@@ -21,39 +21,39 @@ const LpFAQ = () => {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section className="py-28 md:py-36">
+    <section className="py-28 md:py-36" style={{ background: "#ffffff" }}>
       <div className="lp-section-container">
         <ScrollFadeIn className="text-center mb-16">
           <span className="lp-section-label justify-center mb-5">FAQs</span>
-          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-gray-900 tracking-tight">
             Still on the fence?<br className="hidden md:inline" /> We&apos;ve heard it before.
           </h2>
         </ScrollFadeIn>
 
-        <ScrollFadeIn delay={100}>
+        <ScrollFadeIn>
           <div className="max-w-[720px] mx-auto rounded-xl overflow-hidden"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+            style={{ border: "1px solid rgba(255,193,7,0.2)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
             {items.map((item, i) => {
               const isOpen = open === i;
               return (
-                <div key={i} style={{ borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div key={i} style={{ borderBottom: i < items.length - 1 ? "1px solid rgba(255,193,7,0.12)" : "none" }}>
                   <button
                     onClick={() => setOpen(isOpen ? null : i)}
                     className="w-full flex items-center justify-between px-6 py-5 text-left gap-4 transition-colors duration-200"
-                    style={{ background: isOpen ? 'rgba(255,193,7,0.04)' : 'transparent' }}
+                    style={{ background: isOpen ? "rgba(255,193,7,0.06)" : "transparent" }}
                     aria-expanded={isOpen}
                   >
-                    <span className="text-sm font-semibold text-white/80">{item.q}</span>
+                    <span className="text-sm font-semibold text-gray-800">{item.q}</span>
                     <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200"
                       style={{
-                        background: isOpen ? 'rgba(255,193,7,0.15)' : 'rgba(255,255,255,0.06)',
-                        border: isOpen ? '1px solid rgba(255,193,7,0.25)' : '1px solid rgba(255,255,255,0.1)',
+                        background: isOpen ? "rgba(255,193,7,0.2)" : "rgba(255,193,7,0.08)",
+                        border: isOpen ? "1px solid rgba(255,193,7,0.4)" : "1px solid rgba(255,193,7,0.2)",
                       }}>
                       <Plus
                         className="w-3.5 h-3.5 transition-transform duration-200"
                         style={{
-                          color: isOpen ? 'hsl(var(--lp-primary))' : 'rgba(255,255,255,0.4)',
-                          transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                          color: "hsl(var(--lp-primary))",
+                          transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
                         }}
                         strokeWidth={2.5}
                       />
@@ -64,7 +64,7 @@ const LpFAQ = () => {
                     style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
                   >
                     <div className="overflow-hidden">
-                      <p className="text-sm text-white/40 leading-relaxed px-6 pb-5">{item.a}</p>
+                      <p className="text-sm text-gray-500 leading-relaxed px-6 pb-5">{item.a}</p>
                     </div>
                   </div>
                 </div>

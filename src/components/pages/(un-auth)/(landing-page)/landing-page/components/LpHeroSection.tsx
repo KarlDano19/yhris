@@ -1,19 +1,44 @@
 "use client";
 import { useState } from "react";
 import { ArrowRight, CheckCircle } from "lucide-react";
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import ScrollFadeIn from "./ScrollFadeIn";
-import LpHeroDashboard from "./LpHeroDashboard";
+
+const LpHeroDashboard = dynamic(() => import("./LpHeroDashboard"), {
+  loading: () => (
+    <div
+      className="relative w-full rounded-2xl"
+      style={{
+        height: 350,
+        background: "#F4F6FB",
+        boxShadow:
+          "0 4px 6px -1px rgba(0,0,0,0.05), 0 24px 60px rgba(53,95,208,0.15), 0 0 0 1px rgba(53,95,208,0.1)",
+      }}
+    />
+  ),
+});
 
 const DEMO_CALENDAR_URL =
   "https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026";
 
+const isValidEmail = (val: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+
 const LpHeroSection = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleBookDemo = async () => {
-    if (!email.trim()) return;
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setError("");
     setSubmitted(true);
     const url = `${DEMO_CALENDAR_URL}&email=${encodeURIComponent(email.trim())}`;
     window.open(url, "_blank", "noopener,noreferrer");
@@ -85,28 +110,38 @@ const LpHeroSection = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row items-center gap-2 max-w-[500px]">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleBookDemo()}
-                  placeholder="Enter work email"
-                  className="flex-1 w-full px-5 py-3.5 text-sm outline-none rounded-[10px]"
-                  style={{
-                    color: 'hsl(213 32% 18%)',
-                    border: '1px solid hsl(213 32% 18% / 0.15)',
-                    background: '#ffffff',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                  }}
-                />
-                <button
-                  onClick={handleBookDemo}
-                  disabled={!email.trim()}
-                  className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-                >
-                  Book a Free Demo <ArrowRight className="w-4 h-4" />
-                </button>
+              <div className="flex flex-col max-w-[500px]">
+                <div className="flex flex-col sm:flex-row items-start gap-2">
+                  <div className="flex-1 w-full">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); if (error) setError(""); }}
+                      onKeyDown={(e) => e.key === "Enter" && handleBookDemo()}
+                      placeholder="Enter work email"
+                      className="w-full px-5 py-3.5 text-sm outline-none rounded-[10px] transition-all duration-200"
+                      style={{
+                        color: 'hsl(213 32% 18%)',
+                        border: error ? '1px solid rgba(239,68,68,0.6)' : '1px solid hsl(213 32% 18% / 0.15)',
+                        background: '#ffffff',
+                        boxShadow: error
+                          ? '0 0 0 3px rgba(239,68,68,0.1)'
+                          : '0 2px 8px rgba(0,0,0,0.06)',
+                      }}
+                    />
+                  </div>
+                  <button
+                    onClick={handleBookDemo}
+                    className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto"
+                  >
+                    Book a Free Demo <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+                {error && (
+                  <p className="text-xs mt-2 font-medium" style={{ color: 'rgba(239,68,68,0.9)' }}>
+                    {error}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -117,7 +152,7 @@ const LpHeroSection = () => {
               {/* Glow behind dashboard */}
               <div
                 className="absolute -inset-6 rounded-3xl pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(53,95,208,0.1) 0%, rgba(255,193,7,0.06) 50%, transparent 75%)' }}
+                style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(255,193,7,0.08) 0%, rgba(255,193,7,0.04) 50%, transparent 75%)' }}
               />
               <div className="lp-hero-float relative">
                 <LpHeroDashboard />

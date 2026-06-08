@@ -2,27 +2,31 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
-
 import toast from 'react-hot-toast';
 
+import ConfirmModal from '@/components/ConfirmModal';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import useApplicantItems from './hooks/useGetApplicantItems';
+import useToggleApplicantStatus from './hooks/useToggleApplicantStatus';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import MoreIcon from '@/svg/MoreIcon';
 
 const Content = () => {
   const [clientItems, setClientItems] = useState<any>([]);
-  const [itemsFilter, setItemsFilter] = useState<any>({
-    search: '',
-  });
-  const [isApplicantGoalModalOpen, setIsApplicantGoalModalOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState<any>({ search: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { data: dataApplicant, isLoading: isGetApplicantLoading, refetch } = useApplicantItems(itemsFilter);
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; item: any | null }>({
+    isOpen: false,
+    item: null,
+  });
+
+  const { data: dataApplicant, isLoading: isGetApplicantLoading, refetch } = useApplicantItems(appliedFilter);
+  const toggleStatus = useToggleApplicantStatus();
 
   useEffect(() => {
     if (dataApplicant && !isGetApplicantLoading) {
@@ -30,13 +34,55 @@ const Content = () => {
         item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
       });
       setClientItems(dataApplicant);
-      setCurrentPage(1);
     }
   }, [dataApplicant]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [appliedFilter]);
 
   const totalRecords = clientItems.length;
   const totalPages = Math.ceil(totalRecords / pageSize) || 1;
   const paginatedItems = clientItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSearch = () => {
+    setAppliedFilter({ search: searchText });
+  };
+
+  const handleToggle = (item: any) => {
+    setConfirmModal({ isOpen: true, item });
+  };
+
+  const handleConfirmToggle = () => {
+    const item = confirmModal.item;
+    if (!item) return;
+
+    const action = item.is_active ? 'disable' : 'enable';
+    toggleStatus.mutate(
+      { id: item.id, is_active: !item.is_active },
+      {
+        onSuccess: () => {
+          setConfirmModal({ isOpen: false, item: null });
+          toast.custom(
+            <CustomToast
+              message={`Applicant account ${action}d successfully.`}
+              type='success'
+            />
+          );
+          refetch();
+        },
+        onError: (err: any) => {
+          setConfirmModal({ isOpen: false, item: null });
+          toast.custom(
+            <CustomToast
+              message={err?.message || `Failed to ${action} applicant account.`}
+              type='error'
+            />
+          );
+        },
+      }
+    );
+  };
 
   const renderRows = () => {
     if (isGetApplicantLoading) {
@@ -57,16 +103,35 @@ const Content = () => {
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm'>
+            <span
+              className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                item.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+              }`}
+            >
+              {item.is_active ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm'>
+            <button
+              onClick={() => handleToggle(item)}
+              disabled={toggleStatus.isLoading}
+              className={`rounded-md px-3 py-1 text-xs font-semibold text-white shadow-sm disabled:opacity-50 ${
+                item.is_active
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-green-500 hover:bg-green-600'
+              }`}
+            >
+              {item.is_active ? 'Disable' : 'Enable'}
+            </button>
+          </td>
         </tr>
       ));
     } else {
       return (
         <tr>
-          <td colSpan={5}>
+          <td colSpan={6}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>
-              Please click create to add separation of employee.
-            </h4>
           </td>
         </tr>
       );
@@ -76,7 +141,6 @@ const Content = () => {
   return (
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
-        <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-6 flex flex-col lg:flex-row gap-4'>
             <div className='flex-none w-full lg:w-1/2 space-y-4'>
               <h2 className='text-xl font-bold text-indigo-dye'>Applicant Monitoring</h2>
@@ -86,19 +150,21 @@ const Content = () => {
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSearch();
+                  }}
                   placeholder='Search ...'
                 />
                 <button
                   className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                  onClick={() => refetch()}
+                  onClick={handleSearch}
                 >
                   <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>
                 <div className='flex-1 flex justify-end ml-4'>
                   <button
                     className='bg-slate-500 w-max rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
-                    // onClick={() => setIsClientGoalModalOpen(true)} // Disabled for now to now open the client analytics dialog box
                     disabled={true}
                   >
                     Applicant Analytics
@@ -137,27 +203,36 @@ const Content = () => {
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Registration Date
                       </th>
-                      {/* <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
-                      </th> */}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={{ totalPages, totalRecords }}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
-                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={{ totalPages, totalRecords }}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+              onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+            />
           </div>
-        </div>
       </div>
-      {/* <ClientGoalModal isOpen={isClientGoalModalOpen} setIsOpen={setIsClientGoalModalOpen} /> */}
+
+      <ConfirmModal
+        message={`Are you sure you want to ${confirmModal.item?.is_active ? 'disable' : 'enable'} the account of ${confirmModal.item?.name}?`}
+        isOpen={confirmModal.isOpen}
+        setIsOpen={(open) => setConfirmModal((prev) => ({ ...prev, isOpen: open }))}
+        confirmAction={handleConfirmToggle}
+        isLoading={toggleStatus.isLoading}
+      />
     </>
   );
 };

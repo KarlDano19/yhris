@@ -99,10 +99,10 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
 
   return (
     <>
-      <div className='flex flex-col h-full gap-4 border-r border-gray-200 pr-4'>
+      <div className='flex flex-col h-full gap-4 md:border-r md:border-gray-200 md:pr-4'>
         <div className='flex-1'>
-          <div className='flex gap-6'>
-            <ApplicantAvatar applicant={applicant} size={150} />
+          <div className='flex gap-4 flex-wrap'>
+            <ApplicantAvatar applicant={applicant} size={100} />
             <div className='flex flex-col'>
               <h4 className='font-semibold text-lg mb-1'>
                 {applicant.firstname} {applicant.lastname}
@@ -129,26 +129,22 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
               )}
             </div>
           </div>
-          <div className='flex justify-between gap-4 mt-4'>
-            <div className='flex flex-col gap-4 flex-1'>
-              <div className='flex flex-col mb-4'>
-                <div className='font-bold '>Location</div>
-                <div className='break-words'>{applicant.location || 'Not specified'}</div>
-              </div>
-              <div className='flex flex-col mb-4'>
-                <div className='font-bold '>Contact Number</div>
-                <div className='break-words'>{applicant.contact_number || applicant.mobile || 'Not specified'}</div>
-              </div>
+          <div className='grid grid-cols-2 gap-x-4 gap-y-2 mt-4'>
+            <div className='flex flex-col'>
+              <div className='font-bold'>Location</div>
+              <div className='break-words'>{applicant.location || 'Not specified'}</div>
             </div>
-            <div className='flex flex-col gap-4 flex-1'>
-              <div className='flex flex-col mb-4'>
-                <div className='font-bold '>Nationality</div>
-                <div className='break-words'>{applicant.nationality}</div>
-              </div>
-              <div className='flex flex-col mb-4'>
-                <div className='font-bold'>Email</div>
-                <div className='break-words text-sm'>{applicant.email}</div>
-              </div>
+            <div className='flex flex-col'>
+              <div className='font-bold'>Nationality</div>
+              <div className='break-words'>{applicant.nationality}</div>
+            </div>
+            <div className='flex flex-col'>
+              <div className='font-bold'>Contact Number</div>
+              <div className='break-words'>{applicant.contact_number || applicant.mobile || 'Not specified'}</div>
+            </div>
+            <div className='flex flex-col'>
+              <div className='font-bold'>Email</div>
+              <div className='break-words text-sm'>{applicant.email}</div>
             </div>
           </div>
         </div>

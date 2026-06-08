@@ -1,0 +1,75 @@
+# YAHSHUA HRIS
+
+> YAHSHUA HRIS is a Philippine HR management system for small and mid-sized businesses, built by YAHSHUA Outsourcing Worldwide, Inc. (YOWI). It covers hiring, onboarding, attendance, leave, performance, DOLE compliance, and payroll integration. Flat pricing starting at PHP 4,000/month for up to 100 employees. No per-seat fees, no long-term contracts.
+
+## What It Does
+
+- DOLE compliance automation (company registration, OSH reports, annual medical reports, mandatory DOLE filings)
+- Multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs) with centralized applicant tracking
+- Pre-screened talent pool for faster hiring
+- Employee onboarding and 201 document management
+- Attendance and leave management, integrated with ABBA Timekeeper
+- Overtime, undertime, and rest day work tracking
+- Performance evaluation with standard templates and custom forms
+- Real-time two-way sync with YAHSHUA Payroll (no CSV exports or manual re-entry)
+- Employee self-service portal (leave filing, payslip access, document requests)
+- Memos and Notice-to-Explain distribution via email
+
+## Who It's For
+
+Philippine SMEs and growing businesses with 10 to 500+ employees that need DOLE-compliant HR without building a full in-house team. Serves 20 industries including Manufacturing, Retail, BPO, Healthcare, Education, Hospitality, Agriculture, and Construction.
+
+## Key Differentiators
+
+- Only HRIS in the Philippines with DOLE compliance automation built in (no add-ons)
+- Flat monthly pricing starting at PHP 4,000 for up to 100 employees — not per-seat
+- Real-time payroll sync with YAHSHUA Payroll — no manual data entry between HR and payroll
+- SOC2 Type 2 certified and ISO 27001 certified — enterprise-grade security
+- GDPR compliant and registered with the Philippine National Privacy Commission (DPA 2012)
+- 17+ years in operation, 100,000+ users nationwide
+- Tech + managed services hybrid — proprietary software with outsourced expertise available
+
+## Certifications
+
+- SOC2 Type 2
+- ISO 27001
+- GDPR Compliant
+- DPA 2012 / NPC Registered
+- EOPT-Ready (BIR Ease of Paying Taxes Act compliant)
+
+## Notable Clients
+
+Del Monte Philippines Inc., DTI Region X, University of St. La Salle - Bacolod, Polymedic Medical Plaza, Mindanao Golden Grains Corporation, 1A Express Hotel, Makimura Ramen Corp., Engagis Inc.
+
+## Pricing Summary
+
+- Starts at PHP 4,000/month for up to 100 employees
+- Flat pricing — no per-seat fees
+- No long-term contracts required
+- 14-day free trial, no credit card required
+- Full pricing: https://yahshuahris.com/pricing
+
+## Pages
+
+- Homepage: https://yahshuahris.com
+- Features: https://yahshuahris.com/features
+- Pricing: https://yahshuahris.com/pricing
+- DOLE Compliance Article: https://yahshuahris.com/blog/dole-compliance-requirements-philippines
+- Payroll Integration: https://yahshuahris.com/payroll-integration
+- YAHSHUA HRIS vs Sprout HR: https://yahshuahris.com/vs-sprout
+- How We Compare (vs competitors): https://yahshuahris.com/how-we-compare
+- Employee Onboarding Use Case: https://yahshuahris.com/use-cases/employee-onboarding
+- Performance Management Use Case: https://yahshuahris.com/use-cases/performance-management
+- Employee Documentation Use Case: https://yahshuahris.com/use-cases/employee-documentation
+- FAQs: https://yahshuahris.com/faqs
+- Docs: https://yahshuahris.com/docs
+- Book a Demo: https://yahshuahris.com/book-demo
+- Machine-readable pricing: https://yahshuahris.com/pricing.md
+
+## Company
+
+- Full Name: YAHSHUA Outsourcing Worldwide, Inc.
+- Short Name: YOWI
+- Headquarters: Cagayan de Oro City, Philippines
+- Contact: clientrelations@abba.works | +63 917 306 2539
+- Website: https://yahshuahris.com

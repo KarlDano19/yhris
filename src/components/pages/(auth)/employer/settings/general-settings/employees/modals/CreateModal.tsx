@@ -2,8 +2,11 @@ import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
+
+import CustomToast from '@/components/CustomToast';
 
 import useAddLocation from '../hooks/location/useAddLocation';
 import useAddDepartment from '../hooks/department/useAddDepartment';
@@ -41,11 +44,15 @@ export default function CreateLocationModal({
     
     const callbackReq = {
       onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         setIsOpen(false);
         reset();
         setDescription('');
         refetch();
-      }
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 5000 });
+      },
     };
     if (module === 'location') {
       addLocation(submitData, callbackReq);

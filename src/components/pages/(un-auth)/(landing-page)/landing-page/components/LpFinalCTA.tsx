@@ -8,12 +8,24 @@ import AnimatedHeadline from "./AnimatedHeadline";
 const DEMO_CALENDAR_URL =
   "https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026";
 
+const isValidEmail = (val: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+
 const LpFinalCTA = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleBookDemo = async () => {
-    if (!email.trim()) return;
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setError("");
     setSubmitted(true);
     const url = `${DEMO_CALENDAR_URL}&email=${encodeURIComponent(email.trim())}`;
     window.open(url, "_blank", "noopener,noreferrer");
@@ -56,28 +68,38 @@ const LpFinalCTA = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row items-center gap-2 max-w-[500px] mx-auto">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleBookDemo()}
-                  placeholder="Enter work email"
-                  className="flex-1 w-full px-5 py-3.5 text-sm outline-none rounded-[10px]"
-                  style={{
-                    color: 'hsl(213 32% 18%)',
-                    border: '1px solid hsl(213 32% 18% / 0.15)',
-                    background: '#ffffff',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                  }}
-                />
-                <button
-                  onClick={handleBookDemo}
-                  disabled={!email.trim()}
-                  className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-                >
-                  Book a Free Demo <ArrowRight className="w-4 h-4" />
-                </button>
+              <div className="flex flex-col items-center max-w-[500px] mx-auto">
+                <div className="flex flex-col sm:flex-row items-start gap-2 w-full">
+                  <div className="flex-1 w-full">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); if (error) setError(""); }}
+                      onKeyDown={(e) => e.key === "Enter" && handleBookDemo()}
+                      placeholder="Enter work email"
+                      className="w-full px-5 py-3.5 text-sm outline-none rounded-[10px] transition-all duration-200"
+                      style={{
+                        color: 'hsl(213 32% 18%)',
+                        border: error ? '1px solid rgba(239,68,68,0.6)' : '1px solid hsl(213 32% 18% / 0.15)',
+                        background: '#ffffff',
+                        boxShadow: error
+                          ? '0 0 0 3px rgba(239,68,68,0.1)'
+                          : '0 2px 8px rgba(0,0,0,0.06)',
+                      }}
+                    />
+                  </div>
+                  <button
+                    onClick={handleBookDemo}
+                    className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto"
+                  >
+                    Book a Free Demo <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+                {error && (
+                  <p className="text-xs mt-2 font-medium self-start" style={{ color: 'rgba(239,68,68,0.9)' }}>
+                    {error}
+                  </p>
+                )}
               </div>
             )}
             <div className="mt-6">

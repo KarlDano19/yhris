@@ -19,6 +19,8 @@ import {
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
 
+import Pagination from '@/components/Pagination';
+
 import useClientItems from './client-monitoring/hooks/useGetClientItems';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -227,10 +229,6 @@ const chartOptions = {
   },
 } as const;
 
-// ─── Pagination ───────────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 5;
-
 // ─── StatCard sub-component ───────────────────────────────────────────────────
 
 type StatCardProps = {
@@ -255,7 +253,8 @@ function StatCard({ label, value, icon, iconBg }: StatCardProps) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const Content = () => {
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const { data, isLoading, isError } = useClientItems();
 
   const clientItems: any[] = Array.isArray(data) ? data : (data as any)?.data ?? [];
@@ -273,14 +272,15 @@ const Content = () => {
   ).length;
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(clientItems.length / PAGE_SIZE));
-  const paginatedItems = clientItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalRecords = clientItems.length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
+  const paginatedItems = clientItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Chart data
   const chartData = buildChartData(clientItems);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Title */}
       <h1 className="text-xl font-bold text-gray-800">
         Client Subscription Monitoring Dashboard
@@ -409,43 +409,14 @@ const Content = () => {
               </table>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-400">
-                  Page {page} of {totalPages} · {clientItems.length} clients
-                </p>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="px-3 py-1 text-xs rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Prev
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`px-3 py-1 text-xs rounded-md border transition-colors ${
-                        p === page
-                          ? 'bg-savoy-blue text-white border-savoy-blue'
-                          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="px-3 py-1 text-xs rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
+            <hr className="mt-4" />
+            <Pagination
+              pagination={{ totalPages, totalRecords }}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+              onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+            />
           </>
         )}
       </div>

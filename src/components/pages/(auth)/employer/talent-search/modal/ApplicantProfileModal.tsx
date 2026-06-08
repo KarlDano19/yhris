@@ -62,7 +62,7 @@ function ApplicantProfileModal({
         </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-start justify-center p-4 text-center sm:items-center sm:p-0">
             <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
@@ -91,13 +91,13 @@ function ApplicantProfileModal({
                       <p className="mt-2 text-gray-600">Loading profile/s...</p>
                     </div>
                   ) : (
-                    <div className="flex gap-6">
-                      <div className="w-1/3 h-full">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="w-full md:w-1/3 h-full">
                         <ApplicantProfile
                           applicant={applicantDetailsData}
                         />
                       </div>
-                      <div className="w-2/3 h-full">
+                      <div className="w-full md:w-2/3 h-full">
                         <WorkExperience
                           workExperience={applicantDetailsData?.work_experience || []}
                         />

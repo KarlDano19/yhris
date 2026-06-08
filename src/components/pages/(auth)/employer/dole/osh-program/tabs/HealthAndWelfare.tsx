@@ -238,24 +238,50 @@ export default function HealthAndWelfare({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="relative mt-2 pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register("special_medical_surveillance")}
-                id="blood_chemistry"
-                value="Blood Chemistry"
-                checked={Array.isArray(watch("special_medical_surveillance")) && watch("special_medical_surveillance").includes("Blood Chemistry")}
+              <Controller
+                control={control}
+                name="special_medical_surveillance"
+                render={({ field }) => (
+                  <input
+                    type="checkbox"
+                    id="blood_chemistry"
+                    value="Blood Chemistry"
+                    checked={Array.isArray(field.value) && field.value.includes("Blood Chemistry")}
+                    onChange={(e) => {
+                      const currentValue = Array.isArray(field.value) ? field.value : [];
+                      if (e.target.checked) {
+                        field.onChange([...currentValue, e.target.value]);
+                      } else {
+                        field.onChange(currentValue.filter((item: string) => item !== e.target.value));
+                      }
+                    }}
+                  />
+                )}
               />
               <label htmlFor="blood_chemistry" className="ml-2 mt-1">
                 Blood Chemistry
               </label>
             </div>
             <div className="relative mt-2 pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register("special_medical_surveillance")}
-                id="ecg"
-                value="ECG"
-                checked={Array.isArray(watch("special_medical_surveillance")) && watch("special_medical_surveillance").includes("ECG")}
+              <Controller
+                control={control}
+                name="special_medical_surveillance"
+                render={({ field }) => (
+                  <input
+                    type="checkbox"
+                    id="ecg"
+                    value="ECG"
+                    checked={Array.isArray(field.value) && field.value.includes("ECG")}
+                    onChange={(e) => {
+                      const currentValue = Array.isArray(field.value) ? field.value : [];
+                      if (e.target.checked) {
+                        field.onChange([...currentValue, e.target.value]);
+                      } else {
+                        field.onChange(currentValue.filter((item: string) => item !== e.target.value));
+                      }
+                    }}
+                  />
+                )}
               />
               <label htmlFor="ecg" className="ml-2 mt-1">
                 ECG
@@ -327,54 +353,33 @@ export default function HealthAndWelfare({
             </label>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-            <div className="relative mt-2 pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register("schedule_of_annual_medical_examination")}
-                id="q1"
-                value="Q1"
-                checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q1")}
-              />
-              <label htmlFor="q1" className="ml-2 mt-1">
-                Q1
-              </label>
-            </div>
-            <div className="relative mt-2 pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register("schedule_of_annual_medical_examination")}
-                id="q2"
-                value="Q2"
-                checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q2")}
-              />
-              <label htmlFor="q2" className="ml-2 mt-1">
-                Q2
-              </label>
-            </div>
-            <div className="relative mt-2 pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register("schedule_of_annual_medical_examination")}
-                id="q3"
-                value="Q3"
-                checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q3")}
-              />
-              <label htmlFor="q3" className="ml-2 mt-1">
-                Q3
-              </label>
-            </div>
-            <div className="relative mt-2 pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register("schedule_of_annual_medical_examination")}
-                id="q4"
-                value="Q4"
-                checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q4")}
-              />
-              <label htmlFor="q4" className="ml-2 mt-1">
-                Q4
-              </label>
-            </div>
+            {["Q1", "Q2", "Q3", "Q4"].map((quarter) => (
+              <div key={quarter} className="relative mt-2 pl-4 flex gap-2">
+                <Controller
+                  control={control}
+                  name="schedule_of_annual_medical_examination"
+                  render={({ field }) => (
+                    <input
+                      type="checkbox"
+                      id={quarter.toLowerCase()}
+                      value={quarter}
+                      checked={Array.isArray(field.value) && field.value.includes(quarter)}
+                      onChange={(e) => {
+                        const currentValue = Array.isArray(field.value) ? field.value : [];
+                        if (e.target.checked) {
+                          field.onChange([...currentValue, e.target.value]);
+                        } else {
+                          field.onChange(currentValue.filter((item: string) => item !== e.target.value));
+                        }
+                      }}
+                    />
+                  )}
+                />
+                <label htmlFor={quarter.toLowerCase()} className="ml-2 mt-1">
+                  {quarter}
+                </label>
+              </div>
+            ))}
           </div>
           <div className="mt-4">
             <label
@@ -451,7 +456,8 @@ export default function HealthAndWelfare({
                   {...register("no_of_treatment_rooms_first_aid_rooms")}
                   id="no_of_treatment_rooms_first_aid_rooms"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('no_of_treatment_rooms_first_aid_rooms') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('no_of_treatment_rooms_first_aid_rooms') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -470,7 +476,8 @@ export default function HealthAndWelfare({
                   {...register("no_of_clinics_in_the_workplace")}
                   id="no_of_clinics_in_the_workplace"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('no_of_clinics_in_the_workplace') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('no_of_clinics_in_the_workplace') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -488,7 +495,8 @@ export default function HealthAndWelfare({
                   {...register("hospitals_youre_affiliated_with")}
                   id="hospitals_youre_affiliated_with"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('hospitals_youre_affiliated_with') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('hospitals_youre_affiliated_with') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -548,7 +556,8 @@ export default function HealthAndWelfare({
                   {...register("chairperson_less_than_ten")}
                   id="chairperson_less_than_ten"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('chairperson_less_than_ten') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('chairperson_less_than_ten') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -566,7 +575,8 @@ export default function HealthAndWelfare({
                   {...register("secretary_less_than_ten")}
                   id="secretary_less_than_ten"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('secretary_less_than_ten') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('secretary_less_than_ten') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -584,7 +594,8 @@ export default function HealthAndWelfare({
                   {...register("member_less_than_ten")}
                   id="member_less_than_ten"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('member_less_than_ten') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('member_less_than_ten') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -615,7 +626,8 @@ export default function HealthAndWelfare({
                   {...register("chairperson_medium_to_high")}
                   id="chairperson_medium_to_high"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('chairperson_medium_to_high') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('chairperson_medium_to_high') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -633,7 +645,8 @@ export default function HealthAndWelfare({
                   {...register("secretary_medium_to_high")}
                   id="secretary_medium_to_high"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('secretary_medium_to_high') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('secretary_medium_to_high') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -648,26 +661,50 @@ export default function HealthAndWelfare({
                 <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                <input
-                  type="text"
-                  {...register("ex_officio_members")}
-                  id="ex_officio_members"
-                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('ex_officio_members') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                <Controller
+                  control={control}
+                  name="ex_officio_members"
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      id="ex_officio_members"
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                    />
+                  )}
+                />
+                {isMissingField('ex_officio_members') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
-                <input
-                  type="text"
-                  {...register("ex_officio_members_2")}
-                  id="ex_officio_members_2"
-                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('ex_officio_members_2') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                <Controller
+                  control={control}
+                  name="ex_officio_members_1"
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      id="ex_officio_members_1_b"
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                    />
+                  )}
+                />
+                {isMissingField('ex_officio_members_1') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
-                <input
-                  type="text"
-                  {...register("ex_officio_members_3")}
-                  id="ex_officio_members_3"
-                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('ex_officio_members_3') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                <Controller
+                  control={control}
+                  name="ex_officio_members_2"
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      id="ex_officio_members_2_b"
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                    />
+                  )}
+                />
+                {isMissingField('ex_officio_members_2') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -687,14 +724,16 @@ export default function HealthAndWelfare({
                   {...register("members")}
                   id="members"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('members') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('members') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
                 <input
                   type="text"
                   {...register("members_2")}
                   id="members_2"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('members_2') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('members_2') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -723,7 +762,8 @@ export default function HealthAndWelfare({
                   {...register("chairperson_joint_coordinating")}
                   id="chairperson_joint_coordinating"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('chairperson_joint_coordinating') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('chairperson_joint_coordinating') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -741,7 +781,8 @@ export default function HealthAndWelfare({
                   {...register("secretary_joint_coordinating")}
                   id="secretary_joint_coordinating"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('secretary_joint_coordinating') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('secretary_joint_coordinating') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -765,14 +806,16 @@ export default function HealthAndWelfare({
                   {...register("ex_officio_members_1")}
                   id="ex_officio_members_1"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('ex_officio_members_1') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('ex_officio_members_1') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
                 <input
                   type="text"
                   {...register("ex_officio_members_2")}
                   id="ex_officio_members_2"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('ex_officio_members_2') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('ex_officio_members_2') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>
@@ -790,14 +833,16 @@ export default function HealthAndWelfare({
                   {...register("ex_officio_members_3")}
                   id="ex_officio_members_3"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('ex_officio_members_3') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('ex_officio_members_3') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
                 <input
                   type="text"
                   {...register("ex_officio_members_4")}
                   id="ex_officio_members_4"
                   className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
-                />                {isMissingField('ex_officio_members_4') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
+                />
+                {isMissingField('ex_officio_members_4') && <p className="text-red-500 text-xs mt-1">This field is required</p>}
 
               </div>
             </div>

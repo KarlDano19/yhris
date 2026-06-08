@@ -2,9 +2,66 @@ import Link from "next/link";
 import ScrollFadeIn from "./ScrollFadeIn";
 import MainLogoWhite from "@/svg/MainLogoWhite";
 
-const featureLinks = ["Recruitment", "Employee Management", "Leave & Attendance", "Time Tracking", "Compliance", "Performance"];
-const companyLinks = ["About The ABBA Initiative", "Pricing", "Request a Demo", "Contact"];
-const resourceLinks = ["Documentation", "Support", "Data Privacy Statement", "Blog"];
+const CALENDLY_URL = "https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026";
+
+interface FooterLinkItem {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLinkItem[];
+}
+
+const FOOTER_COLUMNS: FooterColumn[] = [
+  {
+    title: "Features",
+    links: [
+      { label: "Recruitment", href: "/features" },
+      { label: "Employee Management", href: "/features" },
+      { label: "Leave & Attendance", href: "/features" },
+      { label: "Time Tracking", href: "/features" },
+      { label: "Compliance", href: "/features" },
+      { label: "Performance", href: "/features" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About The ABBA Initiative", href: "https://www.theabbainitiative.com/", external: true },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Request a Demo", href: CALENDLY_URL, external: true },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { label: "Documentation", href: "/docs" },
+      { label: "Support", href: "/faqs" },
+      { label: "Data Privacy Statement", href: "/privacy-notice" },
+      { label: "Blog", href: "/blog" },
+    ],
+  },
+];
+
+const linkClass = "text-sm text-white/50 hover:text-white transition-colors duration-200";
+
+const FooterLink = ({ label, href, external }: FooterLinkItem) => {
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass}>
+        {label}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={linkClass}>
+      {label}
+    </Link>
+  );
+};
 
 const LpFooter = () => {
   return (
@@ -25,30 +82,13 @@ const LpFooter = () => {
               </p>
             </div>
 
-            {/* Links */}
-            {[
-              { heading: "Features", links: featureLinks },
-              { heading: "Company", links: companyLinks },
-              { heading: "Resources", links: resourceLinks },
-            ].map((col) => (
-              <div key={col.heading}>
-                <h4 className="text-sm font-semibold text-white mb-4">{col.heading}</h4>
+            {FOOTER_COLUMNS.map((column) => (
+              <div key={column.title}>
+                <h4 className="text-sm font-semibold text-white mb-4">{column.title}</h4>
                 <ul className="space-y-2.5">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      {link === "Blog" ? (
-                        <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                          {link}
-                        </Link>
-                      ) : link === "Pricing" ? (
-                        <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                          {link}
-                        </Link>
-                      ) : (
-                        <a href="#" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                          {link}
-                        </a>
-                      )}
+                  {column.links.map((link) => (
+                    <li key={link.label}>
+                      <FooterLink {...link} />
                     </li>
                   ))}
                 </ul>
@@ -60,7 +100,12 @@ const LpFooter = () => {
         <ScrollFadeIn delay={100}>
           <div className="border-t border-white/10 pt-6 text-center">
             <p className="text-xs text-white/30">
-              © 2025 The ABBA Initiative (OPC). All rights reserved. · Privacy Policy · Terms of Service · Data Privacy Statement
+              © 2025 The ABBA Initiative (OPC). All rights reserved. ·{' '}
+              <Link href="/privacy-policy" className="hover:text-white/60 transition-colors duration-200">Privacy Policy</Link>
+              {' · '}
+              <Link href="/terms-of-service" className="hover:text-white/60 transition-colors duration-200">Terms of Service</Link>
+              {' · '}
+              <Link href="/privacy-notice" className="hover:text-white/60 transition-colors duration-200">Data Privacy Statement</Link>
             </p>
           </div>
         </ScrollFadeIn>

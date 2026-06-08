@@ -3,21 +3,13 @@
 import { useState } from "react"
 import { ChevronUpIcon } from "@heroicons/react/24/outline"
 
-interface Props {
-  isAnonymous: boolean
-  onIsAnonymousChange: (v: boolean) => void
-}
+interface Props {}
 
-const SettingsTab = ({
-  isAnonymous,
-  onIsAnonymousChange,
-}: Props) => {
+const SettingsTab = ({}: Props) => {
   // Responses
   const [collectEmail, setCollectEmail] = useState<"none" | "verified" | "responder">("none")
   const [sendCopy, setSendCopy] = useState<"off" | "always" | "if_requested">("off")
   const [allowEditing, setAllowEditing] = useState(false)
-  const [limitToOne, setLimitToOne] = useState(false)
-
   // Presentation
   const [showProgressBar, setShowProgressBar] = useState(true)
   const [shuffleQuestions, setShuffleQuestions] = useState(false)
@@ -40,7 +32,6 @@ const SettingsTab = ({
 
   // Section open/close
   const [openSections, setOpenSections] = useState({
-    general: true,
     responses: true,
     presentation: true,
     defaults: true,
@@ -53,18 +44,6 @@ const SettingsTab = ({
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-
-      {/* General */}
-      <Section
-        title="General"
-        description="Basic form configuration"
-        open={openSections.general}
-        onToggle={() => toggle("general")}
-      >
-        <SettingRow label="Anonymous Responses" description="Responses will not be linked to individual employees">
-          <Toggle value={isAnonymous} onChange={onIsAnonymousChange} />
-        </SettingRow>
-      </Section>
 
       {/* Responses */}
       <Section
@@ -109,12 +88,6 @@ const SettingsTab = ({
           <Toggle value={allowEditing} onChange={setAllowEditing} />
         </SettingRow>
 
-        <div className="pt-2">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">Requires Sign-in</p>
-          <SettingRow label="Limit to 1 response">
-            <Toggle value={limitToOne} onChange={setLimitToOne} />
-          </SettingRow>
-        </div>
       </Section>
 
       {/* Presentation */}

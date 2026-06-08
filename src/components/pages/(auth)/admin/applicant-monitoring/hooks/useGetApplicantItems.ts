@@ -31,7 +31,7 @@ async function getApplicantItems(filters: any) {
 }
 
 function useApplicantItems(filters: any) {
-  const query = useQuery(['applicantItemsCache'], () => getApplicantItems(filters), {
+  const query = useQuery(['applicantItemsCache', filters], () => getApplicantItems(filters), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

@@ -155,7 +155,6 @@ const QuestionsTabPage = ({ formId }: Props) => {
     { id: uuidv4(), section_title: "Section 1", section_description: "", items: [] },
   ])
   const [formType, setFormType] = useState<T_FormType>("custom")
-  const [isAnonymous, setIsAnonymous] = useState(false)
   const [currentFormId, setCurrentFormId] = useState<number | null>(formId ?? null)
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -166,7 +165,6 @@ const QuestionsTabPage = ({ formId }: Props) => {
       setTitle(form.title ?? "")
       setDescription(form.description ?? "")
       setFormType(form.form_type ?? "custom")
-      setIsAnonymous(form.is_anonymous ?? false)
       setSections(form.questions ?? [
         { id: uuidv4(), section_title: "Section 1", section_description: "", items: [] },
       ])
@@ -177,9 +175,8 @@ const QuestionsTabPage = ({ formId }: Props) => {
     title,
     description,
     form_type: formType,
-    is_anonymous: isAnonymous,
     questions: sections,
-  }), [title, description, formType, isAnonymous, sections])
+  }), [title, description, formType, sections])
 
   const triggerAutoSave = useCallback(() => {
     if (!currentFormId) return
@@ -195,7 +192,7 @@ const QuestionsTabPage = ({ formId }: Props) => {
 
   useEffect(() => {
     if (currentFormId) triggerAutoSave()
-  }, [title, description, sections, formType, isAnonymous])
+  }, [title, description, sections, formType])
 
   async function handleSave() {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
@@ -419,10 +416,7 @@ const QuestionsTabPage = ({ formId }: Props) => {
 
         {/* Settings Tab */}
         {activeTab === "settings" && (
-          <SettingsTab
-            isAnonymous={isAnonymous}
-            onIsAnonymousChange={setIsAnonymous}
-          />
+          <SettingsTab />
         )}
       </div>
     </div>

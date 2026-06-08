@@ -1,6 +1,28 @@
 User-agent: *
 Allow: /
 
+# Allow AI search bots explicitly
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
 # Allow crawling of public pages
 Allow: /about
 Allow: /features

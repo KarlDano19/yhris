@@ -45,14 +45,56 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    const trailingSlashPages = [
+      '/features',
+      '/pricing',
+      '/yahshua-payroll',
+      '/payroll-integration',
+      '/vs-sprout',
+      '/how-we-compare',
+      '/use-cases',
+      '/use-cases/employee-onboarding',
+      '/use-cases/performance-management',
+      '/use-cases/employee-documentation',
+      '/blog',
+      '/blog/dole-compliance-requirements-philippines',
+      '/faqs',
+      '/docs',
+      '/jobs',
+      '/privacy-notice',
+      '/privacy-policy',
+      '/terms-of-service',
+    ];
+
+    return [
+      {
+        source: '/landing-page/:path*',
+        destination: '/:path*',
+        permanent: true,
+      },
+      {
+        source: '/landing-page',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/book-demo',
+        destination: 'https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026',
+        permanent: true,
+      },
+      // Strip trailing slashes on all landing pages (skipTrailingSlashRedirect
+      // is enabled for PostHog, so we handle this manually per-page)
+      ...trailingSlashPages.map((path) => ({
+        source: `${path}/`,
+        destination: path,
+        permanent: true,
+      })),
+    ];
+  },
   async rewrites() {
     return {
-      beforeFiles: [
-        {
-          source: '/',
-          destination: '/landing-page',
-        },
-      ],
+      beforeFiles: [],
       afterFiles: [
         {
           source: '/ingest/static/:path*',
