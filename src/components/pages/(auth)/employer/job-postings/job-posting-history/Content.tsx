@@ -1331,6 +1331,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
           isOpen={isCreateJobModalOpen}
           setIsOpen={(open) => { if (!open) handleCloseCreateJobModal(); else setIsCreateJobModalOpen(true); }}
           openConfirmSocialShareModal={openConfirmSocialShareModal}
+          onJobCreated={refetch}
           pageNumber={pageNumber}
           setPageNumber={setPageNumber}
           isSalaryRangeModalOpen={isSalaryRangeModalOpen}
