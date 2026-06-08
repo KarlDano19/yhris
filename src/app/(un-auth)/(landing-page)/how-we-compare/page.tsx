@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import CompetitorsContent from "@/components/pages/(un-auth)/(landing-page)/competitors/CompetitorsContent";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'How YAHSHUA HRIS Compares to Other HR Software in the Philippines',
@@ -22,5 +23,10 @@ export const metadata: Metadata = {
 };
 
 export default function HowWeCompare() {
-  return <CompetitorsContent />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'How We Compare', content_category: 'comparison' }} />
+      <CompetitorsContent />
+    </>
+  );
 }

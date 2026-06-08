@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Content from "@/components/pages/(un-auth)/(landing-page)/faqs/Content";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'FAQs — YAHSHUA HRIS Help and Support',
@@ -22,7 +23,12 @@ export const metadata: Metadata = {
 };
 
 const FaqPage = () => {
-  return <Content />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'FAQs', content_category: 'support' }} />
+      <Content />
+    </>
+  );
 };
 
 export default FaqPage;

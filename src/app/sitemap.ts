@@ -33,13 +33,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.95,
     },
-    {
-      url: `${BASE_URL}/book-demo`,
-      lastModified: new Date(DATES.redesign),
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-
     // ── Product pages ─────────────────────────────────────────────────────
     {
       url: `${BASE_URL}/yahshua-payroll`,
