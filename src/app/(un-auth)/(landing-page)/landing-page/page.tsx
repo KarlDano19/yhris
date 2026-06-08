@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Content from "@/components/pages/(un-auth)/(landing-page)/landing-page/Content";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS - All-in-One HR Software for Philippine Businesses',
@@ -22,7 +23,12 @@ export const metadata: Metadata = {
 };
 
 const LandingPage = () => {
-  return <Content />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'Homepage', content_category: 'homepage' }} />
+      <Content />
+    </>
+  );
 };
 
 export default LandingPage;
