@@ -240,7 +240,7 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
 // ─── Loops ────────────────────────────────────────────────────────────────────
 async function createLoopsContact(data: LeadData) {
   const apiKey = process.env.LOOPS_BOOKDEMO_API;
-  if (!apiKey) throw new Error('LOOPS_BOOKDEMO_API not set');
+  if (!apiKey) return;
 
   const contactFields = {
     email: data.email,
