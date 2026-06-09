@@ -28,6 +28,7 @@ interface ScoringResult {
   score: number;
   tier: 'hot' | 'warm' | 'cold';
   notes: string;
+  companyIntel: string;
 }
 
 // ─── Signature Verification ───────────────────────────────────────────────────
@@ -57,6 +58,26 @@ function verifyCalendlySignature(rawBody: string, signature: string, secret: str
 
 // ─── Parse Calendly payload ───────────────────────────────────────────────────
 function parsePayload(payload: any): LeadData | null {
+  // Make format: flat object with source = 'make'
+  if (payload?.source === 'make') {
+    const email = payload?.email;
+    if (!email) return null;
+
+    const fullName: string = payload?.name ?? '';
+    const [firstName = '', ...rest] = fullName.trim().split(' ');
+
+    return {
+      firstName: payload?.firstName || firstName,
+      lastName: payload?.lastName || rest.join(' '),
+      email,
+      phone: payload?.phone ?? '',
+      companyName: payload?.companyName ?? '',
+      painPoint: payload?.painPoint ?? '',
+      scheduledAt: payload?.scheduledAt ?? '',
+    };
+  }
+
+  // Native Calendly format
   const invitee = payload?.invitee;
   const email = invitee?.email;
   const fullName: string = invitee?.name ?? '';
@@ -83,7 +104,96 @@ function parsePayload(payload: any): LeadData | null {
   };
 }
 
-// ─── Rule-based Lead Scoring ──────────────────────────────────────────────────
+// ─── AI Lead Scoring (Tavily + Claude) ───────────────────────────────────────
+async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
+  const tavilyKey = process.env.TAVILY_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!tavilyKey || !anthropicKey) throw new Error('Missing TAVILY_API_KEY or ANTHROPIC_API_KEY');
+
+  // Step 1: Search for the company
+  const searchQuery = data.companyName
+    ? `${data.companyName} Philippines company`
+    : `${data.email.split('@')[1]} company Philippines`;
+
+  const tavilyRes = await fetch('https://api.tavily.com/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      api_key: tavilyKey,
+      query: searchQuery,
+      search_depth: 'basic',
+      max_results: 4,
+      include_answer: true,
+    }),
+  });
+
+  if (!tavilyRes.ok) throw new Error(`Tavily error: ${tavilyRes.status}`);
+
+  const tavilyData = await tavilyRes.json();
+  const searchContext = [
+    tavilyData.answer ? `Summary: ${tavilyData.answer}` : '',
+    ...(tavilyData.results ?? []).map((r: { title: string; content: string; url: string }) =>
+      `Source: ${r.title}\n${r.content}\nURL: ${r.url}`
+    ),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  // Step 2: Ask Claude to score + summarize intel
+  const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  const client = new Anthropic({ apiKey: anthropicKey });
+
+  const prompt = `You are a sales intelligence analyst for YAHSHUA HRIS, a Philippine HR and payroll software company.
+
+A prospect just booked a demo. Here is their info:
+- Company: ${data.companyName || '(not provided)'}
+- Email: ${data.email}
+- Phone: ${data.phone || '(not provided)'}
+- HR challenge: ${data.painPoint || '(not provided)'}
+- Demo scheduled: ${data.scheduledAt || '(not provided)'}
+
+Here is what we found about the company online:
+---
+${searchContext || 'No results found.'}
+---
+
+Based on this, return a JSON object with these fields:
+{
+  "score": <number 1-10, likelihood to buy YAHSHUA HRIS>,
+  "tier": <"hot" | "warm" | "cold">,
+  "notes": <1-2 sentence scoring rationale based on email domain, company profile, and pain point>,
+  "companyIntel": <3-5 sentences of real company intelligence: what they do, industry, estimated size, any relevant business context the sales team should know before the demo. Only include what is supported by the search results — do not guess.>
+}
+
+Scoring guide:
+- Hot (7-10): Established company, business email, urgent HR pain (payroll, DOLE compliance, headcount growth)
+- Warm (4-6): Growing company or moderate HR needs
+- Cold (1-3): Early stage, personal email, vague pain point
+
+Return only valid JSON, no explanation outside the JSON.`;
+
+  const message = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 512,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const raw = message.content[0].type === 'text' ? message.content[0].text.trim() : '';
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Claude returned no valid JSON');
+
+  const result = JSON.parse(jsonMatch[0]);
+
+  return {
+    score: Math.min(10, Math.max(1, Math.round(result.score))),
+    tier: ['hot', 'warm', 'cold'].includes(result.tier) ? result.tier : result.score >= 7 ? 'hot' : result.score >= 4 ? 'warm' : 'cold',
+    notes: result.notes ?? '',
+    companyIntel: result.companyIntel ?? '',
+  };
+}
+
+// ─── Rule-based Lead Scoring (fallback) ──────────────────────────────────────
 function scoreLeadWithRules(data: LeadData): ScoringResult {
   let score = 1;
   const reasons: string[] = [];
@@ -124,7 +234,7 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
   const tier: 'hot' | 'warm' | 'cold' = score >= 7 ? 'hot' : score >= 4 ? 'warm' : 'cold';
   const notes = `Score ${score}/10 based on: ${reasons.join(', ')}. Pain point: "${data.painPoint}".`;
 
-  return { score, tier, notes };
+  return { score, tier, notes, companyIntel: '' };
 }
 
 // ─── Loops ────────────────────────────────────────────────────────────────────
@@ -292,10 +402,11 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     scoring?.score ?? '',
     scoring?.tier ?? '',
     scoring?.notes ?? '',
+    scoring?.companyIntel ?? '',
   ]];
 
   await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:L:append?valueInputOption=USER_ENTERED`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:M:append?valueInputOption=USER_ENTERED`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
@@ -325,7 +436,8 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     `😤 *Pain point:* ${data.painPoint}\n` +
     `🗓 *Scheduled:* ${bookedDate}\n\n` +
     (scoring
-      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}`
+      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
+        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '')
       : `_Scoring unavailable_`);
 
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -352,11 +464,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  if (payload.event !== 'invitee.created') {
+  if (payload.source !== 'make' && payload.event !== 'invitee.created') {
     return NextResponse.json({ received: true });
   }
 
-  const data = parsePayload(payload.payload);
+  const data = parsePayload(payload.source === 'make' ? payload : payload.payload);
   if (!data) {
     return NextResponse.json({ error: 'Missing invitee email' }, { status: 400 });
   }
@@ -365,8 +477,14 @@ export async function POST(request: NextRequest) {
     // Create contact in Loops
     await createLoopsContact(data);
 
-    // Score lead with rules
-    const scoring = scoreLeadWithRules(data);
+    // Score lead with AI (Tavily research + Claude), fall back to rules if it fails
+    let scoring: ScoringResult;
+    try {
+      scoring = await scoreLeadWithIntel(data);
+    } catch (err) {
+      console.warn('AI scoring failed, falling back to rules:', err);
+      scoring = scoreLeadWithRules(data);
+    }
 
     // Update Loops with score and fire both events
     await updateLoopsContact(data.email, {
