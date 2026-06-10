@@ -170,13 +170,13 @@ Person research (the one who booked):
 ${personContext || 'No results found.'}
 ---
 
-Based on this, return a JSON object with these fields:
+Based on this, return a JSON object with these exact fields. All fields are required and must never be empty strings:
 {
   "score": <number 1-10, likelihood to buy YAHSHUA HRIS>,
   "tier": <"hot" | "warm" | "cold">,
-  "notes": <1-2 sentence scoring rationale based on email domain, company profile, and pain point>,
-  "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context. Only include what is supported by the search results — do not guess.>,
-  "personIntel": <2-3 sentences about the person who booked. If search results reveal their role, background, or seniority, use that. If not, infer from available signals: email domain (personal vs business), their name, the fact that they booked the demo themselves (suggests decision-maker or influencer), and what you know about the company. Always return something useful — never an empty string.>
+  "notes": <1 short sentence only — just the scoring rationale: why hot/warm/cold based on email domain and pain point. Do NOT include company background here.>,
+  "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context for the sales team. Use search results if available; otherwise use your general knowledge. Never leave this empty.>,
+  "personIntel": <2-3 sentences about the person who booked. Use search results if available. If not found, infer from signals: business vs personal email, the fact they booked themselves (likely decision-maker or influencer), their name, and their company role context. Never leave this empty.>
 }
 
 Scoring guide:
@@ -193,6 +193,7 @@ Return only valid JSON, no explanation outside the JSON.`;
   });
 
   const raw = message.content[0].type === 'text' ? message.content[0].text.trim() : '';
+  console.log('Claude raw response:', raw);
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('Claude returned no valid JSON');
 
