@@ -325,11 +325,23 @@ async function sendMetaLeadEvent(data: LeadData) {
   if (data.firstName) userData.fn = hash(data.firstName.toLowerCase());
   if (data.lastName) userData.ln = hash(data.lastName.toLowerCase());
 
+  const eventTime = Math.floor(Date.now() / 1000);
   const body = {
     data: [
       {
         event_name: 'Lead',
-        event_time: Math.floor(Date.now() / 1000),
+        event_time: eventTime,
+        action_source: 'website',
+        user_data: userData,
+        custom_data: {
+          lead_type: 'demo_booking',
+          company_name: data.companyName,
+          pain_point: data.painPoint,
+        },
+      },
+      {
+        event_name: 'Schedule',
+        event_time: eventTime,
         action_source: 'website',
         user_data: userData,
         custom_data: {
