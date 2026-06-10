@@ -184,9 +184,9 @@ const HolidayPayComputationArticle = () => {
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
                   Built for Philippine compliance. Regular holidays, special holidays, rest day premiums — the system applies the right multiplier based on each employee&apos;s actual attendance and work schedule. No manual lookups. No payroll errors.
                 </p>
-                <Link href="https://yahshua.works" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
-                  Book a free demo at yahshua.works <ArrowRight className="w-4 h-4" />
-                </Link>
+                <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
+                  Book a free demo <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
 
               {/* FAQ — AEO structured Q&A */}
