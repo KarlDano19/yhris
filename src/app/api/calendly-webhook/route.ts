@@ -29,6 +29,7 @@ interface ScoringResult {
   tier: 'hot' | 'warm' | 'cold';
   notes: string;
   companyIntel: string;
+  personIntel: string;
 }
 
 // ─── Signature Verification ───────────────────────────────────────────────────
@@ -111,34 +112,39 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
 
   if (!tavilyKey || !anthropicKey) throw new Error('Missing TAVILY_API_KEY or ANTHROPIC_API_KEY');
 
-  // Step 1: Search for the company
-  const searchQuery = data.companyName
+  // Step 1: Search for company + person in parallel
+  const companyQuery = data.companyName
     ? `${data.companyName} Philippines company`
     : `${data.email.split('@')[1]} company Philippines`;
+  const personQuery = `"${data.firstName} ${data.lastName}" "${data.companyName || data.email.split('@')[1]}" LinkedIn Philippines`;
 
-  const tavilyRes = await fetch('https://api.tavily.com/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      api_key: tavilyKey,
-      query: searchQuery,
-      search_depth: 'basic',
-      max_results: 4,
-      include_answer: true,
-    }),
-  });
+  const tavilySearch = (query: string) =>
+    fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: tavilyKey,
+        query,
+        search_depth: 'basic',
+        max_results: 3,
+        include_answer: true,
+      }),
+    }).then(r => r.ok ? r.json() : null);
 
-  if (!tavilyRes.ok) throw new Error(`Tavily error: ${tavilyRes.status}`);
+  const [companyTavily, personTavily] = await Promise.all([
+    tavilySearch(companyQuery),
+    tavilySearch(personQuery),
+  ]);
 
-  const tavilyData = await tavilyRes.json();
-  const searchContext = [
-    tavilyData.answer ? `Summary: ${tavilyData.answer}` : '',
-    ...(tavilyData.results ?? []).map((r: { title: string; content: string; url: string }) =>
+  const buildContext = (data: any) => [
+    data?.answer ? `Summary: ${data.answer}` : '',
+    ...(data?.results ?? []).map((r: { title: string; content: string; url: string }) =>
       `Source: ${r.title}\n${r.content}\nURL: ${r.url}`
     ),
-  ]
-    .filter(Boolean)
-    .join('\n\n');
+  ].filter(Boolean).join('\n\n');
+
+  const searchContext = buildContext(companyTavily);
+  const personContext = buildContext(personTavily);
 
   // Step 2: Ask Claude to score + summarize intel
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
@@ -147,15 +153,21 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   const prompt = `You are a sales intelligence analyst for YAHSHUA HRIS, a Philippine HR and payroll software company.
 
 A prospect just booked a demo. Here is their info:
+- Name: ${data.firstName} ${data.lastName}
 - Company: ${data.companyName || '(not provided)'}
 - Email: ${data.email}
 - Phone: ${data.phone || '(not provided)'}
 - HR challenge: ${data.painPoint || '(not provided)'}
 - Demo scheduled: ${data.scheduledAt || '(not provided)'}
 
-Here is what we found about the company online:
+Company research:
 ---
 ${searchContext || 'No results found.'}
+---
+
+Person research (the one who booked):
+---
+${personContext || 'No results found.'}
 ---
 
 Based on this, return a JSON object with these fields:
@@ -163,7 +175,8 @@ Based on this, return a JSON object with these fields:
   "score": <number 1-10, likelihood to buy YAHSHUA HRIS>,
   "tier": <"hot" | "warm" | "cold">,
   "notes": <1-2 sentence scoring rationale based on email domain, company profile, and pain point>,
-  "companyIntel": <3-5 sentences of real company intelligence: what they do, industry, estimated size, any relevant business context the sales team should know before the demo. Only include what is supported by the search results — do not guess.>
+  "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context. Only include what is supported by the search results — do not guess.>,
+  "personIntel": <2-3 sentences about the person who booked. If search results reveal their role, background, or seniority, use that. If not, infer from available signals: email domain (personal vs business), their name, the fact that they booked the demo themselves (suggests decision-maker or influencer), and what you know about the company. Always return something useful — never an empty string.>
 }
 
 Scoring guide:
@@ -190,6 +203,7 @@ Return only valid JSON, no explanation outside the JSON.`;
     tier: ['hot', 'warm', 'cold'].includes(result.tier) ? result.tier : result.score >= 7 ? 'hot' : result.score >= 4 ? 'warm' : 'cold',
     notes: result.notes ?? '',
     companyIntel: result.companyIntel ?? '',
+    personIntel: result.personIntel ?? '',
   };
 }
 
@@ -234,7 +248,7 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
   const tier: 'hot' | 'warm' | 'cold' = score >= 7 ? 'hot' : score >= 4 ? 'warm' : 'cold';
   const notes = `Score ${score}/10 based on: ${reasons.join(', ')}. Pain point: "${data.painPoint}".`;
 
-  return { score, tier, notes, companyIntel: '' };
+  return { score, tier, notes, companyIntel: '', personIntel: '' };
 }
 
 // ─── Loops ────────────────────────────────────────────────────────────────────
@@ -449,6 +463,7 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     `🗓 *Scheduled:* ${bookedDate}\n\n` +
     (scoring
       ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
+        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${scoring.personIntel}` : '') +
         (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '')
       : `_Scoring unavailable_`);
 
