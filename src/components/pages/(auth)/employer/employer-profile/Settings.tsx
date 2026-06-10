@@ -1,6 +1,8 @@
 import { useMemo, useEffect } from 'react';
 import React from 'react';
 
+import LoadingSpinner from '@/components/LoadingSpinner';
+
 import { Controller } from 'react-hook-form';
 import Select from 'react-select';
 
@@ -132,7 +134,7 @@ function Settings({ register, onSubmit, isLoading, onBack, watch, setValue, cont
                   classNamePrefix='select'
                   options={timezoneOptions}
                   value={timezoneOptions.find((option) => option.value === value)}
-                  onChange={(val) => {
+                  onChange={(val: any) => {
                     onChange(val?.value || '');
                   }}
                   styles={selectStyles}
@@ -147,7 +149,7 @@ function Settings({ register, onSubmit, isLoading, onBack, watch, setValue, cont
                   isClearable={false}
                   noOptionsMessage={() => 'No timezones available'}
                   placeholder='Select a timezone...'
-                  isOptionDisabled={(option) => {
+                  isOptionDisabled={(option: any) => {
                     return option.isDisabled === true;
                   }}
                 />
@@ -186,7 +188,7 @@ function Settings({ register, onSubmit, isLoading, onBack, watch, setValue, cont
                   classNamePrefix='select'
                   options={timeFormatOptions}
                   value={timeFormatOptions.find((option) => option.value === value)}
-                  onChange={(val) => {
+                  onChange={(val: any) => {
                     onChange(val?.value || '');
                   }}
                   styles={selectStyles}
