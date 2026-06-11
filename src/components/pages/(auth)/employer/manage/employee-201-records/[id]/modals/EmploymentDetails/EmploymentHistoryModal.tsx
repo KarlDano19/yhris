@@ -50,9 +50,9 @@ export default function EmploymentHistoryModal({
     employeeId,
     { page: 1, pageSize: 50 }
   );
-  const { isSaving: isAdding, addEntry } = useAddEmploymentHistory(employeeId);
-  const { isUpdating, updateEntry } = useUpdateEmploymentHistory(employeeId);
-  const { isDeleting, deleteEntry } = useDeleteEmploymentHistory(employeeId);
+  const { mutateAsync: addEntry, isLoading: isAdding } = useAddEmploymentHistory(employeeId);
+  const { mutateAsync: updateMutation, isLoading: isUpdating } = useUpdateEmploymentHistory(employeeId);
+  const { mutateAsync: deleteMutation, isLoading: isDeleting } = useDeleteEmploymentHistory(employeeId);
 
   const itemsNewestFirst: EmploymentHistoryItem[] = useMemo(() => {
     const mapped = entries.map((e) => ({
@@ -276,14 +276,13 @@ export default function EmploymentHistoryModal({
               await notify.promise(
                 (async () => {
                   for (const it of newItems) {
-                    const res = await addEntry({
+                    await addEntry({
                       company: it.company,
                       position: it.position,
                       start_date: it.dateFrom,
                       end_date: it.dateTo ?? null,
                       description: it.description ?? "",
                     });
-                    if (!res.ok) throw res.error ?? new Error("Failed to add an employment record.");
                   }
                   setShowAdd(false);
                   await refetch();
@@ -312,14 +311,16 @@ export default function EmploymentHistoryModal({
               }
               await notify.promise(
                 (async () => {
-                  const res = await updateEntry(target.id!, {
-                    company: updated.company,
-                    position: updated.position,
-                    start_date: updated.dateFrom,
-                    end_date: updated.dateTo ?? null,
-                    description: updated.description ?? "",
+                  await updateMutation({
+                    histId: target.id!,
+                    updates: {
+                      company: updated.company,
+                      position: updated.position,
+                      start_date: updated.dateFrom,
+                      end_date: updated.dateTo ?? null,
+                      description: updated.description ?? "",
+                    },
                   });
-                  if (!res.ok) throw res.error ?? new Error("Failed to update employment.");
                   setEditIndex(null);
                   await refetch();
                 })(),
@@ -354,8 +355,7 @@ export default function EmploymentHistoryModal({
             setDeleting(true);
             await notify.promise(
               (async () => {
-                const res = await deleteEntry(target.id!);
-                if (!res.ok) throw res.error ?? new Error("Failed to delete employment.");
+                await deleteMutation(target.id!);
                 await refetch();
               })(),
               { success: "Employment deleted.", error: "Failed to delete employment." }
