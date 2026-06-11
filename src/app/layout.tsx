@@ -15,7 +15,7 @@ import './globals.css';
   
 export const metadata = {
   title: 'Yahshua HRIS',
-  description: 'HRIS',
+  description: 'YAHSHUA HRIS is an all-in-one HR and payroll platform for Philippine businesses. Manage employees, DOLE compliance, 201 files, and more.',
 };
 
 const golos_text = Golos_Text({ subsets: ['latin'], display: 'swap', adjustFontFallback: false });

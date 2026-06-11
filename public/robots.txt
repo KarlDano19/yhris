@@ -49,7 +49,7 @@ Disallow: /reset-password
 
 # Allow static assets
 Allow: /assets/
-Allow: /_next/static/
+Allow: /_next/
 
 # Sitemap location (update when you create a sitemap)
 Sitemap: https://yahshuahris.com/sitemap.xml
