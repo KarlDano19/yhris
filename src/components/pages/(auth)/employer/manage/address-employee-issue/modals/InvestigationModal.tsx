@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState, DragEvent, ChangeEvent } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState, DragEvent, ChangeEvent } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -28,7 +28,17 @@ export default function InvestigationModal({
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
   const { mutate, isLoading } = useAddInvestigationReportItems();
-  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm<T_Investigation>();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm<T_Investigation>({
+    defaultValues: {
+      date: new Date() as unknown as string,
+    },
+  });
+  useEffect(() => {
+    if (isOpen) {
+      setValue('date', new Date() as unknown as string);
+    }
+  }, [isOpen]);
+
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toAddData, setToAddData] = useState<any>(null);

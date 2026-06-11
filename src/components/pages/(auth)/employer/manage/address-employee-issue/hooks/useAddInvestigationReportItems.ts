@@ -18,7 +18,9 @@ async function addInvestigationReport(investigation: T_Investigation) {
     formData.append('has_attended_hearing', investigation.isAttendHearing);
     formData.append('results', investigation.resultOfInvestigation);
     formData.append('decision', investigation.decision);
-    formData.append('custom_decision', investigation.other);
+    if (investigation.other) {
+      formData.append('custom_decision', investigation.other);
+    }
     if (investigation.attachments) {
       formData.append('attachments', investigation.attachments);
     }

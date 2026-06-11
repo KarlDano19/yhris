@@ -65,7 +65,7 @@ export default function SalaryHistoryHistory({
     salary?: string;
     effDate?: string;
   }>({});
-  const { create, isSaving: isCreating } = useCreateSalaryHistory(employeeId);
+  const { mutateAsync: createSalary, isLoading: isCreating } = useCreateSalaryHistory(employeeId);
 
   useEffect(() => {
     setPosition(defaultPosition || "");
@@ -121,8 +121,7 @@ export default function SalaryHistoryHistory({
       });
 
       if (employeeId) {
-        const res = await create(entry);
-        if (!res.ok) throw res.error;
+        await createSalary(entry);
         await refetch();
       } else if (onCreate) {
         await onCreate(entry);

@@ -388,7 +388,8 @@ const Content = () => {
 
   const {
     data: jobTitleAutocompleteResults,
-    isLoading: isJobTitleAutocompleteLoading
+    isLoading: isJobTitleAutocompleteLoading,
+    isFetching: isJobTitleAutocompleteFetching,
   } = useGetJobAutocomplete(
     jobTitleSearchParams ? {
       ...jobTitleSearchParams,
@@ -398,7 +399,8 @@ const Content = () => {
 
   const {
     data: locationAutocompleteResults,
-    isLoading: isLocationAutocompleteLoading
+    isLoading: isLocationAutocompleteLoading,
+    isFetching: isLocationAutocompleteFetching,
   } = useGetJobAutocomplete(
     locationSearchParams ? {
       ...locationSearchParams,
@@ -677,8 +679,8 @@ const Content = () => {
       {/* Search Section - Collapsible */}
       <div
         className={classNames(
-          'mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out overflow-hidden',
-          isSearchSectionVisible ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          'mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out',
+          isSearchSectionVisible ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
         )}
       >
         <div className='px-4 pt-[85px]'>
@@ -701,7 +703,7 @@ const Content = () => {
                   debouncedValue={debouncedJobTitle}
                   isDebouncing={isDebouncingJobTitle}
                   autocompleteResults={jobTitleAutocompleteResults}
-                  isLoading={isJobTitleAutocompleteLoading}
+                  isLoading={isJobTitleAutocompleteLoading || isJobTitleAutocompleteFetching}
                   showAutocomplete={showJobTitleAutocomplete && shouldShowJobTitleAutocomplete}
                   selectedIndex={selectedJobTitleIndex}
                   limit={jobTitleAutocompleteLimit}
@@ -724,7 +726,7 @@ const Content = () => {
                   debouncedValue={debouncedLocation}
                   isDebouncing={isDebouncingLocation}
                   autocompleteResults={locationAutocompleteResults}
-                  isLoading={isLocationAutocompleteLoading}
+                  isLoading={isLocationAutocompleteLoading || isLocationAutocompleteFetching}
                   showAutocomplete={showLocationAutocomplete && shouldShowLocationAutocomplete}
                   selectedIndex={selectedLocationIndex}
                   limit={locationAutocompleteLimit}
