@@ -65,13 +65,19 @@ const LpFeaturesContent = () => {
   const Icon = cat.icon;
 
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (!hash) return;
-    const idx = categories.findIndex(c => c.id === hash);
-    if (idx !== -1) {
-      setActiveIndex(idx);
-      setFadeKey(k => k + 1);
-    }
+    const activateFromHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (!hash) return;
+      const idx = categories.findIndex(c => c.id === hash);
+      if (idx !== -1) {
+        setActiveIndex(idx);
+        setFadeKey(k => k + 1);
+      }
+    };
+
+    activateFromHash();
+    window.addEventListener('hashchange', activateFromHash);
+    return () => window.removeEventListener('hashchange', activateFromHash);
   }, []);
 
   const switchTab = (i: number) => {
