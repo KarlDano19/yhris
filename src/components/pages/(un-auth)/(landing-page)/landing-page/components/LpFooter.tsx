@@ -19,12 +19,10 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: "Features",
     links: [
-      { label: "Recruitment", href: "/features" },
-      { label: "Employee Management", href: "/features" },
-      { label: "Leave & Attendance", href: "/features" },
-      { label: "Time Tracking", href: "/features" },
-      { label: "Compliance", href: "/features" },
-      { label: "Performance", href: "/features" },
+      { label: "Recruitment", href: "/features#recruitment" },
+      { label: "Employee Management", href: "/features#employee-management" },
+      { label: "Compliance", href: "/features#compliance" },
+      { label: "Performance", href: "/features#employee-management" },
     ],
   },
   {
@@ -75,7 +73,7 @@ const LpFooter = () => {
                 <MainLogoWhite />
               </div>
               <p className="text-sm text-white/50 leading-relaxed mb-2">
-                Professional. Compliant. Cost-effective.
+                Professional. Compliant.<br />Cost-effective.
               </p>
               <p className="text-xs text-white/30">
                 A product of The ABBA Initiative (OPC)

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   UserPlus, FolderOpen,
@@ -63,6 +63,22 @@ const LpFeaturesContent = () => {
   const [fadeKey, setFadeKey] = useState(0);
   const cat = categories[activeIndex];
   const Icon = cat.icon;
+
+  useEffect(() => {
+    const activateFromHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (!hash) return;
+      const idx = categories.findIndex(c => c.id === hash);
+      if (idx !== -1) {
+        setActiveIndex(idx);
+        setFadeKey(k => k + 1);
+      }
+    };
+
+    activateFromHash();
+    window.addEventListener('hashchange', activateFromHash);
+    return () => window.removeEventListener('hashchange', activateFromHash);
+  }, []);
 
   const switchTab = (i: number) => {
     if (i === activeIndex) return;

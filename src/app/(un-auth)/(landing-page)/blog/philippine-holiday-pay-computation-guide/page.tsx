@@ -3,7 +3,7 @@ import HolidayPayComputationArticle from "@/components/pages/(un-auth)/(landing-
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'Philippine Holiday Pay Computation: Complete Employer Guide | YAHSHUA HRIS',
+  title: 'Philippine Holiday Pay Computation Guide | YAHSHUA HRIS',
   description: 'Correct holiday pay rates for regular and special non-working holidays in the Philippines. Includes computation table, common employer mistakes, and DOLE compliance requirements.',
   keywords: 'holiday pay computation Philippines, regular holiday pay Philippines, special non-working holiday pay, DOLE holiday pay rules, how to compute holiday pay Philippines',
   openGraph: {

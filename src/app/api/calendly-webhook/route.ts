@@ -13,6 +13,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 
+// ─── Dedup cache ──────────────────────────────────────────────────────────────
+// Keyed by event URI. TTL of 30 min is enough to survive a double-fire within
+// a single Make polling window without persisting stale entries indefinitely.
+const processedUris = new Map<string, number>();
+const DEDUP_TTL_MS = 30 * 60 * 1000;
+
+function isDuplicate(uri: string): boolean {
+  const seen = processedUris.get(uri);
+  if (!seen) return false;
+  if (Date.now() - seen > DEDUP_TTL_MS) {
+    processedUris.delete(uri);
+    return false;
+  }
+  return true;
+}
+
+function markProcessed(uri: string) {
+  processedUris.set(uri, Date.now());
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface LeadData {
   firstName: string;
@@ -22,6 +42,7 @@ interface LeadData {
   companyName: string;
   painPoint: string;
   scheduledAt: string;
+  eventUri?: string;
 }
 
 interface ScoringResult {
@@ -77,6 +98,7 @@ function parsePayload(payload: any): LeadData | null {
       companyName: payload?.companyName ?? '',
       painPoint: payload?.painPoint ?? '',
       scheduledAt: payload?.scheduledAt ?? '',
+      eventUri: payload?.eventUri ?? '',
     };
   }
 
@@ -527,6 +549,14 @@ export async function POST(request: NextRequest) {
   if (!data) {
     return NextResponse.json({ error: 'Missing invitee email' }, { status: 400 });
   }
+
+  // Dedup: skip if we've already processed this Calendly event URI within the last 30 min
+  const dedupKey = data.eventUri || data.email;
+  if (isDuplicate(dedupKey)) {
+    console.log('Duplicate booking skipped:', dedupKey);
+    return NextResponse.json({ received: true, skipped: 'duplicate' });
+  }
+  markProcessed(dedupKey);
 
   try {
     // Create contact in Loops
