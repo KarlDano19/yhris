@@ -29,6 +29,7 @@ function Content() {
   const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger, control } = useForm<T_EmployerProfile>();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [formData, setFormData] = useState<T_EmployerProfile | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
   const { mutate, isLoading } = useUpdateProfile();
 
   // Function to check if all required fields are filled
@@ -122,6 +123,7 @@ function Content() {
         onSuccess: (data: any) => {
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
           setIsSuccessModalOpen(false);
+          setIsNavigating(true);
           queryClient.refetchQueries({ queryKey: ['employerProfileCache'] });
           setTimeout(() => {
             window.location.href = '/dashboard';
@@ -211,10 +213,10 @@ function Content() {
               />
             </div>
             <div style={{ display: progressBar === 1 ? 'block' : 'none' }}>
-              <Settings 
-                register={register} 
-                onSubmit={openConfirmModal} 
-                isLoading={isLoading}
+              <Settings
+                register={register}
+                onSubmit={openConfirmModal}
+                isLoading={isLoading || isNavigating}
                 onBack={() => setProgressBar(0)}
                 watch={watch}
                 setValue={setValue}

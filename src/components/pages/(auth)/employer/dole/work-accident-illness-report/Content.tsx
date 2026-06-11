@@ -24,7 +24,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 import useGetWorkAccidentIlnessReportsItems from './hooks/useGetWorkAccidentIlnessReportsItems';
-import useDeleteWorkAccidentIllnessReport from './hooks/useDeleteWorkAccidentIllnessReport';
+import useDeleteWorkAccidentillnessReport from './hooks/useDeleteWorkAccidentillnessReport';
 import CreateWorkAccidentIllnessReportModal from './modals/CreateWorkAccidentIllnessReportModal';
 import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIllnessReportModal';
 import SelectBranchModal from './modals/SelectBranchModal';
@@ -99,7 +99,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isWorkAccidentIlnessReportsLoading,
     refetch: workAccidentIlnessReportsRefetch,
   } = useGetWorkAccidentIlnessReportsItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
-  const { mutate: deleteWorkAccidentIllnessReport, isLoading: isDeleteWorkAccidentIllnessReportLoading } = useDeleteWorkAccidentIllnessReport();
+  const { mutate: deleteWorkAccidentIllnessReport, isLoading: isDeleteWorkAccidentIllnessReportLoading } = useDeleteWorkAccidentillnessReport();
   
   const menuOptions = [
     {
@@ -721,7 +721,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onConfirm={() => {
             const callbackReq = {
               onSuccess: (data: any) => {
-                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                toast.custom(() => <CustomToast message='Work accident illness report deleted successfully.' type='success' />, { duration: 4000 });
                 setIsWorkAccidentIllnessReportDeleteModalOpen(null);
                 workAccidentIlnessReportsRefetch();
               },

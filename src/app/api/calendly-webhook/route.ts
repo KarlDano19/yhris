@@ -13,6 +13,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 
+// ─── Dedup cache ──────────────────────────────────────────────────────────────
+// Keyed by event URI. TTL of 30 min is enough to survive a double-fire within
+// a single Make polling window without persisting stale entries indefinitely.
+const processedUris = new Map<string, number>();
+const DEDUP_TTL_MS = 30 * 60 * 1000;
+
+function isDuplicate(uri: string): boolean {
+  const seen = processedUris.get(uri);
+  if (!seen) return false;
+  if (Date.now() - seen > DEDUP_TTL_MS) {
+    processedUris.delete(uri);
+    return false;
+  }
+  return true;
+}
+
+function markProcessed(uri: string) {
+  processedUris.set(uri, Date.now());
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface LeadData {
   firstName: string;
@@ -22,12 +42,17 @@ interface LeadData {
   companyName: string;
   painPoint: string;
   scheduledAt: string;
+  eventUri?: string;
 }
 
 interface ScoringResult {
   score: number;
   tier: 'hot' | 'warm' | 'cold';
   notes: string;
+  companyIntel: string;
+  personIntel: string;
+  companyResources: string[];
+  personResources: string[];
 }
 
 // ─── Signature Verification ───────────────────────────────────────────────────
@@ -57,6 +82,27 @@ function verifyCalendlySignature(rawBody: string, signature: string, secret: str
 
 // ─── Parse Calendly payload ───────────────────────────────────────────────────
 function parsePayload(payload: any): LeadData | null {
+  // Make format: flat object with source = 'make'
+  if (payload?.source === 'make') {
+    const email = payload?.email;
+    if (!email) return null;
+
+    const fullName: string = payload?.name ?? '';
+    const [firstName = '', ...rest] = fullName.trim().split(' ');
+
+    return {
+      firstName: payload?.firstName || firstName,
+      lastName: payload?.lastName || rest.join(' '),
+      email,
+      phone: payload?.phone ?? '',
+      companyName: payload?.companyName ?? '',
+      painPoint: payload?.painPoint ?? '',
+      scheduledAt: payload?.scheduledAt ?? '',
+      eventUri: payload?.eventUri ?? '',
+    };
+  }
+
+  // Native Calendly format
   const invitee = payload?.invitee;
   const email = invitee?.email;
   const fullName: string = invitee?.name ?? '';
@@ -83,7 +129,119 @@ function parsePayload(payload: any): LeadData | null {
   };
 }
 
-// ─── Rule-based Lead Scoring ──────────────────────────────────────────────────
+// ─── AI Lead Scoring (Tavily + Claude) ───────────────────────────────────────
+async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
+  const tavilyKey = process.env.TAVILY_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!tavilyKey || !anthropicKey) throw new Error('Missing TAVILY_API_KEY or ANTHROPIC_API_KEY');
+
+  // Step 1: Search for company + person in parallel
+  const companyQuery = data.companyName
+    ? `${data.companyName} Philippines company`
+    : `${data.email.split('@')[1]} company Philippines`;
+  const personQuery = `"${data.firstName} ${data.lastName}" "${data.companyName || data.email.split('@')[1]}" LinkedIn Philippines`;
+
+  const tavilySearch = (query: string) =>
+    fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: tavilyKey,
+        query,
+        search_depth: 'basic',
+        max_results: 3,
+        include_answer: true,
+      }),
+    }).then(r => r.ok ? r.json() : null);
+
+  const [companyTavily, personTavily] = await Promise.all([
+    tavilySearch(companyQuery),
+    tavilySearch(personQuery),
+  ]);
+
+  const buildContext = (data: any) => [
+    data?.answer ? `Summary: ${data.answer}` : '',
+    ...(data?.results ?? []).map((r: { title: string; content: string; url: string }) =>
+      `Source: ${r.title}\n${r.content}\nURL: ${r.url}`
+    ),
+  ].filter(Boolean).join('\n\n');
+
+  const searchContext = buildContext(companyTavily);
+  const personContext = buildContext(personTavily);
+
+  const companyResources: string[] = (companyTavily?.results ?? [])
+    .map((r: { url: string }) => r.url)
+    .filter(Boolean);
+  const personResources: string[] = (personTavily?.results ?? [])
+    .map((r: { url: string }) => r.url)
+    .filter(Boolean);
+
+  // Step 2: Ask Claude to score + summarize intel
+  const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  const client = new Anthropic({ apiKey: anthropicKey });
+
+  const prompt = `You are a sales intelligence analyst for YAHSHUA HRIS, a Philippine HR and payroll software company.
+
+A prospect just booked a demo. Here is their info:
+- Name: ${data.firstName} ${data.lastName}
+- Company: ${data.companyName || '(not provided)'}
+- Email: ${data.email}
+- Phone: ${data.phone || '(not provided)'}
+- HR challenge: ${data.painPoint || '(not provided)'}
+- Demo scheduled: ${data.scheduledAt || '(not provided)'}
+
+Company research:
+---
+${searchContext || 'No results found.'}
+---
+
+Person research (the one who booked):
+---
+${personContext || 'No results found.'}
+---
+
+Based on this, return a JSON object with these exact fields. All fields are required and must never be empty strings:
+{
+  "score": <number 1-10, likelihood to buy YAHSHUA HRIS>,
+  "tier": <"hot" | "warm" | "cold">,
+  "notes": <1 short sentence only — just the scoring rationale: why hot/warm/cold based on email domain and pain point. Do NOT include company background here.>,
+  "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context for the sales team. Use search results if available; otherwise use your general knowledge. Never leave this empty.>,
+  "personIntel": <2-3 sentences about the person who booked. Use search results if available. If not found, infer from signals: business vs personal email, the fact they booked themselves (likely decision-maker or influencer), their name, and their company role context. Never leave this empty.>
+}
+
+Scoring guide:
+- Hot (7-10): Established company, business email, urgent HR pain (payroll, DOLE compliance, headcount growth)
+- Warm (4-6): Growing company or moderate HR needs
+- Cold (1-3): Early stage, personal email, vague pain point
+
+Return only valid JSON, no explanation outside the JSON.`;
+
+  const message = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 512,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const raw = message.content[0].type === 'text' ? message.content[0].text.trim() : '';
+  console.log('Claude raw response:', raw);
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Claude returned no valid JSON');
+
+  const result = JSON.parse(jsonMatch[0]);
+
+  return {
+    score: Math.min(10, Math.max(1, Math.round(result.score))),
+    tier: ['hot', 'warm', 'cold'].includes(result.tier) ? result.tier : result.score >= 7 ? 'hot' : result.score >= 4 ? 'warm' : 'cold',
+    notes: result.notes ?? '',
+    companyIntel: result.companyIntel ?? '',
+    personIntel: result.personIntel ?? '',
+    companyResources,
+    personResources,
+  };
+}
+
+// ─── Rule-based Lead Scoring (fallback) ──────────────────────────────────────
 function scoreLeadWithRules(data: LeadData): ScoringResult {
   let score = 1;
   const reasons: string[] = [];
@@ -124,13 +282,13 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
   const tier: 'hot' | 'warm' | 'cold' = score >= 7 ? 'hot' : score >= 4 ? 'warm' : 'cold';
   const notes = `Score ${score}/10 based on: ${reasons.join(', ')}. Pain point: "${data.painPoint}".`;
 
-  return { score, tier, notes };
+  return { score, tier, notes, companyIntel: '', personIntel: '', companyResources: [], personResources: [] };
 }
 
 // ─── Loops ────────────────────────────────────────────────────────────────────
 async function createLoopsContact(data: LeadData) {
   const apiKey = process.env.LOOPS_BOOKDEMO_API;
-  if (!apiKey) throw new Error('LOOPS_BOOKDEMO_API not set');
+  if (!apiKey) return;
 
   const contactFields = {
     email: data.email,
@@ -215,11 +373,23 @@ async function sendMetaLeadEvent(data: LeadData) {
   if (data.firstName) userData.fn = hash(data.firstName.toLowerCase());
   if (data.lastName) userData.ln = hash(data.lastName.toLowerCase());
 
+  const eventTime = Math.floor(Date.now() / 1000);
   const body = {
     data: [
       {
         event_name: 'Lead',
-        event_time: Math.floor(Date.now() / 1000),
+        event_time: eventTime,
+        action_source: 'website',
+        user_data: userData,
+        custom_data: {
+          lead_type: 'demo_booking',
+          company_name: data.companyName,
+          pain_point: data.painPoint,
+        },
+      },
+      {
+        event_name: 'Schedule',
+        event_time: eventTime,
         action_source: 'website',
         user_data: userData,
         custom_data: {
@@ -292,16 +462,27 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     scoring?.score ?? '',
     scoring?.tier ?? '',
     scoring?.notes ?? '',
+    scoring?.companyIntel ?? '',
+    scoring?.personIntel ?? '',
+    (scoring?.companyResources ?? []).join(', '),
+    (scoring?.personResources ?? []).join(', '),
   ]];
 
-  await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:L:append?valueInputOption=USER_ENTERED`,
+  const sheetsRes = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:P:append?valueInputOption=RAW`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ values }),
     }
   );
+
+  if (!sheetsRes.ok) {
+    const err = await sheetsRes.json().catch(() => ({}));
+    console.error('Google Sheets append error:', sheetsRes.status, JSON.stringify(err));
+  } else {
+    console.log('Google Sheets append success:', sheetsRes.status);
+  }
 }
 
 // ─── Telegram ─────────────────────────────────────────────────────────────────
@@ -325,7 +506,15 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     `😤 *Pain point:* ${data.painPoint}\n` +
     `🗓 *Scheduled:* ${bookedDate}\n\n` +
     (scoring
-      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}`
+      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
+        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${scoring.personIntel}` : '') +
+        (scoring.personResources?.length
+          ? `\n\n🔗 *Person Sources:*\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
+          : '') +
+        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '') +
+        (scoring.companyResources?.length
+          ? `\n\n🔗 *Company Sources:*\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
+          : '')
       : `_Scoring unavailable_`);
 
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -352,21 +541,35 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  if (payload.event !== 'invitee.created') {
+  if (payload.source !== 'make' && payload.event !== 'invitee.created') {
     return NextResponse.json({ received: true });
   }
 
-  const data = parsePayload(payload.payload);
+  const data = parsePayload(payload.source === 'make' ? payload : payload.payload);
   if (!data) {
     return NextResponse.json({ error: 'Missing invitee email' }, { status: 400 });
   }
+
+  // Dedup: skip if we've already processed this Calendly event URI within the last 30 min
+  const dedupKey = data.eventUri || data.email;
+  if (isDuplicate(dedupKey)) {
+    console.log('Duplicate booking skipped:', dedupKey);
+    return NextResponse.json({ received: true, skipped: 'duplicate' });
+  }
+  markProcessed(dedupKey);
 
   try {
     // Create contact in Loops
     await createLoopsContact(data);
 
-    // Score lead with rules
-    const scoring = scoreLeadWithRules(data);
+    // Score lead with AI (Tavily research + Claude), fall back to rules if it fails
+    let scoring: ScoringResult;
+    try {
+      scoring = await scoreLeadWithIntel(data);
+    } catch (err) {
+      console.warn('AI scoring failed, falling back to rules:', err);
+      scoring = scoreLeadWithRules(data);
+    }
 
     // Update Loops with score and fire both events
     await updateLoopsContact(data.email, {

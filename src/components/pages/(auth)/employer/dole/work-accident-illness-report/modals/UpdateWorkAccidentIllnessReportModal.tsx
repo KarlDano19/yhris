@@ -1,6 +1,8 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentIllnessReportDetails';
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
 import PersonalInformation from './tabs/PersonalInformation';
@@ -106,8 +108,12 @@ export default function UpdateWorkAccidentIllnessReportModal({
     data.disabling_injury = data.disabling_injury === 'yes';
     const callbackReq = {
       onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message='Updated successfully.' type='success' />, { duration: 4000 });
         customCloseModal();
         refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
     mutate({ work_accident_illness_report_id: isOpen.id, data: data }, callbackReq);

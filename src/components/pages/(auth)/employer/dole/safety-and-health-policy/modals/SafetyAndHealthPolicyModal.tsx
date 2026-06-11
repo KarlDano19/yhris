@@ -82,10 +82,19 @@ function SafetyAndHealthPolicyModal({
   } = useGetSafetyAndHealthPolicyDetails();
 
   useEffect(() => {
+    if (safetyAndHealthPolicyDetails?.id) {
+      setSafetyAndHealthPolicyId(safetyAndHealthPolicyDetails.id);
+    }
+  }, [safetyAndHealthPolicyDetails?.id]);
+
+  useEffect(() => {
     if (isEdit) {
       refetchSafetyAndHealthPolicyDetails();
+      if (safetyAndHealthPolicyDetails?.body) {
+        setValue("body", safetyAndHealthPolicyDetails.body);
+      }
     }
-  }, [isEdit, refetchSafetyAndHealthPolicyDetails]);
+  }, [isEdit]);
 
   const { mutateAsync: updateMutate, isLoading } = useUpdateSafetyAndHealthPolicy();
   const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
@@ -438,16 +447,16 @@ function SafetyAndHealthPolicyModal({
                     )
                   ) : (
                     <>
-                      <div className="border border-gray-200 rounded-lg mx-6 my-6">
+                      <div className="border border-gray-200 rounded-lg mx-6 my-6 overflow-hidden">
                         <div className="px-4 pb-6">
                           <div id="pdf-content" className="sm:col-span-4 mt-4">
                             <div
                               className="policy-content"
                               dangerouslySetInnerHTML={{
-                                __html: safetyAndHealthPolicyDetails?.body.replace(
+                                __html: safetyAndHealthPolicyDetails?.body?.replace(
                                   /{{company_name}}/g,
                                   companyName
-                                ),
+                                ) ?? '',
                               }}
                             />
                           </div>

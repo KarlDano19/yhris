@@ -1,7 +1,9 @@
 import { Dispatch, Fragment, useRef, useState } from "react";
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import toast from 'react-hot-toast';
 import useAddWorkAccidentIllnessReport from "../hooks/useAddWorkAccidentIllnessReports";
+import CustomToast from '@/components/CustomToast';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import PersonalInformation from "./tabs/PersonalInformation";
@@ -39,11 +41,15 @@ function CreateWorkAccidentIllnessReportModal({
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message='Created successfully.' type='success' />, { duration: 4000 });
         setIsOpen(false);
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
         refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
     addWorkAccidentIllnessReport(data, callbackReq);

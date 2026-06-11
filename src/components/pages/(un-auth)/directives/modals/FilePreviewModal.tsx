@@ -6,6 +6,8 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
+import LoadingSpinner from '@/components/LoadingSpinner';
+
 interface FilePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -113,10 +115,11 @@ export default function FilePreviewModal({
   const renderFileContent = () => {
     if (isLoading) {
       return (
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#355FD0]"></div>
-          <p className="mt-2 text-sm text-gray-500">Loading {fileType === 'image' ? 'image' : 'file'}...</p>
-        </div>
+        <LoadingSpinner
+          size='lg'
+          showText={true}
+          text={`Loading ${fileType === 'image' ? 'image' : 'file'}...`}
+        />
       );
     }
     

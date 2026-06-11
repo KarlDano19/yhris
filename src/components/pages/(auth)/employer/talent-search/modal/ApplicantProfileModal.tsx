@@ -2,6 +2,8 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 import { XCircleIcon, PrinterIcon } from "@heroicons/react/24/solid";
+
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetApplicantDetails from "../hook/useGetApplicantDetails";
 import ApplicantProfile from "../profile/ApplicantProfile";
 import WorkExperience from "../profile/WorkExperience";
@@ -86,9 +88,8 @@ function ApplicantProfileModal({
                 </div>
                 <div className="p-4">
                   {isLoading ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                      <p className="mt-2 text-gray-600">Loading profile/s...</p>
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner size='md' showText={true} text='Loading profile...' />
                     </div>
                   ) : (
                     <div className="flex flex-col md:flex-row gap-6">
