@@ -45,14 +45,6 @@ const ProductTopBar = () => (
     className="flex items-center justify-between px-4 py-2.5 shrink-0"
     style={{ background: "rgba(5,9,26,0.95)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
   >
-    <div className="flex items-center gap-1.5">
-      <div style={{ width: 132, height: 19, position: "relative", overflow: "visible", flexShrink: 0 }}>
-        <div style={{ transform: "scale(0.65)", transformOrigin: "left center", position: "absolute", top: 0, left: 0 }}>
-          <MainLogoWhite />
-        </div>
-      </div>
-      <InfoIcon fill="rgba(255,255,255,0.45)" />
-    </div>
     <div className="flex items-center gap-2">
       <div className="relative">
         <MessageSquare className="w-4 h-4" style={{ color: "rgba(255,255,255,0.45)" }} />
@@ -73,12 +65,20 @@ const ProductTopBar = () => (
         <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: YELLOW }}>
           C
         </div>
-        <div className="text-right">
+        <div>
           <p className="text-[10px] font-semibold leading-none" style={{ color: "rgba(255,255,255,0.85)" }}>Case and Sherman</p>
           <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.35)" }}>Apr 19, 2026</p>
         </div>
         <ChevronDown className="w-3 h-3" style={{ color: "rgba(255,255,255,0.35)" }} />
       </div>
+    </div>
+    <div className="flex items-center gap-1.5">
+      <div style={{ width: 132, height: 19, position: "relative", overflow: "visible", flexShrink: 0 }}>
+        <div style={{ transform: "scale(0.65)", transformOrigin: "right center", position: "absolute", top: 0, right: 0 }}>
+          <MainLogoWhite />
+        </div>
+      </div>
+      <InfoIcon fill="rgba(255,255,255,0.45)" />
     </div>
   </div>
 );
