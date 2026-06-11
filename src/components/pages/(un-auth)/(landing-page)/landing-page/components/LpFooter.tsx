@@ -22,7 +22,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "Recruitment", href: "/features#recruitment" },
       { label: "Employee Management", href: "/features#employee-management" },
       { label: "Compliance", href: "/features#compliance" },
-      { label: "Performance", href: "/features" },
+      { label: "Performance", href: "/features#employee-management" },
     ],
   },
   {

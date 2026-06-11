@@ -100,6 +100,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.85,
     },
+    {
+      url: `${BASE_URL}/blog/philippine-holiday-pay-computation-guide`,
+      lastModified: new Date('2026-06-10'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/blog/thirteenth-month-pay-tracking-philippines`,
+      lastModified: new Date('2026-06-10'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
 
     // ── Support / docs ────────────────────────────────────────────────────
     {
@@ -126,12 +138,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Legal ─────────────────────────────────────────────────────────────
     {
       url: `${BASE_URL}/privacy-notice`,
-      lastModified: new Date(DATES.legal),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/privacy-policy`,
       lastModified: new Date(DATES.legal),
       changeFrequency: 'yearly',
       priority: 0.3,
