@@ -30,6 +30,8 @@ interface ScoringResult {
   notes: string;
   companyIntel: string;
   personIntel: string;
+  companyResources: string[];
+  personResources: string[];
 }
 
 // ─── Signature Verification ───────────────────────────────────────────────────
@@ -146,6 +148,13 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   const searchContext = buildContext(companyTavily);
   const personContext = buildContext(personTavily);
 
+  const companyResources: string[] = (companyTavily?.results ?? [])
+    .map((r: { url: string }) => r.url)
+    .filter(Boolean);
+  const personResources: string[] = (personTavily?.results ?? [])
+    .map((r: { url: string }) => r.url)
+    .filter(Boolean);
+
   // Step 2: Ask Claude to score + summarize intel
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
   const client = new Anthropic({ apiKey: anthropicKey });
@@ -205,6 +214,8 @@ Return only valid JSON, no explanation outside the JSON.`;
     notes: result.notes ?? '',
     companyIntel: result.companyIntel ?? '',
     personIntel: result.personIntel ?? '',
+    companyResources,
+    personResources,
   };
 }
 
@@ -249,7 +260,7 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
   const tier: 'hot' | 'warm' | 'cold' = score >= 7 ? 'hot' : score >= 4 ? 'warm' : 'cold';
   const notes = `Score ${score}/10 based on: ${reasons.join(', ')}. Pain point: "${data.painPoint}".`;
 
-  return { score, tier, notes, companyIntel: '', personIntel: '' };
+  return { score, tier, notes, companyIntel: '', personIntel: '', companyResources: [], personResources: [] };
 }
 
 // ─── Loops ────────────────────────────────────────────────────────────────────
@@ -465,7 +476,13 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     (scoring
       ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
         (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${scoring.personIntel}` : '') +
-        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '')
+        (scoring.personResources?.length
+          ? `\n\n🔗 *Person Sources:*\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
+          : '') +
+        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '') +
+        (scoring.companyResources?.length
+          ? `\n\n🔗 *Company Sources:*\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
+          : '')
       : `_Scoring unavailable_`);
 
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
