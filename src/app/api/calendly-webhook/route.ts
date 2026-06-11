@@ -441,10 +441,13 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     scoring?.tier ?? '',
     scoring?.notes ?? '',
     scoring?.companyIntel ?? '',
+    scoring?.personIntel ?? '',
+    (scoring?.companyResources ?? []).join(', '),
+    (scoring?.personResources ?? []).join(', '),
   ]];
 
   await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:M:append?valueInputOption=USER_ENTERED`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:P:append?valueInputOption=USER_ENTERED`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
