@@ -446,7 +446,7 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     (scoring?.personResources ?? []).join(', '),
   ]];
 
-  await fetch(
+  const sheetsRes = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:P:append?valueInputOption=USER_ENTERED`,
     {
       method: 'POST',
@@ -454,6 +454,13 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
       body: JSON.stringify({ values }),
     }
   );
+
+  if (!sheetsRes.ok) {
+    const err = await sheetsRes.json().catch(() => ({}));
+    console.error('Google Sheets append error:', sheetsRes.status, JSON.stringify(err));
+  } else {
+    console.log('Google Sheets append success:', sheetsRes.status);
+  }
 }
 
 // ─── Telegram ─────────────────────────────────────────────────────────────────
