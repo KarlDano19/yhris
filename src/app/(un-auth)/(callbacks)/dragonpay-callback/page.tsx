@@ -3,7 +3,8 @@ import React from 'react'
 
 export const metadata = {
     title: 'Dragonpay Callback - Yahshua HRIS',
-    description: 'HRIS',
+    description: 'Payment callback page.',
+    robots: { index: false, follow: false },
 }
 
 const DragonayCallbackPage = async () => {

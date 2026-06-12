@@ -8,7 +8,8 @@ import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
   title: 'Pricing - Yahshua HRIS',
-  description: 'HRIS',
+  description: 'YAHSHUA HRIS pricing plans.',
+  robots: { index: false, follow: false },
 };
 
 async function getSession() {

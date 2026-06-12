@@ -8,7 +8,7 @@ import PixelEvents from '@/components/PixelEvents';
 import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
-  title: 'YAHSHUA HRIS Pricing - Affordable HR & Payroll Plans for Philippine Businesses',
+  title: 'YAHSHUA HRIS Pricing — HR & Payroll Plans for Philippines',
   description: 'Simple, transparent pricing for YAHSHUA HRIS. Get payroll automation, employee management, DOLE compliance, and more. Plans designed for small and growing businesses in the Philippines.',
   openGraph: {
     title: 'YAHSHUA HRIS Pricing - Affordable HR & Payroll Plans',
