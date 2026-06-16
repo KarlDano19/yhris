@@ -1,6 +1,6 @@
 "use client";
 import { Fragment, useEffect, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, Transition, TransitionChild } from '@headlessui/react';
 
 import SuccessPopAlert from "@/components/SuccessPopAlert";
 
@@ -39,13 +39,13 @@ const SavingProgress = ({ open, onClose }: SavingProgressProps) => {
 
   return (
     <>
-      <Transition.Root show={open} as={Fragment}>
+      <Transition show={open} as={Fragment}>
         <Dialog
           as="div"
           className={`relative z-10 `}
           onClose={onClose}
         >
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -55,7 +55,7 @@ const SavingProgress = ({ open, onClose }: SavingProgressProps) => {
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-          </Transition.Child>
+          </TransitionChild>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full flex-col items-center justify-center">
               <h1 className="text-xl md:text-5xl text-white font-medium mb-10">
@@ -70,7 +70,7 @@ const SavingProgress = ({ open, onClose }: SavingProgressProps) => {
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
       <SuccessPopAlert
         message="Successfully saved recording."
         open={successAlert}

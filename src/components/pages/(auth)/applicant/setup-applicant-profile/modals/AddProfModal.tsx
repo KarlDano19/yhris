@@ -2,7 +2,7 @@
 
 import { Fragment, useRef } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useFormContext, useFieldArray, useForm} from "react-hook-form";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -27,13 +27,13 @@ const AddProfModal = ({ open, onSave, onClose }: AddProfModalProps) => {
   
   return (
     
-    <Transition.Root show={open} as={Fragment}>
+    <Transition show={open} as={Fragment}>
       <Dialog
         as="div"
         className={`relative z-10 `}
         onClose={onClose}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -43,10 +43,10 @@ const AddProfModal = ({ open, onSave, onClose }: AddProfModalProps) => {
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -55,7 +55,7 @@ const AddProfModal = ({ open, onSave, onClose }: AddProfModalProps) => {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-sm">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-sm">
                 <div className="header bg-savoy-blue rounded-md flex justify-between px-4 py-2">
                   <h6 className="text-white font-medium">Job 1</h6>
                   <button onClick={onClose}>
@@ -177,12 +177,12 @@ const AddProfModal = ({ open, onSave, onClose }: AddProfModalProps) => {
                     </button>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

@@ -1,9 +1,8 @@
-import { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 
 import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useUpdateDirective from '../hooks/useUpdateDirective';
 import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
 import SignatureModal from './SignatureModal';
@@ -25,7 +25,7 @@ import EyePassword from '@/svg/EyePassword';
 import { MemoFormData } from '@/types/directives';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 interface CachedProfileData {
   name: string;
@@ -62,7 +62,7 @@ export default function EditMemoModal({
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<MemoFormData>();
   const updateMutation = useUpdateDirective();
   const queryClient = useQueryClient();
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+
 
   const cachedProfile = queryClient
     .getQueryCache()
@@ -305,9 +305,9 @@ export default function EditMemoModal({
   }, [signatureUrl, setValue, isOpen]);
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -317,11 +317,11 @@ export default function EditMemoModal({
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -330,7 +330,7 @@ export default function EditMemoModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Memo</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -786,8 +786,8 @@ export default function EditMemoModal({
                     </button>
                   </div>
                 </form>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
         <SignatureModal
@@ -796,6 +796,6 @@ export default function EditMemoModal({
           setIsOpen={setSignatureModalOpen}
         />
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

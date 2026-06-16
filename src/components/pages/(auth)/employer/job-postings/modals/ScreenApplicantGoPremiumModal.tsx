@@ -2,7 +2,7 @@ import { Dispatch, Fragment, useRef } from 'react';
 
 import Link from 'next/link';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -14,9 +14,9 @@ function ScreenApplicantGoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean;
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -26,11 +26,11 @@ function ScreenApplicantGoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean;
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -39,7 +39,7 @@ function ScreenApplicantGoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean;
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
+              <DialogPanel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
                 <div className='flex justify-end px-4 pt-4'>
                   <XCircleIcon className='w-5 h-5 text-slate-400 cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
@@ -84,12 +84,12 @@ function ScreenApplicantGoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean;
                     </div>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }
 

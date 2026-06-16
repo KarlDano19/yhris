@@ -45,7 +45,7 @@ import useUpdateStatus from '../hooks/applicant/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/email/useSendInterviewSchedule';
 
 import { EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import UploadIcon from '@/svg/UploadIcon';
 import ArchiveIcon from '@/svg/ArchiveIcon';
 import PlusIconGreen from '@/svg/PlusIconGreen';
@@ -980,9 +980,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                       {/* Mobile Dropdown Menu */}
                       <Menu as="div" className="relative">
-                        <Menu.Button className="rounded-lg bg-gray-600 hover:bg-gray-700 text-white py-1.5 px-2 flex items-center justify-center w-12">
+                        <MenuButton className="rounded-lg bg-gray-600 hover:bg-gray-700 text-white py-1.5 px-2 flex items-center justify-center w-12">
                           <EllipsisVerticalIcon className="h-5 w-5" />
-                        </Menu.Button>
+                        </MenuButton>
                         <Transition
                           as={Fragment}
                           enter="transition ease-out duration-100"
@@ -992,45 +992,37 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <MenuItems className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="py-1">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    onClick={() => setIsArchivedApplicantsModalOpen(true)}
-                                    className={`${
-                                      active ? 'bg-gray-50' : 'hover:bg-gray-50'
-                                    } group flex items-center gap-3 w-full px-3 py-2 text-sm font-bold transition-colors`}
-                                    style={{ color: '#6b7280' }}
-                                  >
-                                    <div className="relative">
-                                      <ArchiveIcon />
-                                      {recentArchivedCount > 0 && (
-                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
-                                          {recentArchivedCount > 99 ? '99+' : recentArchivedCount}
-                                        </span>
-                                      )}
-                                    </div>
-                                    Archived
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <SmartButton
-                                    id="create-job-stage-btn"
-                                    onClick={handleAddStage}
-                                    className={`${
-                                      active ? 'bg-green-50' : 'hover:bg-green-50'
-                                    } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
-                                  >
-                                    <PlusIconGreen />
-                                    <span className="ml-1">Add Stage</span>
-                                  </SmartButton>
-                                )}
-                              </Menu.Item>
+                              <MenuItem>
+                                <button
+                                  onClick={() => setIsArchivedApplicantsModalOpen(true)}
+                                  className='hover:bg-gray-50 data-[focus]:bg-gray-50 group flex items-center gap-3 w-full px-3 py-2 text-sm font-bold transition-colors'
+                                  style={{ color: '#6b7280' }}
+                                >
+                                  <div className="relative">
+                                    <ArchiveIcon />
+                                    {recentArchivedCount > 0 && (
+                                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
+                                        {recentArchivedCount > 99 ? '99+' : recentArchivedCount}
+                                      </span>
+                                    )}
+                                  </div>
+                                  Archived
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <SmartButton
+                                  id="create-job-stage-btn"
+                                  onClick={handleAddStage}
+                                  className='hover:bg-green-50 data-[focus]:bg-green-50 group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors'
+                                >
+                                  <PlusIconGreen />
+                                  <span className="ml-1">Add Stage</span>
+                                </SmartButton>
+                              </MenuItem>
                             </div>
-                          </Menu.Items>
+                          </MenuItems>
                         </Transition>
                       </Menu>
                     </div>

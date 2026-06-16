@@ -3,7 +3,7 @@
 import { Fragment, useState, useEffect } from 'react';
 
 import toast from 'react-hot-toast';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
 import useFileforge from '../hooks/useFileforge';
@@ -100,13 +100,13 @@ export default function VersionHistoryDetailsModal({
 
   return (
     <>
-      <Transition.Root show={isOpen} as={Fragment}>
+      <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-50"
         onClose={() => {}}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -116,11 +116,11 @@ export default function VersionHistoryDetailsModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -129,7 +129,7 @@ export default function VersionHistoryDetailsModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-5xl h-[97.5vh] flex flex-col">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-5xl h-[97.5vh] flex flex-col">
                 {/* Header */}
                 <div className="flex bg-savoy-blue p-4 items-center">
                   <h3 className="flex-1 text-white font-semibold text-lg">
@@ -228,12 +228,12 @@ export default function VersionHistoryDetailsModal({
                     </button>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
               </Dialog>
-      </Transition.Root>
+      </Transition>
 
     </>
   );

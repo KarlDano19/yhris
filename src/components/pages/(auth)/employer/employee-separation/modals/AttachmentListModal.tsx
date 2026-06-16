@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/outline';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/20/solid';
@@ -26,10 +26,10 @@ export default function AttachmentListModal({
   title,
 }: AttachmentListModalProps) {
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={setIsOpen}>
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -39,12 +39,12 @@ export default function AttachmentListModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         {/* Modal Panel */}
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -53,12 +53,12 @@ export default function AttachmentListModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 {/* Header */}
                 <div className="bg-savoy-blue px-4 py-3 sm:px-6 flex justify-between items-center">
-                  <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-white">
+                  <DialogTitle as="h3" className="text-lg font-semibold leading-6 text-white">
                     {title}
-                  </Dialog.Title>
+                  </DialogTitle>
                   <button
                     type="button"
                     className="text-white hover:text-gray-200"
@@ -113,11 +113,11 @@ export default function AttachmentListModal({
                     Close
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

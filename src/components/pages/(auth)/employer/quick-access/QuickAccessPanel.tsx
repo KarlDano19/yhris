@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { DragDropContext, Draggable, Droppable, DroppableProps, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'react-tooltip';
 
@@ -15,19 +15,6 @@ import useUpdateQuickAccess from './hooks/useUpdateQuickAccess';
 import useGetQuickAccessCounters from './hooks/useGetQuickAccessCounters';
 import QuickAccessEditModal from './QuickAccessEditModal';
 
-// Workaround for react-beautiful-dnd + React 18 Strict Mode
-function StrictModeDroppable({ children, ...props }: DroppableProps) {
-  const [enabled, setEnabled] = React.useState(false);
-  React.useEffect(() => {
-    const animation = requestAnimationFrame(() => setEnabled(true));
-    return () => {
-      cancelAnimationFrame(animation);
-      setEnabled(false);
-    };
-  }, []);
-  if (!enabled) return null;
-  return <Droppable {...props}>{children}</Droppable>;
-}
 
 type Props = {
   className?: string;
@@ -112,7 +99,7 @@ export default function QuickAccessPanel({ className = '', hasActiveSubscription
 
           {!isLoading && localItems.length > 0 && (
             <DragDropContext onDragEnd={onDragEnd}>
-              <StrictModeDroppable droppableId='quick-access-list' direction='vertical'>
+              <Droppable droppableId='quick-access-list' direction='vertical'>
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
@@ -184,7 +171,7 @@ export default function QuickAccessPanel({ className = '', hasActiveSubscription
                     {provided.placeholder}
                   </div>
                 )}
-              </StrictModeDroppable>
+              </Droppable>
             </DragDropContext>
           )}
         </div>

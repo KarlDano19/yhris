@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -57,9 +57,9 @@ export default function AddEmployeeModal({
 
   return (
     <>
-      <Transition.Root show={isOpen} as={Fragment}>
+      <Transition show={isOpen} as={Fragment}>
         <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(false)}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300'
             enterFrom='opacity-0'
@@ -69,11 +69,11 @@ export default function AddEmployeeModal({
             leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300'
                 enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -82,7 +82,7 @@ export default function AddEmployeeModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full mx-4 sm:my-8 sm:mx-8 sm:max-w-screen-2xl'>
+                <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full mx-4 sm:my-8 sm:mx-8 sm:max-w-screen-2xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Add Employee</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -385,12 +385,12 @@ export default function AddEmployeeModal({
                       </div>
                     </form>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 }

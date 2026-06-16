@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
-
-import dynamic from "next/dynamic";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../modals/DrawSignatureModal";
 import FilePreviewModal from "../modals/FilePreviewModal";
+import ReactQuill from "@/components/ReactQuillDynamic";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -28,10 +27,6 @@ export default function ProgramAndPolicy({
   validationMessage?: string;
   missingFields?: string[];
 }) {
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
-    []
-  );
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [drawnSignaturePreview, setDrawnSignaturePreview] = useState<string>("");

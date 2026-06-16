@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -839,12 +839,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
                     const position = open ? getDropdownPosition(jobPost.id) : { top: -9999, left: -9999 };
                     return (
                     <>
-                      <Menu.Button
+                      <MenuButton
                         ref={(el: HTMLButtonElement | null) => { menuButtonRefs.current[jobPost.id] = el; }}
                         className="flex items-center"
                       >
                         <MoreIconWithBorder />
-                      </Menu.Button>
+                      </MenuButton>
                       {typeof document !== 'undefined' && createPortal(
                         <Transition
                           as={Fragment}
@@ -857,7 +857,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
                           leaveTo="transform opacity-0 scale-95"
                           beforeLeave={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: false }))}
                         >
-                          <Menu.Items
+                          <MenuItems
                             static
                             className="fixed z-[9999] w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-[calc(100vh-16px)] overflow-y-auto"
                             style={{
@@ -866,21 +866,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
                             }}
                           >
                             <div className="py-1 text-left">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }));
-                                    }}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b`}
-                                  >
-                                    Share Post To <ChevronRightIcon className='inline h-4 w-4' />
-                                  </button>
-                                )}
-                              </Menu.Item>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }));
+                                  }}
+                                  className='data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b'
+                                >
+                                  Share Post To <ChevronRightIcon className='inline h-4 w-4' />
+                                </button>
+                              </MenuItem>
                               {showShareOptions[jobPost.id] && (
                                 <div className='pl-4 flex flex-wrap'>
                                   {jobPost.shared_to.split(',').map((social: any) => {
@@ -897,63 +895,53 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
                                   })}
                                 </div>
                               )}
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_active ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_roles ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_salary ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_benefits ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm ${!jobPost.is_show_remarks ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
-                                  </button>
-                                )}
-                              </Menu.Item>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_active ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_roles ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_salary ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_benefits ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm ${!jobPost.is_show_remarks ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                                </button>
+                              </MenuItem>
                             </div>
-                          </Menu.Items>
+                          </MenuItems>
                         </Transition>,
                         document.body
                       )}

@@ -33,13 +33,15 @@ if (typeof window !== 'undefined' && !(history.pushState as any)[PATCHED]) {
   const origReplace = history.replaceState.bind(history);
 
   const patchedPush = function (state: unknown, unused: string, url?: string | URL | null) {
-    navHandlers.forEach(h => h(url));
+    // Defer handlers so state updates never fire during React's useInsertionEffect
+    // phase (Next.js 15 calls pushState internally during navigation commits).
+    setTimeout(() => navHandlers.forEach(h => h(url)), 0);
     return origPush(state as any, unused, url);
   };
   (patchedPush as any)[PATCHED] = true;
 
   const patchedReplace = function (state: unknown, unused: string, url?: string | URL | null) {
-    navHandlers.forEach(h => h(url));
+    setTimeout(() => navHandlers.forEach(h => h(url)), 0);
     return origReplace(state as any, unused, url);
   };
   (patchedReplace as any)[PATCHED] = true;
