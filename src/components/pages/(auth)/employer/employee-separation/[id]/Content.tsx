@@ -450,8 +450,8 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
           onClose={() => setIsLegalDocsModalOpen(null)}
           onSubmit={handleLegalDocsSubmit}
           defaultRecipients={letterDefaultRecipients}
-          showDragDropAttachment={false}
-          showAttachment={false}
+          showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send Files"
           isLoading={isMutating}
         />
