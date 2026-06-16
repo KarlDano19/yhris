@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 
-import dynamic from "next/dynamic";
-
 import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import Select from 'react-select';
@@ -10,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import CustomToast from "@/components/CustomToast";
 import UnsavedChangesModal from "@/components/UnsavedChangesModal";
 import ModalLayout from "@/components/ModalLayout";
+import ReactQuill from "@/components/ReactQuillDynamic";
 import EmailField from "@/components/common/EmailField";
 import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItems";
 import useTagTo from "@/components/hooks/useTagTo";
@@ -22,7 +21,7 @@ import EyePassword from "@/svg/EyePassword";
 import InfoIcon from "@/svg/InfoIcon";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 
 interface Field {
   onChange: (value: any) => void;
@@ -88,11 +87,6 @@ export default function SendEmailModal({
   emailFieldDataSource = 'employees',
   prePopulatedData
 }: SendEmailModalProps) {
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
-    [isOpen]
-  );
-  
   const [isCCOpen, setIsCCOpen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState("");

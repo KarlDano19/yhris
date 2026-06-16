@@ -36,6 +36,9 @@ const nextConfig = {
   },
   reactStrictMode: false,
   experimental: {},
+  devIndicators: {
+    position: 'top-left',
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

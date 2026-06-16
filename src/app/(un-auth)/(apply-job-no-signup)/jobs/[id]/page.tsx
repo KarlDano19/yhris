@@ -3,13 +3,13 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import Content from '@/components/pages/(un-auth)/apply-job-without-signup/job-detail/Content';
 
 type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
   try {
-    const id = params.id;
+    const { id } = await params;
     const config = {
       method: 'GET',
       headers: {
@@ -63,7 +63,7 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
   }
 }
 
-const JobsDetail = ({ params, searchParams }: Props) => {
+const JobsDetail = (_props: Props) => {
   return <Content />;
 };
 

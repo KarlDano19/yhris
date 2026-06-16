@@ -5,7 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-import { Menu, Popover, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react';
 import {getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
 
@@ -239,41 +239,35 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
     });
   };
 
-  const MenuItems = ({ item }: any) => {
+  const UserMenuItemLink = ({ item }: any) => {
     return (
       <>
         {item.href && (
-          <Menu.Item>
-            {({ active }) => (
-              <Link
-                href={item.isDisabled ? '#' : item.href}
+          <MenuItem>
+            <Link
+              href={item.isDisabled ? '#' : item.href}
+              className={classNames(
+                'block rounded-md py-2 px-3 text-base font-medium data-[focus]:bg-gray-100',
+                item.isDisabled ? 'opacity-50 hover:bg-transparent cursor-default' : 'hover:bg-gray-50',
+              )}
+            >
+              {item.name}
+            </Link>
+          </MenuItem>
+        )}
+        {!item.href && (
+          <MenuItem>
+            <div onClick={item.onClick}>
+              <div
                 className={classNames(
-                  'block rounded-md py-2 px-3 text-base font-medium',
-                  item.isDisabled ? 'opacity-50 hover:bg-transparent cursor-default' : 'hover:bg-gray-50',
-                  active ? 'bg-gray-100' : ''
+                  'block rounded-md py-2 px-3 text-base font-medium data-[focus]:bg-gray-100',
+                  item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
                 )}
               >
                 {item.name}
-              </Link>
-            )}
-          </Menu.Item>
-        )}
-        {!item.href && (
-          <Menu.Item>
-            {({ active }) => (
-              <div onClick={item.onClick}>
-                <div
-                  className={classNames(
-                    'block rounded-md py-2 px-3 text-base font-medium',
-                    item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
-                    active ? 'bg-gray-100' : ''
-                  )}
-                >
-                  {item.name}
-                </div>
               </div>
-            )}
-          </Menu.Item>
+            </div>
+          </MenuItem>
         )}
       </>
     );
@@ -311,17 +305,15 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
     };
 
     return (
-      <Menu.Item>
-        {({ active }) => (
-          <Link
-            href={notification.url_path || '#'}
-            onClick={handleClick}
-            className={classNames(
-              'block px-4 py-3 border-b border-gray-100 last:border-b-0',
-              active ? 'bg-gray-50' : '',
-              !notification.is_read ? 'bg-blue-50' : ''
-            )}
-          >
+      <MenuItem>
+        <Link
+          href={notification.url_path || '#'}
+          onClick={handleClick}
+          className={classNames(
+            'block px-4 py-3 border-b border-gray-100 last:border-b-0 data-[focus]:bg-gray-50',
+            !notification.is_read ? 'bg-blue-50' : ''
+          )}
+        >
             <div className='flex items-start gap-2'>
               {!notification.is_read && (
                 <span className='mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0' />
@@ -342,8 +334,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
               </div>
             </div>
           </Link>
-        )}
-      </Menu.Item>
+      </MenuItem>
     );
   };
 
@@ -368,7 +359,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
 
     return (
       <Menu as='div' className='relative'>
-        <Menu.Button className='relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'>
+        <MenuButton className='relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'>
           <span className='sr-only'>Open notification menu</span>
           <BellIcon className='block h-6 w-6 text-blue-800' aria-hidden='true' />
           {unreadCount > 0 && (
@@ -376,7 +367,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
-        </Menu.Button>
+        </MenuButton>
         <Transition
           as={Fragment}
           enter='transition ease-out duration-100'
@@ -386,7 +377,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
           leaveFrom='transform opacity-100 scale-100'
           leaveTo='transform opacity-0 scale-95'
         >
-          <Menu.Items className='absolute right-0 z-[1000] mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden'>
+          <MenuItems className='absolute right-0 z-[1000] mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden'>
             <div className='px-4 py-3 border-b border-gray-200 flex items-center justify-between'>
               <h3 className='text-sm font-semibold text-gray-900'>Notifications</h3>
               <Link href='/notifications' className='text-xs text-blue-600 hover:text-blue-800'>
@@ -417,7 +408,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                 </Link>
               </div>
             )}
-          </Menu.Items>
+          </MenuItems>
         </Transition>
       </Menu>
     );
@@ -499,14 +490,14 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   {/* Mobile Notifications */}
                   <NotificationDropdown />
                   {/* Mobile menu button */}
-                  <Popover.Button className='-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500'>
+                  <PopoverButton className='-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500'>
                     <span className='sr-only'>Open menu</span>
                     {open ? (
                       <XMarkIcon className='block h-6 w-6' aria-hidden='true' />
                     ) : (
                       <Bars3Icon className='block h-6 w-6' aria-hidden='true' />
                     )}
-                  </Popover.Button>
+                  </PopoverButton>
                 </div>
                 <div className='hidden lg:flex lg:items-center lg:justify-end xl:col-span-4 gap-2'>
                   {/* Messages Button */}
@@ -527,7 +518,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   {/* Profile dropdown */}
                   <Menu as='div' className='relative ml-5 flex-shrink-0'>
                     <div>
-                      <Menu.Button className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
+                      <MenuButton className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
                         <span className='sr-only'>Open user menu</span>
                         {!isProfileLoading && profile ? (
                           profile.logo ? (
@@ -557,7 +548,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                           </div>
                         )}
                         <ChevronDownIcon className='h-5 w-5' />
-                      </Menu.Button>
+                      </MenuButton>
                     </div>
                     <Transition
                       as={Fragment}
@@ -568,7 +559,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                       leaveFrom='transform opacity-100 scale-100'
                       leaveTo='transform opacity-0 scale-95'
                     >
-                      <Menu.Items className='absolute right-0 z-[1000] mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                      <MenuItems className='absolute right-0 z-[1000] mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                         {userDetails?.email && (
                           <div className='px-3 py-2 shadow-md overflow-hidden'>
                             <div className='flex items-center gap-2'>
@@ -584,16 +575,16 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                           </div>
                         )}
                         {userNavigation.map((item: any, index: any) => (
-                          <MenuItems key={index} item={item} />
+                          <UserMenuItemLink key={index} item={item} />
                         ))}
-                      </Menu.Items>
+                      </MenuItems>
                     </Transition>
                   </Menu>
                 </div>
               </div>
             </div>
 
-            <Popover.Panel as='nav' className='lg:hidden' aria-label='Global'>
+            <PopoverPanel as='nav' className='lg:hidden' aria-label='Global'>
               <div className='mx-auto max-w-3xl space-y-1 px-2 pb-3 pt-2 sm:px-4'>
                 {userDetails?.email && (
                   <div className='px-3 py-2 mb-1 shadow-md overflow-hidden'>
@@ -613,7 +604,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   <PopOverItems key={index} item={item} />
                 ))}
               </div>
-            </Popover.Panel>
+            </PopoverPanel>
           </>
         )}
       </Popover>

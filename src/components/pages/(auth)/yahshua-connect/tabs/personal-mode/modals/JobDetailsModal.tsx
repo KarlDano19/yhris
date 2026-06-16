@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import { formatDateToLocal } from '@/helpers/date';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import useGetYahshuaConnectJobDetails from '../pages/jobs/hooks/useGetJobDetails';
 import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
@@ -14,7 +14,7 @@ import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
 import formatPrice from '@/helpers/currencyFormat';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 interface JobDetailsModalProps {
   isOpen: boolean;
@@ -88,7 +88,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
     <Transition show={isOpen} as={Fragment} appear={true}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -98,13 +98,13 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-        </Transition.Child>
+        </TransitionChild>
 
         {/* Slide-in panel from right */}
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="transform transition ease-in-out duration-500"
                 enterFrom="translate-x-full"
@@ -113,7 +113,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen sm:w-[85vw] md:w-[50vw]">
+                <DialogPanel className="pointer-events-auto w-screen sm:w-[85vw] md:w-[50vw]">
                   <div className="flex h-screen flex-col overflow-hidden bg-white shadow-2xl">
                   {/* Header with Apply Now button or Applied badge and Close button */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
@@ -411,8 +411,8 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                     </div>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
             </div>
           </div>
         </div>

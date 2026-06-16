@@ -4,22 +4,21 @@ import {
   useRef,
   useEffect,
   useState,
-  useMemo,
 } from "react";
 
-import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import CustomToast from "@/components/CustomToast";
 import SendEmailModal from "@/components/SendEmailModal";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import ReactQuill from "@/components/ReactQuillDynamic";
 import useGetSafetyAndHealthPolicyDetails from "../hooks/useGetSafetyANdHelathPolicyDetails";
 import useUpdateSafetyAndHealthPolicy from "../hooks/useUpdateSafetyAndHealthPolicy";
 import useSendEmail from "../hooks/useSendEmail";
@@ -57,10 +56,6 @@ function SafetyAndHealthPolicyModal({
   const cancelButtonRef = useRef(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
-    []
-  );
   const { register, handleSubmit, reset, setValue, watch } =
     useForm<FormValues>({
       defaultValues: {
@@ -277,14 +272,14 @@ function SafetyAndHealthPolicyModal({
 
   return (
     <>
-      <Transition.Root show={isOpen} as={Fragment}>
+      <Transition show={isOpen} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-10"
           initialFocus={cancelButtonRef}
           onClose={() => setIsOpen(false)}
         >
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -294,11 +289,11 @@ function SafetyAndHealthPolicyModal({
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -307,7 +302,7 @@ function SafetyAndHealthPolicyModal({
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+                <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                   <div className="flex bg-savoy-blue p-2 items-center">
                     <h3 className="flex-1 text-white ml-2 font-semibold">
                       Safety and Health Policy
@@ -479,8 +474,8 @@ function SafetyAndHealthPolicyModal({
                       </div>
                     </>
                   )}
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
           
@@ -506,7 +501,7 @@ function SafetyAndHealthPolicyModal({
             />
           )}
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 }

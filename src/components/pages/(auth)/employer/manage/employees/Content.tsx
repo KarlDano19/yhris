@@ -5,7 +5,7 @@ import React, { useEffect, useState, Fragment, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
@@ -1042,12 +1042,12 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   CREATE
                 </SmartButton>
                 <Menu as='div' className='relative'>
-                  <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                  <MenuButton className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                     <span className='sr-only'>Open options</span>
                     <div className='flex gap-4'>
                       <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
                     </div>
-                  </Menu.Button>
+                  </MenuButton>
                   <Transition
                     as={Fragment}
                     enter='transition ease-out duration-100'
@@ -1057,10 +1057,10 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                     leaveFrom='transform opacity-100 scale-100'
                     leaveTo='transform opacity-0 scale-95'
                   >
-                    <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                    <MenuItems className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                       <div className='py-1'>
                         {smartMenuOptions.map((item) => (
-                          <Menu.Item key={item.name}>
+                          <MenuItem key={item.name}>
                             {({ active }) => (
                               <span
                                 id={item.id}
@@ -1076,10 +1076,10 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                                 {item.name}
                               </span>
                             )}
-                          </Menu.Item>
+                          </MenuItem>
                         ))}
                       </div>
-                    </Menu.Items>
+                    </MenuItems>
                   </Transition>
                 </Menu>
               </div>
@@ -1088,7 +1088,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   <Menu as='div' className='relative'>
                     {({ open }) => (
                       <>
-                        <Menu.Button 
+                        <MenuButton 
                           className='bg-savoy-blue rounded-l-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'
                           data-tooltip-id={!open ? 'column-filter-tooltip' : undefined}
                           data-tooltip-content={!open ? 'Column Filter' : undefined}
@@ -1096,7 +1096,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                           data-tooltip-delay-show={300}
                         >
                           <Cog6ToothIcon className='h-5 w-5' />
-                        </Menu.Button>
+                        </MenuButton>
                     <Transition
                       as={Fragment}
                       enter='transition ease-out duration-100'
@@ -1106,7 +1106,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                       leaveFrom='transform opacity-100 scale-100'
                       leaveTo='transform opacity-0 scale-95'
                     >
-                      <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                      <MenuItems className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                         <div className='p-4'>
                           <div className='mb-4'>
                             <h3 className='text-sm font-semibold text-gray-900 mb-2'>
@@ -1146,7 +1146,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                             </button>
                           </div>
                         </div>
-                      </Menu.Items>
+                      </MenuItems>
                     </Transition>
                       </>
                     )}

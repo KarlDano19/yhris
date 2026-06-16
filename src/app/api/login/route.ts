@@ -7,7 +7,8 @@ import { sessionOptions, sleep, SessionData, ACCESS_TOKEN_LIFETIME_SECONDS } fro
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
     const credentials = await request.json();
     
     // SECURITY FIX: Removed OTP bypass mechanism
