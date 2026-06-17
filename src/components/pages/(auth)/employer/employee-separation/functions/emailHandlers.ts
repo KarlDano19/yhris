@@ -71,6 +71,7 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachments?: (File | string)[];
   };
   isLetterSent: boolean;
   isDocumentsSent: boolean;
@@ -166,6 +167,11 @@ export const handleEmailSending = (
     separationItemCopy.legalDocs.message = data.message;
     if (data.cc) separationItemCopy.legalDocs.cc = data.cc;
     if (data.bcc) separationItemCopy.legalDocs.bcc = data.bcc;
+    if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+      separationItemCopy.legalDocs.attachments = data.attachments;
+    } else if (data.attachment) {
+      separationItemCopy.legalDocs.attachments = [data.attachment];
+    }
   }
 
   // Set common fields
