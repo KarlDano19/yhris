@@ -689,7 +689,7 @@ export default function SendEmailModal({
                       isOpen={showEmailTemplateTooltip}
                     >
                       <div>
-                        <h2 className='text-[12px] font-medium'>Note: To, CC, and BCC from the email template will not be applied when recipients are pre-assigned.</h2>
+                        <h2 className='text-[12px] font-medium'>Note: Template recipients (To, CC, BCC) will only fill fields that are currently empty. Pre-assigned recipients are kept.</h2>
                       </div>
                     </Tooltip>
                   )}
@@ -715,30 +715,19 @@ export default function SendEmailModal({
                           onChange(val?.value || '');
                           if (val?.template) {
                             const template = val.template;
-                            // Only modify recipients from template if no default recipients provided
-                            if (defaultRecipients.length === 0) {
-                              const templateRecipients = template.to || [];
-                              const newRecipients = [...defaultRecipients];
-                              templateRecipients.forEach((email: string) => {
-                                if (!newRecipients.includes(email)) {
-                                  newRecipients.push(email);
-                                }
-                              });
-                              setTagsTo(newRecipients);
+                            // Apply template recipients only for fields that are currently empty
+                            if (tagsTo.length === 0 && template.to && template.to.length > 0) {
+                              setTagsTo(template.to);
+                            }
 
-                              if (!disableCCBCC) {
-                                if (template.bcc) {
-                                  setIsBCCOpen(true);
-                                  setTagsBcc(template.bcc);
-                                } else {
-                                  setTagsBcc([]);
-                                }
-                                if (template.cc) {
-                                  setIsCCOpen(true);
-                                  setTagsCc(template.cc);
-                                } else {
-                                  setTagsCc([]);
-                                }
+                            if (!disableCCBCC) {
+                              if (tagsCc.length === 0 && template.cc && template.cc.length > 0) {
+                                setIsCCOpen(true);
+                                setTagsCc(template.cc);
+                              }
+                              if (tagsBcc.length === 0 && template.bcc && template.bcc.length > 0) {
+                                setIsBCCOpen(true);
+                                setTagsBcc(template.bcc);
                               }
                             }
                             setValue("message", template.body);
@@ -778,13 +767,18 @@ export default function SendEmailModal({
                               setEffectiveAllowMultiple(allowMultipleAttachments);
                             }
                           } else {
-                            // Clear template-related fields if no template is selected
-                            if (defaultRecipients.length === 0) {
-                              setTagsTo(defaultRecipients);
-                              if (!disableCCBCC) {
-                                setTagsCc([]);
-                                setTagsBcc([]);
-                              }
+                            // Revert each field to its initial pre-populated state when template is cleared
+                            const initialTo = prePopulatedData?.to && prePopulatedData.to.length > 0
+                              ? prePopulatedData.to
+                              : defaultRecipients;
+                            setTagsTo(initialTo);
+                            if (!disableCCBCC) {
+                              const initialCc = prePopulatedData?.cc && prePopulatedData.cc.length > 0 ? prePopulatedData.cc : [];
+                              const initialBcc = prePopulatedData?.bcc && prePopulatedData.bcc.length > 0 ? prePopulatedData.bcc : [];
+                              setTagsCc(initialCc);
+                              setTagsBcc(initialBcc);
+                              setIsCCOpen(initialCc.length > 0);
+                              setIsBCCOpen(initialBcc.length > 0);
                             }
                             setValue("message", "");
                             setValue("subject", "");
