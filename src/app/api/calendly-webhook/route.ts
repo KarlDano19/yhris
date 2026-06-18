@@ -518,8 +518,6 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
 }
 
 // ─── Telegram ─────────────────────────────────────────────────────────────────
-const escapeMd = (s: string) => s.replace(/[_*`[]/g, '\\$&');
-
 async function sendTelegramNotification(data: LeadData, scoring: ScoringResult | null) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -531,33 +529,35 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     ? new Date(data.scheduledAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
     : 'TBD';
 
-  const message =
-    `📅 *Demo Booked via Calendly*\n\n` +
-    `👤 *Name:* ${escapeMd(`${data.firstName} ${data.lastName}`)}\n` +
-    `🏢 *Company:* ${escapeMd(data.companyName)}\n` +
-    `📧 *Email:* ${escapeMd(data.email)}\n` +
-    (data.phone ? `📞 *Phone:* ${escapeMd(data.phone)}\n` : '') +
-    (data.service ? `🛠 *Service:* ${escapeMd(data.service)}\n` : '') +
-    (data.employeeCount ? `👥 *Employees:* ${escapeMd(data.employeeCount)}\n` : '') +
-    (data.currentProcess ? `⚙️ *Current process:* ${escapeMd(data.currentProcess)}\n` : '') +
-    `😤 *Pain point:* ${escapeMd(data.painPoint)}\n` +
-    `🗓 *Scheduled:* ${bookedDate}\n\n` +
-    (scoring
-      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${escapeMd(scoring.notes)}` +
-        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${escapeMd(scoring.personIntel)}` : '') +
-        (scoring.personResources?.length
-          ? `\n\n🔗 *Person Sources:*\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
-          : '') +
-        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${escapeMd(scoring.companyIntel)}` : '') +
-        (scoring.companyResources?.length
-          ? `\n\n🔗 *Company Sources:*\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
-          : '')
-      : `_Scoring unavailable_`);
+  const message = [
+    '📅 Demo Booked via Calendly',
+    '',
+    `👤 Name: ${data.firstName} ${data.lastName}`,
+    `🏢 Company: ${data.companyName}`,
+    `📧 Email: ${data.email}`,
+    data.phone ? `📞 Phone: ${data.phone}` : '',
+    data.service ? `🛠 Service: ${data.service}` : '',
+    data.employeeCount ? `👥 Employees: ${data.employeeCount}` : '',
+    data.currentProcess ? `⚙️ Current process: ${data.currentProcess}` : '',
+    `😤 Pain point: ${data.painPoint}`,
+    `🗓 Scheduled: ${bookedDate}`,
+    '',
+    scoring
+      ? [
+          `${tierEmoji} Score: ${scoring.score}/10 — ${scoring.tier.toUpperCase()}`,
+          `📝 ${scoring.notes}`,
+          scoring.personIntel ? `\n👤 Person Intel:\n${scoring.personIntel}` : '',
+          scoring.personResources?.length ? `\n🔗 Person Sources:\n${scoring.personResources.map(u => `• ${u}`).join('\n')}` : '',
+          scoring.companyIntel ? `\n🔍 Company Intel:\n${scoring.companyIntel}` : '',
+          scoring.companyResources?.length ? `\n🔗 Company Sources:\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}` : '',
+        ].filter(Boolean).join('\n')
+      : 'Scoring unavailable',
+  ].filter(s => s !== '').join('\n');
 
   const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' }),
+    body: JSON.stringify({ chat_id: chatId, text: message }),
   });
 
   if (!res.ok) {
