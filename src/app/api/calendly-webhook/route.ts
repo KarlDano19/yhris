@@ -40,6 +40,9 @@ interface LeadData {
   email: string;
   phone: string;
   companyName: string;
+  service: string;
+  employeeCount: string;
+  currentProcess: string;
   painPoint: string;
   scheduledAt: string;
   eventUri?: string;
@@ -96,6 +99,9 @@ function parsePayload(payload: any): LeadData | null {
       email,
       phone: payload?.phone ?? '',
       companyName: payload?.companyName ?? '',
+      service: payload?.service ?? '',
+      employeeCount: payload?.employeeCount ?? '',
+      currentProcess: payload?.currentProcess ?? '',
       painPoint: payload?.painPoint ?? '',
       scheduledAt: payload?.scheduledAt ?? '',
       eventUri: payload?.eventUri ?? '',
@@ -124,7 +130,10 @@ function parsePayload(payload: any): LeadData | null {
     email,
     phone: find('phone'),
     companyName: find('company'),
-    painPoint: find('challenge') || find('pain') || find('hr'),
+    service: find('product') || find('service') || find('availing'),
+    employeeCount: find('employee') || find('headcount'),
+    currentProcess: find('current hr') || find('payroll process') || find('process'),
+    painPoint: find('challenge') || find('pain'),
     scheduledAt,
   };
 }
@@ -188,6 +197,9 @@ A prospect just booked a demo. Here is their info:
 - Company: ${data.companyName || '(not provided)'}
 - Email: ${data.email}
 - Phone: ${data.phone || '(not provided)'}
+- Product/Service interested in: ${data.service || '(not provided)'}
+- No. of employees: ${data.employeeCount || '(not provided)'}
+- Current HR/Payroll process: ${data.currentProcess || '(not provided)'}
 - HR challenge: ${data.painPoint || '(not provided)'}
 - Demo scheduled: ${data.scheduledAt || '(not provided)'}
 
@@ -264,12 +276,22 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
     reasons.push('established company name');
   }
 
+  // Employee count signal (+2 for 100+, +1 for 50+)
+  const empCount = parseInt(data.employeeCount.replace(/\D/g, ''), 10);
+  if (!isNaN(empCount) && empCount >= 100) {
+    score += 2;
+    reasons.push(`${empCount} employees`);
+  } else if (!isNaN(empCount) && empCount >= 50) {
+    score += 1;
+    reasons.push(`${empCount} employees`);
+  }
+
   // Pain point urgency (+3 for high fit, +2 for moderate, +0 for low)
-  const painLower = data.painPoint.toLowerCase();
-  if (painLower.includes('payroll') || painLower.includes('dole') || painLower.includes('compliance')) {
+  const painLower = (data.painPoint + ' ' + data.service).toLowerCase();
+  if (painLower.includes('payroll') || painLower.includes('dole') || painLower.includes('compliance') || painLower.includes('termination')) {
     score += 3;
     reasons.push('high-urgency pain point');
-  } else if (painLower.includes('records') || painLower.includes('leave') || painLower.includes('attendance')) {
+  } else if (painLower.includes('records') || painLower.includes('leave') || painLower.includes('attendance') || painLower.includes('hris')) {
     score += 2;
     reasons.push('moderate-urgency pain point');
   } else {
@@ -294,10 +316,13 @@ async function createLoopsContact(data: LeadData) {
     email: data.email,
     firstName: data.firstName,
     lastName: data.lastName,
-    phone: data.phone,
+    ...(data.phone && { phone: data.phone }),
     companyName: data.companyName,
     source: 'calendly',
     leadStatus: 'booked',
+    service: data.service,
+    employeeCount: data.employeeCount,
+    currentProcess: data.currentProcess,
     painPoint: data.painPoint,
     demoBooked: true,
     demoScheduledAt: data.scheduledAt,
@@ -456,6 +481,9 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     data.email,
     data.phone,
     data.companyName,
+    data.service,
+    data.employeeCount,
+    data.currentProcess,
     data.painPoint,
     data.scheduledAt,
     'booked',
@@ -469,7 +497,7 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   ]];
 
   const sheetsRes = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:P:append?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:S:append?valueInputOption=RAW`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
@@ -502,7 +530,10 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     `👤 *Name:* ${data.firstName} ${data.lastName}\n` +
     `🏢 *Company:* ${data.companyName}\n` +
     `📧 *Email:* ${data.email}\n` +
-    `📞 *Phone:* ${data.phone}\n` +
+    (data.phone ? `📞 *Phone:* ${data.phone}\n` : '') +
+    (data.service ? `🛠 *Service:* ${data.service}\n` : '') +
+    (data.employeeCount ? `👥 *Employees:* ${data.employeeCount}\n` : '') +
+    (data.currentProcess ? `⚙️ *Current process:* ${data.currentProcess}\n` : '') +
     `😤 *Pain point:* ${data.painPoint}\n` +
     `🗓 *Scheduled:* ${bookedDate}\n\n` +
     (scoring
