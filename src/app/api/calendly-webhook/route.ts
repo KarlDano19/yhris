@@ -518,6 +518,8 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
 }
 
 // ─── Telegram ─────────────────────────────────────────────────────────────────
+const escapeMd = (s: string) => s.replace(/[_*`[]/g, '\\$&');
+
 async function sendTelegramNotification(data: LeadData, scoring: ScoringResult | null) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -531,32 +533,37 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
 
   const message =
     `📅 *Demo Booked via Calendly*\n\n` +
-    `👤 *Name:* ${data.firstName} ${data.lastName}\n` +
-    `🏢 *Company:* ${data.companyName}\n` +
-    `📧 *Email:* ${data.email}\n` +
-    (data.phone ? `📞 *Phone:* ${data.phone}\n` : '') +
-    (data.service ? `🛠 *Service:* ${data.service}\n` : '') +
-    (data.employeeCount ? `👥 *Employees:* ${data.employeeCount}\n` : '') +
-    (data.currentProcess ? `⚙️ *Current process:* ${data.currentProcess}\n` : '') +
-    `😤 *Pain point:* ${data.painPoint}\n` +
+    `👤 *Name:* ${escapeMd(`${data.firstName} ${data.lastName}`)}\n` +
+    `🏢 *Company:* ${escapeMd(data.companyName)}\n` +
+    `📧 *Email:* ${escapeMd(data.email)}\n` +
+    (data.phone ? `📞 *Phone:* ${escapeMd(data.phone)}\n` : '') +
+    (data.service ? `🛠 *Service:* ${escapeMd(data.service)}\n` : '') +
+    (data.employeeCount ? `👥 *Employees:* ${escapeMd(data.employeeCount)}\n` : '') +
+    (data.currentProcess ? `⚙️ *Current process:* ${escapeMd(data.currentProcess)}\n` : '') +
+    `😤 *Pain point:* ${escapeMd(data.painPoint)}\n` +
     `🗓 *Scheduled:* ${bookedDate}\n\n` +
     (scoring
-      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
-        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${scoring.personIntel}` : '') +
+      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${escapeMd(scoring.notes)}` +
+        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${escapeMd(scoring.personIntel)}` : '') +
         (scoring.personResources?.length
           ? `\n\n🔗 *Person Sources:*\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
           : '') +
-        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '') +
+        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${escapeMd(scoring.companyIntel)}` : '') +
         (scoring.companyResources?.length
           ? `\n\n🔗 *Company Sources:*\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
           : '')
       : `_Scoring unavailable_`);
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' }),
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    console.error('Telegram error:', JSON.stringify(err));
+  }
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
