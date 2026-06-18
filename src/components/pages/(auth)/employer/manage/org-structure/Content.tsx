@@ -8,8 +8,6 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 import ManageOrgChart from './components/ManageOrgChart';
 import ZoomControls from './components/ZoomControls';
@@ -358,6 +356,7 @@ const Content = () => {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       // Capture the chart as canvas with high quality
+      const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(chartContainer, {
         backgroundColor: '#ffffff',
         scale: 3, // Higher resolution
@@ -386,6 +385,7 @@ const Content = () => {
         const orientation = imgWidth > imgHeight ? 'landscape' : 'portrait';
         
         // Create PDF
+        const { jsPDF } = await import('jspdf');
         const pdf = new jsPDF({
           orientation: orientation,
           unit: 'mm',
