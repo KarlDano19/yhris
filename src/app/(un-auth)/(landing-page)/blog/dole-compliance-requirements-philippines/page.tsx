@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import DoleComplianceArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleComplianceArticle";
 
 export const metadata: Metadata = {
-  title: 'DOLE Compliance Requirements Every Philippine Employer Must Know | YAHSHUA HRIS',
+  title: 'DOLE Compliance Requirements for Philippine Employers | YAHSHUA HRIS',
   description: 'A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.',
   keywords: 'DOLE compliance requirements Philippines, WAIR report, EC logbook, OSH annual report, Philippine labor compliance',
   openGraph: {
