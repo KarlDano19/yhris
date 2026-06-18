@@ -595,7 +595,7 @@ export async function POST(request: NextRequest) {
   // Reject stale bookings from Make (older than 30 min based on Calendly created_at)
   if (payload.source === 'make' && payload.createdAt) {
     const age = Date.now() - new Date(payload.createdAt).getTime();
-    if (age > 30 * 60 * 1000) {
+    if (age > 2 * 60 * 60 * 1000) {
       console.log('Stale booking skipped:', payload.createdAt);
       return NextResponse.json({ received: true, skipped: 'stale' });
     }
