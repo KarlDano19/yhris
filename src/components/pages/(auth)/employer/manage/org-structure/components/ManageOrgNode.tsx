@@ -268,11 +268,11 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
         leave="transition-all ease-in duration-200 transform"
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 -translate-y-2"
-        className="mt-4 flex flex-col items-center"
       >
+        <div className="mt-4 flex flex-col items-center">
         {/* Dashed line connecting to position */}
         <div className="w-0.5 h-4 border-l-2 border-dashed border-gray-400 mb-2"></div>
-        
+
         {/* Employee nodes container */}
         <div className="flex flex-col items-center gap-3">
           {/* Employee grid */}
@@ -280,7 +280,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
             {employeesToShow.map((item, index) => {
               const isShadow = typeof item.id === 'string' && item.id.startsWith('shadow-');
               const employee = !isShadow ? item : undefined;
-              
+
               return (
                 <Transition
                   key={typeof item.id === 'string' ? item.id : `employee-${item.id}`}
@@ -289,16 +289,16 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
                   enter="transition-all ease-out duration-300 transform"
                   enterFrom="opacity-0 translate-y-2 scale-95"
                   enterTo="opacity-100 translate-y-0 scale-100"
-                  className="inline-block"
-                  style={{ transitionDelay: `${index * 50}ms` }}
                 >
-                  <EmployeeNode
-                    employee={employee as Employee | undefined}
-                    disableTooltips={disableTooltips}
-                    isShadow={isShadow}
-                    usePlaceholderAvatars={usePlaceholderAvatars}
-                    excludeAvatars={excludeAvatars}
-                  />
+                  <div className="inline-block" style={{ transitionDelay: `${index * 50}ms` }}>
+                    <EmployeeNode
+                      employee={employee as Employee | undefined}
+                      disableTooltips={disableTooltips}
+                      isShadow={isShadow}
+                      usePlaceholderAvatars={usePlaceholderAvatars}
+                      excludeAvatars={excludeAvatars}
+                    />
+                  </div>
                 </Transition>
               );
             })}
@@ -322,6 +322,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
               )}
             </button>
           )}
+        </div>
         </div>
       </Transition>
 
