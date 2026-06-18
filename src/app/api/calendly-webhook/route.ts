@@ -570,10 +570,15 @@ export async function POST(request: NextRequest) {
   }
 
   let payload: any;
-  try {
-    payload = JSON.parse(rawBody);
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  const contentType = request.headers.get('content-type') ?? '';
+  if (contentType.includes('application/x-www-form-urlencoded')) {
+    payload = Object.fromEntries(new URLSearchParams(rawBody));
+  } else {
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
   }
 
   if (payload.source !== 'make' && payload.event !== 'invitee.created') {
