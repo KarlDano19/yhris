@@ -11,7 +11,7 @@ async function deleteSeparation(separation_id: number | null) {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separation_id}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${separation_id}/`, config);
     if (!res.ok) {
       throw res.json();
     }

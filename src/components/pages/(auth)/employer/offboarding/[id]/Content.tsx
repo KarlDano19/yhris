@@ -225,7 +225,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 pb-20'>
         {/* Back Navigation */}
         <div className='pt-4 pb-2'>
-          <BackButton label="Employee Separation" onClick={() => router.push('/employee-separation')} />
+          <BackButton label="Offboarding" onClick={() => router.push('/offboarding')} />
         </div>
 
         {/* Employee Header Card */}

@@ -1,30 +1,29 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function createStageTask(data: { separationId: number | string; stage: string; label: string }) {
+async function deleteStageTask(data: { separationId: number | string; taskId: number }) {
   const token = getCookie('token');
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${data.separationId}/stage-tasks/`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${data.separationId}/stage-tasks/${data.taskId}/`,
     {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Token ${token}`,
       },
-      body: JSON.stringify({ stage: data.stage, label: data.label }),
     }
   );
   if (!res.ok) {
     const err = await res.json();
-    throw new Error(err.message || 'Failed to create task.');
+    throw new Error(err.message || 'Failed to delete task.');
   }
   return res.json();
 }
 
-function useCreateStageTask(separationId: number | string, stage: string) {
+function useDeleteStageTask(separationId: number | string, stage: string) {
   const queryClient = useQueryClient();
   return useMutation(
-    (data: { separationId: number | string; stage: string; label: string }) => createStageTask(data),
+    (data: { separationId: number | string; taskId: number }) => deleteStageTask(data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['stageTasksCache', separationId, stage]);
@@ -33,4 +32,4 @@ function useCreateStageTask(separationId: number | string, stage: string) {
   );
 }
 
-export default useCreateStageTask;
+export default useDeleteStageTask;

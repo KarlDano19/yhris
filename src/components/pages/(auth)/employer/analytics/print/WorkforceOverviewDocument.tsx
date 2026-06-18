@@ -151,7 +151,7 @@ const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
             <td className="border border-gray-300 p-1 text-xs">{kpiData.newHires.trend}</td>
           </tr>
           <tr>
-            <td className="border border-gray-300 p-1 font-medium text-xs">Separated Employees</td>
+            <td className="border border-gray-300 p-1 font-medium text-xs">Offboarded Employees</td>
             <td className="border border-gray-300 p-1 text-center font-bold text-xs">{kpiData.separatedEmployees.value}</td>
             <td className="border border-gray-300 p-1 text-xs">{kpiData.separatedEmployees.trend}</td>
           </tr>

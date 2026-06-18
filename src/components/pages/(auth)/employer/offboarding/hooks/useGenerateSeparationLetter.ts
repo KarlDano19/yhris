@@ -28,7 +28,7 @@ async function generateSeparationLetter(data: GenerateSeparationLetterData) {
     };
 
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${data.separation_id}/generate-letter/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${data.separation_id}/generate-letter/`,
       config
     );
 

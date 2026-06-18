@@ -3,7 +3,7 @@ import { getCookie } from 'cookies-next';
 
 async function updateSeparationFields(id: string, fields: { effective_date?: string | null }) {
   const token = getCookie('token');
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separation/${id}/`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${id}/`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

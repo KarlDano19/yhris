@@ -9,7 +9,7 @@ interface BulkDeleteResponse {
 const bulkDeleteSeparations = async (separationIds: number[]): Promise<BulkDeleteResponse> => {
   const token = getCookie('token');
   
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separations/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Token ${token}`,

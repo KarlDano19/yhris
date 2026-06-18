@@ -151,7 +151,7 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         body: JSON.stringify(data),
       };
     }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationEmail.id}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${separationEmail.id}/`, config);
     if (!res.ok) {
       throw res.json();
     }

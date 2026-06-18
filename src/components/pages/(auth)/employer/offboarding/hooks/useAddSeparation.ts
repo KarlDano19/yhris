@@ -21,7 +21,7 @@ async function addSeparation(separation: T_Separation) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separations/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/`, config);
     if (!res.ok) {
       throw res.json();
     }

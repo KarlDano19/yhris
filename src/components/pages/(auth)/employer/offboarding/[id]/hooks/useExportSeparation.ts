@@ -9,7 +9,7 @@ function useExportSeparation() {
     try {
       const token = getCookie('token');
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationId}/export/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${separationId}/export/`,
         {
           method: 'GET',
           headers: { Authorization: `Token ${token}` },

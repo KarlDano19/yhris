@@ -4,7 +4,7 @@ import { getCookie } from 'cookies-next';
 async function getStageTasks(separationId: number | string, stage: string) {
   const token = getCookie('token');
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationId}/stage-tasks/?stage=${stage}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${separationId}/stage-tasks/?stage=${stage}`,
     {
       method: 'GET',
       headers: {

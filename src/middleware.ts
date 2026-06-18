@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     'screening-question-guideline',
     'onboarding',
     'manage',
-    'employee-separation',
+    'offboarding',
     'employer-profile',
     'setup-employer-profile',
     'evaluation',
@@ -70,7 +70,7 @@ export async function middleware(request: NextRequest) {
       if (employerRoutes.includes(firstRoute)) {
         if (
           firstRoute === 'dashboard' ||
-          firstRoute === 'employee-separation' ||
+          firstRoute === 'offboarding' ||
           firstRoute === 'manage' ||
           firstRoute === 'post-job' ||
           firstRoute === 'screen-applicants' ||

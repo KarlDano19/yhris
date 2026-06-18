@@ -16,10 +16,10 @@ async function uploadSignedCopy({ attachmentId, separationId, attachment }: Para
   let method: string;
 
   if (attachmentId) {
-    url = `${process.env.NEXT_PUBLIC_API_URL}/api/separation-letter-attachments/${attachmentId}/upload-signed-copy/`;
+    url = `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding-letter-attachments/${attachmentId}/upload-signed-copy/`;
     method = 'PATCH';
   } else if (separationId) {
-    url = `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationId}/letter-signed-copy/`;
+    url = `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${separationId}/letter-signed-copy/`;
     method = 'POST';
   } else {
     throw new Error('Either attachmentId or separationId is required.');

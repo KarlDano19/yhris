@@ -7,7 +7,7 @@ async function uploadStageTaskAttachment(data: { separationId: number | string; 
   formData.append('attachment', data.attachment);
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${data.separationId}/stage-tasks/${data.taskId}/`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${data.separationId}/stage-tasks/${data.taskId}/`,
     {
       method: 'PATCH',
       headers: {

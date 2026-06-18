@@ -156,7 +156,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const filterGroups: FilterGroup[] = [
     {
       id: 'status',
-      title: 'Separation Status',
+      title: 'Offboarding Status',
       options: [
         { label: 'Unfinished', value: 'unfinished' },
         { label: 'Separated', value: 'separated' },
@@ -326,14 +326,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     try {
       await bulkDeleteMutation.mutateAsync(Array.from(selectedSeparations));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete separations';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete offboarding records';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
       setIsBulkDeleteModalOpen(false);
     }
   };
 
   const handleBulkDeleteSuccess = () => {
-    toast.custom(() => <CustomToast message={`${bulkDeleteCount} separation(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} offboarding record(s) deleted successfully.`} type="success" />, { duration: 3000 });
     queryClient.invalidateQueries(['employeePaginatedSelectCache']);
     setSelectedSeparations(new Set());
     setSelectAll(false);
@@ -418,7 +418,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <td className='whitespace-nowrap px-3 py-4 text-center text-sm'>
               <div className='flex items-center justify-center gap-2'>
                 <button
-                  onClick={() => router.push(`/employee-separation/${item.id}`)}
+                  onClick={() => router.push(`/offboarding/${item.id}`)}
                   className='p-1.5 rounded-md hover:bg-gray-100 text-indigo-dye'
                   data-tooltip-id='view-case-tooltip'
                   data-tooltip-content='View Case'
@@ -427,7 +427,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <EyePassword visible />
                 </button>
                 <SmartButton
-                  id="edit-separation-btn"
+                  id="edit-offboarding-btn"
                   onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
                   disabled={selectedSeparations.size > 1}
                   className={classNames('p-1.5 rounded-md hover:bg-gray-100', selectedSeparations.size > 1 ? 'opacity-50 cursor-not-allowed' : '')}
@@ -444,7 +444,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       <tr>
         <td colSpan={8}>
           <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
-          <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add separation of employee.</h4>
+          <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add an offboarding record.</h4>
         </td>
       </tr>
     );
@@ -458,13 +458,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
 
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Employee Resignation/Separation</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Offboarding</h2>
         </div>
 
         {/* Stats Cards */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 grid grid-cols-2 lg:grid-cols-4 gap-4'>
           <StatCard
-            label="Total Separations"
+            label="Total Offboarding"
             value={stats.total}
             icon={<UsersIcon className='h-6 w-6 text-indigo-600' />}
             color="bg-indigo-50"
@@ -538,7 +538,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end gap-2'>
               <SmartButton
-                id='create-separation-btn'
+                id='create-offboarding-btn'
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsAddSeparationModalOpen(true)}
               >
@@ -559,7 +559,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className="mt-4">
               <div className="flex items-center gap-3">
                 <SmartButton
-                  id="edit-separation-btn"
+                  id="edit-offboarding-btn"
                   onClick={handleBulkDelete}
                   disabled={bulkDeleteMutation.isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -645,7 +645,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsBulkDeleteConfirmModalOpen}
           onConfirm={confirmBulkDeleteWarning}
           isLoading={false}
-          customText={`${bulkDeleteCount} separation${bulkDeleteCount > 1 ? 's' : ''}`}
+          customText={`${bulkDeleteCount} offboarding record${bulkDeleteCount > 1 ? 's' : ''}`}
         />
       )}
       {isBulkDeleteModalOpen && (
@@ -653,7 +653,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          title={`Deleting ${bulkDeleteCount} separation${bulkDeleteCount > 1 ? 's' : ''}...`}
+          title={`Deleting ${bulkDeleteCount} offboarding record${bulkDeleteCount > 1 ? 's' : ''}...`}
           isProcessing={bulkDeleteMutation.isLoading}
           onSuccess={handleBulkDeleteSuccess}
         />

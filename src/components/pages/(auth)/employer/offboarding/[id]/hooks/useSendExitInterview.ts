@@ -8,7 +8,7 @@ interface T_SendExitInterviewPayload {
 async function sendExitInterview(separationId: string, payload: T_SendExitInterviewPayload) {
   const token = getCookie('token');
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationId}/exit-interview/send/`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/${separationId}/exit-interview/send/`,
     {
       method: 'POST',
       headers: {

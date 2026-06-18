@@ -18,7 +18,7 @@ async function getSeparationItems(filters: any) {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separations/?${searchParams}`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }

@@ -16,7 +16,7 @@ type Props = {
 
 const ActivityLog = ({ separation }: Props) => {
   const entries: LogEntry[] = [
-    { label: 'Separation Created', date: separation.created_at, done: true },
+    { label: 'Offboarding Created', date: separation.created_at, done: true },
     { label: 'Letter Sent', date: separation.is_letter_sent ? separation.updated_at : null, done: !!separation.is_letter_sent },
     { label: 'Letter Received', date: separation.letter_received_date, done: !!separation.is_letter_received },
     { label: 'Documents Sent', date: separation.is_documents_sent ? separation.updated_at : null, done: !!separation.is_documents_sent },

@@ -12,7 +12,7 @@ async function getSeparationStats() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separations/?view_type=separation_dashboard`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/?view_type=separation_dashboard`, config);
       if (!res.ok) throw res.json();
       const data = await res.json();
       return data.data ?? data;
