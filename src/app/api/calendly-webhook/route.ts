@@ -83,6 +83,10 @@ function verifyCalendlySignature(rawBody: string, signature: string, secret: str
   }
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const sanitize = (v: unknown): string =>
+  String(v ?? '').replace(/[\r\n]+/g, ' ').trim();
+
 // ─── Parse Calendly payload ───────────────────────────────────────────────────
 function parsePayload(payload: any): LeadData | null {
   // Make format: flat object with source = 'make'
@@ -94,15 +98,15 @@ function parsePayload(payload: any): LeadData | null {
     const [firstName = '', ...rest] = fullName.trim().split(' ');
 
     return {
-      firstName: payload?.firstName || firstName,
-      lastName: payload?.lastName || rest.join(' '),
+      firstName: sanitize(payload?.firstName || firstName),
+      lastName: sanitize(payload?.lastName || rest.join(' ')),
       email,
-      phone: payload?.phone ?? '',
-      companyName: payload?.companyName ?? '',
-      service: payload?.service ?? '',
-      employeeCount: payload?.employeeCount ?? '',
-      currentProcess: payload?.currentProcess ?? '',
-      painPoint: payload?.painPoint ?? '',
+      phone: sanitize(payload?.phone),
+      companyName: sanitize(payload?.companyName),
+      service: sanitize(payload?.service),
+      employeeCount: sanitize(payload?.employeeCount),
+      currentProcess: sanitize(payload?.currentProcess),
+      painPoint: sanitize(payload?.painPoint),
       scheduledAt: payload?.scheduledAt ?? '',
       eventUri: payload?.eventUri ?? '',
     };
@@ -125,15 +129,15 @@ function parsePayload(payload: any): LeadData | null {
     qa.find(q => q.question.toLowerCase().includes(keyword.toLowerCase()))?.answer ?? '';
 
   return {
-    firstName,
-    lastName,
+    firstName: sanitize(firstName),
+    lastName: sanitize(lastName),
     email,
-    phone: find('phone'),
-    companyName: find('company'),
-    service: find('product') || find('service') || find('availing'),
-    employeeCount: find('employee') || find('headcount'),
-    currentProcess: find('current hr') || find('payroll process') || find('process'),
-    painPoint: find('challenge') || find('pain'),
+    phone: sanitize(find('phone')),
+    companyName: sanitize(find('company')),
+    service: sanitize(find('product') || find('service') || find('availing')),
+    employeeCount: sanitize(find('employee') || find('headcount')),
+    currentProcess: sanitize(find('current hr') || find('payroll process') || find('process')),
+    painPoint: sanitize(find('challenge') || find('pain')),
     scheduledAt,
   };
 }
