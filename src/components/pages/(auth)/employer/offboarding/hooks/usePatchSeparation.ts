@@ -75,6 +75,9 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         data.cc = separationEmail.legalDocs.cc;
         data.bcc = separationEmail.legalDocs.bcc;
         data.context = separationEmail.legalDocs.message;
+        if (separationEmail.legalDocs.attachments?.length) {
+          data.attachments = separationEmail.legalDocs.attachments;
+        }
       }
     } else {
       data = {
