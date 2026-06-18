@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
@@ -20,16 +20,22 @@ type Props = {
   attachments: Attachment[];
   label?: string;
   onUploadSignedCopy?: (attachmentId: number | undefined, idx: number) => void;
+  limit?: number;
 };
 
-const AttachmentCard = ({ attachments, label, onUploadSignedCopy }: Props) => {
+const AttachmentCard = ({ attachments, label, onUploadSignedCopy, limit = 3 }: Props) => {
+  const [expanded, setExpanded] = useState(false);
+
   if (!attachments || attachments.length === 0) return null;
+
+  const visible = expanded ? attachments : attachments.slice(0, limit);
+  const hiddenCount = attachments.length - limit;
 
   return (
     <div className='mt-3'>
       {label && <p className='text-sm font-medium text-gray-500 mb-2'>{label}</p>}
       <div className='flex flex-col gap-2'>
-        {attachments.map((att, idx) => (
+        {visible.map((att, idx) => (
           <div
             key={att.id ?? idx}
             className={`flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg border ${att.is_signed ? 'border-green-400' : 'border-gray-200'}`}
@@ -71,6 +77,16 @@ const AttachmentCard = ({ attachments, label, onUploadSignedCopy }: Props) => {
           </div>
         ))}
       </div>
+
+      {attachments.length > limit && (
+        <button
+          onClick={() => setExpanded(prev => !prev)}
+          className='mt-2 text-xs text-indigo-600 hover:text-indigo-800 font-medium'
+        >
+          {expanded ? 'Show less' : `Show ${hiddenCount} more`}
+        </button>
+      )}
+
       <Tooltip id='open-attachment-tooltip' />
     </div>
   );

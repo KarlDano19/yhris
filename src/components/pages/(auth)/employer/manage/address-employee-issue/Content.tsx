@@ -25,6 +25,7 @@ import EditIncidentReportModal from './modals/EditIncidentReportModal';
 import UpdateStatusModal from './modals/UpdateStatusModal';
 import InvestigationReportDetailsModal from './modals/InvestigationReportDetailsModal';
 import SendEmailModal from '@/components/SendEmailModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import NTEAttachmentSection from './components/NTEAttachmentSection';
 import InvestigationDecisionSection from './components/InvestigationDecisionSection';
 import { useDeleteNTEAttachment } from './hooks/useDeleteNTEAttachment';
@@ -97,6 +98,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState<any>(null);
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const [isNTEConfirmOpen, setIsNTEConfirmOpen] = useState(false);
+  const [pendingNTEData, setPendingNTEData] = useState<any>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
@@ -491,63 +494,81 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const handleNTESubmit = (data: any) => {
-    if (isSendNTEModalOpen && isSendNTEModalOpen.id) {
-      const payload = {
-        id: isSendNTEModalOpen.id.toString(),
-        actionType: 'sending',
-        emailType: 'nte',
-        nte_subject: data.subject,
-        nte_to: JSON.stringify(data.email),
-        nte_cc: JSON.stringify(data.cc),
-        nte_bcc: JSON.stringify(data.bcc),
-        nte_message: data.message,
-        issueNTEForm: {
-          template: data.template,
-          subject: data.subject,
-          to: data.email,
-          cc: data.cc,
-          bcc: data.bcc,
-          message: data.message,
-          attachment: pdfAttachment || null
-        },
-        sendDecisionForm: {
-          template: '',
-          subject: '',
-          to: [],
-          cc: [],
-          bcc: [],
-          message: '',
-          attachment: null
-        },
-        dateReceived: null,
-        decision_subject: '',
-        decision_to: '',
-        decision_cc: '',
-        decision_bcc: '',
-        decision_message: ''
-      };
+  const executeNTESend = (data: any) => {
+    const nteId = data._nteId;
+    const attachment = data._pdfAttachment;
+    if (!nteId) return;
 
-      // Track which item is loading
-      setLoadingItemId(`${isSendNTEModalOpen.id}-nte`);
-      mutate(payload, {
-        onSuccess: (data: any) => {
-          setLoadingItemId(null);
-          setIsSendNTEModalOpen(null);
-          setPdfAttachment(null);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-          if (refetch) {
-            refetch();
-          }
-        },
-        onError: (err: any) => {
-          setLoadingItemId(null);
-          toast.custom(() => <CustomToast message={err} type='error' />, {
-            duration: 7000,
-          });
-        },
-      });
-    }
+    const payload = {
+      id: nteId.toString(),
+      actionType: 'sending',
+      emailType: 'nte',
+      nte_subject: data.subject,
+      nte_to: JSON.stringify(data.email),
+      nte_cc: JSON.stringify(data.cc),
+      nte_bcc: JSON.stringify(data.bcc),
+      nte_message: data.message,
+      issueNTEForm: {
+        template: data.template,
+        subject: data.subject,
+        to: data.email,
+        cc: data.cc,
+        bcc: data.bcc,
+        message: data.message,
+        attachment: attachment || null,
+      },
+      sendDecisionForm: {
+        template: '',
+        subject: '',
+        to: [],
+        cc: [],
+        bcc: [],
+        message: '',
+        attachment: null,
+      },
+      dateReceived: null,
+      decision_subject: '',
+      decision_to: '',
+      decision_cc: '',
+      decision_bcc: '',
+      decision_message: '',
+    };
+
+    setLoadingItemId(`${nteId}-nte`);
+    mutate(payload, {
+      onSuccess: (data: any) => {
+        setLoadingItemId(null);
+        setIsSendNTEModalOpen(null);
+        setPdfAttachment(null);
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        if (refetch) {
+          refetch();
+        }
+      },
+      onError: (err: any) => {
+        setLoadingItemId(null);
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
+  };
+
+  const handleNTESubmit = (data: any) => {
+    // Snapshot id and pdfAttachment now — SendEmailModal calls onClose() synchronously
+    // after onSubmit(), which sets isSendNTEModalOpen to null before the user can confirm.
+    setPendingNTEData({
+      ...data,
+      _nteId: isSendNTEModalOpen?.id,
+      _pdfAttachment: pdfAttachment,
+    });
+    setIsNTEConfirmOpen(true);
+  };
+
+  const handleNTEConfirm = () => {
+    setIsNTEConfirmOpen(false);
+    executeNTESend(pendingNTEData);
+    setPendingNTEData(null);
   };
 
   const handleDecisionSubmit = (data: any) => {
@@ -639,6 +660,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.incidentDate}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
               <span>{item.name}</span>
+            </td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span>{item.issue_type || '—'}</span>
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
               <SendNTE
@@ -758,7 +782,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={9}>
+          <td colSpan={10}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
           </td>
@@ -919,6 +943,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Name
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Type
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Issue NTE
@@ -1094,6 +1121,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip'/>
+      <ConfirmModal
+        message={`Are you sure you want to send the NTE to the employee?\n\nThis will be reflected in their kiosk.`}
+        isOpen={isNTEConfirmOpen}
+        setIsOpen={setIsNTEConfirmOpen}
+        confirmAction={handleNTEConfirm}
+        isLoading={isLoading}
+      />
     </>
   );
 };

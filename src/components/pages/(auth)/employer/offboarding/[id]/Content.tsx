@@ -102,6 +102,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     const now = new Date().toISOString();
     if (emailType === 'letters') { copy.is_letter_received = true; copy.letter_received_date = now; }
     if (emailType === 'sign documents') { copy.is_documents_received = true; copy.documents_received_date = now; }
+    if (emailType === 'legal docs') { copy.is_legal_docs_received = true; copy.legal_docs_received_date = now; }
 
     mutate(copy, {
       onSuccess: (data: any) => {
@@ -162,12 +163,18 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
 
   const handleLegalDocsSubmit = (data: any) => {
     if (!isLegalDocsModalOpen?.id || !separation) return;
+    const existingUrls = (separation.legal_docs_attachments || []).map((att: any) => att.attachment);
+    const mergedData = {
+      ...data,
+      attachments: [...existingUrls, ...(data.attachments || [])],
+    };
     const items = [separation];
-    const updatedItem = handleEmailSending(data, 'legal docs', items, isLegalDocsModalOpen.id);
+    const updatedItem = handleEmailSending(mergedData, 'legal docs', items, isLegalDocsModalOpen.id);
     mutate(updatedItem, {
       onSuccess: (res: any) => {
         setIsLegalDocsModalOpen(null);
         toast.custom(() => <CustomToast message={res.message} type='success' />, { duration: 5000 });
+        refetch().then(() => setLocalCase(null));
       },
       onError: (err: any) => toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 }),
     });
@@ -352,6 +359,8 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
                 separation={separation}
                 onTasksChange={(hasAny, allComplete) => setLegalDocsTasksBlocked(!hasAny || !allComplete)}
                 onOpenLegalDocsEmail={(modal) => setIsLegalDocsModalOpen(modal)}
+                onMarkReceived={setReceived}
+                isLoading={loadingStates[`${separation.id}-legal docs`] || false}
               />
             )}
             {displayStage === 'Exit Interview' && (
@@ -454,6 +463,20 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
           allowMultipleAttachments={true}
           submitButtonText="Send Files"
           isLoading={isMutating}
+          customContentAboveAttachment={
+            (separation.legal_docs_attachments || []).length > 0 ? (
+              <div className="mb-2">
+                <p className="text-xs font-medium text-gray-500 mb-1">Previously sent attachments:</p>
+                <ul className="space-y-1">
+                  {separation.legal_docs_attachments.map((att: any, i: number) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-gray-700 bg-gray-50 rounded px-2 py-1">
+                      <span className="truncate">{att.attachment_name || att.attachment.split('/').pop()}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null
+          }
         />
       )}
     </>
