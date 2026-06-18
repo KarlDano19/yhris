@@ -4,12 +4,13 @@ import React, { Fragment, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 
-import ManageOrgChart from './components/ManageOrgChart';
+const ManageOrgChart = dynamic(() => import('./components/ManageOrgChart'), { ssr: false });
 import ZoomControls from './components/ZoomControls';
 import BackButton from '@/components/BackButton';
 import ExportOptionsModal from './modals/ExportOptionsModal';
