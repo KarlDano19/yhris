@@ -592,6 +592,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
+  // Reject stale bookings from Make (older than 30 min based on Calendly created_at)
+  if (payload.source === 'make' && payload.createdAt) {
+    const age = Date.now() - new Date(payload.createdAt).getTime();
+    if (age > 30 * 60 * 1000) {
+      console.log('Stale booking skipped:', payload.createdAt);
+      return NextResponse.json({ received: true, skipped: 'stale' });
+    }
+  }
+
   const data = parsePayload(payload.source === 'make' ? payload : payload.payload);
   if (!data) {
     return NextResponse.json({ error: 'Missing invitee email' }, { status: 400 });
