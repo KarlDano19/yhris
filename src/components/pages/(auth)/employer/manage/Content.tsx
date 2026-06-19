@@ -5,6 +5,7 @@ import React from 'react';
 import Link from 'next/link';
 
 import BackButton from '@/components/BackButton';
+import FloatingSyncButton from '@/components/FloatingSyncButton';
 import { useIncompleteEmployeeCount } from "./employee-201-records/hooks/useIncompleteEmployeeCount";
 
 import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
@@ -67,10 +68,14 @@ const menus = [
   },
 ];
 
-const Content = () => {
+const PAYROLL_LOGIN_TYPES = ['yahshua-payroll', 'yg-payroll'];
+
+const Content = ({ loginType }: { loginType?: string }) => {
   const { count, isLoading } = useIncompleteEmployeeCount();
 
   return (
+    <>
+    {loginType && PAYROLL_LOGIN_TYPES.includes(loginType) && <FloatingSyncButton />}
     <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
       <div className="flex p-4">
         <BackButton label="Dashboard" href="/dashboard" />
@@ -83,10 +88,13 @@ const Content = () => {
             const is201 = menu.link === "/manage/employee-201-records";
             const show = is201 && (isLoading || count > 0);
 
+            const isEmployeeList = menu.link === '/manage/employees';
+
             return (
               <Link
                 href={menu.link}
                 key={i}
+                {...(isEmployeeList ? { 'data-tour-id': 'tour-manage-employees' } : {})}
                 className="relative bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80"
               >
                 {/* badge */}
@@ -100,6 +108,7 @@ const Content = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
