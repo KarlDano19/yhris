@@ -5,6 +5,10 @@ import React, { useState } from 'react';
 import { CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
+import { Tooltip } from 'react-tooltip';
+
+import EditIcon from '@/svg/EditIcon';
+
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import { formatDateToLocal } from '@/helpers/date';
@@ -16,16 +20,19 @@ import { SeparationPhase } from '../../functions/separationPhase';
 type Props = {
   separation: any;
   currentPhase: SeparationPhase;
+  progress?: number;
   onTasksChange?: (hasAny: boolean, allComplete: boolean) => void;
   onSave?: () => void;
 };
 
-const RenderingStage = ({ separation, currentPhase, onTasksChange, onSave }: Props) => {
+const RenderingStage = ({ separation, currentPhase, progress = 0, onTasksChange, onSave }: Props) => {
   const effectiveDate = separation.effective_date || separation.date_of_separation;
   const isEffectiveDateSet = !!separation.effective_date;
+  const canEdit = isEffectiveDateSet && progress < 100 && currentPhase === 'Rendering';
   const showDatePicker = !isEffectiveDateSet && currentPhase === 'Rendering';
 
   const [pickedDate, setPickedDate] = useState<Date | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { mutate: updateFields, isLoading: isSaving } = useUpdateSeparationFields(String(separation.id));
 
   const daysRemaining = effectiveDate
@@ -40,6 +47,8 @@ const RenderingStage = ({ separation, currentPhase, onTasksChange, onSave }: Pro
       {
         onSuccess: () => {
           toast.custom(() => <CustomToast type='success' message='Last Working Day saved.' />);
+          setIsEditing(false);
+          setPickedDate(null);
           onSave?.();
         },
         onError: () => {
@@ -47,6 +56,11 @@ const RenderingStage = ({ separation, currentPhase, onTasksChange, onSave }: Pro
         },
       }
     );
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setPickedDate(null);
   };
 
   return (
@@ -67,8 +81,8 @@ const RenderingStage = ({ separation, currentPhase, onTasksChange, onSave }: Pro
             <CalendarDaysIcon className='h-5 w-5 text-gray-400 mt-0.5' />
             <div className='flex-1'>
               <p className='text-xs text-gray-500'>Last Working Day</p>
-              {showDatePicker ? (
-                <div className='mt-1 flex items-center gap-2' style={{ position: 'relative'}}>
+              {showDatePicker || isEditing ? (
+                <div className='mt-1 flex items-center gap-2' style={{ position: 'relative' }}>
                   <div className='relative flex-1'>
                     <CustomDatePicker
                       id='rendering-last-working-day'
@@ -86,11 +100,30 @@ const RenderingStage = ({ separation, currentPhase, onTasksChange, onSave }: Pro
                   >
                     {isSaving ? 'Saving…' : 'Set'}
                   </button>
+                  {isEditing && (
+                    <button
+                      onClick={handleCancelEdit}
+                      className='text-xs px-2.5 py-1.5 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 whitespace-nowrap'
+                    >
+                      Cancel
+                    </button>
+                  )}
                 </div>
               ) : (
                 <p className='text-sm font-semibold text-gray-800 mt-0.5'>{effectiveDate ? formatDateToLocal(effectiveDate) : '—'}</p>
               )}
             </div>
+            {canEdit && !isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className='text-gray-400 hover:text-savoy-blue transition-colors'
+                data-tooltip-id='edit-lwd-tooltip'
+                data-tooltip-content='Edit Last Working Day'
+                data-tooltip-place='top'
+              >
+                <EditIcon />
+              </button>
+            )}
           </div>
         </div>
 
@@ -106,6 +139,8 @@ const RenderingStage = ({ separation, currentPhase, onTasksChange, onSave }: Pro
       </div>
 
       <StageTaskChecklist separationId={separation.id} stage="rendering" title="Rendering Tasks" onTasksChange={onTasksChange} />
+
+      <Tooltip id='edit-lwd-tooltip' />
     </div>
   );
 };

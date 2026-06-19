@@ -334,6 +334,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
               <RenderingStage
                 separation={separation}
                 currentPhase={currentPhase}
+                progress={progress}
                 onTasksChange={(hasAny, allComplete) => setRenderingTasksBlocked(!hasAny || !allComplete)}
                 onSave={() => refetch().then(() => setLocalCase(null))}
               />
