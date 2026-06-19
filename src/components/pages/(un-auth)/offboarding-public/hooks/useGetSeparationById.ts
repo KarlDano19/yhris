@@ -10,7 +10,7 @@ export const useGetSeparationById = (separationId: string | number): UseQueryRes
     queryKey: ['separation', separationId],
     queryFn: async () => {
       try {
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/separations/${separationId}/`;
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/manage/${separationId}/`;
         
         const response = await fetch(apiUrl, {
           method: 'GET',

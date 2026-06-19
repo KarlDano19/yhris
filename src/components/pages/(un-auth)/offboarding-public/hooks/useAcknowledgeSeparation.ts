@@ -27,7 +27,7 @@ async function acknowledgeSeparation(data: AcknowledgeSeparationData) {
     };
 
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/separations/${data.separation_id}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/offboarding/manage/${data.separation_id}/`,
       config
     );
 
