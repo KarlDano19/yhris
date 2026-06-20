@@ -1,17 +1,16 @@
 'use client';
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 
-import ManageOrgChart from './components/ManageOrgChart';
+const ManageOrgChart = dynamic(() => import('./components/ManageOrgChart'), { ssr: false });
 import ZoomControls from './components/ZoomControls';
 import BackButton from '@/components/BackButton';
 import ExportOptionsModal from './modals/ExportOptionsModal';
@@ -358,6 +357,7 @@ const Content = () => {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       // Capture the chart as canvas with high quality
+      const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(chartContainer, {
         backgroundColor: '#ffffff',
         scale: 3, // Higher resolution
@@ -386,6 +386,7 @@ const Content = () => {
         const orientation = imgWidth > imgHeight ? 'landscape' : 'portrait';
         
         // Create PDF
+        const { jsPDF } = await import('jspdf');
         const pdf = new jsPDF({
           orientation: orientation,
           unit: 'mm',
@@ -615,15 +616,6 @@ const Content = () => {
               <span className='sm:hidden'>{isExporting ? '...' : 'Export'}</span>
               <ChevronDownIcon className='h-4 w-4 flex-shrink-0' />
             </MenuButton>
-          <Transition
-            as={Fragment}
-            enter='transition ease-out duration-100'
-            enterFrom='transform opacity-0 scale-95'
-            enterTo='transform opacity-100 scale-100'
-            leave='transition ease-in duration-75'
-            leaveFrom='transform opacity-100 scale-100'
-            leaveTo='transform opacity-0 scale-95'
-          >
             <MenuItems className='absolute right-0 z-10 mt-2 w-32 sm:w-full min-w-[120px] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
               <div className='py-1'>
                 {exportOptions.map((item) => (
@@ -646,7 +638,6 @@ const Content = () => {
                 ))}
               </div>
             </MenuItems>
-          </Transition>
             </Menu>
             </div>
           )}

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 
 import BackButton from '@/components/BackButton';
-import SettingsOrgChart from './components/SettingsOrgChart';
+const SettingsOrgChart = dynamic(() => import('./components/SettingsOrgChart'), { ssr: false });
 import ZoomControls from './components/ZoomControls';
 import useGetOrgStructureSettings from './hooks/useGetOrgStructureSettings';
 

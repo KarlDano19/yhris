@@ -16,7 +16,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'onboarding-page', permission: 'view_onboarding_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'manage-page', permission: 'view_manage_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'evaluation-page', permission: 'view_evaluation_page', type: 'section', fallbackBehavior: 'hide' },
-  { elementId: 'employee-separation-page', permission: 'view_employee_separation_page', type: 'section', fallbackBehavior: 'hide' },
+  { elementId: 'offboarding-page', permission: 'view_offboarding_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'dole-page', permission: 'view_dole_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'analytics-page', permission: 'view_analytics_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'settings-page', permission: 'view_settings_page', type: 'section', fallbackBehavior: 'hide' },
@@ -73,9 +73,9 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'view-employee-201-btn', permission: 'view_employee_201', type: 'button', fallbackBehavior: 'hide' },
   { elementId: 'edit-employee-201-btn', permission: 'edit_employee_201', type: 'button', fallbackBehavior: 'disable' },
 
-  // Separation & Employee Kit
-  { elementId: 'create-separation-btn', permission: 'create_separation', type: 'button', fallbackBehavior: 'disable' },
-  { elementId: 'edit-separation-btn', permission: 'edit_separation', type: 'button', fallbackBehavior: 'disable' },
+  // Offboarding
+  { elementId: 'create-offboarding-btn', permission: 'create_offboarding', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'edit-offboarding-btn', permission: 'edit_offboarding', type: 'button', fallbackBehavior: 'disable' },
 
   // DOLE Employee Compensation
   { elementId: 'create-dole-employee-compensation-btn', permission: 'create_dole_employee_compensation', type: 'button', fallbackBehavior: 'disable' },

@@ -95,7 +95,7 @@ export default function EmployeeSeparationRightsModal({
               >
                 <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-2xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Employee Separation User Rights</h3>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Offboarding User Rights</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen({ id: 0, open: false })} />
                   </div>
                   <div className='md:mx-6 my-4'>
@@ -120,7 +120,7 @@ export default function EmployeeSeparationRightsModal({
                                 htmlFor='create_separation'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Employee Separation
+                                Create Offboarding
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -142,7 +142,7 @@ export default function EmployeeSeparationRightsModal({
                                 htmlFor='edit_separation'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Edit Employee Separation
+                                Edit Offboarding
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
