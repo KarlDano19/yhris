@@ -4,6 +4,7 @@ import LpValueProposition from "./components/LpValueProposition";
 import LpFeatureBento from "./components/LpFeatureBento";
 import LpPayrollIntegration from "./components/LpPayrollIntegration";
 import LpComplianceTrust from "./components/LpComplianceTrust";
+import LpCalculatorTeaser from "./components/LpCalculatorTeaser";
 import LpComparisonTable from "./components/LpComparisonTable";
 import LpFAQ from "./components/LpFAQ";
 import LpFinalCTA from "./components/LpFinalCTA";
@@ -19,6 +20,7 @@ const Content = () => {
         <LpFeatureBento />
         <LpPayrollIntegration />
         <LpComplianceTrust />
+        <LpCalculatorTeaser />
         <LpComparisonTable />
         <LpFAQ />
         <LpFinalCTA />
