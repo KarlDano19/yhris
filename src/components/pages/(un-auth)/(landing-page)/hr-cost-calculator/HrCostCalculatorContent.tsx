@@ -260,6 +260,7 @@ export default function HrCostCalculatorContent() {
           companyName: lead.company.trim(),
           numberOfEmployees: form.employees,
           source: "hr-cost-calculator",
+          subscribed: true,
           calcTotalAnnualWaste: Math.round(results.totalWaste),
           calcYahshuaSavings: Math.round(results.yahshuaSavings),
           calcMonthsToROI: results.monthsToROI,
