@@ -1,8 +1,8 @@
-import React, { Fragment, useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import { Tree } from 'react-organizational-chart';
 import { Tooltip } from 'react-tooltip';
-import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 import ZoomControls from './ZoomControls';
@@ -362,15 +362,6 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
               <span className='sm:hidden'>{isExporting ? '...' : 'Export'}</span>
               <ChevronDownIcon className='h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0' />
             </MenuButton>
-            <Transition
-              as={Fragment}
-              enter='transition ease-out duration-100'
-              enterFrom='transform opacity-0 scale-95'
-              enterTo='transform opacity-100 scale-100'
-              leave='transition ease-in duration-75'
-              leaveFrom='transform opacity-100 scale-100'
-              leaveTo='transform opacity-0 scale-95'
-            >
               <MenuItems className='absolute right-0 z-10 mt-2 w-28 sm:w-full min-w-[120px] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                 <div className='py-1'>
                   {exportOptions.map((item) => (
@@ -393,7 +384,6 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
                   ))}
                 </div>
               </MenuItems>
-            </Transition>
           </Menu>
         </div>
       )}

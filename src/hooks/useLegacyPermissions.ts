@@ -31,7 +31,7 @@ export const useLegacyPermissions = () => {
       // Dashboard Pages
       'view_post_job_page', 'view_talent_search_page', 'view_screen_applicant_page', 
       'view_onboarding_page', 'view_manage_page', 'view_evaluation_page',
-      'view_employee_separation_page', 'view_dole_page', 'view_analytics_page', 
+      'view_offboarding_page', 'view_dole_page', 'view_analytics_page',
       'view_settings_page', 'view_audit_log_page',
       
       // Employee Management
@@ -65,8 +65,8 @@ export const useLegacyPermissions = () => {
       // Employee 201
       'view_employee_201', 'edit_employee_201',
       
-      // Separation & Employee Kit
-      'create_separation', 'edit_separation',
+      // Offboarding
+      'create_offboarding', 'edit_offboarding',
       
       // All DOLE permissions
       'create_dole_employee_compensation', 'edit_dole_employee_compensation', 

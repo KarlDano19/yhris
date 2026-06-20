@@ -44,7 +44,7 @@ const SeparatedEmployeesCard: React.FC<SeparatedEmployeesCardProps> = ({
   if (isLoading) {
     return (
       <div className="flex flex-col pl-2 pr-2">
-        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Separated Employees</h3>
+        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Offboarded Employees</h3>
         <div className="flex items-center justify-center h-16">
           <LoadingSpinner size="md" color="yellow" />
         </div>
@@ -55,7 +55,7 @@ const SeparatedEmployeesCard: React.FC<SeparatedEmployeesCardProps> = ({
   if (error) {
     return (
       <div className="flex flex-col pl-2 pr-2">
-        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Separated Employees</h3>
+        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Offboarded Employees</h3>
         <div className="bg-red-50 p-4 rounded-2xl">
           <p className="text-red-600 text-sm">Failed to load separation data</p>
         </div>
@@ -65,7 +65,7 @@ const SeparatedEmployeesCard: React.FC<SeparatedEmployeesCardProps> = ({
 
   return (
     <div className="flex flex-col pl-2 pr-2">
-      <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Separated Employees</h3>
+      <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Offboarded Employees</h3>
       <Card
         value={separatedEmployeesData.separatedEmployees.toString()}
         trend={separatedEmployeesData.trend}

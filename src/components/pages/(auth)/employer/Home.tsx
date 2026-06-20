@@ -139,7 +139,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   const menus = [
     {
       icon: <AddPostLogo />,
-      text: 'Post a Job',
+      text: 'Job Posting',
       link: '/post-job',
       isAvailable: true,
       isGrayedOut: false,
@@ -198,11 +198,11 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
     // },
     {
       icon: <EmployeeSeparationLogo />,
-      text: 'Employee Separation',
-      link: '/employee-separation',
+      text: 'Offboarding',
+      link: '/offboarding',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
-      permissionId: 'employee-separation-page',
+      permissionId: 'offboarding-page',
     },
     // {
     //   icon: <EmployeeKitLogo />,

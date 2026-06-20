@@ -43,7 +43,7 @@ const columnDefinitions = [
   { key: 'manage', label: 'Manage' },
   { key: 'train', label: 'Train' },
   { key: 'payroll', label: 'Payroll' },
-  { key: 'employee_separation', label: 'Employee Separation' },
+  { key: 'employee_separation', label: 'Offboarding' },
   { key: 'employee_kit', label: 'Employee Kit' },
   { key: 'dole', label: 'DOLE' },
   { key: 'settings', label: 'Settings' },
