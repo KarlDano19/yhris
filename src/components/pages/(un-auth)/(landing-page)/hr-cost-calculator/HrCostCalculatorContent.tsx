@@ -250,7 +250,7 @@ export default function HrCostCalculatorContent() {
     const lastName = rest.join(" ");
 
     try {
-      await fetch("/api/loops/contacts", {
+      await fetch("/api/loops/calculator/contacts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -267,7 +267,7 @@ export default function HrCostCalculatorContent() {
         }),
       });
 
-      await fetch("/api/loops/events", {
+      await fetch("/api/loops/calculator/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
