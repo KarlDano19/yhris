@@ -8,20 +8,49 @@ import React, {
   useRef,
 } from 'react';
 import { usePathname } from 'next/navigation';
+import { getCookie } from 'cookies-next';
 import { TourContextType, TourStartOptions, TourStep } from './types';
 import TourOverlay from './TourOverlay';
 
 const PENDING_KEY = 'hris_tour_pending_state';
 
+// ── Direct API caller (no hook) ───────────────────────────────────────────────
+// Called directly so it works even after a full-page reload (refs cleared) and
+// can be awaited inside doItNow before navigation.
+
+async function patchTourProgress(segmentKey: string): Promise<void> {
+  try {
+    const token = getCookie('token');
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tour-progress/`, {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify({ [`is_${segmentKey}_tour_done`]: true }),
+    });
+  } catch {
+    // Fail silently — tour tracking should never block the user
+  }
+}
+
 // ── localStorage helpers ──────────────────────────────────────────────────────
 
-function savePendingState(nextStepIndex: number, steps: TourStep[]): void {
+function savePendingState(
+  nextStepIndex: number,
+  steps: TourStep[],
+  segmentKey?: string,
+): void {
   try {
-    localStorage.setItem(PENDING_KEY, JSON.stringify({ nextStepIndex, steps }));
+    localStorage.setItem(PENDING_KEY, JSON.stringify({ nextStepIndex, steps, segmentKey }));
   } catch { /* private browsing */ }
 }
 
-function loadPendingState(): { nextStepIndex: number; steps: TourStep[] } | null {
+function loadPendingState(): {
+  nextStepIndex: number;
+  steps: TourStep[];
+  segmentKey?: string;
+} | null {
   try {
     const raw = localStorage.getItem(PENDING_KEY);
     if (!raw) return null;
@@ -49,12 +78,18 @@ export default function TourProvider({ children }: TourProviderProps) {
   const [steps, setSteps]             = useState<TourStep[]>([]);
   const pathname = usePathname();
 
-  // Ref so callbacks always see latest steps without stale closure
-  const stepsRef = useRef<TourStep[]>([]);
-  stepsRef.current = steps;
+  // Always-current refs
+  const stepsRef       = useRef<TourStep[]>([]);
+  const currentStepRef = useRef(0);
+  stepsRef.current       = steps;
+  currentStepRef.current = currentStep;
 
-  // Persists segment callbacks across page navigation (TourProvider never unmounts)
+  // Segment callbacks + key — stored in a ref so they survive re-renders.
+  // NOTE: these are cleared on a full-page reload (window.location.href).
+  // segmentKey is also persisted in localStorage so it can be restored on
+  // auto-resume after cross-page navigation.
   const segmentCallbacksRef = useRef<{
+    segmentKey?: string;
     onComplete?: () => void;
     onSkip?:     () => void;
   }>({});
@@ -65,35 +100,40 @@ export default function TourProvider({ children }: TourProviderProps) {
   }, []);
 
   const startTour = useCallback((tourSteps: TourStep[], options: TourStartOptions = {}) => {
-    const { fromIndex = 0, onComplete, onSkip } = options;
-    // Store callbacks in ref so they survive page navigation
-    segmentCallbacksRef.current = { onComplete, onSkip };
+    const { fromIndex = 0, segmentKey, onComplete, onSkip } = options;
+    segmentCallbacksRef.current = { segmentKey, onComplete, onSkip };
     setSteps(tourSteps);
     setCurrentStep(fromIndex);
     setIsRunning(true);
   }, []);
 
   const nextStep = useCallback(() => {
-    setCurrentStep((prev) => {
-      const last = stepsRef.current.length - 1;
-      if (prev >= last) {
-        // Segment complete — fire callback, clear ref, stop
-        const { onComplete } = segmentCallbacksRef.current;
-        segmentCallbacksRef.current = {};
-        setIsRunning(false);
-        if (onComplete) onComplete();
-        return 0;
-      }
-      return prev + 1;
-    });
+    const last = stepsRef.current.length - 1;
+
+    if (currentStepRef.current >= last) {
+      // ── Segment complete ──────────────────────────────────────────────────
+      const { segmentKey, onComplete } = segmentCallbacksRef.current;
+      segmentCallbacksRef.current = {};
+      setIsRunning(false);
+      setCurrentStep(0);
+
+      // Persist to backend directly — works even after a full-page reload
+      // because segmentKey is in the ref (non-cross-page) or restored from
+      // localStorage (cross-page auto-resume).
+      if (segmentKey) patchTourProgress(segmentKey);
+
+      // Fire optional callback (e.g. start the next segment from Home.tsx)
+      if (onComplete) onComplete();
+    } else {
+      setCurrentStep(prev => prev + 1);
+    }
   }, []);
 
   const previousStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(0, prev - 1));
+    setCurrentStep(prev => Math.max(0, prev - 1));
   }, []);
 
   const skipTour = useCallback(() => {
-    // Fire onSkip callback (no backend write — "Do it Later")
     const { onSkip } = segmentCallbacksRef.current;
     segmentCallbacksRef.current = {};
     clearPendingState();
@@ -101,42 +141,45 @@ export default function TourProvider({ children }: TourProviderProps) {
     if (onSkip) onSkip();
   }, [stopTour]);
 
-  // "Do it now!" — navigate to link AND complete the segment
-  const doItNow = useCallback((link: string) => {
-    const { onComplete } = segmentCallbacksRef.current;
+  // "Do it now!" — await the PATCH before navigating so the fetch isn't aborted
+  const doItNow = useCallback(async (link: string) => {
+    const { segmentKey, onComplete } = segmentCallbacksRef.current;
     segmentCallbacksRef.current = {};
     clearPendingState();
     setIsRunning(false);
     setCurrentStep(0);
     if (onComplete) onComplete();
+    if (segmentKey) await patchTourProgress(segmentKey); // wait before unloading
     window.location.href = link;
   }, []);
 
-  // Cross-page: save remaining steps → navigate WITHOUT completing
+  // Cross-page: save remaining steps + segmentKey → navigate WITHOUT completing
   const navigateAndContinue = useCallback((link: string) => {
-    // Functional updater reads the real current step synchronously
     setCurrentStep((prev) => {
-      savePendingState(prev + 1, stepsRef.current);
+      savePendingState(prev + 1, stepsRef.current, segmentCallbacksRef.current.segmentKey);
       return prev;
     });
-    // Do NOT clear segmentCallbacksRef — callbacks survive for auto-resume
+    // Do NOT clear segmentCallbacksRef — segmentKey is also in localStorage as backup
     setIsRunning(false);
     window.location.href = link;
   }, []);
 
-  // Auto-resume: on every pathname change, check for a pending tour state
+  // Auto-resume: on every pathname change, check for a pending tour state.
+  // segmentKey is restored from localStorage so the API call works even though
+  // the full-page reload cleared segmentCallbacksRef.
   useEffect(() => {
     const pending = loadPendingState();
     if (!pending) return;
 
     clearPendingState();
 
-    // Small delay so the new page's DOM elements have time to render
     const id = setTimeout(() => {
       startTour(pending.steps, {
         fromIndex:  pending.nextStepIndex,
-        onComplete: segmentCallbacksRef.current.onComplete,
-        onSkip:     segmentCallbacksRef.current.onSkip,
+        segmentKey: pending.segmentKey,
+        // onComplete / onSkip intentionally omitted here — Home.tsx is unmounted
+        // after full-page navigation. patchTourProgress handles the API call
+        // via segmentKey when nextStep() fires the last step.
       });
     }, 600);
 

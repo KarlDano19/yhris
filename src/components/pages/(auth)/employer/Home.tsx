@@ -65,11 +65,9 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
 
     startTour(segment.steps, {
       segmentKey: segment.key,
+      // TourProvider calls patchTourProgress(segmentKey) directly — no API call needed here.
+      // onComplete just chains to the next segment for non-cross-page flows.
       onComplete: () => {
-        updateTourProgress({ [`is_${segment.key}_tour_done`]: true } as any);
-        // For non-cross-page segments, immediately start the next pending one.
-        // For cross-page (manage), the settings tour auto-starts when the user
-        // returns to the dashboard and tourProgress refetches.
         if (!segment.crossPage) {
           startSegmentTour(index + 1, segments);
         }
@@ -78,7 +76,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
         startSegmentTour(index + 1, segments);
       },
     });
-  }, [startTour, updateTourProgress]);
+  }, [startTour]);
 
   // Auto-start the first pending segment once data is ready
   useEffect(() => {

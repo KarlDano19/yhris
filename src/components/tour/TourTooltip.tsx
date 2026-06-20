@@ -88,8 +88,8 @@ function PointerTooltip({
   const isFirst = currentStep === 0;
   const isLast  = currentStep === totalSteps - 1;
 
-  // Pointer steps always advance the tour — they never navigate away mid-tour
-  const handleAction = () => (isLast ? onSkip() : onNext());
+  // Always call onNext — TourProvider fires onComplete when past the last step
+  const handleAction = () => onNext();
 
   return (
     <div
@@ -259,7 +259,7 @@ function CardTooltip({
               </>
             ) : (
               <button
-                onClick={isLast ? onSkip : onNext}
+                onClick={onNext}
                 className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1a2e6e] hover:bg-[#162456] px-3.5 py-1.5 rounded-lg transition-colors shadow-sm"
               >
                 {isLast ? '🎉 Finish' : 'Next →'}

@@ -135,31 +135,30 @@ Run migrations:
 python manage.py makemigrations && python manage.py migrate
 ```
 
-### 2. Use `onComplete` / `onSkip` callbacks
+### 2. Use `segmentKey` + optional callbacks
+
+Pass a `segmentKey` to `startTour`. `TourProvider` will call `PATCH /api/tour-progress/` with `{ is_<segmentKey>_tour_done: true }` automatically when the last step completes (or when the "Do it now!" button navigates away). This works even across full-page reloads.
 
 ```tsx
 import useGetTourProgress from '@/components/hooks/useGetTourProgress';
-import useUpdateTourProgress from '@/components/hooks/useUpdateTourProgress';
 import { useTour } from '@/components/tour/useTour';
 
 const { data: tourProgress } = useGetTourProgress();
-const { mutate: updateTourProgress } = useUpdateTourProgress();
 const { startTour } = useTour();
 
 const launchTour = () => {
   if (tourProgress?.is_payroll_tour_done) return; // already completed
 
   startTour(MY_TOUR_STEPS, {
-    onComplete: () => {
-      // Mark done permanently in the backend
-      updateTourProgress({ is_payroll_tour_done: true });
-    },
+    segmentKey: 'payroll',  // TourProvider handles the PATCH automatically
     onSkip: () => {
-      // "Do it Later" — don't mark done; tour will show again next visit
+      // "Do it Later" — segmentKey is NOT patched; tour shows again next visit
     },
   });
 };
 ```
+
+> **Note:** `onComplete` is optional and only needed for chaining to the next segment. The backend write is handled by `TourProvider` via `segmentKey` regardless of whether you provide `onComplete`.
 
 ---
 
@@ -191,9 +190,10 @@ const STEPS: TourStep[] = [
 
 **How it works internally:**
 1. Clicking the action button calls `navigateAndContinue(link)`.
-2. The remaining steps + callbacks are saved to `localStorage` key `hris_tour_pending_state`.
-3. `TourProvider` watches `usePathname()`. On the new page, it reads the pending state and resumes the tour after a 600ms delay (to let the DOM render).
-4. Callbacks (`onComplete` / `onSkip`) persist in a ref inside `TourProvider` and survive the navigation.
+2. The remaining steps + `segmentKey` are saved to `localStorage` key `hris_tour_pending_state`.
+3. `window.location.href` causes a full-page reload — all React state is reset.
+4. On the new page, `TourProvider`'s auto-resume `useEffect` fires on pathname change, reads the pending state (including `segmentKey`), and resumes the tour after a 600ms delay.
+5. When the last step completes, `TourProvider` calls `patchTourProgress(segmentKey)` directly — no callback from the parent component is needed, so full-page reloads can't break it.
 
 ---
 
