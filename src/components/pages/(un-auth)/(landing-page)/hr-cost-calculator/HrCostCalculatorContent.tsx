@@ -74,11 +74,15 @@ const calcYahshuaMonthly = (employees: number): number => {
 };
 
 const runCalc = (f: FormValues): CalcResults => {
-  const hourlyRate = (f.avgMonthlySalary * 1.3) / 160;
-  const payrollTimeCost = hourlyRate * f.payrollHoursPerWeek * 52;
-  const complianceTimeCost = hourlyRate * f.complianceHoursPerWeek * 52;
+  // 1.18 = PH employer burden: 13th month (8.3%) + SSS (~4%) + PhilHealth (~2.5%) + Pag-IBIG (~0.3%) + misc (~3%)
+  // 173 = standard PH working hours per month (8h × 5d × ~21.75 working days)
+  const hourlyRate = (f.avgMonthlySalary * 1.18) / 173;
+  // Multiply by hrStaff — payroll/compliance hours are per-person, not total team
+  const payrollTimeCost = hourlyRate * f.hrStaff * f.payrollHoursPerWeek * 52;
+  const complianceTimeCost = hourlyRate * f.hrStaff * f.complianceHoursPerWeek * 52;
   const errorCost = f.errorsPerMonth * 2500 * 12;
-  const toolRedundancyCost = (f.toolCount - 1) * 15000;
+  // ₱36,000/yr per extra tool (≈ ₱3,000/mo — entry-level PH software subscription equivalent)
+  const toolRedundancyCost = (f.toolCount - 1) * 36000;
   const totalWaste = payrollTimeCost + complianceTimeCost + errorCost + toolRedundancyCost;
   const yahshuaSavings = totalWaste * 0.7;
   const yahshuaMonthly = calcYahshuaMonthly(f.employees);
@@ -358,7 +362,8 @@ export default function HrCostCalculatorContent() {
               />
 
               <SliderField
-                label="Hours per week the team spends processing payroll manually"
+                label="Hours per person per week spent processing payroll manually"
+                hint="Per HR/payroll staff member"
                 value={form.payrollHoursPerWeek}
                 min={1}
                 max={40}
@@ -366,8 +371,8 @@ export default function HrCostCalculatorContent() {
               />
 
               <SliderField
-                label="Hours per week on government compliance reports"
-                hint="BIR, SSS, PhilHealth, Pag-IBIG, DOLE"
+                label="Hours per person per week on government compliance reports"
+                hint="BIR, SSS, PhilHealth, Pag-IBIG, DOLE — per HR/payroll staff member"
                 value={form.complianceHoursPerWeek}
                 min={1}
                 max={20}
