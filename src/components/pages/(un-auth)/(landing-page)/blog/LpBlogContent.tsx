@@ -13,7 +13,7 @@ const posts = [
     excerpt: "SSS is now at 15%, PhilHealth at 5%, and BIR penalties compound at 25% surcharge plus 12% annual interest. If your payroll system was not updated, errors have been accumulating since January.",
     date: "June 2026",
     readTime: "7 min read",
-    image: null,
+    image: "/blog/payroll-errors-msme.png",
   },
   {
     slug: "philippine-compliance-hris-2026",
