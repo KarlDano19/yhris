@@ -24,7 +24,7 @@ const PayrollErrorsArticle = () => {
                 Payroll Compliance
               </span>
               <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-gray-900 mb-6" style={{ lineHeight: "1.25" }}>
-                The ₱480,000 Wake-Up Call: What Philippine Payroll Errors Actually Cost MSMEs
+                What Philippine Payroll Errors Actually Cost MSMEs
               </h1>
               <p className="text-gray-500 text-lg leading-relaxed mb-8">
                 Payroll errors are not just an inconvenience. They are a compliance liability — and in 2026, with updated rates across SSS, PhilHealth, and BIR, the cost of getting it wrong has never been higher.
