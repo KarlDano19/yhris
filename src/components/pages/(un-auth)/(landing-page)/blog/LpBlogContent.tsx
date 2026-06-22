@@ -9,7 +9,7 @@ const posts = [
   {
     slug: "philippine-payroll-errors-msme",
     category: "Payroll Compliance",
-    title: "The ₱480,000 Wake-Up Call: What Philippine Payroll Errors Actually Cost MSMEs",
+    title: "What Philippine Payroll Errors Actually Cost MSMEs",
     excerpt: "SSS is now at 15%, PhilHealth at 5%, and BIR penalties compound at 25% surcharge plus 12% annual interest. If your payroll system was not updated, errors have been accumulating since January.",
     date: "June 2026",
     readTime: "7 min read",
