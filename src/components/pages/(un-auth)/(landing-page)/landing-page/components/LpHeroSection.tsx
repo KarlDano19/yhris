@@ -74,8 +74,8 @@ const LpHeroSection = () => {
 
             <ScrollFadeIn delay={80}>
               <h1
-                className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold mb-6 tracking-tight"
-                style={{ color: 'hsl(213 32% 18%)' }}
+                className="text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold mb-6 tracking-tight"
+                style={{ color: '#0F172A' }}
               >
                 <span className="block mb-3">
                   The Only HRIS Your<br className="hidden md:block" /> HR Team Will
@@ -87,7 +87,7 @@ const LpHeroSection = () => {
             <ScrollFadeIn delay={160}>
               <p
                 className="text-base md:text-lg leading-relaxed max-w-[460px] mb-10"
-                style={{ color: 'hsl(213 25% 42%)' }}
+                style={{ color: '#334155' }}
               >
                 Hiring, attendance, payroll sync, DOLE compliance, and performance. All in one place, no more chasing records across five different tools.
               </p>
