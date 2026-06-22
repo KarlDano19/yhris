@@ -13,7 +13,7 @@ const posts = [
     excerpt: "Philippine employers owe 13th month pay by December 24. The ones that don't scramble are the ones tracking it every payroll run, not just in November. Here's the formula, who qualifies, and how to set it up.",
     date: "June 2026",
     readTime: "6 min read",
-    image: "/blog/Start Tracking 13th Month.png",
+    image: "/blog/start-tracking-13th-month.png",
   },
   {
     slug: "philippine-holiday-pay-computation-guide",
@@ -22,7 +22,7 @@ const posts = [
     excerpt: "Correct pay rates for regular and special non-working holidays, rest day premiums, common employer mistakes, and what DOLE expects on every payroll cycle.",
     date: "June 2026",
     readTime: "6 min read",
-    image: "/blog/Philippine Holiday Pay.png",
+    image: "/blog/philippine-holiday-pay.png",
   },
   {
     slug: "dole-compliance-requirements-philippines",
