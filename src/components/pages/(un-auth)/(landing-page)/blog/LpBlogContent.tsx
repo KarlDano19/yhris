@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "payroll-automation-philippines",
+    category: "Payroll & HR",
+    title: "Your Payroll Is a Message to Your Team",
+    excerpt: "A payroll that is late says: you were not our priority. A payroll that is correct, on time, every cycle says something else entirely. Here is what accurate, automated payroll actually gives Philippine businesses.",
+    date: "June 2026",
+    readTime: "7 min read",
+    image: null,
+  },
+  {
     slug: "thirteenth-month-pay-tracking-philippines",
     category: "Payroll Compliance",
     title: "Start Tracking 13th Month Pay Now — Or Pay For It in November",
