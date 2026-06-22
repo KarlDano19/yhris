@@ -13,7 +13,7 @@ const posts = [
     excerpt: "A payroll that is late says: you were not our priority. A payroll that is correct, on time, every cycle says something else entirely. Here is what accurate, automated payroll actually gives Philippine businesses.",
     date: "June 2026",
     readTime: "7 min read",
-    image: null,
+    image: "/blog/payroll-message.png",
   },
   {
     slug: "thirteenth-month-pay-tracking-philippines",
