@@ -43,7 +43,7 @@ const HolidayPayComputationArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto pt-10 pb-0">
             <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: "360px" }}>
               <Image
-                src="/blog/Philippine Holiday Pay.png"
+                src="/blog/philippine-holiday-pay.png"
                 alt="Philippine Holiday Pay Computation: A Complete Employer Guide"
                 fill
                 className="object-cover"

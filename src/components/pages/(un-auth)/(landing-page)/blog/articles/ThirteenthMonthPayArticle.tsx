@@ -43,7 +43,7 @@ const ThirteenthMonthPayArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto pt-10 pb-0">
             <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: "360px" }}>
               <Image
-                src="/blog/Start Tracking 13th Month.png"
+                src="/blog/start-tracking-13th-month.png"
                 alt="Start Tracking 13th Month Pay Now"
                 fill
                 className="object-cover"
