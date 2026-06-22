@@ -13,7 +13,7 @@ const posts = [
     excerpt: "PhilHealth E-Claims 3.0 deadline is June 30. BIR income sourcing rules are active. DOLE AERW is open. Here is what each obligation means and how to face all of them without drowning.",
     date: "June 2026",
     readTime: "6 min read",
-    image: null,
+    image: "/blog/why-one-system.png",
   },
   {
     slug: "payroll-automation-philippines",
