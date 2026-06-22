@@ -51,10 +51,10 @@ const HolidayPayComputationArticle = () => {
               </div>
 
               <p style={{ fontSize: "1.125rem", color: "#374151", marginBottom: "2rem" }}>
-                Every time DOLE issues a holiday pay advisory, Philippine business owners face the same pressure: get the computation right before the next payroll closes. For most MSMEs, this means manually checking which employees worked, what schedule they were on, and applying the correct multiplier — without an integrated system to do it automatically.
+                Under Articles 93 and 94 of the Philippine Labor Code, every covered rank-and-file employee is entitled to holiday pay on regular and special non-working holidays. The rates differ by holiday type and by whether the employee worked. Getting the multiplier wrong — even by one employee, one holiday — constitutes a wage violation that DOLE can assess back pay on with no statute of limitations waiver.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                This guide walks through the correct holiday pay rates under the Philippine Labor Code, the most common employer mistakes, and what compliance actually looks like in practice.
+                This guide covers the correct rates under the Labor Code, the most common employer computation mistakes, and what compliance looks like under DOLE&apos;s 2026 inspection posture.
               </p>
 
               {/* H2 */}
@@ -153,27 +153,38 @@ const HolidayPayComputationArticle = () => {
 
               {/* H2: YAKAP */}
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
-                DOLE Labor Advisory No. 10-2026: The YAKAP Program
+                DOLE Labor Advisory No. 10-2026: YAKAP Registration Requirements
               </h2>
               <p style={{ marginBottom: "1rem" }}>
-                Alongside holiday pay obligations, DOLE issued Labor Advisory No. 10-2026 under the YAKAP program, encouraging employers to support onsite PhilHealth registration drives for employees.
+                On June 3, 2026, Labor Secretary Francis Tolentino signed Labor Advisory No. 10, Series of 2026, requiring all private-sector employers to facilitate worker registration under PhilHealth&apos;s Yaman ng Kalusugan Program (YAKAP). The advisory was issued under Article 5 of the Labor Code and Republic Act No. 11223 (Universal Health Care Act).
               </p>
               <p style={{ marginBottom: "1rem" }}>
-                The advisory encourages companies to allow employees to participate in YAKAP registration activities and to treat the time as an excused absence — meaning employees should not be docked pay or marked absent for attending.
+                Under the advisory, employers are required to:
               </p>
-              <p style={{ marginBottom: "2rem", color: "#6b7280", fontSize: "0.9rem", padding: "1rem 1.25rem", background: "#f9fafb", borderRadius: "8px" }}>
-                Note: Specific implementation details and scope of DOLE Labor Advisory No. 10-2026 may vary. Review the official advisory or consult your DOLE regional office for guidance specific to your workplace.
+              <ul style={{ paddingLeft: "1.5rem", marginBottom: "1rem", listStyleType: "disc" }}>
+                <li style={{ marginBottom: "0.5rem" }}>Coordinate with PhilHealth to facilitate onsite YAKAP registration activities in the workplace</li>
+                <li style={{ marginBottom: "0.5rem" }}>Assist workers with online registration through the eGov app and the PhilHealth Member Portal</li>
+                <li style={{ marginBottom: "0.5rem" }}>Grant reasonable time off or excused absences to employees registering at PhilHealth offices or attending first-patient consultations at YAKAP clinics</li>
+              </ul>
+              <p style={{ marginBottom: "2rem" }}>
+                Excused absences under the advisory are subject to existing company policies, and employees are expected to give prior notice. DOLE regional offices have been directed to integrate YAKAP compliance into standard labor inspections — meaning inspectors will check for this alongside standard labor standards during visits.
               </p>
 
               {/* H2 */}
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
-                What Happens When Systems Are Not Built for This
+                What Non-Compliance with Holiday Pay Actually Costs
               </h2>
               <p style={{ marginBottom: "1rem" }}>
-                For an MSME running on spreadsheets or disconnected HR tools, every holiday advisory becomes a manual scramble: check which employees worked, verify their schedule type, apply the correct multiplier per employee, ensure the computation is in the payroll run, and document it for audit.
+                Under Articles 128 and 129 of the Labor Code, failure to pay correct holiday pay is treated as a wage violation. The consequences are:
               </p>
+              <ul style={{ paddingLeft: "1.5rem", marginBottom: "1rem", listStyleType: "disc" }}>
+                <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>Full back pay</strong> for the underpaid amount, covering all affected employees and all underpaid periods</li>
+                <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>Attorney&apos;s fees</strong> equal to 10% of the total recovered wages, awarded to the employee</li>
+                <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>DOLE compliance orders</strong> requiring the employer to correct and document the violation</li>
+                <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>Work stoppage orders</strong> in cases where non-compliance is found to jeopardize worker safety — during which the employer must continue paying wages</li>
+              </ul>
               <p style={{ marginBottom: "2rem" }}>
-                Two separate compliance obligations — holiday pay and attendance excusing — with no guarantee the records talk to each other. DOLE&apos;s enforcement posture is hardening. Compliance is no longer just a best practice; it is an area of active scrutiny.
+                Employees can file money claims directly with DOLE or the National Labor Relations Commission (NLRC). DOLE labor inspections actively pull payroll records to verify holiday pay computations. With YAKAP advocacy now integrated into inspection visits, employers should expect more frequent touchpoints with regional labor offices in 2026.
               </p>
 
               {/* YAHSHUA CTA callout */}
@@ -235,7 +246,7 @@ const HolidayPayComputationArticle = () => {
                   What is the penalty for not paying the correct holiday pay?
                 </h3>
                 <p>
-                  Non-compliance with holiday pay rules is treated as a wage violation by DOLE. Employees may file a money claim before the NLRC or DOLE, and employers can be assessed back pay for the underpaid amount. DOLE labor inspections actively check payroll records for holiday pay compliance.
+                  Under Articles 128 and 129 of the Labor Code, the employer is liable for the full unpaid or underpaid amount across all affected employees, plus attorney&apos;s fees equal to 10% of total recovered wages. DOLE can issue a compliance order and, in cases where non-compliance jeopardizes worker welfare, suspend business operations — during which the employer must continue to pay wages. Employees may file money claims directly with DOLE or the NLRC without needing to hire a lawyer.
                 </p>
               </div>
 
