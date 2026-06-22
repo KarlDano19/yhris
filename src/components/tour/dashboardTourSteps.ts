@@ -7,7 +7,7 @@ const HEADER_STEP: TourStep = {
   targetId: 'tour-company-profile',
   title: 'Your Company Profile',
   description:
-    'Click here to view and update your company profile, subscription, and account settings.',
+    'Click here to update your company profile and account setting.',
   actionLabel: 'Got it!',
   variant: 'pointer',
 };
@@ -17,7 +17,7 @@ const SYNC_STEP: TourStep = {
   targetId: 'tour-sync-button',
   title: 'Payroll Sync',
   description:
-    'Click this button to sync all data from your Yahshua Payroll system into HRIS — employees, departments, positions, locations, and more.',
+    'Click here to sync all your employee records from YAHSHUA Payroll such as names, department, position, location, and more.',
   actionLabel: 'Got it!',
   variant: 'pointer',
 };
@@ -47,9 +47,20 @@ const SETTINGS_STEP: TourStep = {
   targetId: 'tour-settings',
   title: 'Settings',
   description:
-    'Configure your company profile, manage user roles & permissions, and customise your HRIS to fit your workflow.',
-  link: '/settings',
-  actionLabel: 'Go to Settings!',
+    'Click here to set up the General Settings and Admin user list to fit your workflow.',
+  actionLabel: 'Got it!',
+  variant: 'pointer',
+};
+
+const BACK_TO_DASHBOARD_STEP: TourStep = {
+  id: 'tour-back-to-dashboard',
+  targetId: 'tour-back-to-dashboard',
+  title: 'Back to Dashboard',
+  description:
+    'Great! Now click here to go back to the dashboard and continue with the next step.',
+  link: '/dashboard',
+  actionLabel: 'Go back to Dashboard',
+  variant: 'pointer',
 };
 
 // ── Segment configuration ─────────────────────────────────────────────────────
@@ -66,7 +77,7 @@ export interface TourSegmentConfig {
 export const TOUR_SEGMENTS: TourSegmentConfig[] = [
   { key: 'header',   steps: [HEADER_STEP] },
   { key: 'sync',     steps: [SYNC_STEP],                        requiresPayroll: true },
-  { key: 'manage',   steps: [MANAGE_STEP, EMPLOYEE_LIST_STEP],  crossPage: true },
+  { key: 'manage',   steps: [MANAGE_STEP, EMPLOYEE_LIST_STEP, BACK_TO_DASHBOARD_STEP],  crossPage: true },
   { key: 'settings', steps: [SETTINGS_STEP] },
 ];
 

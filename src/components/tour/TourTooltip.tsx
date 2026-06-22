@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useLayoutEffect, useState } from 'react';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import { TourStep, ElementRect, TooltipPlacement } from './types';
 
 const OFFSET         = 20;
@@ -101,36 +102,31 @@ function PointerTooltip({
       {/* Description area */}
       <div className="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
         <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
-        {/* ✕ Skip tour */}
-        <button
+        <XCircleIcon
           onClick={onSkip}
-          aria-label="Skip tour"
-          className="shrink-0 -mt-0.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          className="w-8 h-8 text-savoy-blue cursor-pointer self-start shrink-0"
+        />
       </div>
 
       {/* Button row */}
       <div className="px-3 pb-3 flex items-center gap-2">
-        {/* ← Back button */}
-        <button
-          onClick={onPrevious}
-          disabled={isFirst}
-          aria-label="Previous step"
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full border-2 border-gray-700 text-gray-700 hover:border-gray-900 hover:text-gray-900 disabled:opacity-0 disabled:pointer-events-none transition-colors shrink-0"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-        </button>
+        {/* ← Back button — only shown when there is a previous step */}
+        {!isFirst && (
+          <button
+            onClick={onPrevious}
+            aria-label="Previous step"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full border-2 border-gray-700 text-gray-700 hover:border-gray-900 hover:text-gray-900 transition-colors shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+          </button>
+        )}
 
         {/* Action pill */}
         <button
           onClick={handleAction}
-          className="flex-1 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 px-4 py-2 rounded-full transition-colors shadow-sm whitespace-nowrap"
+          className="flex-1 text-sm font-bold text-white bg-savoy-blue hover:opacity-90 active:opacity-80 px-4 py-2 rounded-full transition-opacity shadow-sm whitespace-nowrap"
           aria-label={step.actionLabel ?? 'Click here!'}
         >
           {isLast ? 'Finish' : (step.actionLabel ?? 'Click here!')}
@@ -175,25 +171,22 @@ function CardTooltip({
       style={style}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Blue header */}
-      <div className="bg-[#1a2e6e] px-4 py-3 flex items-center justify-between">
+      {/* Header */}
+      <div className="bg-savoy-blue px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="shrink-0 text-[10px] font-bold text-[#1a2e6e] bg-white px-2 py-0.5 rounded-full">
-            {currentStep + 1}/{totalSteps}
-          </span>
+          {totalSteps > 1 && (
+            <span className="shrink-0 text-[10px] font-bold text-savoy-blue bg-white px-2 py-0.5 rounded-full">
+              {currentStep + 1}/{totalSteps}
+            </span>
+          )}
           <h3 className="text-sm font-semibold text-white truncate leading-snug">
             {step.title}
           </h3>
         </div>
-        <button
+        <XCircleIcon
           onClick={onSkip}
-          className="shrink-0 ml-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-white/60 hover:text-white transition-colors rounded"
-          aria-label="Close tour"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          className="w-8 h-8 text-white cursor-pointer self-start"
+        />
       </div>
 
       {/* Body */}
@@ -216,8 +209,8 @@ function CardTooltip({
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === currentStep ? 'w-5 bg-[#1a2e6e]'
-                  : i < currentStep ? 'w-2.5 bg-[#1a2e6e]/30'
+                i === currentStep ? 'w-5 bg-savoy-blue'
+                  : i < currentStep ? 'w-2.5 bg-savoy-blue/30'
                   : 'w-2.5 bg-gray-200'
               }`}
             />
@@ -249,7 +242,7 @@ function CardTooltip({
                     if (step.continuesOnNextPage && step.link) onNavigateAndContinue(step.link);
                     else if (step.link) onDoItNow(step.link);
                   }}
-                  className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1a2e6e] hover:bg-[#162456] active:bg-[#111c42] px-3.5 py-1.5 rounded-lg transition-colors shadow-sm"
+                  className="flex items-center gap-1 text-xs font-semibold text-white bg-savoy-blue hover:opacity-90 active:opacity-80 px-3.5 py-1.5 rounded-lg transition-opacity shadow-sm"
                 >
                   {step.actionLabel ?? 'Do it now!'}
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -260,7 +253,7 @@ function CardTooltip({
             ) : (
               <button
                 onClick={onNext}
-                className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1a2e6e] hover:bg-[#162456] px-3.5 py-1.5 rounded-lg transition-colors shadow-sm"
+                className="flex items-center gap-1 text-xs font-semibold text-white bg-savoy-blue hover:opacity-90 active:opacity-80 px-3.5 py-1.5 rounded-lg transition-opacity shadow-sm"
               >
                 {isLast ? '🎉 Finish' : 'Next →'}
               </button>

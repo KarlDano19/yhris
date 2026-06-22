@@ -135,6 +135,19 @@ export default function TourOverlay({
         {/* Indigo highlight ring around the target */}
         {targetRect && (
           <>
+            {/* Transparent click blocker — prevents clicks on the spotlighted element
+                from navigating away before the tour step completes */}
+            <rect
+              x={targetRect.left}
+              y={targetRect.top}
+              width={targetRect.width}
+              height={targetRect.height}
+              rx={SPOTLIGHT_RADIUS}
+              ry={SPOTLIGHT_RADIUS}
+              fill="transparent"
+              style={{ pointerEvents: 'all', cursor: 'default' }}
+              onClick={(e) => e.stopPropagation()}
+            />
             {/* Glow halo */}
             <rect
               x={targetRect.left - 3}

@@ -26,6 +26,7 @@ import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 import TalentSearchIcon from '@/svg/TalentSearchIcon';
 import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
 import InsufficientPermissionsModal from './modals/InsufficientPermissionsModal';
+import TourCompletionModal from './modals/TourCompletionModal';
 import QuickAccessPanel from './quick-access/QuickAccessPanel';
 import { useTour } from '@/components/tour/useTour';
 import { TOUR_SEGMENTS, TourSegmentConfig } from '@/components/tour/dashboardTourSteps';
@@ -56,12 +57,16 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
 
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
   const [isInsufficientPermissionsModalOpen, setIsInsufficientPermissionsModalOpen] = useState(false);
+  const [isTourCompletionModalOpen, setIsTourCompletionModalOpen] = useState(false);
   const [intendedRedirectLink, setIntendedRedirectLink] = useState<string | null>(null);
   const [restrictedFeatureName, setRestrictedFeatureName] = useState<string>('');
 
   const startSegmentTour = useCallback((index: number, segments: TourSegmentConfig[]) => {
     const segment = segments[index];
-    if (!segment) return;
+    if (!segment) {
+      setIsTourCompletionModalOpen(true);
+      return;
+    }
 
     startTour(segment.steps, {
       segmentKey: segment.key,
@@ -297,10 +302,14 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
         </div>
       </div>
       <GoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handleGoPremiumModalClose} />
-      <InsufficientPermissionsModal 
-        isOpen={isInsufficientPermissionsModalOpen} 
+      <InsufficientPermissionsModal
+        isOpen={isInsufficientPermissionsModalOpen}
         setIsOpen={handlePermissionModalClose}
         featureName={restrictedFeatureName}
+      />
+      <TourCompletionModal
+        isOpen={isTourCompletionModalOpen}
+        onClose={() => setIsTourCompletionModalOpen(false)}
       />
     </>
   );
