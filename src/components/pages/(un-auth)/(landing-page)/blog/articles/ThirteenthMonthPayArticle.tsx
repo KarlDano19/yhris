@@ -51,10 +51,10 @@ const ThirteenthMonthPayArticle = () => {
               </div>
 
               <p style={{ fontSize: "1.125rem", color: "#374151", marginBottom: "2rem" }}>
-                It is June. Your business is running. Payroll goes out on time. And somewhere in the back of your mind, you know November is coming.
+                13th month pay is governed by Presidential Decree No. 851, signed on December 16, 1975, and remains one of the most actively enforced labor benefits in the Philippines. Under Section 9 of the PD 851 Implementing Rules, non-payment is treated as a money claims case and processed under the Rules of the National Labor Relations Commission — meaning employees can file against an employer with no upper limit on the amount recoverable.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                For most Philippine business owners, the 13th month pay conversation happens exactly once a year — in late October, when the panic sets in. The math is not complicated. The problem is the timing: you are doing in two stressful weeks what should have been happening automatically since January.
+                Employers are also required to submit a compliance report on 13th month pay distribution to their DOLE Regional Office after each December 24 payment. This report captures the total amount granted, number of workers covered, and average amount per employee. Failure to file this report is a separate compliance exposure from the payment itself.
               </p>
 
               {/* H2 */}
@@ -108,41 +108,34 @@ const ThirteenthMonthPayArticle = () => {
 
               {/* H2 */}
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
-                The Cash Flow Problem Nobody Plans For
+                Common 13th Month Pay Computation Mistakes
               </h2>
-              <p style={{ marginBottom: "1rem" }}>
-                13th month pay is not a surprise. The obligation is fixed by law. What catches businesses off guard is the cash flow reality.
+
+              <p style={{ marginBottom: "1rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
+                <strong style={{ color: "#111827" }}>Mistake 1: Including non-basic pay in the computation.</strong> Overtime pay, COLA, night differential, holiday premiums, and cash equivalents of leave conversions do not form part of basic salary. Including them inflates the amount and produces a non-compliant payslip if challenged at the NLRC.
               </p>
-              <p style={{ marginBottom: "1rem" }}>
-                For a business with 30 employees at an average monthly basic salary of ₱20,000, the 13th month obligation is ₱600,000 — payable by December 24. If that money has not been set aside, or at minimum tracked, the number can feel like a wall appearing out of nowhere.
+
+              <p style={{ marginBottom: "1rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
+                <strong style={{ color: "#111827" }}>Mistake 2: Not prorating for resigned or newly hired employees.</strong> An employee who worked only 3 months is entitled to 3/12 of their annual basic salary. Employers who skip the proration — or include it in final pay without computing it — are exposed to money claims before the NLRC.
               </p>
-              <p style={{ marginBottom: "2.5rem" }}>
-                Beyond cash, there is compliance risk. The computation must accurately reflect actual basic salary, account for absences correctly, and be documented in a way that survives a BIR audit. Getting this wrong does not go unnoticed.
+
+              <p style={{ marginBottom: "1rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
+                <strong style={{ color: "#111827" }}>Mistake 3: Not adjusting for mid-year salary increases.</strong> 13th month pay is based on actual basic salary earned per month, not a flat annual rate. If an employee received a raise in July, the first half of the year uses the old rate and the second half uses the new rate. Many employers apply one rate to the full year.
+              </p>
+
+              <p style={{ marginBottom: "2.5rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
+                <strong style={{ color: "#111827" }}>Mistake 4: Not filing the DOLE compliance report.</strong> After paying 13th month pay, employers must submit a compliance report to their DOLE Regional Office. The report captures establishment name, total employees covered, amount per employee, and total amount disbursed. Not filing this report is a separate compliance gap from the payment itself.
               </p>
 
               {/* H2 */}
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
-                Why Most Businesses Do Not Track This Monthly
+                Cash Flow Exposure: What the Numbers Look Like
               </h2>
               <p style={{ marginBottom: "1rem" }}>
-                Most businesses do not track 13th month pay monthly because the tools they use were not designed to do it automatically. When payroll runs on spreadsheets, the focus is on getting the current cut-off right — 13th month accruals are a separate calculation nobody has time for in the moment.
+                For a business with 30 rank-and-file employees at an average basic salary of ₱20,000 per month, the total 13th month obligation is ₱600,000 — payable by December 24. For 50 employees at the same average: ₱1,000,000. These are fixed liabilities that accrue from January 1 regardless of whether they are tracked.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                By the time November arrives, the spreadsheet that was supposed to help has become the source of the most stress.
-              </p>
-
-              {/* H2 */}
-              <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
-                The Right Approach: Accrual From Day One
-              </h2>
-              <p style={{ marginBottom: "1rem" }}>
-                When an employee&apos;s basic pay processes in June, their 13th month entitlement for June should be calculated and recorded in the same moment. No separate step. No November scramble.
-              </p>
-              <p style={{ marginBottom: "1rem" }}>
-                This is what integrated HR and payroll looks like in practice. You open the system in June and see exactly what your 13th month liability is today — updated with every payroll run, visible at any time, ready for cash flow planning.
-              </p>
-              <p style={{ marginBottom: "2.5rem" }}>
-                When November comes, you are not computing — you are confirming.
+                The computation must accurately reflect actual basic salary, account for unpaid absences, and be documented in a way that survives both a DOLE inspection and a BIR audit. Both agencies can request payroll records and 13th month computations independently.
               </p>
 
               {/* YAHSHUA CTA callout */}
@@ -208,12 +201,21 @@ const ThirteenthMonthPayArticle = () => {
                 </p>
               </div>
 
-              <div style={{ marginBottom: "3rem" }}>
+              <div style={{ marginBottom: "2rem" }}>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
                   What is the penalty for non-payment of 13th month pay?
                 </h3>
                 <p>
-                  Failure to pay 13th month pay is a violation of PD 851 and constitutes non-payment of a legal benefit. DOLE can assess penalties, and employees may file a money claim before the National Labor Relations Commission (NLRC). The employer is liable for the unpaid benefit plus any applicable damages.
+                  Under Section 9 of the PD 851 Implementing Rules, non-payment is treated as a money claims case processed under the Rules of the National Labor Relations Commission. The employer is liable for the full unpaid amount for all affected employees. DOLE can also assess administrative penalties and employers may face fines or imprisonment under Article 303 of the Labor Code for willful violations. There is no cap on the recoverable amount per employee.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "3rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  Do employers need to file any report with DOLE after paying 13th month pay?
+                </h3>
+                <p>
+                  Yes. Employers must submit a 13th month pay compliance report to their DOLE Regional Office after distribution. The report must include the establishment name and address, total number of employees covered, amount granted per employee, and the total amount disbursed. This is a separate obligation from the payment itself — missing it is a compliance gap even if payment was made on time.
                 </p>
               </div>
 
