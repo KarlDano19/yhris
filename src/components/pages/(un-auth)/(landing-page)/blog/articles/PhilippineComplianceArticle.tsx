@@ -197,7 +197,7 @@ const PhilippineComplianceArticle = () => {
               className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-xl text-white transition-all hover:gap-3"
               style={{ background: "hsl(38, 92%, 45%)" }}
             >
-              Book a free demo at yahshua.ph <ArrowRight className="w-4 h-4" />
+              Book a free demo <ArrowRight className="w-4 h-4" />
             </a>
           </div>
         </section>
