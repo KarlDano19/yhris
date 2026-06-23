@@ -13,15 +13,23 @@ interface LpPricingContentProps {
 }
 
 const BASE_PRICE = 7000;
+const EXCESS_RATE = 60;
+const SETUP_FEE = 35000;
+
+const calculateMonthly = (employees: number) => {
+  if (employees <= 100) return BASE_PRICE;
+  return BASE_PRICE + (employees - 100) * EXCESS_RATE;
+};
 
 const formatPHP = (price: number) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
 
 const faqs = [
   { q: "Is there really no credit card required for the free plan?", a: "Correct. The Freemium plan is free forever with no payment information needed. You can post jobs and screen applicants without spending anything." },
-  { q: "What happens when I go over 100 employees?", a: "For teams above 100 employees, we put together a custom quote based on your exact headcount. Book a call and we will get you a number quickly." },
+  { q: "What happens when I go over 100 employees?", a: "An additional ₱60 per employee per month is added on top of the ₱7,000 base rate. The calculator above shows your exact monthly cost as you type." },
+  { q: "Is there a setup fee?", a: "Yes. There is a one-time setup fee of ₱35,000 which covers full implementation, data migration, and dedicated onboarding training. There are no other upfront costs after that." },
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
-  { q: "Is VAT included in the pricing shown?", a: "For up to 100 employees, VAT is excluded. For over 100 employees, the calculator includes 12% VAT in the total shown." },
+  { q: "Is VAT included in the pricing shown?", a: "No. All prices shown are VAT excluded. The applicable VAT will be reflected in your invoice." },
   { q: "Does YAHSHUA HRIS include payroll?", a: "Yes. Payroll is built into every YAHSHUA HRIS plan at no extra charge. Automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, and bank disbursement are all included in your subscription." },
   { q: "Can I see the full platform before subscribing?", a: "Yes. Book a free demo and we will walk you through YAHSHUA HRIS and the built-in payroll tools in full. You can also request a trial period during your demo call." },
 ];
@@ -31,13 +39,10 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
   const [employeeCount, setEmployeeCount] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const monthly = calculateMonthly(employeeCount);
   const isOverBase = employeeCount > 100;
 
   const handlePaidCTA = () => {
-    if (isOverBase) {
-      window.open("https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026", "_blank");
-      return;
-    }
     if (isLoggedIn) {
       router.push(`/checkout/hris/`);
     } else {
@@ -111,7 +116,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                       <div className="rounded-lg p-4 mb-6 text-sm" style={{ border: "1.5px dashed rgba(0,0,0,0.15)" }}>
                         <p className="font-semibold text-gray-700 mb-1">Ready to grow?</p>
-                        <p className="text-gray-400">Upgrade anytime to unlock the complete HR suite</p>
+                        <p className="text-gray-400">Upgrade anytime to unlock the complete HR and payroll suite</p>
                       </div>
 
                       <div className="mt-auto">
@@ -127,7 +132,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                   </article>
                 </ScrollFadeIn>
 
-                {/* Paid HRIS */}
+                {/* Paid */}
                 <ScrollFadeIn delay={120}>
                   <article className="rounded-xl border-2 border-primary overflow-hidden h-full flex flex-col shadow-lg shadow-primary/10">
                     <div className="bg-primary px-8 py-6">
@@ -158,21 +163,40 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                         />
                       </div>
 
-                      {!isOverBase ? (
-                        <div className="mb-6">
-                          <div className="flex items-baseline gap-1 mb-1">
-                            <span className="text-4xl font-bold text-gray-900">{formatPHP(BASE_PRICE)}</span>
-                            <span className="text-gray-400">/month</span>
-                          </div>
-                          <p className="text-xs text-primary font-semibold">Up to 100 employees</p>
-                          <p className="text-xs text-gray-400 mt-0.5">VAT excluded</p>
+                      {/* Monthly price */}
+                      <div className="mb-2">
+                        <div className="flex items-baseline gap-1 mb-1">
+                          <span className="text-4xl font-bold text-gray-900">{formatPHP(monthly)}</span>
+                          <span className="text-gray-400">/month</span>
                         </div>
-                      ) : (
-                        <div className="rounded-lg p-5 mb-6 text-center" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
-                          <p className="text-sm font-semibold text-gray-800 mb-1">100+ employees?</p>
-                          <p className="text-xs text-gray-500">We will put together a custom quote for your team size.</p>
+                        <p className="text-xs text-gray-400">VAT excluded</p>
+                      </div>
+
+                      {/* Breakdown for 100+ */}
+                      {isOverBase && (
+                        <div className="rounded-lg p-4 mb-4 text-xs space-y-1" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                          <p className="font-semibold text-gray-700 mb-2">Monthly breakdown</p>
+                          <div className="flex justify-between text-gray-500">
+                            <span>Base (up to 100 employees)</span><span>{formatPHP(BASE_PRICE)}</span>
+                          </div>
+                          <div className="flex justify-between text-gray-500">
+                            <span>{employeeCount - 100} employees x ₱{EXCESS_RATE}</span>
+                            <span>{formatPHP((employeeCount - 100) * EXCESS_RATE)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-gray-800 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+                            <span>Monthly total</span><span>{formatPHP(monthly)}</span>
+                          </div>
                         </div>
                       )}
+
+                      {/* Setup fee */}
+                      <div className="rounded-lg p-4 mb-6 text-sm" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="font-semibold text-gray-700">One-time setup</p>
+                          <p className="font-bold text-gray-900">{formatPHP(SETUP_FEE)}</p>
+                        </div>
+                        <p className="text-xs text-gray-400">Includes full implementation, data migration, and dedicated onboarding training</p>
+                      </div>
 
                       <div className="mb-6 space-y-4">
                         <div>
@@ -212,7 +236,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                       <div className="mt-auto">
                         <button onClick={handlePaidCTA} className="w-full lp-btn-primary lp-btn-glow py-3 text-sm">
-                          {isOverBase ? "Get a Custom Quote" : "Get Started"}
+                          Get Started
                         </button>
                         <p className="text-center text-xs text-gray-400 mt-3">
                           No long-term contract. Cancel anytime.
@@ -225,22 +249,23 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
             </div>
           </section>
 
-          {/* Per-employee pricing table */}
+          {/* Pricing breakdown table */}
           <section className="py-20" style={{ background: "#ffffff" }}>
             <div className="lp-section-container">
               <ScrollFadeIn className="text-center mb-12">
                 <span className="lp-section-label justify-center mb-5">PRICING</span>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Simple, flat pricing.</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Grows with your team, not against it.</h2>
                 <p className="text-gray-500 text-base max-w-md mx-auto">
-                  One price for up to 100 employees. Bigger team? We will work out a custom rate.
+                  Flat rate for up to 100 employees. A simple per-head fee above that.
                 </p>
               </ScrollFadeIn>
 
               <ScrollFadeIn delay={100}>
-                <div className="grid sm:grid-cols-2 gap-6 max-w-xl mx-auto">
+                <div className="grid sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
                   {[
                     { range: "Up to 100 employees", rate: "₱7,000", sub: "flat monthly rate" },
-                    { range: "100+ employees", rate: "Custom", sub: "contact us for a quote" },
+                    { range: "101+ employees", rate: "₱60", sub: "per employee/month added" },
+                    { range: "One-time setup", rate: "₱35,000", sub: "implementation and training" },
                   ].map((tier, i) => (
                     <div key={i} className="lp-light-card p-6 text-center">
                       <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">{tier.range}</p>
@@ -250,8 +275,9 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                   ))}
                 </div>
                 <p className="text-center text-sm text-gray-400 mt-6">
+                  All prices are VAT excluded.{" "}
                   <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="text-gray-600 font-semibold hover:text-primary transition-colors">Book a call</a>{" "}
-                  and we will put together a quote for your team.
+                  if you have questions.
                 </p>
               </ScrollFadeIn>
             </div>
