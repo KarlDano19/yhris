@@ -12,28 +12,17 @@ interface LpPricingContentProps {
   isLoggedIn: boolean;
 }
 
-const calculatePrice = (employees: number) => {
-  const basePrice = 4000;
-  if (employees <= 100) return basePrice;
-  let additionalPrice = 0;
-  let remaining = employees - 100;
-  if (remaining > 0) { const t1 = Math.min(remaining, 150); additionalPrice += t1 * 39; remaining -= t1; }
-  if (remaining > 0) { const t2 = Math.min(remaining, 250); additionalPrice += t2 * 37; remaining -= t2; }
-  if (remaining > 0) { additionalPrice += remaining * 35; }
-  return basePrice + additionalPrice;
-};
-
-const withVAT = (price: number) => price + price * 0.12;
+const BASE_PRICE = 7000;
 
 const formatPHP = (price: number) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
 
 const faqs = [
   { q: "Is there really no credit card required for the free plan?", a: "Correct. The Freemium plan is free forever with no payment information needed. You can post jobs and screen applicants without spending anything." },
-  { q: "What happens when I go over 100 employees?", a: "Your monthly cost increases based on tiered rates: ₱39 per employee for 101 to 250, ₱37 for 251 to 500, and ₱35 for 500 and above. The calculator above shows your exact cost." },
+  { q: "What happens when I go over 100 employees?", a: "For teams above 100 employees, we put together a custom quote based on your exact headcount. Book a call and we will get you a number quickly." },
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
   { q: "Is VAT included in the pricing shown?", a: "For up to 100 employees, VAT is excluded. For over 100 employees, the calculator includes 12% VAT in the total shown." },
-  { q: "Does YAHSHUA HRIS include payroll?", a: "Yes. Every YAHSHUA HRIS plan includes full payroll processing at no extra charge. Automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, and bank disbursement are all built in." },
+  { q: "Does YAHSHUA HRIS include payroll?", a: "Yes. Payroll is built into every YAHSHUA HRIS plan at no extra charge. Automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, and bank disbursement are all included in your subscription." },
   { q: "Can I see the full platform before subscribing?", a: "Yes. Book a free demo and we will walk you through YAHSHUA HRIS and the built-in payroll tools in full. You can also request a trial period during your demo call." },
 ];
 
@@ -42,16 +31,17 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
   const [employeeCount, setEmployeeCount] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const base = calculatePrice(employeeCount);
-  const total = employeeCount > 100 ? withVAT(base) : base;
+  const isOverBase = employeeCount > 100;
 
   const handlePaidCTA = () => {
-    const params = new URLSearchParams({ additional_employee_slot: String(Math.max(0, employeeCount - 100)) });
+    if (isOverBase) {
+      window.open("https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026", "_blank");
+      return;
+    }
     if (isLoggedIn) {
-      router.push(`/checkout/hris/?${params}`);
+      router.push(`/checkout/hris/`);
     } else {
-      const redirect = new URLSearchParams({ redirect: `/checkout/hris/?${params}` });
-      router.push(`/login?${redirect}`);
+      router.push(`/login?${new URLSearchParams({ redirect: "/checkout/hris/" })}`);
     }
   };
 
@@ -168,57 +158,19 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                         />
                       </div>
 
-                      <div className="mb-6">
-                        <div className="flex items-baseline gap-1 mb-1">
-                          <span className="text-4xl font-bold text-gray-900">{formatPHP(total)}</span>
-                          <span className="text-gray-400">/month</span>
+                      {!isOverBase ? (
+                        <div className="mb-6">
+                          <div className="flex items-baseline gap-1 mb-1">
+                            <span className="text-4xl font-bold text-gray-900">{formatPHP(BASE_PRICE)}</span>
+                            <span className="text-gray-400">/month</span>
+                          </div>
+                          <p className="text-xs text-primary font-semibold">Up to 100 employees</p>
+                          <p className="text-xs text-gray-400 mt-0.5">VAT excluded</p>
                         </div>
-                        <p className="text-xs text-primary font-semibold">Introductory price</p>
-                        {employeeCount <= 100 && <p className="text-xs text-gray-400 mt-0.5">VAT excluded</p>}
-                        {employeeCount > 100 && <p className="text-xs text-gray-400 mt-0.5">12% VAT included</p>}
-                      </div>
-
-                      {/* Breakdown for 100+ */}
-                      {employeeCount > 100 && (
-                        <div className="rounded-lg p-4 mb-6 text-xs space-y-1" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
-                          <p className="font-semibold text-gray-700 mb-2">Pricing breakdown</p>
-                          <div className="flex justify-between text-gray-500">
-                            <span>Base (up to 100 employees)</span><span>₱4,000</span>
-                          </div>
-                          {employeeCount > 100 && employeeCount <= 250 && (
-                            <div className="flex justify-between text-gray-500">
-                              <span>{employeeCount - 100} employees x ₱39</span>
-                              <span>₱{((employeeCount - 100) * 39).toLocaleString()}</span>
-                            </div>
-                          )}
-                          {employeeCount > 250 && (
-                            <div className="flex justify-between text-gray-500">
-                              <span>150 employees x ₱39</span><span>₱{(150 * 39).toLocaleString()}</span>
-                            </div>
-                          )}
-                          {employeeCount > 250 && employeeCount <= 500 && (
-                            <div className="flex justify-between text-gray-500">
-                              <span>{employeeCount - 250} employees x ₱37</span>
-                              <span>₱{((employeeCount - 250) * 37).toLocaleString()}</span>
-                            </div>
-                          )}
-                          {employeeCount > 500 && (
-                            <>
-                              <div className="flex justify-between text-gray-500">
-                                <span>250 employees x ₱37</span><span>₱{(250 * 37).toLocaleString()}</span>
-                              </div>
-                              <div className="flex justify-between text-gray-500">
-                                <span>{employeeCount - 500} employees x ₱35</span>
-                                <span>₱{((employeeCount - 500) * 35).toLocaleString()}</span>
-                              </div>
-                            </>
-                          )}
-                          <div className="flex justify-between text-gray-500">
-                            <span>12% VAT</span><span>₱{(base * 0.12).toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between font-bold text-gray-800 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-                            <span>Monthly total</span><span>{formatPHP(total)}</span>
-                          </div>
+                      ) : (
+                        <div className="rounded-lg p-5 mb-6 text-center" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                          <p className="text-sm font-semibold text-gray-800 mb-1">100+ employees?</p>
+                          <p className="text-xs text-gray-500">We will put together a custom quote for your team size.</p>
                         </div>
                       )}
 
@@ -260,7 +212,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                       <div className="mt-auto">
                         <button onClick={handlePaidCTA} className="w-full lp-btn-primary lp-btn-glow py-3 text-sm">
-                          Get Started
+                          {isOverBase ? "Get a Custom Quote" : "Get Started"}
                         </button>
                         <p className="text-center text-xs text-gray-400 mt-3">
                           No long-term contract. Cancel anytime.
@@ -277,19 +229,18 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
           <section className="py-20" style={{ background: "#ffffff" }}>
             <div className="lp-section-container">
               <ScrollFadeIn className="text-center mb-12">
-                <span className="lp-section-label justify-center mb-5">SCALING PRICING</span>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Grows with your team, not against it.</h2>
+                <span className="lp-section-label justify-center mb-5">PRICING</span>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Simple, flat pricing.</h2>
                 <p className="text-gray-500 text-base max-w-md mx-auto">
-                  The more employees you add, the lower the per-person rate. No per-seat spikes.
+                  One price for up to 100 employees. Bigger team? We will work out a custom rate.
                 </p>
               </ScrollFadeIn>
 
               <ScrollFadeIn delay={100}>
-                <div className="grid sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+                <div className="grid sm:grid-cols-2 gap-6 max-w-xl mx-auto">
                   {[
-                    { range: "Up to 100", rate: "₱4,000", sub: "flat monthly base" },
-                    { range: "101 to 250", rate: "₱39", sub: "per employee/month" },
-                    { range: "251 to 500", rate: "₱37", sub: "per employee/month" },
+                    { range: "Up to 100 employees", rate: "₱7,000", sub: "flat monthly rate" },
+                    { range: "100+ employees", rate: "Custom", sub: "contact us for a quote" },
                   ].map((tier, i) => (
                     <div key={i} className="lp-light-card p-6 text-center">
                       <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">{tier.range}</p>
@@ -299,9 +250,8 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                   ))}
                 </div>
                 <p className="text-center text-sm text-gray-400 mt-6">
-                  500+ employees: ₱35/employee per month.{" "}
-                  <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="text-gray-600 font-semibold hover:text-primary transition-colors">Talk to us</a>{" "}
-                  for enterprise pricing.
+                  <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="text-gray-600 font-semibold hover:text-primary transition-colors">Book a call</a>{" "}
+                  and we will put together a quote for your team.
                 </p>
               </ScrollFadeIn>
             </div>
