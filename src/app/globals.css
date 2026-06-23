@@ -206,6 +206,19 @@
 }
 /* ─── End landing page design system ─────────────────────────── */
 
+/* ─── HR Cost Calculator range slider ────────────────────────── */
+.calc-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+.calc-range:focus { outline: none; }
+
+@media print {
+  .calc-print-only { display: block !important; }
+}
+
 html,
 body {
   font-family: sans-serif;
