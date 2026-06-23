@@ -33,8 +33,8 @@ const faqs = [
   { q: "What happens when I go over 100 employees?", a: "Your monthly cost increases based on tiered rates: ₱39 per employee for 101 to 250, ₱37 for 251 to 500, and ₱35 for 500 and above. The calculator above shows your exact cost." },
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
   { q: "Is VAT included in the pricing shown?", a: "For up to 100 employees, VAT is excluded. For over 100 employees, the calculator includes 12% VAT in the total shown." },
-  { q: "Does YAHSHUA Payroll include YAHSHUA HRIS?", a: "Yes. Every YAHSHUA Payroll plan includes full access to YAHSHUA HRIS. Employee records, leaves, DOLE compliance, and performance management are all part of your subscription with no extra charge." },
-  { q: "Can I see the full platform before subscribing?", a: "Yes. Book a free demo and we will walk you through YAHSHUA Payroll and YAHSHUA HRIS in full. You can also request a trial period during your demo call." },
+  { q: "Does YAHSHUA HRIS include payroll?", a: "Yes. Every YAHSHUA HRIS plan includes full payroll processing at no extra charge. Automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, and bank disbursement are all built in." },
+  { q: "Can I see the full platform before subscribing?", a: "Yes. Book a free demo and we will walk you through YAHSHUA HRIS and the built-in payroll tools in full. You can also request a trial period during your demo call." },
 ];
 
 const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
@@ -72,7 +72,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                   <span className="text-primary">No surprises.</span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
-                  One plan. Full payroll. YAHSHUA HRIS included. No long-term contracts. Cancel anytime.
+                  One plan. Complete HR management with payroll built in. No long-term contracts. Cancel anytime.
                 </p>
               </ScrollFadeIn>
             </div>
@@ -142,8 +142,8 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                   <article className="rounded-xl border-2 border-primary overflow-hidden h-full flex flex-col shadow-lg shadow-primary/10">
                     <div className="bg-primary px-8 py-6">
                       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-navy/70 mb-2">Recommended</p>
-                      <h2 className="text-xl font-bold text-navy mb-1">YAHSHUA Payroll</h2>
-                      <p className="text-sm text-navy/70">Includes YAHSHUA HRIS</p>
+                      <h2 className="text-xl font-bold text-navy mb-1">YAHSHUA HRIS</h2>
+                      <p className="text-sm text-navy/70">Now with payroll built in.</p>
                     </div>
                     <div className="px-8 py-6 flex flex-col flex-1 bg-white">
 
@@ -224,13 +224,14 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                       <div className="mb-6 space-y-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">Payroll</p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">HRIS</p>
                           <ul className="space-y-3">
                             {[
-                              "Automated payroll processing",
-                              "BIR, SSS, PhilHealth, Pag-IBIG filing",
-                              "One-click bank disbursement",
-                              "Payslip generation",
+                              "Employee management and 201 files",
+                              "Job posting and recruitment",
+                              "Leave, attendance, and time tracking",
+                              "DOLE compliance reports",
+                              "Performance management",
                             ].map((f) => (
                               <li key={f} className="flex items-start gap-3 text-sm">
                                 <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
@@ -240,14 +241,13 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                           </ul>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">YAHSHUA HRIS — included</p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">Payroll — built in</p>
                           <ul className="space-y-3">
                             {[
-                              "Employee management and 201 files",
-                              "Job posting and recruitment",
-                              "Leave, attendance, and time tracking",
-                              "DOLE compliance reports",
-                              "Performance management",
+                              "Automated payroll processing",
+                              "BIR, SSS, PhilHealth, Pag-IBIG filing",
+                              "One-click bank disbursement",
+                              "Payslip generation",
                             ].map((f) => (
                               <li key={f} className="flex items-start gap-3 text-sm">
                                 <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
