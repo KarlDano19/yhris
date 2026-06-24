@@ -1,7 +1,10 @@
+'use client';
+
 import { Dispatch, Fragment, useEffect, useRef } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import CreatableSelect from 'react-select/creatable';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -13,8 +16,8 @@ type T_ModalData = {
   id: number;
   open: boolean;
   name?: string;
-  email?: string;
-  phone?: string;
+  emails?: string[];
+  phones?: string[];
   is_active?: boolean;
 };
 
@@ -28,23 +31,30 @@ export default function EditPartnerModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset } = useForm<any>();
+  const { register, handleSubmit, reset, control, setError, clearErrors, formState: { errors } } = useForm<any>();
   const { mutate, isLoading } = useUpdatePartner();
 
   useEffect(() => {
     if (isOpen) {
       reset({
         name: isOpen.name || '',
-        email: isOpen.email || '',
-        phone: isOpen.phone || '',
         is_active: isOpen.is_active ?? true,
+        emails: (isOpen.emails || []).map((e) => ({ label: e, value: e })),
+        phones: (isOpen.phones || []).map((p) => ({ label: p, value: p })),
       });
     }
   }, [isOpen, reset]);
 
   const onSubmit = handleSubmit((data) => {
+    const emails: string[] = (data.emails || []).map((item: any) => item.value);
+    if (emails.length === 0) {
+      setError('emails', { type: 'manual', message: 'At least one email is required.' });
+      return;
+    }
+    clearErrors('emails');
+    const phones: string[] = (data.phones || []).map((item: any) => item.value);
     mutate(
-      { id: isOpen.id, data },
+      { id: isOpen.id, data: { ...data, emails, phones } },
       {
         onSuccess: (res: any) => {
           toast.custom(() => <CustomToast message={res.message || 'Partner updated successfully.'} type="success" />, { duration: 4000 });
@@ -103,20 +113,108 @@ export default function EditPartnerModal({
                     </div>
                     <div>
                       <label className="block text-sm font-medium leading-6 text-gray-900">
-                        Email <span className="text-red-600">*</span>
+                        Email(s) <span className="text-red-600">*</span>
                       </label>
-                      <input
-                        type="email"
-                        {...register('email', { required: true })}
-                        className="mt-1 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                      <Controller
+                        name="emails"
+                        control={control}
+                        defaultValue={[]}
+                        render={({ field }) => (
+                          <CreatableSelect
+                            {...field}
+                            isMulti
+                            options={[]}
+                            className="mt-1 text-sm"
+                            classNamePrefix="select"
+                            placeholder="Type an email and press Enter..."
+                            noOptionsMessage={() => null}
+                            formatCreateLabel={(input) => `Add "${input}"`}
+                            components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            styles={{
+                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                              multiValue: (provided) => ({
+                                ...provided,
+                                backgroundColor: '#eff6ff',
+                                borderRadius: '6px',
+                                border: '1.5px solid rgba(29, 78, 216, 0.1)',
+                              }),
+                              multiValueLabel: (provided) => ({
+                                ...provided,
+                                color: '#305ddb',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                              }),
+                              multiValueRemove: (provided) => ({
+                                ...provided,
+                                color: '#2353d9',
+                                padding: '2px',
+                                borderRadius: '2px',
+                                ':hover': {
+                                  backgroundColor: 'rgba(29, 78, 216, 0.2)',
+                                  color: '#305ddb',
+                                },
+                              }),
+                            }}
+                          />
+                        )}
                       />
+                      {errors.emails && (
+                        <p className="mt-1 text-xs text-red-500">{(errors.emails as any).message}</p>
+                      )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium leading-6 text-gray-900">Phone</label>
-                      <input
-                        type="text"
-                        {...register('phone')}
-                        className="mt-1 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                      <label className="block text-sm font-medium leading-6 text-gray-900">Phone(s)</label>
+                      <Controller
+                        name="phones"
+                        control={control}
+                        defaultValue={[]}
+                        render={({ field }) => (
+                          <CreatableSelect
+                            {...field}
+                            isMulti
+                            options={[]}
+                            className="mt-1 text-sm"
+                            classNamePrefix="select"
+                            placeholder="Type a phone number and press Enter..."
+                            isValidNewOption={(inputValue) => /^[0-9+\-\s()]+$/.test(inputValue.trim())}
+                            noOptionsMessage={({ inputValue }) =>
+                              inputValue && !/^[0-9+\-\s()]+$/.test(inputValue.trim())
+                                ? 'Numbers only (e.g. +63 912 345 6789)'
+                                : null
+                            }
+                            formatCreateLabel={(input) => `Add "${input}"`}
+                            components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            styles={{
+                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                              multiValue: (provided) => ({
+                                ...provided,
+                                backgroundColor: '#eff6ff',
+                                borderRadius: '6px',
+                                border: '1.5px solid rgba(29, 78, 216, 0.1)',
+                              }),
+                              multiValueLabel: (provided) => ({
+                                ...provided,
+                                color: '#305ddb',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                              }),
+                              multiValueRemove: (provided) => ({
+                                ...provided,
+                                color: '#2353d9',
+                                padding: '2px',
+                                borderRadius: '2px',
+                                ':hover': {
+                                  backgroundColor: 'rgba(29, 78, 216, 0.2)',
+                                  color: '#305ddb',
+                                },
+                              }),
+                            }}
+                          />
+                        )}
                       />
                     </div>
                     <div className="flex items-center gap-2">
