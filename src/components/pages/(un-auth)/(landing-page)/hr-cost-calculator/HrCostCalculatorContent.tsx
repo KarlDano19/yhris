@@ -297,8 +297,8 @@ export default function HrCostCalculatorContent() {
           calcMonthsToRoi: results.monthsToROI,
         }),
       });
-      const txData = await txRes.json();
-      console.log("[Loops transactional]", txRes.status, txData);
+      const txText = await txRes.text();
+      console.log("[Loops transactional]", txRes.status, txText);
 
       setStep(3);
     } catch {
