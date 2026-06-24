@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import useResetOnboarding from '@/components/hooks/useResetOnboarding';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
+import useGetTourProgress from '@/components/hooks/useGetTourProgress';
+import useUpdateTourProgress from '@/components/hooks/useUpdateTourProgress';
 
 import { SmartDashboardItem } from '@/components/SmartPermissions/SmartDashboardItem';
 import FloatingProgress from '../../../FloatingProgress';
@@ -24,7 +26,12 @@ import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 import TalentSearchIcon from '@/svg/TalentSearchIcon';
 import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
 import InsufficientPermissionsModal from './modals/InsufficientPermissionsModal';
+import TourCompletionModal from './modals/TourCompletionModal';
 import QuickAccessPanel from './quick-access/QuickAccessPanel';
+import { useTour } from '@/components/tour/useTour';
+import { TOUR_SEGMENTS, TourSegmentConfig } from '@/components/tour/dashboardTourSteps';
+
+const PAYROLL_LOGIN_TYPES = ['yahshua-payroll', 'yg-payroll'];
 
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
   const router = useRouter();
@@ -33,15 +40,79 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   const isOnboardingEnabled = isUsersLoading ? false : (usersData?.is_onboarding_enabled ?? true);
   const isDeveloper = usersData?.is_developer === true;
 
+  const { startTour, isRunning } = useTour();
+  const { data: tourProgress, isLoading: isTourProgressLoading } = useGetTourProgress();
+  const { mutate: updateTourProgress } = useUpdateTourProgress();
+
+  const isPayrollUser = PAYROLL_LOGIN_TYPES.includes(loginType);
+
+  // Ordered list of segments that are not yet completed
+  const pendingSegments = useMemo<TourSegmentConfig[]>(() => {
+    if (!tourProgress) return [];
+    return TOUR_SEGMENTS.filter(s => {
+      if (s.requiresPayroll && !isPayrollUser) return false;
+      return !(tourProgress as any)[`is_${s.key}_tour_done`];
+    });
+  }, [tourProgress, isPayrollUser]);
+
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
   const [isInsufficientPermissionsModalOpen, setIsInsufficientPermissionsModalOpen] = useState(false);
+  const [isTourCompletionModalOpen, setIsTourCompletionModalOpen] = useState(false);
   const [intendedRedirectLink, setIntendedRedirectLink] = useState<string | null>(null);
   const [restrictedFeatureName, setRestrictedFeatureName] = useState<string>('');
+
+  const startSegmentTour = useCallback((index: number, segments: TourSegmentConfig[]) => {
+    const segment = segments[index];
+    if (!segment) {
+      setIsTourCompletionModalOpen(true);
+      return;
+    }
+
+    startTour(segment.steps, {
+      segmentKey: segment.key,
+      // TourProvider calls patchTourProgress(segmentKey) directly — no API call needed here.
+      // onComplete just chains to the next segment for non-cross-page flows.
+      onComplete: () => {
+        if (!segment.crossPage) {
+          startSegmentTour(index + 1, segments);
+        }
+      },
+      onSkip: () => {
+        startSegmentTour(index + 1, segments);
+      },
+    });
+  }, [startTour]);
+
+  // Auto-start the first pending segment once data is ready
+  useEffect(() => {
+    if (isUsersLoading || isTourProgressLoading) return;
+    if (isRunning) return;
+    if (pendingSegments.length === 0) return;
+    const id = setTimeout(() => startSegmentTour(0, pendingSegments), 600);
+    return () => clearTimeout(id);
+  }, [isUsersLoading, isTourProgressLoading, pendingSegments.length]);
 
   const handleReset = () => {
     resetOnboarding(undefined, {
       onSuccess: () => router.push('/setup-employer-profile/onboarding-checklist'),
     });
+  };
+
+  const handleRestartTour = () => {
+    updateTourProgress(
+      {
+        is_header_tour_done:   false,
+        is_sync_tour_done:     false,
+        is_manage_tour_done:   false,
+        is_settings_tour_done: false,
+      },
+      {
+        onSuccess: () => {
+          // pendingSegments will update after the query invalidates;
+          // the auto-start effect fires again automatically.
+        },
+      }
+    );
   };
 
   const handleGrayedOutClick = (link: string, reason: 'subscription' | 'permission', featureName?: string) => {
@@ -78,6 +149,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: false,
       permissionId: 'post-job-page',
+      tourId: 'tour-post-job',
     },
     {
       icon: <TalentSearchIcon />,
@@ -86,6 +158,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       permissionId: 'talent-search-page',
       isGrayedOut: !hasActiveSubscription,
+      tourId: 'tour-talent-search',
     },
     {
       icon: <ScreenApplicantsLogo />,
@@ -94,6 +167,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: false,
       permissionId: 'screen-applicant-page',
+      tourId: 'tour-screen-applicants',
     },
     {
       icon: <OrientLogo />,
@@ -110,6 +184,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
       permissionId: 'manage-page',
+      tourId: 'tour-manage',
     },
     {
       icon: <EvaluationLogo />,
@@ -156,6 +231,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
       permissionId: 'analytics-page',
+      tourId: 'tour-analytics',
     },
     {
       icon: <SettingsLogo />,
@@ -164,6 +240,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
       permissionId: 'settings-page',
+      tourId: 'tour-settings',
     },
     {
       icon: <AuditLogsIcon />,
@@ -180,8 +257,21 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingSyncButton />}
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
-          <div className='flex items-center gap-3'>
+          <div className='flex items-center gap-3 flex-wrap'>
             <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
+
+            {/* Tour help button — always visible so users can restart anytime */}
+            {!isRunning && (
+              <button
+                onClick={handleRestartTour}
+                className='flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors'
+                title='Take a guided tour of the dashboard'
+              >
+                <span>?</span>
+                <span>Take a tour</span>
+              </button>
+            )}
+
             {isDeveloper && isOnboardingEnabled && (
               <button
                 onClick={handleReset}
@@ -212,10 +302,14 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
         </div>
       </div>
       <GoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handleGoPremiumModalClose} />
-      <InsufficientPermissionsModal 
-        isOpen={isInsufficientPermissionsModalOpen} 
+      <InsufficientPermissionsModal
+        isOpen={isInsufficientPermissionsModalOpen}
         setIsOpen={handlePermissionModalClose}
         featureName={restrictedFeatureName}
+      />
+      <TourCompletionModal
+        isOpen={isTourCompletionModalOpen}
+        onClose={() => setIsTourCompletionModalOpen(false)}
       />
     </>
   );

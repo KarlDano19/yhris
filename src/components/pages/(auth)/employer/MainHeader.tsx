@@ -518,7 +518,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   {/* Profile dropdown */}
                   <Menu as='div' className='relative ml-5 flex-shrink-0'>
                     <div>
-                      <MenuButton className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
+                      <MenuButton
+                        className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'
+                        data-tour-id="tour-company-profile"
+                      >
                         <span className='sr-only'>Open user menu</span>
                         {!isProfileLoading && profile ? (
                           profile.logo ? (
