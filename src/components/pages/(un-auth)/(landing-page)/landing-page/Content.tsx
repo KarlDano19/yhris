@@ -18,9 +18,9 @@ const Content = () => {
         <LpValueProposition />
         <LpTrustBar />
         <LpFeatureBento />
+        <LpCalculatorTeaser />
         <LpPayrollIntegration />
         <LpComplianceTrust />
-        <LpCalculatorTeaser />
         <LpComparisonTable />
         <LpFAQ />
         <LpFinalCTA />
