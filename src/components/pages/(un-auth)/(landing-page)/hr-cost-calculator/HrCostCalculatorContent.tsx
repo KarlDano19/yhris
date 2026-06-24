@@ -675,9 +675,9 @@ export default function HrCostCalculatorContent() {
 
             {/* Benchmark */}
             <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-8 text-sm text-amber-900 leading-relaxed">
-              Philippine companies with {form.employees} employees typically spend{" "}
-              {fmt(benchmark)} on HR and payroll operations. YAHSHUA customers at your size
-              spend 70% less.
+              Based on your inputs, a company with {form.employees} employees like yours is
+              estimated to spend {fmt(benchmark)} per year on HR and payroll operations.
+              YAHSHUA customers at your size typically recover 70% of that.
             </div>
 
             {/* CTAs */}
