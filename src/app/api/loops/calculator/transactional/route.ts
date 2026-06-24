@@ -25,11 +25,8 @@ export async function POST(request: NextRequest) {
         transactionalId: TEMPLATE_ID,
         email: body.email,
         dataVariables: {
-          firstName: body.firstName,
-          companyName: body.companyName,
-          calcTotalAnnualWaste: body.calcTotalAnnualWaste,
-          calcYahshuaSavings: body.calcYahshuaSavings,
-          calcMonthsToRoi: body.calcMonthsToRoi,
+          FirstName: body.firstName,
+          CalcTotalAnnualWaste: body.calcTotalAnnualWaste,
         },
       }),
     });
