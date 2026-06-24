@@ -15,11 +15,15 @@ interface LpPricingContentProps {
 const BASE_PRICE = 7000;
 const EXCESS_RATE = 60;
 const SETUP_FEE = 35000;
+const VAT_RATE = 0.12;
 
 const calculateMonthly = (employees: number) => {
   if (employees <= 100) return BASE_PRICE;
   return BASE_PRICE + (employees - 100) * EXCESS_RATE;
 };
+
+const calculateVAT = (price: number) => Math.round(price * VAT_RATE);
+const calculateWithVAT = (price: number) => price + calculateVAT(price);
 
 const formatPHP = (price: number) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
@@ -172,22 +176,28 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                         <p className="text-xs text-gray-400">VAT excluded</p>
                       </div>
 
-                      {/* Breakdown for 100+ */}
-                      {isOverBase && (
-                        <div className="rounded-lg p-4 mb-4 text-xs space-y-1" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
-                          <p className="font-semibold text-gray-700 mb-2">Monthly breakdown</p>
-                          <div className="flex justify-between text-gray-500">
-                            <span>Base (up to 100 employees)</span><span>{formatPHP(BASE_PRICE)}</span>
-                          </div>
+                      {/* Monthly breakdown with VAT */}
+                      <div className="rounded-lg p-4 mb-4 text-xs space-y-1" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                        <p className="font-semibold text-gray-700 mb-2">Monthly breakdown</p>
+                        <div className="flex justify-between text-gray-500">
+                          <span>Base (up to 100 employees)</span><span>{formatPHP(BASE_PRICE)}</span>
+                        </div>
+                        {isOverBase && (
                           <div className="flex justify-between text-gray-500">
                             <span>{employeeCount - 100} employees x ₱{EXCESS_RATE}</span>
                             <span>{formatPHP((employeeCount - 100) * EXCESS_RATE)}</span>
                           </div>
-                          <div className="flex justify-between font-bold text-gray-800 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-                            <span>Monthly total</span><span>{formatPHP(monthly)}</span>
-                          </div>
+                        )}
+                        <div className="flex justify-between text-gray-600 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+                          <span>Subtotal (VAT excl.)</span><span>{formatPHP(monthly)}</span>
                         </div>
-                      )}
+                        <div className="flex justify-between text-gray-500">
+                          <span>VAT (12%)</span><span>{formatPHP(calculateVAT(monthly))}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-gray-800 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+                          <span>Total with VAT</span><span>{formatPHP(calculateWithVAT(monthly))}</span>
+                        </div>
+                      </div>
 
                       {/* Setup fee */}
                       <div className="rounded-lg p-4 mb-6 text-sm" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
