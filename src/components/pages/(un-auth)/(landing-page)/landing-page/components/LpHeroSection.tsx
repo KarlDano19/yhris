@@ -142,6 +142,15 @@ const LpHeroSection = () => {
                     {error}
                   </p>
                 )}
+                <a
+                  href="/hr-cost-calculator"
+                  className="mt-4 flex items-center gap-1.5 text-sm font-medium transition-colors w-fit"
+                  style={{ color: 'hsl(213 32% 42%)' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'hsl(var(--lp-primary))')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'hsl(213 32% 42%)')}
+                >
+                  See what you&apos;re losing <ArrowRight className="w-3.5 h-3.5" />
+                </a>
               </div>
             )}
           </div>

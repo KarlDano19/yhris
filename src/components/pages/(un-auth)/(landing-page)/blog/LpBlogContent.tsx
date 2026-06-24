@@ -1,10 +1,38 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Clock, Tag } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 
 const posts = [
+  {
+    slug: "philippine-payroll-errors-msme",
+    category: "Payroll Compliance",
+    title: "What Philippine Payroll Errors Actually Cost MSMEs",
+    excerpt: "SSS is now at 15%, PhilHealth at 5%, and BIR penalties compound at 25% surcharge plus 12% annual interest. If your payroll system was not updated, errors have been accumulating since January.",
+    date: "June 2026",
+    readTime: "7 min read",
+    image: "/blog/payroll-errors-msme.png",
+  },
+  {
+    slug: "philippine-compliance-hris-2026",
+    category: "HRIS & Compliance",
+    title: "Philippine Compliance 2026: Why You Need One System, Not Five Checklists",
+    excerpt: "PhilHealth E-Claims 3.0 deadline is June 30. BIR income sourcing rules are active. DOLE AERW is open. Here is what each obligation means and how to face all of them without drowning.",
+    date: "June 2026",
+    readTime: "6 min read",
+    image: "/blog/why-one-system.png",
+  },
+  {
+    slug: "payroll-automation-philippines",
+    category: "Payroll & HR",
+    title: "Your Payroll Is a Message to Your Team",
+    excerpt: "A payroll that is late says: you were not our priority. A payroll that is correct, on time, every cycle says something else entirely. Here is what accurate, automated payroll actually gives Philippine businesses.",
+    date: "June 2026",
+    readTime: "7 min read",
+    image: "/blog/payroll-message.png",
+  },
   {
     slug: "thirteenth-month-pay-tracking-philippines",
     category: "Payroll Compliance",
@@ -12,6 +40,7 @@ const posts = [
     excerpt: "Philippine employers owe 13th month pay by December 24. The ones that don't scramble are the ones tracking it every payroll run, not just in November. Here's the formula, who qualifies, and how to set it up.",
     date: "June 2026",
     readTime: "6 min read",
+    image: "/blog/start-tracking-13th-month.png",
   },
   {
     slug: "philippine-holiday-pay-computation-guide",
@@ -20,6 +49,7 @@ const posts = [
     excerpt: "Correct pay rates for regular and special non-working holidays, rest day premiums, common employer mistakes, and what DOLE expects on every payroll cycle.",
     date: "June 2026",
     readTime: "6 min read",
+    image: "/blog/philippine-holiday-pay.png",
   },
   {
     slug: "dole-compliance-requirements-philippines",
@@ -28,6 +58,7 @@ const posts = [
     excerpt: "A practical breakdown of mandatory DOLE reports under DO 252-25, including monthly WAIR submissions, the Annual Medical Report, and what the new penalty rules mean for your business.",
     date: "April 2026",
     readTime: "7 min read",
+    image: "/blog/dole-compliance-2026.png",
   },
 ];
 
@@ -63,6 +94,16 @@ const LpBlogContent = () => {
                 <ScrollFadeIn key={post.slug} delay={i * 60}>
                   <Link href={`/blog/${post.slug}`} className="group block h-full">
                     <div className="lp-light-card h-full flex flex-col overflow-hidden">
+                      {post.image && (
+                        <div className="relative w-full overflow-hidden" style={{ height: "180px" }}>
+                          <Image
+                            src={post.image}
+                            alt={post.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
                       <div className="p-6 flex flex-col flex-1">
                         <span
                           className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 self-start"
