@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, Fragment, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Dispatch, Fragment } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -11,6 +11,9 @@ import CustomToast from '@/components/CustomToast';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import useUpdatePartner from '../hooks/useUpdatePartner';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[0-9+\-\s()]+$/;
 
 type T_ModalData = {
   id: number;
@@ -33,6 +36,8 @@ export default function EditPartnerModal({
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setError, clearErrors, formState: { errors } } = useForm<any>();
   const { mutate, isLoading } = useUpdatePartner();
+  const [emailInput, setEmailInput] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -127,7 +132,16 @@ export default function EditPartnerModal({
                             className="mt-1 text-sm"
                             classNamePrefix="select"
                             placeholder="Type an email and press Enter..."
-                            noOptionsMessage={() => null}
+                            isValidNewOption={(inputValue) => EMAIL_REGEX.test(inputValue.trim())}
+                            noOptionsMessage={({ inputValue }) =>
+                              inputValue && !EMAIL_REGEX.test(inputValue.trim()) ? 'Invalid email format' : null
+                            }
+                            onInputChange={(val) => setEmailInput(val)}
+                            onKeyDown={(e) => {
+                              if (['Enter', 'Tab'].includes(e.key) && emailInput.trim() && !EMAIL_REGEX.test(emailInput.trim())) {
+                                toast.custom(() => <CustomToast message="Invalid email format. Please enter a valid email address." type="error" />, { duration: 3000 });
+                              }
+                            }}
                             formatCreateLabel={(input) => `Add "${input}"`}
                             components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                             menuPortalTarget={document.body}
@@ -165,7 +179,9 @@ export default function EditPartnerModal({
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium leading-6 text-gray-900">Phone(s)</label>
+                      <label className="block text-sm font-medium leading-6 text-gray-900">
+                        Phone(s) <span className="text-red-600">*</span>
+                      </label>
                       <Controller
                         name="phones"
                         control={control}
@@ -178,12 +194,18 @@ export default function EditPartnerModal({
                             className="mt-1 text-sm"
                             classNamePrefix="select"
                             placeholder="Type a phone number and press Enter..."
-                            isValidNewOption={(inputValue) => /^[0-9+\-\s()]+$/.test(inputValue.trim())}
+                            isValidNewOption={(inputValue) => PHONE_REGEX.test(inputValue.trim())}
                             noOptionsMessage={({ inputValue }) =>
-                              inputValue && !/^[0-9+\-\s()]+$/.test(inputValue.trim())
+                              inputValue && !PHONE_REGEX.test(inputValue.trim())
                                 ? 'Numbers only (e.g. +63 912 345 6789)'
                                 : null
                             }
+                            onInputChange={(val) => setPhoneInput(val)}
+                            onKeyDown={(e) => {
+                              if (['Enter', 'Tab'].includes(e.key) && phoneInput.trim() && !PHONE_REGEX.test(phoneInput.trim())) {
+                                toast.custom(() => <CustomToast message="Invalid phone number. Use digits, +, -, spaces, or parentheses only." type="error" />, { duration: 3000 });
+                              }
+                            }}
                             formatCreateLabel={(input) => `Add "${input}"`}
                             components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                             menuPortalTarget={document.body}
