@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -39,6 +40,19 @@ const DoleComplianceArticle = () => {
               </ScrollFadeIn>
             </div>
           </section>
+
+          {/* Featured Image */}
+          <div className="lp-section-container max-w-3xl mx-auto pt-10 pb-0">
+            <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: "360px" }}>
+              <Image
+                src="/blog/dole-compliance-2026.png"
+                alt="DOLE Compliance Requirements Every Philippine Employer Must Know in 2026"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          </div>
 
           {/* Article Body */}
           <article className="py-16">
@@ -307,6 +321,28 @@ const DoleComplianceArticle = () => {
               </div>
             </div>
           </article>
+
+          {/* End CTA */}
+          <section className="py-16" style={{ background: "#FFFBF0", borderTop: "1px solid rgba(255,193,7,0.2)" }}>
+            <div className="lp-section-container max-w-3xl mx-auto text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
+                Stop rebuilding WAIR reports from scratch every month.
+              </h2>
+              <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
+                YAHSHUA HRIS generates your WAIR, EC Logbook, Annual Medical Report, and OSH annual report directly from your HR data. Correct format, ready to submit, every reporting period.
+              </p>
+              <a
+                href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=dole_compliance"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-xl text-white transition-all hover:gap-3"
+                style={{ background: "hsl(38, 92%, 45%)" }}
+              >
+                See how DOLE compliance works in YAHSHUA <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </section>
 
           {/* Back to blog */}
           <section className="py-12" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
