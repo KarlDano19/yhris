@@ -249,6 +249,9 @@ export default function HrCostCalculatorContent() {
     const [firstName, ...rest] = lead.name.trim().split(" ");
     const lastName = rest.join(" ");
 
+    const fmtNum = (n: number) =>
+      new Intl.NumberFormat("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(n));
+
     try {
       await fetch("/api/loops/calculator/contacts", {
         method: "POST",
@@ -281,6 +284,19 @@ export default function HrCostCalculatorContent() {
           },
         }),
       });
+
+      fetch("/api/loops/calculator/transactional", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: lead.email.trim(),
+          firstName,
+          companyName: lead.company.trim(),
+          calcTotalAnnualWaste: fmtNum(results.totalWaste),
+          calcYahshuaSavings: fmtNum(results.yahshuaSavings),
+          calcMonthsToRoi: results.monthsToROI,
+        }),
+      }).catch(() => {});
 
       setStep(3);
     } catch {
