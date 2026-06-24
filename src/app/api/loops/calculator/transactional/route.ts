@@ -26,7 +26,10 @@ export async function POST(request: NextRequest) {
         email: body.email,
         dataVariables: {
           FirstName: body.firstName,
+          CompanyName: body.companyName,
           CalcTotalAnnualWaste: body.calcTotalAnnualWaste,
+          CalcYahshuaSavings: body.calcYahshuaSavings,
+          CalcMonthstoROI: body.calcMonthsToRoi,
         },
       }),
     });
