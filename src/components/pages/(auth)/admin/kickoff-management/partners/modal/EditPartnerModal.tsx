@@ -59,7 +59,7 @@ export default function EditPartnerModal({
     clearErrors('emails');
     const phones: string[] = (data.phones || []).map((item: any) => item.value);
     mutate(
-      { id: isOpen.id, data: { ...data, emails, phones } },
+      { id: isOpen.id, data: { name: data.name, is_active: data.is_active, email: emails, phone: phones } },
       {
         onSuccess: (res: any) => {
           toast.custom(() => <CustomToast message={res.message || 'Partner updated successfully.'} type="success" />, { duration: 4000 });

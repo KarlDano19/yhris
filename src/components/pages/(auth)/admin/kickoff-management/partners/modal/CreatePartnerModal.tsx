@@ -38,7 +38,7 @@ export default function CreatePartnerModal({
     }
     clearErrors('emails');
     const phones: string[] = (data.phones || []).map((item: any) => item.value);
-    mutate({ ...data, emails, phones }, {
+    mutate({ name: data.name, is_active: data.is_active, email: emails, phone: phones }, {
       onSuccess: (res: any) => {
         toast.custom(() => <CustomToast message={res.message || 'Partner created successfully.'} type="success" />, { duration: 4000 });
         setIsOpen(false);

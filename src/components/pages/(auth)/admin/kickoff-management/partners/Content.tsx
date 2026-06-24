@@ -56,7 +56,7 @@ const Content = () => {
   const paginatedItems = partnerItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const openViewModal = (item: any) =>
-    setIsViewModalOpen({ id: item.id, open: true, name: item.name, emails: item.emails, phones: item.phones });
+    setIsViewModalOpen({ id: item.id, open: true, name: item.name, emails: item.email, phones: item.phone });
 
   const renderRows = () => {
     if (isLoading) {
@@ -77,20 +77,20 @@ const Content = () => {
           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-700">{item.name}</td>
           <td className="px-3 py-4 text-sm text-gray-500">
             <button type="button" className="text-left hover:underline" onClick={() => openViewModal(item)}>
-              <span>{item.emails?.[0] ?? '—'}</span>
-              {item.emails?.length > 1 && (
+              <span>{item.email?.[0] ?? '—'}</span>
+              {item.email?.length > 1 && (
                 <span className="ml-1 inline-block rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
-                  +{item.emails.length - 1} more
+                  +{item.email.length - 1} more
                 </span>
               )}
             </button>
           </td>
           <td className="px-3 py-4 text-sm text-gray-500">
             <button type="button" className="text-left hover:underline" onClick={() => openViewModal(item)}>
-              <span>{item.phones?.[0] ?? '—'}</span>
-              {item.phones?.length > 1 && (
+              <span>{item.phone?.[0] ?? '—'}</span>
+              {item.phone?.length > 1 && (
                 <span className="ml-1 inline-block rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
-                  +{item.phones.length - 1} more
+                  +{item.phone.length - 1} more
                 </span>
               )}
             </button>
@@ -108,7 +108,7 @@ const Content = () => {
             <div className="flex justify-center space-x-2">
               <button
                 onClick={() =>
-                  setIsEditModalOpen({ id: item.id, open: true, name: item.name, emails: item.emails, phones: item.phones, is_active: item.is_active })
+                  setIsEditModalOpen({ id: item.id, open: true, name: item.name, emails: item.email, phones: item.phone, is_active: item.is_active })
                 }
               >
                 <EditIcon />
