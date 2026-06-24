@@ -285,7 +285,7 @@ export default function HrCostCalculatorContent() {
         }),
       });
 
-      fetch("/api/loops/calculator/transactional", {
+      const txRes = await fetch("/api/loops/calculator/transactional", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -296,7 +296,9 @@ export default function HrCostCalculatorContent() {
           calcYahshuaSavings: fmtNum(results.yahshuaSavings),
           calcMonthsToRoi: results.monthsToROI,
         }),
-      }).catch(() => {});
+      });
+      const txData = await txRes.json();
+      console.log("[Loops transactional]", txRes.status, txData);
 
       setStep(3);
     } catch {
