@@ -9,6 +9,7 @@ import GlobalLoadingSpinner from '@/components/GlobalLoadingSpinner';
 import Auth from '@/app/auth';
 import GlobalPixelTracker from '@/components/GlobalPixelTracker';
 import NetworkStatusWatcher from '@/components/NetworkStatusWatcher';
+import TourProvider from '@/components/tour/TourProvider';
 
 import './globals.css';
   
@@ -26,8 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PostHogProvider>
           <GlobalErrorHandler />
           <ReactQueryWrapper>
-            <GlobalLoadingSpinner />
-            <Auth>{children}</Auth>
+            <TourProvider>
+              <GlobalLoadingSpinner />
+              <Auth>{children}</Auth>
+            </TourProvider>
           </ReactQueryWrapper>
           <GlobalPixelTracker />
           <NetworkStatusWatcher />

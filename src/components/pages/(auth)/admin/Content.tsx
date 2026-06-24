@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
 import {
   Chart as ChartJS,
@@ -12,16 +12,20 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import {
   UsersIcon,
   BeakerIcon,
   ExclamationTriangleIcon,
   LockClosedIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 import Pagination from '@/components/Pagination';
 
 import useClientItems from './client-monitoring/hooks/useGetClientItems';
+import ExportClientProgressModal from './modals/ExportClientProgressModal';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -256,6 +260,18 @@ const Content = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const { data, isLoading, isError } = useClientItems();
+  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+  const exportOptions = [
+    { label: 'Export as CSV', format: 'csv' as const },
+    { label: 'Export as PDF', format: 'pdf' as const },
+  ];
+
+  const handleExport = (format: 'csv' | 'pdf') => {
+    setExportFormat(format);
+    setIsExportModalOpen(true);
+  };
 
   const clientItems: any[] = Array.isArray(data) ? data : (data as any)?.data ?? [];
 
@@ -318,12 +334,55 @@ const Content = () => {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-semibold text-gray-800">Client Lifecycle Monitoring</h2>
-          <button
-            disabled
-            className="px-4 py-2 text-sm rounded-lg bg-savoy-blue text-white opacity-50 cursor-not-allowed font-medium"
-          >
-            + Add Client
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Export dropdown */}
+            <Menu as='div' className='relative'>
+              <div className='flex'>
+                <MenuButton className='inline-flex items-center gap-1.5 rounded-l-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors'>
+                  <ArrowDownTrayIcon className='w-4 h-4' />
+                  Export
+                </MenuButton>
+                <MenuButton className='rounded-r-lg border border-l-0 border-gray-300 bg-white px-2 py-2 text-gray-700 hover:bg-gray-50 transition-colors'>
+                  <ChevronDownIcon className='w-4 h-4' />
+                </MenuButton>
+              </div>
+              <Transition
+                as={Fragment}
+                enter='transition ease-out duration-100'
+                enterFrom='transform opacity-0 scale-95'
+                enterTo='transform opacity-100 scale-100'
+                leave='transition ease-in duration-75'
+                leaveFrom='transform opacity-100 scale-100'
+                leaveTo='transform opacity-0 scale-95'
+              >
+                <MenuItems className='absolute right-0 z-10 mt-1 w-44 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                  <div className='py-1'>
+                    {exportOptions.map((option) => (
+                      <MenuItem key={option.format}>
+                        {({ active }) => (
+                          <button
+                            onClick={() => handleExport(option.format)}
+                            className={`block w-full px-4 py-2 text-left text-sm ${
+                              active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        )}
+                      </MenuItem>
+                    ))}
+                  </div>
+                </MenuItems>
+              </Transition>
+            </Menu>
+
+            <button
+              disabled
+              className="px-4 py-2 text-sm rounded-lg bg-savoy-blue text-white opacity-50 cursor-not-allowed font-medium"
+            >
+              + Add Client
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -467,6 +526,13 @@ const Content = () => {
         </div>
       </div>
 
+      {isExportModalOpen && (
+        <ExportClientProgressModal
+          isOpen={isExportModalOpen}
+          setIsOpen={setIsExportModalOpen}
+          format={exportFormat}
+        />
+      )}
     </div>
   );
 };

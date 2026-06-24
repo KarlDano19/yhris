@@ -8,9 +8,10 @@ interface Props {
   href?: string;
   className?: string;
   onClick?: () => void;
+  'data-tour-id'?: string;
 }
 
-export default function BackButton({ label, href, className, onClick }: Props) {
+export default function BackButton({ label, href, className, onClick, 'data-tour-id': dataTourId }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -45,6 +46,7 @@ export default function BackButton({ label, href, className, onClick }: Props) {
     <button
       onClick={handleClick}
       className={className ?? 'flex-none flex gap-3 items-center hover:bg-gray-200'}
+      data-tour-id={dataTourId}
     >
       <ArrowLeftIcon className='h-5 w-5' />
       <h4>{label}</h4>

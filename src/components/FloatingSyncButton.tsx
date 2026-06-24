@@ -321,7 +321,11 @@ const FloatingSyncButton = () => {
       )}
       
       {/* Floating button */}
-      <div className='fixed z-50 bottom-4 left-6' onClick={() => setShowProgress(!isProgressShow)}>
+      <div
+        className='fixed z-50 bottom-4 left-6'
+        onClick={() => setShowProgress(!isProgressShow)}
+        data-tour-id="tour-sync-button"
+      >
         <div
           className={`${
             !isProgressShow ? 'flex' : 'hidden'
