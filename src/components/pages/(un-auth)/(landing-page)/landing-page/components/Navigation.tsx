@@ -80,9 +80,9 @@ const Navigation = () => {
                 )}
               </div>
 
-              {/* <Link href="/pricing" className="text-white/60 hover:text-white px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+              <Link href="/pricing" className="text-white/60 hover:text-white px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Pricing
-              </Link> */}
+              </Link>
             </div>
           </div>
 
