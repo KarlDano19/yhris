@@ -12,10 +12,11 @@ import ClientGoalModal from './modal/ClientGoalModal';
 import EditClientSourceModal from './modal/EditClientSourceModal';
 import CreateClientModal from './modal/CreateClientModal';
 import RecordPaymentModal from './modal/RecordPaymentModal';
+import DeleteClientModal from './modal/DeleteClientModal';
 import useClientItems from './hooks/useGetClientItems';
 import useToggleEmployerOTP from './hooks/useToggleEmployerOTP';
 
-import { CreditCardIcon, MagnifyingGlassIcon, ShieldCheckIcon, ShieldExclamationIcon } from '@heroicons/react/24/outline';
+import { CreditCardIcon, MagnifyingGlassIcon, ShieldCheckIcon, ShieldExclamationIcon, TrashIcon } from '@heroicons/react/24/outline';
 import MoreIcon from '@/svg/MoreIcon';
 import EditIcon from '@/svg/EditIcon';
 
@@ -45,6 +46,7 @@ const Content = () => {
   const [isCreateClientOpen, setIsCreateClientOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<{ id: number; name: string; client_source: string; partner: string } | null>(null);
   const [paymentTarget, setPaymentTarget] = useState<{ id: number; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
   const { data: dataClient, isLoading: isGetClientLoading, refetch } = useClientItems({
     search,
@@ -159,6 +161,15 @@ const Content = () => {
                   ) : (
                     <ShieldExclamationIcon className='w-5 h-5' />
                   )}
+                </button>
+                <button
+                  onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
+                  className='border rounded px-[0.65em] border-red-300 text-red-400 hover:bg-red-50'
+                  data-tooltip-id='otp-btn-tooltip'
+                  data-tooltip-content='Delete company'
+                  data-tooltip-place='top'
+                >
+                  <TrashIcon className='w-5 h-5' />
                 </button>
               </div>
             </td>
@@ -279,6 +290,12 @@ const Content = () => {
         isOpen={!!paymentTarget}
         onClose={() => setPaymentTarget(null)}
         employer={paymentTarget}
+      />
+      <DeleteClientModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        employer={deleteTarget}
+        refetch={refetch}
       />
     </>
   );
