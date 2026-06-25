@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import { useTour } from '@/components/tour/useTour';
 import useSyncEmployees from './hooks/useSyncEmployees';
 import useSyncYPUsers from './pages/(auth)/employer/settings/users/accounts/hooks/useSyncYPUsers';
 import useSyncDepartment from './pages/(auth)/employer/settings/general-settings/employees/hooks/department/useSyncDepartment';
@@ -35,6 +36,7 @@ type SyncStep = {
 };
 
 const FloatingSyncButton = () => {
+  const { hideOverlay } = useTour();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as {
     state: { data: any } | undefined;
@@ -86,7 +88,7 @@ const FloatingSyncButton = () => {
   };
 
   // Master sync orchestration function
-  const handleMasterSync = async () => {
+  const handleMasterSync = useCallback(async () => {
     setIsMasterSyncing(true);
     setCurrentStep(0);
     
@@ -272,21 +274,23 @@ const FloatingSyncButton = () => {
 
       // All steps completed successfully
       toast.custom(() => <CustomToast message="All systems synced successfully!" type='success' />, { duration: 5000 });
-      
-      // Auto-close after a delay
+
+      // Close modal first, then advance the tour so the next step doesn't
+      // overlap the still-visible sync dialog.
       setTimeout(() => {
         setShowProgress(false);
         setIsMasterSyncing(false);
         setSyncSteps(initialSteps);
         setCurrentStep(0);
-      }, 3000);
+        window.dispatchEvent(new CustomEvent('tour-action-complete', { detail: { action: 'sync-all-done' } }));
+      }, 1500);
 
     } catch (error: any) {
       console.error('Master sync failed:', error);
       toast.custom(() => <CustomToast message={`Sync failed: ${error.message || 'Unknown error'}`} type='error' />, { duration: 7000 });
       setIsMasterSyncing(false);
     }
-  };
+  }, [syncEmployees, ypUsersSync, syncDepartment, pullEmployeeIdSettings, syncEmployeeStatus, syncLocation, syncPosition, syncDepartmentFromYP, syncLocationFromYP, syncPositionFromYP, syncEmployeeStatusFromYP, selectedOption]);
 
   const handleCancel = () => {
     if (!isMasterSyncing) {
@@ -295,6 +299,17 @@ const FloatingSyncButton = () => {
       setCurrentStep(0);
     }
   };
+
+  // Listen for tour trigger — open modal, hide tour tooltip, and auto-start sync
+  useEffect(() => {
+    const handler = () => {
+      hideOverlay();
+      setShowProgress(true);
+      setTimeout(() => handleMasterSync(), 150);
+    };
+    window.addEventListener('tour-open-sync-modal', handler);
+    return () => window.removeEventListener('tour-open-sync-modal', handler);
+  }, [handleMasterSync, hideOverlay]);
 
   // Helper function to get step icon
   const getStepIcon = (step: SyncStep) => {
@@ -429,7 +444,7 @@ const FloatingSyncButton = () => {
                     </div>
 
                     {/* Progress Steps */}
-                    <div className="space-y-3">
+                    <div className="space-y-3 max-h-[45vh] overflow-y-auto pr-1">
                       {syncSteps.map((step, index) => (
                         <div
                           key={step.id}

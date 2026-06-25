@@ -14,15 +14,31 @@ interface TourOverlayProps {
   onNext: () => void;
   onPrevious: () => void;
   onSkip: () => void;
+  onHideOverlay: () => void;
   onDoItNow: (link: string) => void;
   onNavigateAndContinue: (link: string) => void;
 }
 
 function resolveTarget(targetId: string): Element | null {
-  return (
+  const el =
     document.getElementById(targetId) ??
-    document.querySelector(`[data-tour-id="${targetId}"]`)
-  );
+    document.querySelector(`[data-tour-id="${targetId}"]`);
+  if (!el) return null;
+
+  // Treat hidden / zero-size elements as not found so the tooltip falls back
+  // to a centered position (e.g. when the target is inside a collapsed burger menu).
+  const rect = el.getBoundingClientRect();
+  const style = window.getComputedStyle(el);
+  if (
+    style.display === 'none' ||
+    style.visibility === 'hidden' ||
+    rect.width === 0 ||
+    rect.height === 0
+  ) {
+    return null;
+  }
+
+  return el;
 }
 
 /**
@@ -61,6 +77,7 @@ export default function TourOverlay({
   onNext,
   onPrevious,
   onSkip,
+  onHideOverlay,
   onDoItNow,
   onNavigateAndContinue,
 }: TourOverlayProps) {
@@ -111,6 +128,13 @@ export default function TourOverlay({
   }, [measure]);
 
   const hasTarget = Boolean(targetRect);
+
+  // nonBlocking: overlay is visual only — pointer events pass through so the
+  // user can fill in form fields while the tour spotlights the target.
+  // Also non-blocking when hideActionButton is set but the target doesn't exist
+  // yet (e.g. Save button hidden until the form advances to the next step).
+  const blockingOverlay = !step.nonBlocking && (hasTarget || !step.hideActionButton);
+
   const spotlightPath = hasTarget && vw > 0
     ? buildSpotlightPath(targetRect!, vw, vh)
     : `M0,0 H${vw} V${vh} H0 Z`; // solid overlay when no target
@@ -128,7 +152,7 @@ export default function TourOverlay({
           d={spotlightPath}
           fill="rgba(0,0,0,0.72)"
           fillRule="evenodd"
-          style={{ pointerEvents: 'all', cursor: 'default' }}
+          style={{ pointerEvents: blockingOverlay ? 'all' : 'none', cursor: 'default' }}
           onClick={(e) => e.stopPropagation()}
         />
 
@@ -136,18 +160,22 @@ export default function TourOverlay({
         {targetRect && (
           <>
             {/* Transparent click blocker — prevents clicks on the spotlighted element
-                from navigating away before the tour step completes */}
-            <rect
-              x={targetRect.left}
-              y={targetRect.top}
-              width={targetRect.width}
-              height={targetRect.height}
-              rx={SPOTLIGHT_RADIUS}
-              ry={SPOTLIGHT_RADIUS}
-              fill="transparent"
-              style={{ pointerEvents: 'all', cursor: 'default' }}
-              onClick={(e) => e.stopPropagation()}
-            />
+                from navigating away before the tour step completes.
+                Omitted when hideActionButton is true: those steps require the user
+                to click the highlighted element to advance. */}
+            {!step.hideActionButton && (
+              <rect
+                x={targetRect.left}
+                y={targetRect.top}
+                width={targetRect.width}
+                height={targetRect.height}
+                rx={SPOTLIGHT_RADIUS}
+                ry={SPOTLIGHT_RADIUS}
+                fill="transparent"
+                style={{ pointerEvents: 'all', cursor: 'default' }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
             {/* Glow halo */}
             <rect
               x={targetRect.left - 3}
@@ -186,7 +214,7 @@ export default function TourOverlay({
         targetRect={targetRect}
         onNext={onNext}
         onPrevious={onPrevious}
-        onSkip={onSkip}
+        onSkip={step.hideOnSkip ? onHideOverlay : onSkip}
         onDoItNow={onDoItNow}
         onNavigateAndContinue={onNavigateAndContinue}
       />

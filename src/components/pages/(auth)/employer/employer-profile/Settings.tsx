@@ -220,6 +220,7 @@ function Settings({ register, onSubmit, isLoading, onBack, watch, setValue, cont
         </button>
         <button
           type='submit'
+          data-tour-id='tour-profile-save'
           className='w-full lg:w-32 uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
           disabled={isLoading}
         >

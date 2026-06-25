@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useEffect, useRef } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
 import CustomToast from '@/components/CustomToast';
+import { useTour } from '@/components/tour/useTour';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import useAddEmployee from '../hooks/useAddEmployee';
 
@@ -32,6 +33,12 @@ export default function AddEmployeeModal({
   const cancelButtonRef = useRef(null);
   const queryClient = useQueryClient();
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm();
+  const { hideOverlay, showOverlay } = useTour();
+
+  useEffect(() => {
+    if (isOpen) hideOverlay();
+    else showOverlay();
+  }, [isOpen]);
   const { mutate, isLoading: isLoadingAddEmployee } = useAddEmployee();
 
   const onSubmit = handleSubmit((data) => {
@@ -40,6 +47,7 @@ export default function AddEmployeeModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
+        window.dispatchEvent(new CustomEvent('tour-action-complete', { detail: { action: 'employee-data-added' } }));
         // Invalidate employee paginated select cache to ensure separation page gets updated data
         queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         reset(); // Only reset after successful save
