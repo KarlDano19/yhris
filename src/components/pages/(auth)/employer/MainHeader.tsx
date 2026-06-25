@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { Menu, MenuButton, MenuItem, MenuItems, Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react';
@@ -23,6 +23,9 @@ import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead'
 import useGetEmployerApplicantChatsList from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import ChatRoomsModal from '@/components/common/chat/ChatRoomsModal';
 import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
+import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/modal/ChecklistEmployerViewModal';
+import TourCompletionModal from './modals/TourCompletionModal';
+import { useTour } from '@/components/tour/useTour';
 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -30,7 +33,6 @@ import { Tooltip } from 'react-tooltip';
 import MainLogo from '@/svg/MainLogo';
 import ChatIcon from '@/svg/ChatIcon';
 import InfoIcon from '@/svg/InfoIcon';
-import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/modal/ChecklistEmployerViewModal';
 
 interface ErrorDetail {
   detail: string;
@@ -46,7 +48,6 @@ interface MainHeaderProps {
 
 const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, initialTokenExpiresAt }: MainHeaderProps) => {
   const router = useRouter();
-  const pathname = usePathname();
   const [profile, setProfile] = useState<any>({});
   const [userDetails, setUserDetails] = useState<any>({});
   const [isExpiring, setIsExpiring] = useState(false);
@@ -150,6 +151,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
   }, [usersData]);
 
   const isOnboardingEnabled = isUsersLoading ? false : (usersData?.is_onboarding_enabled ?? true);
+
+  const { isRunning } = useTour();
 
   // Initialize token expiration from prop
   useEffect(() => {

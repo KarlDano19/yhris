@@ -40,6 +40,9 @@ import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 import FloatingProgress from '@/components/FloatingProgress';
+import { useTour } from '@/components/tour/useTour';
+import { MANAGE_STEPS_SYNCED } from '@/components/tour/dashboardTourSteps';
+import useGetTourProgress from '@/components/hooks/useGetTourProgress';
 
 import { MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -74,9 +77,49 @@ const columnDefinitions = [
   { key: 'address', label: 'Address' },
 ];
 
+const PAYROLL_LOGIN_TYPES = ['yahshua-payroll', 'yg-payroll'];
+
 const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const { isRunning, hideOverlay } = useTour();
+
+  const { data: tourProgress, isLoading: isTourProgressLoading } = useGetTourProgress();
+
+  // Only applies to YP users who have COMPLETED the sync tour.
+  // Patches stale localStorage (non-YP 4-step manage flow) with the correct 2-step synced
+  // flow before TourProvider's 600ms auto-resume timer fires. Also auto-fires the
+  // completeTrigger as a safety net if the wrong step is already running.
+  useEffect(() => {
+    if (!PAYROLL_LOGIN_TYPES.includes(loginType)) return;
+    if (isTourProgressLoading || !tourProgress) return;
+    if (!tourProgress.is_sync_tour_done) return;
+
+    // Patch stale localStorage before TourProvider's 600ms auto-resume timer reads it
+    try {
+      const raw = localStorage.getItem('hris_tour_pending_state');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const isStaleManageFlow = parsed.segmentKey === 'manage' &&
+          parsed.steps?.some((s: any) => s.completeTrigger === 'employee-data-added');
+        if (isStaleManageFlow) {
+          localStorage.setItem('hris_tour_pending_state', JSON.stringify({
+            segmentKey: 'manage',
+            nextStepIndex: 1,
+            steps: MANAGE_STEPS_SYNCED,
+          }));
+        }
+      }
+    } catch { /* ignore */ }
+
+    // Safety net: if the tour is already running with the stale step, auto-advance it
+    if (!isRunning) return;
+    const id = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('tour-action-complete', { detail: { action: 'employee-data-added' } }));
+    }, 800);
+    return () => clearTimeout(id);
+  }, [isRunning, loginType, isTourProgressLoading, tourProgress]);
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState<boolean>(false);
@@ -1033,7 +1076,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   );
                 }}
               />
-              <div className='flex'>
+              <div className='flex' data-tour-id='tour-employee-guide'>
                 <SmartButton
                   id="create-employee-btn"
                   onClick={() => setIsAddEmployeeModalOpen(true)}
@@ -1042,7 +1085,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   CREATE
                 </SmartButton>
                 <Menu as='div' className='relative'>
-                  <MenuButton className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                  <MenuButton className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50' onClick={() => { if (isRunning) hideOverlay(); }}>
                     <span className='sr-only'>Open options</span>
                     <div className='flex gap-4'>
                       <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />

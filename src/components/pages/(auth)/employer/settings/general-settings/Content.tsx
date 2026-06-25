@@ -61,7 +61,7 @@ const Content = () => {
         <BackButton label="Settings" href="/settings" />
       </div>
       <div className='px-2 md:px-8 lg:px-4'>
-        <h2 className='text-xl font-bold text-indigo-dye'>General Settings</h2>
+        <h2 className='text-xl font-bold text-indigo-dye' data-tour-id='tour-general-settings-header'>General Settings</h2>
         <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6'>
           {menus.map((menu, index) => {
             return <MenuItem key={index} menu={menu} />;

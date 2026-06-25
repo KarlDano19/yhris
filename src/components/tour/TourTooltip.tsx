@@ -56,10 +56,8 @@ function computePosition(
     case 'left':   top = cy - tooltipH / 2;                  left = targetRect.left - tooltipW - OFFSET; break;
   }
 
-  const vw2 = window.innerWidth;
-  const vh2 = window.innerHeight;
-  left = Math.max(VIEWPORT_MARGIN, Math.min(left, vw2 - tooltipW - VIEWPORT_MARGIN));
-  top  = Math.max(VIEWPORT_MARGIN, Math.min(top,  vh2 - tooltipH - VIEWPORT_MARGIN));
+  left = Math.max(VIEWPORT_MARGIN, Math.min(left, vw - tooltipW - VIEWPORT_MARGIN));
+  top  = Math.max(VIEWPORT_MARGIN, Math.min(top,  vh - tooltipH - VIEWPORT_MARGIN));
 
   return { top, left };
 }
@@ -75,7 +73,9 @@ function PointerTooltip({
   onPrevious,
   onNext,
   onSkip,
-}: Pick<TourTooltipProps, 'step' | 'targetRect' | 'currentStep' | 'totalSteps' | 'onPrevious' | 'onNext' | 'onSkip'>) {
+  onDoItNow,
+  onNavigateAndContinue,
+}: Pick<TourTooltipProps, 'step' | 'targetRect' | 'currentStep' | 'totalSteps' | 'onPrevious' | 'onNext' | 'onSkip' | 'onDoItNow' | 'onNavigateAndContinue'>) {
   const ref = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<React.CSSProperties>({ opacity: 0, top: 0, left: 0, pointerEvents: 'none' });
 
@@ -86,11 +86,18 @@ function PointerTooltip({
     setStyle({ opacity: 1, top, left, pointerEvents: 'auto' });
   }, [targetRect, currentStep]);
 
-  const isFirst = currentStep === 0;
-  const isLast  = currentStep === totalSteps - 1;
+  const isFirst  = currentStep === 0;
+  const hasLink  = Boolean(step.link);
 
-  // Always call onNext — TourProvider fires onComplete when past the last step
-  const handleAction = () => onNext();
+  const handleAction = () => {
+    if (step.actionEvent) {
+      window.dispatchEvent(new CustomEvent(step.actionEvent));
+      return; // tour advances via completeTrigger, not here
+    }
+    if (step.continuesOnNextPage && step.link) onNavigateAndContinue(step.link);
+    else if (step.link) onDoItNow(step.link);
+    else onNext();
+  };
 
   return (
     <div
@@ -101,7 +108,7 @@ function PointerTooltip({
     >
       {/* Description area */}
       <div className="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
-        <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
+        <p className="text-sm text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: step.description }} />
         <XCircleIcon
           onClick={onSkip}
           className="w-8 h-8 text-savoy-blue cursor-pointer self-start shrink-0"
@@ -123,14 +130,24 @@ function PointerTooltip({
           </button>
         )}
 
-        {/* Action pill */}
+        {/* Do it Later */}
         <button
-          onClick={handleAction}
-          className="flex-1 text-sm font-bold text-white bg-savoy-blue hover:opacity-90 active:opacity-80 px-4 py-2 rounded-full transition-opacity shadow-sm whitespace-nowrap"
-          aria-label={step.actionLabel ?? 'Click here!'}
+          onClick={onSkip}
+          className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors px-2 py-1.5 rounded hover:bg-gray-50 whitespace-nowrap"
         >
-          {isLast ? 'Finish' : (step.actionLabel ?? 'Click here!')}
+          Do it Later
         </button>
+
+        {/* Action pill — hidden when the page action (e.g. a form button) is the only trigger */}
+        {!step.hideActionButton && (
+          <button
+            onClick={handleAction}
+            className="flex-1 text-sm font-bold text-white bg-savoy-blue hover:opacity-90 active:opacity-80 px-4 py-2 rounded-full transition-opacity shadow-sm whitespace-nowrap"
+            aria-label={step.actionLabel ?? (hasLink ? 'Proceed' : 'Got it!')}
+          >
+            {step.actionLabel ?? (hasLink ? 'Proceed' : 'Got it!')}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -191,7 +208,7 @@ function CardTooltip({
 
       {/* Body */}
       <div className="bg-white px-4 pt-3 pb-4">
-        <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
+        <p className="text-sm text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: step.description }} />
 
         {step.previewImage && (
           <div className="mt-3 rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
@@ -229,7 +246,14 @@ function CardTooltip({
           </button>
 
           <div className="flex items-center gap-2">
-            {hasLink ? (
+            {step.hideActionButton ? (
+              <button
+                onClick={onSkip}
+                className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors px-2 py-1.5 rounded hover:bg-gray-50"
+              >
+                Do it Later
+              </button>
+            ) : hasLink ? (
               <>
                 <button
                   onClick={onSkip}
@@ -252,12 +276,70 @@ function CardTooltip({
               </>
             ) : (
               <button
-                onClick={onNext}
+                onClick={() => {
+                  if (step.actionEvent) {
+                    window.dispatchEvent(new CustomEvent(step.actionEvent));
+                  } else {
+                    onNext();
+                  }
+                }}
                 className="flex items-center gap-1 text-xs font-semibold text-white bg-savoy-blue hover:opacity-90 active:opacity-80 px-3.5 py-1.5 rounded-lg transition-opacity shadow-sm"
               >
-                {isLast ? '🎉 Finish' : 'Next →'}
+                {step.actionEvent ? (step.actionLabel ?? 'Proceed') : (isLast ? 'Finish' : 'Next →')}
               </button>
             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Floating card — no overlay, pinned bottom-right, always visible
+// Used for "set up at your own pace" steps (noOverlay: true)
+// ─────────────────────────────────────────────────────────────────────────────
+export function FloatingTourCard({
+  step,
+  onNext,
+  onSkip,
+  onDoItNow,
+  onNavigateAndContinue,
+}: Pick<TourTooltipProps, 'step' | 'onNext' | 'onSkip' | 'onDoItNow' | 'onNavigateAndContinue'>) {
+  const handleAction = () => {
+    if (step.continuesOnNextPage && step.link) onNavigateAndContinue(step.link);
+    else if (step.link) onDoItNow(step.link);
+    else onNext();
+  };
+
+  return (
+    <div className="fixed bottom-20 sm:bottom-6 left-0 right-0 z-[10000] pointer-events-none">
+      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+        <div
+          className="pointer-events-auto w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-savoy-blue px-4 py-2.5">
+            <h3 className="text-sm font-semibold text-white">{step.title}</h3>
+          </div>
+          <div className="px-4 pt-3 pb-4">
+            <p className="text-sm text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: step.description }} />
+            <div className="flex items-center gap-2 mt-3">
+              <button
+                onClick={onSkip}
+                className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors px-2 py-1.5 rounded hover:bg-gray-50 whitespace-nowrap"
+              >
+                Do it Later
+              </button>
+              {!step.hideActionButton && (
+                <button
+                  onClick={handleAction}
+                  className="flex-1 text-sm font-bold text-white bg-savoy-blue hover:opacity-90 active:opacity-80 px-4 py-2 rounded-full transition-opacity shadow-sm whitespace-nowrap"
+                >
+                  {step.actionLabel ?? (step.link ? 'Proceed' : 'Got it!')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -269,7 +351,7 @@ function CardTooltip({
 // Exported component — delegates to the right variant
 // ─────────────────────────────────────────────────────────────────────────────
 export default function TourTooltip(props: TourTooltipProps) {
-  if (props.step.variant === 'pointer') {
+  if (props.step.variant === 'pointer' || props.totalSteps === 1) {
     return (
       <PointerTooltip
         step={props.step}
@@ -279,6 +361,8 @@ export default function TourTooltip(props: TourTooltipProps) {
         onPrevious={props.onPrevious}
         onNext={props.onNext}
         onSkip={props.onSkip}
+        onDoItNow={props.onDoItNow}
+        onNavigateAndContinue={props.onNavigateAndContinue}
       />
     );
   }
