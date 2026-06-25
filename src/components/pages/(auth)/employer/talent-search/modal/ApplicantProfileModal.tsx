@@ -1,7 +1,9 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 import { XCircleIcon, PrinterIcon } from "@heroicons/react/24/solid";
+
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetApplicantDetails from "../hook/useGetApplicantDetails";
 import ApplicantProfile from "../profile/ApplicantProfile";
 import WorkExperience from "../profile/WorkExperience";
@@ -42,14 +44,14 @@ function ApplicantProfileModal({
   }, [applicantDetailsData]);
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={() => customCloseModal()}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -59,11 +61,11 @@ function ApplicantProfileModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-start justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -72,7 +74,7 @@ function ApplicantProfileModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-2xl">
+              <DialogPanel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-2xl">
                 <div className="flex bg-savoy-blue p-2 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Profile Details
@@ -86,9 +88,8 @@ function ApplicantProfileModal({
                 </div>
                 <div className="p-4">
                   {isLoading ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                      <p className="mt-2 text-gray-600">Loading profile/s...</p>
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner size='md' showText={true} text='Loading profile...' />
                     </div>
                   ) : (
                     <div className="flex flex-col md:flex-row gap-6">
@@ -105,12 +106,12 @@ function ApplicantProfileModal({
                     </div>
                   )}
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }
 

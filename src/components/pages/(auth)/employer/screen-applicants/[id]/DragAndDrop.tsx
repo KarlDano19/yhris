@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react"
-import { DragDropContext, Draggable } from "react-beautiful-dnd"
+import { DragDropContext, Draggable } from "@hello-pangea/dnd"
 import { StrictModeDroppable } from "../layouts/StrictModeDroppable"
 import Stage from "./Stage"
 import { useParams } from "next/navigation";

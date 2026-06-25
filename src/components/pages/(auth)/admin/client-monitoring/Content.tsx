@@ -2,21 +2,23 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
-
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
+import { Tooltip } from 'react-tooltip';
 import ClientGoalModal from './modal/ClientGoalModal';
 import EditClientSourceModal from './modal/EditClientSourceModal';
 import CreateClientModal from './modal/CreateClientModal';
 import RecordPaymentModal from './modal/RecordPaymentModal';
+import DeleteClientModal from './modal/DeleteClientModal';
 import useClientItems from './hooks/useGetClientItems';
+import useToggleEmployerOTP from './hooks/useToggleEmployerOTP';
 
-import { ArrowLeftIcon, CreditCardIcon, MagnifyingGlassIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { CreditCardIcon, MagnifyingGlassIcon, ShieldCheckIcon, ShieldExclamationIcon, TrashIcon } from '@heroicons/react/24/outline';
 import MoreIcon from '@/svg/MoreIcon';
+import EditIcon from '@/svg/EditIcon';
 
 const CLIENT_SOURCE_OPTIONS = ["", "Direct Client", "RCBC Partner", "GLOBE Partner"];
 
@@ -44,18 +46,24 @@ const Content = () => {
   const [isCreateClientOpen, setIsCreateClientOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<{ id: number; name: string; client_source: string; partner: string } | null>(null);
   const [paymentTarget, setPaymentTarget] = useState<{ id: number; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
   const { data: dataClient, isLoading: isGetClientLoading, refetch } = useClientItems({
     search,
     client_source: clientSourceFilter,
   });
 
+  const { mutate: toggleOTP, isLoading: isTogglingOTP } = useToggleEmployerOTP();
+
   useEffect(() => {
     if (dataClient && !isGetClientLoading) {
       setClientItems(dataClient);
-      setCurrentPage(1);
     }
   }, [dataClient]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, clientSourceFilter]);
 
   const totalRecords = clientItems.length;
   const totalPages = Math.ceil(totalRecords / pageSize) || 1;
@@ -77,7 +85,10 @@ const Content = () => {
       return paginatedItems.map((item: any, index: number) => {
         const sub = item.subscription;
         return (
-          <tr key={item.id}>
+          <tr
+            key={item.id}
+            className='hover:bg-gray-50 transition-colors'
+          >
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{(currentPage - 1) * pageSize + index + 1}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-800 font-medium'>{item.name}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.partner || 'Direct Client'}</td>
@@ -91,23 +102,75 @@ const Content = () => {
               {sub?.days_remaining != null ? `${sub.days_remaining}d` : '—'}
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm'>
-              <div className='flex items-center justify-center gap-1'>
+              <div className='flex justify-center space-x-2'>
                 <button
                   onClick={() => setEditTarget({ id: item.id, name: item.name, client_source: item.client_source || '', partner: item.partner || '' })}
-                  className='p-1 rounded hover:bg-gray-100'
-                  title='Edit client source'
+                  data-tooltip-id='otp-btn-tooltip'
+                  data-tooltip-content='Edit client source'
+                  data-tooltip-place='top'
                 >
-                  <PencilSquareIcon className='w-4 h-4 text-gray-500' />
+                  <EditIcon />
                 </button>
                 {(!sub || ['Expired', 'No Subscription'].includes(sub.status)) && (
                   <button
                     onClick={() => setPaymentTarget({ id: item.id, name: item.name })}
-                    className='p-1 rounded hover:bg-gray-100'
-                    title='Record payment'
+                    className='border rounded px-[0.65em] border-[#22c55e9f] text-green-600 hover:bg-green-50'
+                    data-tooltip-id='otp-btn-tooltip'
+                    data-tooltip-content='Record payment'
+                    data-tooltip-place='top'
                   >
-                    <CreditCardIcon className='w-4 h-4 text-gray-500' />
+                    <CreditCardIcon className='w-5 h-5' />
                   </button>
                 )}
+                <button
+                  onClick={() =>
+                    toggleOTP(
+                      { employerId: item.id, is_enabled: !item.otp_enabled },
+                      {
+                        onSuccess: () => {
+                          toast.custom(
+                            <CustomToast
+                              message={`OTP ${!item.otp_enabled ? 'enabled' : 'disabled'} for ${item.name}.`}
+                              type='success'
+                            />
+                          );
+                        },
+                        onError: (err: any) => {
+                          toast.custom(
+                            <CustomToast
+                              message={err?.message ?? 'Failed to update OTP settings.'}
+                              type='error'
+                            />
+                          );
+                        },
+                      }
+                    )
+                  }
+                  disabled={isTogglingOTP}
+                  className={`border rounded px-[0.65em] disabled:opacity-50 ${
+                    item.otp_enabled
+                      ? 'border-[#22c55e9f] text-green-600 hover:bg-green-50'
+                      : 'border-red-300 text-red-400 hover:bg-red-50'
+                  }`}
+                  data-tooltip-id='otp-btn-tooltip'
+                  data-tooltip-content={item.otp_enabled ? 'OTP Enabled — click to disable' : 'OTP Disabled — click to enable'}
+                  data-tooltip-place='top'
+                >
+                  {item.otp_enabled ? (
+                    <ShieldCheckIcon className='w-5 h-5' />
+                  ) : (
+                    <ShieldExclamationIcon className='w-5 h-5' />
+                  )}
+                </button>
+                <button
+                  onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
+                  className='border rounded px-[0.65em] border-red-300 text-red-400 hover:bg-red-50'
+                  data-tooltip-id='otp-btn-tooltip'
+                  data-tooltip-content='Delete company'
+                  data-tooltip-place='top'
+                >
+                  <TrashIcon className='w-5 h-5' />
+                </button>
               </div>
             </td>
           </tr>
@@ -215,6 +278,7 @@ const Content = () => {
             />
           </div>
       </div>
+      <Tooltip id='otp-btn-tooltip' />
       <ClientGoalModal isOpen={isClientGoalModalOpen} setIsOpen={setIsClientGoalModalOpen} />
       <EditClientSourceModal
         isOpen={!!editTarget}
@@ -226,6 +290,12 @@ const Content = () => {
         isOpen={!!paymentTarget}
         onClose={() => setPaymentTarget(null)}
         employer={paymentTarget}
+      />
+      <DeleteClientModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        employer={deleteTarget}
+        refetch={refetch}
       />
     </>
   );

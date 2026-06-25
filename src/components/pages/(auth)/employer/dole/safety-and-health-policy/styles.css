@@ -3,6 +3,12 @@
   display: none !important;
 }
 
+.policy-content {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
 /* Shared styles for both preview and editor */
 .policy-content,
 .quill-editor-container .ql-editor {
@@ -40,6 +46,14 @@
   font-weight: bold;
   margin-top: 1rem;
   color: #333;
+}
+
+.policy-content ol,
+.quill-editor-container .ql-editor ol {
+  list-style-type: decimal !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem !important;
 }
 
 .policy-content p,

@@ -1,6 +1,3 @@
-import dynamic from "next/dynamic";
-import { useMemo } from "react";
-
 // Enhanced modules for ReactQuill to handle HTML content better
 export const ENHANCED_QUILL_MODULES = {
   toolbar: [
@@ -12,10 +9,6 @@ export const ENHANCED_QUILL_MODULES = {
     [{ color: [] }, { background: [] }],
     ['clean']
   ],
-  clipboard: {
-    // Make sure pasted content is properly formatted
-    matchVisual: false,
-  }
 };
 
 // Enhanced formats to better support HTML content

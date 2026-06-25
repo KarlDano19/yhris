@@ -222,11 +222,17 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       });
   };
 
+  const handleSSOError = (message: string) => {
+    toast.custom(() => <CustomToast message={message || 'SSO login failed. Please try again.'} type='error' />, { duration: 7000 });
+  };
+
   // Primary: window.opener.postMessage listener (works cross-origin, e.g. www vs non-www)
   useEffect(() => {
     const handlePostMessage = (event: MessageEvent) => {
       if (event.data?.isGranted) {
         handleSSOData(event.data);
+      } else if (event.data?.isGranted === false) {
+        handleSSOError(event.data.error);
       }
     };
     window.addEventListener('message', handlePostMessage);
@@ -241,6 +247,8 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
     channel.onmessage = (event) => {
       if (event.data.isGranted) {
         handleSSOData(event.data);
+      } else if (event.data.isGranted === false) {
+        handleSSOError(event.data.error);
       }
     };
 
@@ -256,9 +264,11 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       if (event.key === 'sso_result' && event.newValue) {
         try {
           const data = JSON.parse(event.newValue);
+          localStorage.removeItem('sso_result');
           if (data?.isGranted) {
-            localStorage.removeItem('sso_result');
             handleSSOData(data);
+          } else if (data?.isGranted === false) {
+            handleSSOError(data.error);
           }
         } catch (e) {
           console.error('SSO localStorage fallback parse error:', e);
@@ -275,10 +285,12 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       const stored = localStorage.getItem('sso_result');
       if (stored) {
         const data = JSON.parse(stored);
+        localStorage.removeItem('sso_result');
         if (data?.isGranted) {
-          localStorage.removeItem('sso_result');
           handleSSOData(data);
           return true;
+        } else if (data?.isGranted === false) {
+          handleSSOError(data.error);
         }
       }
     } catch (e) {

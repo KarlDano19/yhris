@@ -35,7 +35,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt, isLog
     'screening-question-guideline',
     'onboarding',
     'manage',
-    'employee-separation',
+    'offboarding',
     'employer-profile',
     'setup-employer-profile',
     'evaluation',

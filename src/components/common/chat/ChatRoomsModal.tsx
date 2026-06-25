@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useEffect, useRef } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
 import { XMarkIcon, BriefcaseIcon, UserIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -611,7 +611,7 @@ const ChatRoomsModal = ({
     <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -621,12 +621,12 @@ const ChatRoomsModal = ({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
-        </Transition.Child>
+        </TransitionChild>
 
         {/* Modal Container */}
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-start justify-center p-4 pt-16">
-            <Transition.Child
+            <TransitionChild
               as="div"
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95"
@@ -636,12 +636,12 @@ const ChatRoomsModal = ({
               leaveTo="opacity-0 scale-95"
               className="w-full max-w-2xl"
             >
-              <Dialog.Panel className="w-full transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+              <DialogPanel className="w-full transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
                 {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-gray-200">
-                  <Dialog.Title as="h2" className="text-lg font-semibold text-gray-800">
+                  <DialogTitle as="h2" className="text-lg font-semibold text-gray-800">
                     Messages
-                  </Dialog.Title>
+                  </DialogTitle>
                   <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
                     <XMarkIcon className="h-6 w-6" />
                   </button>
@@ -650,8 +650,8 @@ const ChatRoomsModal = ({
                 {/* Body */}
                 <div className="p-5">{renderContent()}</div>
                 <Tooltip id="business-chat-tooltip" />
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>

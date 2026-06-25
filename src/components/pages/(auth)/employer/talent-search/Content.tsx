@@ -51,6 +51,35 @@ const STORAGE_KEYS = {
   HAS_SEARCHED: 'talent-search-has-searched',
 };
 
+const ApplicantAvatar = ({ applicant, size = 100 }: { applicant: any; size?: number }) => {
+  const [imageError, setImageError] = useState(false);
+
+  if (!applicant.photo || imageError) {
+    return (
+      <PlaceholderAvatar
+        width={size}
+        height={size}
+        firstName={applicant.firstname}
+        lastName={applicant.lastname}
+        className='flex-shrink-0'
+      />
+    );
+  }
+
+  return (
+    <div style={{ width: size, height: size }} className='rounded-xl overflow-hidden flex-shrink-0'>
+      <Image
+        src={applicant.photo}
+        alt={`${applicant.firstname} ${applicant.lastname}`}
+        width={size}
+        height={size}
+        className='w-full h-full object-cover'
+        onError={() => setImageError(true)}
+      />
+    </div>
+  );
+};
+
 const Content = () => {
   const [searchInput, setSearchInput] = useState('');
   const [starredTags, setStarredTags] = useState<Set<string>>(new Set());
@@ -113,36 +142,6 @@ const Content = () => {
 
       return currentEndDate > mostRecentEndDate ? current : mostRecent;
     });
-  };
-
-  // Helper component to display applicant avatar with fallback
-  const ApplicantAvatar = ({ applicant, size = 100 }: { applicant: any; size?: number }) => {
-    const [imageError, setImageError] = useState(false);
-
-    if (!applicant.photo || imageError) {
-      return (
-        <PlaceholderAvatar
-          width={size}
-          height={size}
-          firstName={applicant.firstname}
-          lastName={applicant.lastname}
-          className='flex-shrink-0'
-        />
-      );
-    }
-
-    return (
-      <div style={{ width: size, height: size }} className='rounded-xl overflow-hidden flex-shrink-0'>
-        <Image
-          src={applicant.photo}
-          alt={`${applicant.firstname} ${applicant.lastname}`}
-          width={size}
-          height={size}
-          className='w-full h-full object-cover'
-          onError={() => setImageError(true)}
-        />
-      </div>
-    );
   };
 
   const {

@@ -11,6 +11,13 @@ interface SmartButtonProps {
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   title?: string;
+  /**
+   * When true, SmartButton delegates rendering to its single child element instead
+   * of wrapping it in a <button>. Use this when the child is already a button-like
+   * element (e.g. headlessui MenuButton) to avoid nested <button> hydration errors.
+   * The child receives `disabled` and any permission-driven className additions.
+   */
+  asChild?: boolean;
 }
 
 export const SmartButton = React.forwardRef<HTMLButtonElement, SmartButtonProps>(({
@@ -21,6 +28,7 @@ export const SmartButton = React.forwardRef<HTMLButtonElement, SmartButtonProps>
   disabled = false,
   type = 'button',
   title = '',
+  asChild = false,
 }, ref) => {
   const cachedRights = useLegacyPermissions();
 
@@ -40,9 +48,22 @@ export const SmartButton = React.forwardRef<HTMLButtonElement, SmartButtonProps>
 
   // Combine permission-based disabled state with prop disabled state
   const isDisabled = disabled || (!hasPermission && fallbackBehavior === 'disable');
+  const isDisabledByPermissions = !hasPermission && fallbackBehavior === 'disable';
+
+  // asChild mode: inject disabled/className into the child element rather than
+  // rendering a wrapping <button>, preventing nested button DOM violations.
+  if (asChild && React.isValidElement(children)) {
+    const childProps = (children as React.ReactElement<any>).props;
+    const mergedClassName = isDisabledByPermissions
+      ? `${childProps.className || ''} opacity-50 cursor-not-allowed`.trim()
+      : childProps.className;
+    return React.cloneElement(children as React.ReactElement<any>, {
+      disabled: isDisabled,
+      className: mergedClassName,
+    });
+  }
 
   // Add opacity when disabled due to permissions
-  const isDisabledByPermissions = !hasPermission && fallbackBehavior === 'disable';
   const finalClassName = isDisabledByPermissions
     ? `${className} opacity-50 cursor-not-allowed`.trim()
     : className;

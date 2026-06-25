@@ -1,6 +1,6 @@
 import React, { Fragment, useRef } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -54,9 +54,9 @@ const PipelineInfoModal: React.FC<PipelineInfoModalProps> = ({
   const stages = parsePipelineStages(pipelineInfo, pipelineData);
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -66,11 +66,11 @@ const PipelineInfoModal: React.FC<PipelineInfoModalProps> = ({
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-2 text-center md:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
@@ -79,7 +79,7 @@ const PipelineInfoModal: React.FC<PipelineInfoModalProps> = ({
               leaveFrom='opacity-100 translate-y-0 md:scale-100'
               leaveTo='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-2xl'>
+              <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-2xl'>
         {/* Header */}
         <div className='flex bg-savoy-blue p-2 items-center'>
                   <div className='flex-1 ml-2'>
@@ -145,12 +145,12 @@ const PipelineInfoModal: React.FC<PipelineInfoModalProps> = ({
             Close
           </button>
         </div>
-      </Dialog.Panel>
-    </Transition.Child>
+      </DialogPanel>
+    </TransitionChild>
   </div>
 </div>
 </Dialog>
-</Transition.Root>
+</Transition>
 );
 };
 

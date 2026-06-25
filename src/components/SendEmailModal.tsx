@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 
-import dynamic from "next/dynamic";
-
 import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import Select from 'react-select';
@@ -10,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import CustomToast from "@/components/CustomToast";
 import UnsavedChangesModal from "@/components/UnsavedChangesModal";
 import ModalLayout from "@/components/ModalLayout";
+import ReactQuill from "@/components/ReactQuillDynamic";
 import EmailField from "@/components/common/EmailField";
 import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItems";
 import useTagTo from "@/components/hooks/useTagTo";
@@ -22,7 +21,7 @@ import EyePassword from "@/svg/EyePassword";
 import InfoIcon from "@/svg/InfoIcon";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 
 interface Field {
   onChange: (value: any) => void;
@@ -88,11 +87,6 @@ export default function SendEmailModal({
   emailFieldDataSource = 'employees',
   prePopulatedData
 }: SendEmailModalProps) {
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
-    [isOpen]
-  );
-  
   const [isCCOpen, setIsCCOpen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState("");
@@ -114,6 +108,8 @@ export default function SendEmailModal({
   // Don't manage attachment state when using custom attachment section
   const shouldManageAttachment = showAttachment && !customAttachmentSection && !showDragDropAttachment;
   const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [isConfirmSendModalOpen, setIsConfirmSendModalOpen] = useState<boolean>(false);
+  const [pendingFormData, setPendingFormData] = useState<any>(null);
   const isInitialized = useRef(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
@@ -592,7 +588,6 @@ export default function SendEmailModal({
       return;
     }
 
-
     // Validate total attachment size (10MB limit)
     if (shouldManageAttachment || showDragDropAttachment) {
       const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10MB
@@ -609,13 +604,11 @@ export default function SendEmailModal({
     const template = data.template ? dataEmailTemplate.find(
       (item: any) => item.id === parseInt(data.template)
     ) : null;
-    
-    // Combine template attachments (URLs) with new files (File objects)
-    // In single attachment mode, only include the first template attachment
+
     const allAttachments: (File | string)[] = [];
     if (templateAttachments.length > 0) {
-      const templateAttsToInclude = effectiveAllowMultiple 
-        ? templateAttachments 
+      const templateAttsToInclude = effectiveAllowMultiple
+        ? templateAttachments
         : templateAttachments.slice(0, 1);
       allAttachments.push(...templateAttsToInclude.map(att => att.attachment));
     }
@@ -631,18 +624,25 @@ export default function SendEmailModal({
       template: template?.subject || '',
       message: data.message,
       ...((showAttachment || showDragDropAttachment) && allAttachments.length > 0 && {
-        // For single attachment mode, use 'attachment' (single), for multiple use 'attachments' (array)
-        // Use effectiveAllowMultiple to handle template-based multiple attachments
-        ...(effectiveAllowMultiple 
+        ...(effectiveAllowMultiple
           ? { attachments: allAttachments }
           : { attachment: allAttachments[0] }
         ),
       }),
     };
-    
+
+    // Show confirmation modal before actually sending
+    setPendingFormData(formData);
+    setIsConfirmSendModalOpen(true);
+  };
+
+  const handleConfirmSend = () => {
+    if (!pendingFormData) return;
     try {
-      onSubmit(formData);
+      onSubmit(pendingFormData);
       handleEmailSent();
+      setIsConfirmSendModalOpen(false);
+      setPendingFormData(null);
       resetFormData();
       onClose();
       if (onSuccess) onSuccess();
@@ -659,12 +659,88 @@ export default function SendEmailModal({
 
   return (
     <>
-      <ModalLayout 
-        title={title} 
-        isOpen={isOpen} 
-        handleClose={handleClose}
+      <ModalLayout
+        title={isConfirmSendModalOpen ? "Confirm Recipients" : title}
+        isOpen={isOpen}
+        handleClose={isConfirmSendModalOpen ? () => setIsConfirmSendModalOpen(false) : handleClose}
       >
-        <form onSubmit={onSubmitWithCleanup}>
+        {isConfirmSendModalOpen ? (
+          <>
+            <div className="px-4 pt-4 pb-6 space-y-4">
+              <p className="text-sm text-gray-600">Please review the recipients before sending.</p>
+
+              {/* To */}
+              <div className="sm:col-span-4">
+                <label className="block text-sm font-medium leading-6 text-gray-900">To</label>
+                <div className="mt-2 border border-gray-300 pl-2 pr-2 pt-1.5 pb-1.5 flex items-center gap-3 flex-wrap w-full rounded-md">
+                  {(pendingFormData?.email || []).map((email: string, i: number) => (
+                    <div key={i} className="bg-[#ACB9CB] rounded-md flex items-center py-0 px-4 text-sm">
+                      <p>{email}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CC */}
+              {pendingFormData?.cc && pendingFormData.cc.length > 0 && (
+                <div className="sm:col-span-4">
+                  <label className="block text-sm font-medium leading-6 text-gray-900">CC</label>
+                  <div className="mt-2 border border-gray-300 pl-2 pr-2 pt-1.5 pb-1.5 flex items-center gap-3 flex-wrap w-full rounded-md">
+                    {pendingFormData.cc.map((email: string, i: number) => (
+                      <div key={i} className="bg-[#ACB9CB] rounded-md flex items-center py-0 px-4 text-sm">
+                        <p>{email}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* BCC */}
+              {pendingFormData?.bcc && pendingFormData.bcc.length > 0 && (
+                <div className="sm:col-span-4">
+                  <label className="block text-sm font-medium leading-6 text-gray-900">BCC</label>
+                  <div className="mt-2 border border-gray-300 pl-2 pr-2 pt-1.5 pb-1.5 flex items-center gap-3 flex-wrap w-full rounded-md">
+                    {pendingFormData.bcc.map((email: string, i: number) => (
+                      <div key={i} className="bg-[#ACB9CB] rounded-md flex items-center py-0 px-4 text-sm">
+                        <p>{email}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <hr />
+            <div className="flex items-center gap-4 text-[15px] font-bold justify-end flex-wrap p-4">
+              <button
+                type="button"
+                onClick={() => setIsConfirmSendModalOpen(false)}
+                className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
+              >
+                Go Back
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSend}
+                disabled={isLoading}
+                className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd] disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div
+                    className='animate-spin inline-block w-[20px] h-[20px] border-[2px] border-current border-t-transparent text-white rounded-full'
+                    role='status'
+                    aria-label='loading'
+                  >
+                    <span className='sr-only'>Loading...</span>
+                  </div>
+                ) : (
+                  submitButtonText
+                )}
+              </button>
+            </div>
+          </>
+        ) : null}
+        <form onSubmit={onSubmitWithCleanup} style={{ display: isConfirmSendModalOpen ? 'none' : undefined }}>
           <div className="px-4 pt-4 pb-6">
             {/* Conditional Email Template Section */}
             {showEmailTemplate && (
@@ -695,7 +771,7 @@ export default function SendEmailModal({
                       isOpen={showEmailTemplateTooltip}
                     >
                       <div>
-                        <h2 className='text-[12px] font-medium'>Note: To, CC, and BCC from the email template will not be applied when recipients are pre-assigned.</h2>
+                        <h2 className='text-[12px] font-medium'>Note: Template recipients (To, CC, BCC) will be added to any pre-assigned recipients.</h2>
                       </div>
                     </Tooltip>
                   )}
@@ -721,30 +797,19 @@ export default function SendEmailModal({
                           onChange(val?.value || '');
                           if (val?.template) {
                             const template = val.template;
-                            // Only modify recipients from template if no default recipients provided
-                            if (defaultRecipients.length === 0) {
-                              const templateRecipients = template.to || [];
-                              const newRecipients = [...defaultRecipients];
-                              templateRecipients.forEach((email: string) => {
-                                if (!newRecipients.includes(email)) {
-                                  newRecipients.push(email);
-                                }
-                              });
-                              setTagsTo(newRecipients);
+                            // Merge template recipients into existing fields (no duplicates)
+                            if (template.to && template.to.length > 0) {
+                              setTagsTo([...new Set([...tagsTo, ...template.to])]);
+                            }
 
-                              if (!disableCCBCC) {
-                                if (template.bcc) {
-                                  setIsBCCOpen(true);
-                                  setTagsBcc(template.bcc);
-                                } else {
-                                  setTagsBcc([]);
-                                }
-                                if (template.cc) {
-                                  setIsCCOpen(true);
-                                  setTagsCc(template.cc);
-                                } else {
-                                  setTagsCc([]);
-                                }
+                            if (!disableCCBCC) {
+                              if (template.cc && template.cc.length > 0) {
+                                setIsCCOpen(true);
+                                setTagsCc([...new Set([...tagsCc, ...template.cc])]);
+                              }
+                              if (template.bcc && template.bcc.length > 0) {
+                                setIsBCCOpen(true);
+                                setTagsBcc([...new Set([...tagsBcc, ...template.bcc])]);
                               }
                             }
                             setValue("message", template.body);
@@ -784,13 +849,18 @@ export default function SendEmailModal({
                               setEffectiveAllowMultiple(allowMultipleAttachments);
                             }
                           } else {
-                            // Clear template-related fields if no template is selected
-                            if (defaultRecipients.length === 0) {
-                              setTagsTo(defaultRecipients);
-                              if (!disableCCBCC) {
-                                setTagsCc([]);
-                                setTagsBcc([]);
-                              }
+                            // Revert each field to its initial pre-populated state when template is cleared
+                            const initialTo = prePopulatedData?.to && prePopulatedData.to.length > 0
+                              ? prePopulatedData.to
+                              : defaultRecipients;
+                            setTagsTo(initialTo);
+                            if (!disableCCBCC) {
+                              const initialCc = prePopulatedData?.cc && prePopulatedData.cc.length > 0 ? prePopulatedData.cc : [];
+                              const initialBcc = prePopulatedData?.bcc && prePopulatedData.bcc.length > 0 ? prePopulatedData.bcc : [];
+                              setTagsCc(initialCc);
+                              setTagsBcc(initialBcc);
+                              setIsCCOpen(initialCc.length > 0);
+                              setIsBCCOpen(initialBcc.length > 0);
                             }
                             setValue("message", "");
                             setValue("subject", "");
@@ -1486,7 +1556,8 @@ export default function SendEmailModal({
           contentType="email"
         />
       )}
-      
+
+
       {/* Tooltips */}
       <Tooltip id='to-section-tooltip' />
       <Tooltip id='cc-section-tooltip' />

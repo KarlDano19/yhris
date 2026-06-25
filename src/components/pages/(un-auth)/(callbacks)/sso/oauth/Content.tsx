@@ -122,10 +122,10 @@ function Content() {
           postAndClose(postMessageData);
         },
         onError: (err: any) => {
-          setErrorMessage(err);
-          setTimeout(() => {
-            window.close();
-          }, 1000);
+          const message = typeof err === 'string' && err ? err : 'Login failed. Please try again.';
+          setErrorMessage(message);
+          setHasError(true);
+          postAndClose({ isGranted: false, error: message, provider: params?.provider });
         },
       };
       mutate(data, callbackRequest);

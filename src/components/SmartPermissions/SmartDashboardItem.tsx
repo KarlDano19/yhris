@@ -12,7 +12,8 @@ interface DashboardMenu {
   onClickEvent?: () => void;
   isAvailable: boolean;
   isGrayedOut?: boolean;
-  permissionId?: string; // New field for permission checking
+  permissionId?: string;
+  tourId?: string;
 }
 
 interface SmartDashboardItemProps {
@@ -63,6 +64,7 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
           className={`bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80 ${
             isGrayedOut ? 'opacity-50 cursor-pointer' : ''
           }`}
+          {...(menu.tourId ? { 'data-tour-id': menu.tourId } : {})}
           onClick={shouldBlockClick ? (e) => {
             e.preventDefault();
             handleGrayedOutClick();
@@ -129,6 +131,7 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
             isGrayedOut ? 'opacity-50 cursor-pointer' : ''
           }`}
           onClick={shouldBlockClick ? handleGrayedOutClick : menu.onClickEvent}
+          {...(menu.tourId ? { 'data-tour-id': menu.tourId } : {})}
           data-permission-id={menu.permissionId}
           data-required-permission={requiredPermission}
           data-has-permission={hasPermission}

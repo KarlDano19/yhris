@@ -2,8 +2,8 @@
 
 import { Fragment, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 import { PlusIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import { EyeIcon } from '@heroicons/react/24/outline';
@@ -104,9 +104,9 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-30' onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -116,11 +116,11 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-center justify-center p-4'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:scale-95'
@@ -129,7 +129,7 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:scale-95'
             >
-              <Dialog.Panel className='relative w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden'>
+              <DialogPanel className='relative w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden'>
                 {/* Header */}
                 <div className='flex items-center gap-4 bg-savoy-blue p-3'>
                   <h3 className='flex-1 text-white font-semibold ml-2'>
@@ -422,12 +422,12 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
                   previewItem={previewItem}
                   onClose={() => setPreviewItem(null)}
                 />
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

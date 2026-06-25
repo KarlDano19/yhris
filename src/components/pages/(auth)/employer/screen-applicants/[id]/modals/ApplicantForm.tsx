@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, Fragment, useRef } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -842,25 +842,25 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
 
   const renderDocxDownloadModal = () => {
     return (
-      <Transition.Root show={showDocxDownloadModal} as={Fragment}>
+      <Transition show={showDocxDownloadModal} as={Fragment}>
         <Dialog as='div' className='relative z-40' onClose={() => setShowDocxDownloadModal(false)}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300' enterFrom='opacity-0' enterTo='opacity-100'
             leave='ease-in duration-200' leaveFrom='opacity-100' leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-center justify-center p-4 text-center'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300' enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
                 enterTo='opacity-100 translate-y-0 sm:scale-100'
                 leave='ease-in duration-200' leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md'>
+                <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md'>
                   <div className='flex bg-savoy-blue p-2 items-center gap-4'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Download CV/Resume</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setShowDocxDownloadModal(false)} />
@@ -886,20 +886,20 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                       Close
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     );
   };
 
   return (
     <>
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-30' initialFocus={cancelButtonRef} onClose={handleClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -909,10 +909,10 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-center justify-center p-4 text-center'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -921,7 +921,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel
+              <DialogPanel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
                   viewCV ? 'max-w-4xl' : 'max-w-3xl'
@@ -1037,8 +1037,8 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                     </button>
                   </div>
                 )}
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
         
@@ -1053,7 +1053,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           />
         )}
       </Dialog>
-    </Transition.Root>
+    </Transition>
     {renderDocxDownloadModal()}
     </>
   );

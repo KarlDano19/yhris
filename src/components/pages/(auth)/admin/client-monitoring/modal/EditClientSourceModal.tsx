@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -56,7 +56,7 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-200"
           enterFrom="opacity-0"
@@ -66,9 +66,9 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/30" />
-        </Transition.Child>
+        </TransitionChild>
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-200"
             enterFrom="opacity-0 scale-95"
@@ -77,10 +77,10 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-              <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
+            <DialogPanel className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+              <DialogTitle className="text-lg font-semibold text-gray-900 mb-4">
                 Edit Client Info — {employer?.name}
-              </Dialog.Title>
+              </DialogTitle>
 
               <form onSubmit={onSubmit} className="space-y-4">
                 <div>
@@ -136,8 +136,8 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
                   </button>
                 </div>
               </form>
-            </Dialog.Panel>
-          </Transition.Child>
+            </DialogPanel>
+          </TransitionChild>
         </div>
       </Dialog>
     </Transition>

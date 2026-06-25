@@ -1,6 +1,6 @@
 import React, { useState, Fragment, useRef, useEffect } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 
 import useGetJobPostDetails from '../../hooks/job/useGetJobPostDetails';
 import useGetValidStagesForRestoration, { ValidStage } from '../../hooks/applicant/useGetValidStagesForRestoration';
@@ -10,6 +10,8 @@ import useBatchUnarchiveApplications from '../../hooks/applicant/useBatchUnarchi
 import classNames from '@/helpers/classNames';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
+
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface RestoreApplicationModalProps {
   isOpen: boolean;
@@ -148,14 +150,14 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-50"
         initialFocus={cancelButtonRef}
         onClose={handleClose}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -165,11 +167,11 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -178,14 +180,14 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl">
                 <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                   <div className="flex items-start">
                     
                     <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left flex-1">
-                      <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                      <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
                         {getModalTitle()}
-                      </Dialog.Title>
+                      </DialogTitle>
                       <div className="mt-2">
                         {isMultiple ? (
                           <p className="text-sm text-gray-500">
@@ -207,8 +209,7 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                         
                         {isLoadingStages ? (
                           <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                            <span className="ml-2 text-gray-600">Loading available stages...</span>
+                            <LoadingSpinner size='md' showText={true} text='Loading available stages...' />
                           </div>
                         ) : (
                           <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -311,11 +312,8 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                     onClick={handleConfirm}
                   >
                     {isLoading || restoreInProgress ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                      <span className="inline-flex items-center gap-2">
+                        <LoadingSpinner size='xs' />
                         Restoring...
                       </span>
                     ) : (
@@ -332,12 +330,12 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                     Cancel
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

@@ -17,13 +17,14 @@ import useResendKickoff from '../prospective-clients/hooks/useResendKickoff';
 import CreatePartnerModal from './modal/CreatePartnerModal';
 import EditPartnerModal from './modal/EditPartnerModal';
 import DeletePartnerModal from './modal/DeletePartnerModal';
+import ViewPartnerEmailsModal from './modal/ViewPartnerEmailsModal';
 
 type T_ModalData = {
   id: number;
   open: boolean;
   name?: string;
-  email?: string;
-  phone?: string;
+  emails?: string[];
+  phones?: string[];
   is_active?: boolean;
 };
 
@@ -35,6 +36,7 @@ const Content = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState<T_ModalData | null>(null);
 
   const { data, isLoading, refetch } = useGetPartners(itemsFilter);
 
@@ -53,6 +55,9 @@ const Content = () => {
   const totalPages = Math.ceil(totalRecords / pageSize) || 1;
   const paginatedItems = partnerItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  const openViewModal = (item: any) =>
+    setIsViewModalOpen({ id: item.id, open: true, name: item.name, emails: item.email, phones: item.phone });
+
   const renderRows = () => {
     if (isLoading) {
       return (
@@ -70,8 +75,26 @@ const Content = () => {
       return paginatedItems.map((item: any) => (
         <tr key={item.id}>
           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-700">{item.name}</td>
-          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.email}</td>
-          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.phone || '—'}</td>
+          <td className="px-3 py-4 text-sm text-gray-500">
+            <button type="button" className="text-left hover:underline" onClick={() => openViewModal(item)}>
+              <span>{item.email?.[0] ?? '—'}</span>
+              {item.email?.length > 1 && (
+                <span className="ml-1 inline-block rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
+                  +{item.email.length - 1} more
+                </span>
+              )}
+            </button>
+          </td>
+          <td className="px-3 py-4 text-sm text-gray-500">
+            <button type="button" className="text-left hover:underline" onClick={() => openViewModal(item)}>
+              <span>{item.phone?.[0] ?? '—'}</span>
+              {item.phone?.length > 1 && (
+                <span className="ml-1 inline-block rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
+                  +{item.phone.length - 1} more
+                </span>
+              )}
+            </button>
+          </td>
           <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
             <span
               className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
@@ -85,7 +108,7 @@ const Content = () => {
             <div className="flex justify-center space-x-2">
               <button
                 onClick={() =>
-                  setIsEditModalOpen({ id: item.id, open: true, name: item.name, email: item.email, phone: item.phone, is_active: item.is_active })
+                  setIsEditModalOpen({ id: item.id, open: true, name: item.name, emails: item.email, phones: item.phone, is_active: item.is_active })
                 }
               >
                 <EditIcon />
@@ -184,6 +207,9 @@ const Content = () => {
       )}
       {isDeleteModalOpen && (
         <DeletePartnerModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
+      )}
+      {isViewModalOpen && (
+        <ViewPartnerEmailsModal isOpen={isViewModalOpen} setIsOpen={setIsViewModalOpen} />
       )}
     </>
   );

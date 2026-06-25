@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 
-import 'react-quill/dist/quill.snow.css';
-import { Dialog, Transition } from '@headlessui/react';
+import 'react-quill-new/dist/quill.snow.css';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type DescriptionModalProps = {
@@ -18,9 +18,9 @@ const DescriptionModal: React.FC<DescriptionModalProps> = ({
   description
 }) => {
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -30,11 +30,11 @@ const DescriptionModal: React.FC<DescriptionModalProps> = ({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -43,7 +43,7 @@ const DescriptionModal: React.FC<DescriptionModalProps> = ({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-3xl">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-3xl">
                 {/* Header */}
                 <div className="flex bg-savoy-blue p-4 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold text-lg">
@@ -66,12 +66,12 @@ const DescriptionModal: React.FC<DescriptionModalProps> = ({
                     <p className="text-gray-500 text-center py-8">No description available.</p>
                   )}
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

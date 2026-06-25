@@ -1,12 +1,11 @@
 import { useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react';
 
-import dynamic from 'next/dynamic';
-
 import { Marker } from '@react-google-maps/api';
 import { useForm } from 'react-hook-form';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import { ApplicantType, ContextTypes, ScheduleInterviewPropTypes as PropTypes } from '../../types';
 import { initialActionState } from '../../lib/initialActionState';
 import classNames from '@/helpers/classNames';
@@ -25,7 +24,7 @@ import CalendarIcon from '@/svg/CalendarIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {
@@ -115,7 +114,6 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
   const [map, setMap] = useState(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const applicant: ApplicantType | undefined = useMemo(() => {
     return state
       .find((stage) => stage.id === actionState.stageId)

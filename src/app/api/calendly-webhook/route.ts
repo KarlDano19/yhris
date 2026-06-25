@@ -40,9 +40,6 @@ interface LeadData {
   email: string;
   phone: string;
   companyName: string;
-  service: string;
-  employeeCount: string;
-  currentProcess: string;
   painPoint: string;
   scheduledAt: string;
   eventUri?: string;
@@ -83,10 +80,6 @@ function verifyCalendlySignature(rawBody: string, signature: string, secret: str
   }
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const sanitize = (v: unknown): string =>
-  String(v ?? '').replace(/[\r\n]+/g, ' ').trim();
-
 // ─── Parse Calendly payload ───────────────────────────────────────────────────
 function parsePayload(payload: any): LeadData | null {
   // Make format: flat object with source = 'make'
@@ -98,15 +91,12 @@ function parsePayload(payload: any): LeadData | null {
     const [firstName = '', ...rest] = fullName.trim().split(' ');
 
     return {
-      firstName: sanitize(payload?.firstName || firstName),
-      lastName: sanitize(payload?.lastName || rest.join(' ')),
+      firstName: payload?.firstName || firstName,
+      lastName: payload?.lastName || rest.join(' '),
       email,
-      phone: sanitize(payload?.phone),
-      companyName: sanitize(payload?.companyName),
-      service: sanitize(payload?.service),
-      employeeCount: sanitize(payload?.employeeCount),
-      currentProcess: sanitize(payload?.currentProcess),
-      painPoint: sanitize(payload?.painPoint),
+      phone: payload?.phone ?? '',
+      companyName: payload?.companyName ?? '',
+      painPoint: payload?.painPoint ?? '',
       scheduledAt: payload?.scheduledAt ?? '',
       eventUri: payload?.eventUri ?? '',
     };
@@ -129,15 +119,12 @@ function parsePayload(payload: any): LeadData | null {
     qa.find(q => q.question.toLowerCase().includes(keyword.toLowerCase()))?.answer ?? '';
 
   return {
-    firstName: sanitize(firstName),
-    lastName: sanitize(lastName),
+    firstName,
+    lastName,
     email,
-    phone: sanitize(find('phone')),
-    companyName: sanitize(find('company')),
-    service: sanitize(find('product') || find('service') || find('availing')),
-    employeeCount: sanitize(find('employee') || find('headcount')),
-    currentProcess: sanitize(find('current hr') || find('payroll process') || find('process')),
-    painPoint: sanitize(find('challenge') || find('pain')),
+    phone: find('phone'),
+    companyName: find('company'),
+    painPoint: find('challenge') || find('pain') || find('hr'),
     scheduledAt,
   };
 }
@@ -201,9 +188,6 @@ A prospect just booked a demo. Here is their info:
 - Company: ${data.companyName || '(not provided)'}
 - Email: ${data.email}
 - Phone: ${data.phone || '(not provided)'}
-- Product/Service interested in: ${data.service || '(not provided)'}
-- No. of employees: ${data.employeeCount || '(not provided)'}
-- Current HR/Payroll process: ${data.currentProcess || '(not provided)'}
 - HR challenge: ${data.painPoint || '(not provided)'}
 - Demo scheduled: ${data.scheduledAt || '(not provided)'}
 
@@ -280,22 +264,12 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
     reasons.push('established company name');
   }
 
-  // Employee count signal (+2 for 100+, +1 for 50+)
-  const empCount = parseInt(data.employeeCount.replace(/\D/g, ''), 10);
-  if (!isNaN(empCount) && empCount >= 100) {
-    score += 2;
-    reasons.push(`${empCount} employees`);
-  } else if (!isNaN(empCount) && empCount >= 50) {
-    score += 1;
-    reasons.push(`${empCount} employees`);
-  }
-
   // Pain point urgency (+3 for high fit, +2 for moderate, +0 for low)
-  const painLower = (data.painPoint + ' ' + data.service).toLowerCase();
-  if (painLower.includes('payroll') || painLower.includes('dole') || painLower.includes('compliance') || painLower.includes('termination')) {
+  const painLower = data.painPoint.toLowerCase();
+  if (painLower.includes('payroll') || painLower.includes('dole') || painLower.includes('compliance')) {
     score += 3;
     reasons.push('high-urgency pain point');
-  } else if (painLower.includes('records') || painLower.includes('leave') || painLower.includes('attendance') || painLower.includes('hris')) {
+  } else if (painLower.includes('records') || painLower.includes('leave') || painLower.includes('attendance')) {
     score += 2;
     reasons.push('moderate-urgency pain point');
   } else {
@@ -320,13 +294,10 @@ async function createLoopsContact(data: LeadData) {
     email: data.email,
     firstName: data.firstName,
     lastName: data.lastName,
-    ...(data.phone && { phone: data.phone }),
+    phone: data.phone,
     companyName: data.companyName,
     source: 'calendly',
     leadStatus: 'booked',
-    service: data.service,
-    employeeCount: data.employeeCount,
-    currentProcess: data.currentProcess,
     painPoint: data.painPoint,
     demoBooked: true,
     demoScheduledAt: data.scheduledAt,
@@ -485,9 +456,6 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     data.email,
     data.phone,
     data.companyName,
-    data.service,
-    data.employeeCount,
-    data.currentProcess,
     data.painPoint,
     data.scheduledAt,
     'booked',
@@ -501,7 +469,7 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   ]];
 
   const sheetsRes = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:S:append?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:P:append?valueInputOption=RAW`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
@@ -529,41 +497,31 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     ? new Date(data.scheduledAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
     : 'TBD';
 
-  const message = [
-    '📅 Demo Booked via Calendly',
-    '',
-    `👤 Name: ${data.firstName} ${data.lastName}`,
-    `🏢 Company: ${data.companyName}`,
-    `📧 Email: ${data.email}`,
-    data.phone ? `📞 Phone: ${data.phone}` : '',
-    data.service ? `🛠 Service: ${data.service}` : '',
-    data.employeeCount ? `👥 Employees: ${data.employeeCount}` : '',
-    data.currentProcess ? `⚙️ Current process: ${data.currentProcess}` : '',
-    `😤 Pain point: ${data.painPoint}`,
-    `🗓 Scheduled: ${bookedDate}`,
-    '',
-    scoring
-      ? [
-          `${tierEmoji} Score: ${scoring.score}/10 — ${scoring.tier.toUpperCase()}`,
-          `📝 ${scoring.notes}`,
-          scoring.personIntel ? `\n👤 Person Intel:\n${scoring.personIntel}` : '',
-          scoring.personResources?.length ? `\n🔗 Person Sources:\n${scoring.personResources.map(u => `• ${u}`).join('\n')}` : '',
-          scoring.companyIntel ? `\n🔍 Company Intel:\n${scoring.companyIntel}` : '',
-          scoring.companyResources?.length ? `\n🔗 Company Sources:\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}` : '',
-        ].filter(Boolean).join('\n')
-      : 'Scoring unavailable',
-  ].filter(s => s !== '').join('\n');
+  const message =
+    `📅 *Demo Booked via Calendly*\n\n` +
+    `👤 *Name:* ${data.firstName} ${data.lastName}\n` +
+    `🏢 *Company:* ${data.companyName}\n` +
+    `📧 *Email:* ${data.email}\n` +
+    `📞 *Phone:* ${data.phone}\n` +
+    `😤 *Pain point:* ${data.painPoint}\n` +
+    `🗓 *Scheduled:* ${bookedDate}\n\n` +
+    (scoring
+      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
+        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${scoring.personIntel}` : '') +
+        (scoring.personResources?.length
+          ? `\n\n🔗 *Person Sources:*\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
+          : '') +
+        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '') +
+        (scoring.companyResources?.length
+          ? `\n\n🔗 *Company Sources:*\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
+          : '')
+      : `_Scoring unavailable_`);
 
-  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: message }),
+    body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' }),
   });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    console.error('Telegram error:', JSON.stringify(err));
-  }
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -577,28 +535,14 @@ export async function POST(request: NextRequest) {
   }
 
   let payload: any;
-  const contentType = request.headers.get('content-type') ?? '';
-  if (contentType.includes('application/x-www-form-urlencoded')) {
-    payload = Object.fromEntries(new URLSearchParams(rawBody));
-  } else {
-    try {
-      payload = JSON.parse(rawBody);
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-    }
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
   if (payload.source !== 'make' && payload.event !== 'invitee.created') {
     return NextResponse.json({ received: true });
-  }
-
-  // Reject stale bookings from Make (older than 30 min based on Calendly created_at)
-  if (payload.source === 'make' && payload.createdAt) {
-    const age = Date.now() - new Date(payload.createdAt).getTime();
-    if (age > 20 * 60 * 1000) {
-      console.log('Stale booking skipped:', payload.createdAt);
-      return NextResponse.json({ received: true, skipped: 'stale' });
-    }
   }
 
   const data = parsePayload(payload.source === 'make' ? payload : payload.payload);

@@ -4,7 +4,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import BackButton from '@/components/BackButton';
@@ -735,10 +735,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
               {/* Column Settings */}
               <Menu as='div' className='relative'>
-                <Menu.Button className='bg-white border border-gray-300 rounded-md py-2 px-3 text-gray-700 text-sm font-medium shadow hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-savoy-blue flex items-center gap-2'>
+                <MenuButton className='bg-white border border-gray-300 rounded-md py-2 px-3 text-gray-700 text-sm font-medium shadow hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-savoy-blue flex items-center gap-2'>
                   <Cog6ToothIcon className='h-5 w-5' />
                   Columns
-                </Menu.Button>
+                </MenuButton>
                 <Transition
                   as={Fragment}
                   enter='transition ease-out duration-100'
@@ -748,7 +748,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   leaveFrom='transform opacity-100 scale-100'
                   leaveTo='transform opacity-0 scale-95'
                 >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                  <MenuItems className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='p-4'>
                       <div className='mb-4'>
                         <h3 className='text-sm font-semibold text-gray-900 mb-2'>
@@ -774,7 +774,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         </div>
                       </div>
                     </div>
-                  </Menu.Items>
+                  </MenuItems>
                 </Transition>
               </Menu>
             </div>

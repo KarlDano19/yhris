@@ -6,7 +6,8 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions, SessionData } from './lib/session';
 
 export async function middleware(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   const listPathname = request.nextUrl.pathname.split('/');
   const slicePaths = listPathname.slice(1);
   const firstRoute = slicePaths[0];
@@ -20,7 +21,7 @@ export async function middleware(request: NextRequest) {
   const hasActiveSubscription = session.hasActiveSubscription;
   const loginType = session.loginType;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation', 'privacy-notice', 'blog', 'form-response'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'offboarding-public', 'privacy-notice', 'blog', 'form-response'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
   const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
@@ -32,7 +33,7 @@ export async function middleware(request: NextRequest) {
     'screening-question-guideline',
     'onboarding',
     'manage',
-    'employee-separation',
+    'offboarding',
     'employer-profile',
     'setup-employer-profile',
     'evaluation',
@@ -69,7 +70,7 @@ export async function middleware(request: NextRequest) {
       if (employerRoutes.includes(firstRoute)) {
         if (
           firstRoute === 'dashboard' ||
-          firstRoute === 'employee-separation' ||
+          firstRoute === 'offboarding' ||
           firstRoute === 'manage' ||
           firstRoute === 'post-job' ||
           firstRoute === 'screen-applicants' ||
