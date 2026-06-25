@@ -15,8 +15,9 @@ import RecordPaymentModal from './modal/RecordPaymentModal';
 import DeleteClientModal from './modal/DeleteClientModal';
 import useClientItems from './hooks/useGetClientItems';
 import useToggleEmployerOTP from './hooks/useToggleEmployerOTP';
+import useToggleClientTour from './hooks/useToggleClientTour';
 
-import { CreditCardIcon, MagnifyingGlassIcon, ShieldCheckIcon, ShieldExclamationIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { CreditCardIcon, MapIcon, MagnifyingGlassIcon, ShieldCheckIcon, ShieldExclamationIcon, TrashIcon } from '@heroicons/react/24/outline';
 import MoreIcon from '@/svg/MoreIcon';
 import EditIcon from '@/svg/EditIcon';
 
@@ -54,6 +55,7 @@ const Content = () => {
   });
 
   const { mutate: toggleOTP, isLoading: isTogglingOTP } = useToggleEmployerOTP();
+  const { mutate: toggleTour, isLoading: isTogglingTour } = useToggleClientTour();
 
   useEffect(() => {
     if (dataClient && !isGetClientLoading) {
@@ -84,6 +86,7 @@ const Content = () => {
     if (paginatedItems && paginatedItems.length > 0) {
       return paginatedItems.map((item: any, index: number) => {
         const sub = item.subscription;
+        const tourEnabled = item.tour_enabled !== false;
         return (
           <tr
             key={item.id}
@@ -105,7 +108,7 @@ const Content = () => {
               <div className='flex justify-center space-x-2'>
                 <button
                   onClick={() => setEditTarget({ id: item.id, name: item.name, client_source: item.client_source || '', partner: item.partner || '' })}
-                  data-tooltip-id='otp-btn-tooltip'
+                  data-tooltip-id='action-btn-tooltip'
                   data-tooltip-content='Edit client source'
                   data-tooltip-place='top'
                 >
@@ -115,7 +118,7 @@ const Content = () => {
                   <button
                     onClick={() => setPaymentTarget({ id: item.id, name: item.name })}
                     className='border rounded px-[0.65em] border-[#22c55e9f] text-green-600 hover:bg-green-50'
-                    data-tooltip-id='otp-btn-tooltip'
+                    data-tooltip-id='action-btn-tooltip'
                     data-tooltip-content='Record payment'
                     data-tooltip-place='top'
                   >
@@ -152,7 +155,7 @@ const Content = () => {
                       ? 'border-[#22c55e9f] text-green-600 hover:bg-green-50'
                       : 'border-red-300 text-red-400 hover:bg-red-50'
                   }`}
-                  data-tooltip-id='otp-btn-tooltip'
+                  data-tooltip-id='action-btn-tooltip'
                   data-tooltip-content={item.otp_enabled ? 'OTP Enabled — click to disable' : 'OTP Disabled — click to enable'}
                   data-tooltip-place='top'
                 >
@@ -163,9 +166,45 @@ const Content = () => {
                   )}
                 </button>
                 <button
+                  onClick={() =>
+                    toggleTour(
+                      { employerId: item.id, enable_tour: !tourEnabled },
+                      {
+                        onSuccess: () => {
+                          toast.custom(
+                            <CustomToast
+                              message={`Tour ${!tourEnabled ? 'enabled' : 'disabled'} for ${item.name}.`}
+                              type='success'
+                            />
+                          );
+                        },
+                        onError: (err: any) => {
+                          toast.custom(
+                            <CustomToast
+                              message={err?.message ?? 'Failed to update tour setting.'}
+                              type='error'
+                            />
+                          );
+                        },
+                      }
+                    )
+                  }
+                  disabled={isTogglingTour}
+                  className={`border rounded px-[0.65em] disabled:opacity-50 ${
+                    tourEnabled
+                      ? 'border-[#22c55e9f] text-green-600 hover:bg-green-50'
+                      : 'border-red-300 text-red-400 hover:bg-red-50'
+                  }`}
+                  data-tooltip-id='action-btn-tooltip'
+                  data-tooltip-content={tourEnabled ? 'Tour Enabled — click to disable' : 'Tour Disabled — click to enable'}
+                  data-tooltip-place='top'
+                >
+                  <MapIcon className='w-5 h-5' />
+                </button>
+                <button
                   onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
                   className='border rounded px-[0.65em] border-red-300 text-red-400 hover:bg-red-50'
-                  data-tooltip-id='otp-btn-tooltip'
+                  data-tooltip-id='action-btn-tooltip'
                   data-tooltip-content='Delete company'
                   data-tooltip-place='top'
                 >
@@ -278,7 +317,7 @@ const Content = () => {
             />
           </div>
       </div>
-      <Tooltip id='otp-btn-tooltip' />
+      <Tooltip id='action-btn-tooltip' />
       <ClientGoalModal isOpen={isClientGoalModalOpen} setIsOpen={setIsClientGoalModalOpen} />
       <EditClientSourceModal
         isOpen={!!editTarget}
