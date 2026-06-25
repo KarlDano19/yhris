@@ -315,7 +315,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
             <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
 
             {/* Tour help button — always visible so users can restart anytime */}
-            {!isRunning && (
+            {isDeveloper && !isRunning && (
               <button
                 onClick={handleRestartTour}
                 className='flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors'
