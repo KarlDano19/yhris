@@ -25,6 +25,11 @@ export interface BulkSyncResponse {
     updated: number;
     errors: number;
     total_processed: number;
+    error_details?: Array<{
+      name?: string;
+      system_id?: string | number;
+      error?: string;
+    }>;
   };
 }
 
