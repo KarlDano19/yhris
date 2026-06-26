@@ -27,6 +27,7 @@ function useDeleteStageTask(separationId: number | string, stage: string) {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['stageTasksCache', separationId, stage]);
+        queryClient.invalidateQueries(['separationCaseCache', String(separationId)]);
       },
     }
   );
