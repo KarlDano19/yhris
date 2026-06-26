@@ -155,6 +155,8 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
       onSuccess: (res: any) => {
         setIsLastPayModalOpen(null);
         toast.custom(() => <CustomToast message={res.message} type='success' />, { duration: 5000 });
+        // Last pay released = offboarding complete. Employee is now resigned — remove from selects.
+        queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         refetch().then(() => setLocalCase(null));
       },
       onError: (err: any) => toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 }),

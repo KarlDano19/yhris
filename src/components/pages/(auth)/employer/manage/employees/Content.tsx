@@ -552,9 +552,11 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
     }
     
     if (employeeItems && employeeItems.length > 0) {
-      return employeeItems.map((item: any) => (
+      return employeeItems.map((item: any) => {
+        const tdClass = `whitespace-nowrap px-3 py-5 text-sm ${item.is_resigned ? 'text-red-500' : 'text-gray-500'}`;
+        return (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+          <td className={tdClass}>
             <input
               type="checkbox"
               checked={selectedEmployees.has(item.id)}
@@ -563,50 +565,50 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
             />
           </td>
           {visibleColumns.date_hired && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
+            <td className={tdClass}>{item.date_hired}</td>
           )}
           {visibleColumns.system_id && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.system_id}</td>
+            <td className={tdClass}>{item.system_id}</td>
           )}
           {visibleColumns.employee_id && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_id}</td>
+            <td className={tdClass}>{item.employee_id}</td>
           )}
           {visibleColumns.firstname && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
+            <td className={tdClass}>{item.firstname}</td>
           )}
           {visibleColumns.middlename && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
+            <td className={tdClass}>{item.middlename}</td>
           )}
           {visibleColumns.lastname && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
+            <td className={tdClass}>{item.lastname}</td>
           )}
           {visibleColumns.location && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
+            <td className={tdClass}>{item.location}</td>
           )}
           {visibleColumns.position && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position || 'N/A'}</td>
+            <td className={tdClass}>{item.position || 'N/A'}</td>
           )}
           {visibleColumns.department && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
+            <td className={tdClass}>{item.department || 'N/A'}</td>
           )}
           {visibleColumns.employment_status && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employment_status || 'N/A'}</td>
+            <td className={tdClass}>{item.employment_status || 'N/A'}</td>
           )}
           {visibleColumns.email && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
+            <td className={tdClass}>{item.email}</td>
           )}
           {visibleColumns.mobile && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
+            <td className={tdClass}>{item.mobile}</td>
           )}
           {visibleColumns.gender && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
+            <td className={tdClass}>{item.gender}</td>
           )}
           {visibleColumns.address && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
+            <td className={`${tdClass} overflow-hidden text-ellipsis max-w-xs`}>
               {item.address}
             </td>
           )}
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+          <td className={`${tdClass} text-center`}>
             <div className='flex space-x-2'>
               <SmartButton
                 id="edit-employee-btn"
@@ -625,7 +627,8 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
             </div>
           </td>
         </tr>
-      ));
+        );
+      });
     } else {
       // Calculate total number of visible columns + checkbox + actions column
       const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length;
