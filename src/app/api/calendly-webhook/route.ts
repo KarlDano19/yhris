@@ -108,10 +108,9 @@ function parsePayload(payload: any): LeadData | null {
     };
   }
 
-  // Native Calendly format
-  const invitee = payload?.invitee;
-  const email = invitee?.email;
-  const fullName: string = invitee?.name ?? '';
+  // Native Calendly format — invitee data is at the top level of payload.payload
+  const email = payload?.email;
+  const fullName: string = payload?.name ?? '';
   const scheduledAt: string = payload?.scheduled_event?.start_time ?? '';
 
   if (!email) return null;
@@ -120,7 +119,7 @@ function parsePayload(payload: any): LeadData | null {
   const lastName = rest.join(' ');
 
   // Parse custom question answers by keyword matching
-  const qa: { question: string; answer: string }[] = invitee?.questions_and_answers ?? [];
+  const qa: { question: string; answer: string }[] = payload?.questions_and_answers ?? [];
   const find = (keyword: string) =>
     qa.find(q => q.question.toLowerCase().includes(keyword.toLowerCase()))?.answer ?? '';
 
