@@ -219,7 +219,7 @@ Based on this, return a JSON object with these exact fields. All fields are requ
   "tier": <"hot" | "warm" | "cold">,
   "notes": <1 short sentence only — just the scoring rationale: why hot/warm/cold based on email domain and pain point. Do NOT include company background here.>,
   "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context for the sales team. Use search results if available; otherwise use your general knowledge. Never leave this empty.>,
-  "personIntel": <2-3 sentences about the person who booked. Use search results if available. If not found, infer from signals: business vs personal email, the fact they booked themselves (likely decision-maker or influencer), their name, and their company role context. Never leave this empty.>
+  "personIntel": <2-3 sentences about the person who booked. CRITICAL: Only use search result information if it explicitly and unambiguously matches the exact name "${data.firstName} ${data.lastName}" — do NOT use information about people with similar but different names (e.g. if the prospect is "Karl Dano" and results mention "Karl Brian Dano", ignore those results entirely). If no verified match is found, infer only from available signals: business vs personal email, the fact they booked themselves (likely decision-maker or influencer), their name, and their company role context. Never leave this empty.>
 }
 
 Scoring guide:
