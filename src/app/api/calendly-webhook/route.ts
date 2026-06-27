@@ -339,7 +339,7 @@ async function createLoopsContact(data: LeadData) {
     service: data.service,
     employeeCount: data.employeeCount,
     currentProcess: data.currentProcess,
-    source: 'calendly',
+    source: 'YHRIS Web Booking',
     leadStatus: 'booked',
     painPoint: data.painPoint,
     demoBooked: true,
