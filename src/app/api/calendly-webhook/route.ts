@@ -337,11 +337,13 @@ async function createLoopsContact(data: LeadData) {
         const updateErr = await updateRes.json().catch(() => ({}));
         throw new Error(`Loops update error: ${JSON.stringify(updateErr)}`);
       }
+      console.log('Loops contact updated');
       return updateRes.json();
     }
     throw new Error(`Loops create error: ${JSON.stringify(err)}`);
   }
 
+  console.log('Loops contact created');
   return res.json();
 }
 
@@ -516,33 +518,40 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     : 'TBD';
 
   const message =
-    `📅 *Demo Booked via Calendly*\n\n` +
-    `👤 *Name:* ${data.firstName} ${data.lastName}\n` +
-    `🏢 *Company:* ${data.companyName}\n` +
-    `📧 *Email:* ${data.email}\n` +
-    `📞 *Phone:* ${data.phone || 'N/A'}\n` +
-    (data.service ? `🛠 *Service:* ${data.service}\n` : '') +
-    (data.employeeCount ? `👥 *Employees:* ${data.employeeCount}\n` : '') +
-    (data.currentProcess ? `⚙️ *Current process:* ${data.currentProcess}\n` : '') +
-    `😤 *Pain point:* ${data.painPoint}\n` +
-    `🗓 *Scheduled:* ${bookedDate}\n\n` +
+    `📅 Demo Booked via Calendly\n\n` +
+    `👤 Name: ${data.firstName} ${data.lastName}\n` +
+    `🏢 Company: ${data.companyName}\n` +
+    `📧 Email: ${data.email}\n` +
+    `📞 Phone: ${data.phone || 'N/A'}\n` +
+    (data.service ? `🛠 Service: ${data.service}\n` : '') +
+    (data.employeeCount ? `👥 Employees: ${data.employeeCount}\n` : '') +
+    (data.currentProcess ? `⚙️ Current process: ${data.currentProcess}\n` : '') +
+    `😤 Pain point: ${data.painPoint}\n` +
+    `🗓 Scheduled: ${bookedDate}\n\n` +
     (scoring
-      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
-        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${scoring.personIntel}` : '') +
+      ? `${tierEmoji} Score: ${scoring.score}/10 — ${scoring.tier.toUpperCase()}\n📝 ${scoring.notes}` +
+        (scoring.personIntel ? `\n\n👤 Person Intel:\n${scoring.personIntel}` : '') +
         (scoring.personResources?.length
-          ? `\n\n🔗 *Person Sources:*\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
+          ? `\n\n🔗 Person Sources:\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
           : '') +
-        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '') +
+        (scoring.companyIntel ? `\n\n🔍 Company Intel:\n${scoring.companyIntel}` : '') +
         (scoring.companyResources?.length
-          ? `\n\n🔗 *Company Sources:*\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
+          ? `\n\n🔗 Company Sources:\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
           : '')
-      : `_Scoring unavailable_`);
+      : `Scoring unavailable`);
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' }),
+    body: JSON.stringify({ chat_id: chatId, text: message }),
   });
+
+  if (!tgRes.ok) {
+    const err = await tgRes.json().catch(() => ({}));
+    console.error('Telegram error:', JSON.stringify(err));
+  } else {
+    console.log('Telegram notification sent');
+  }
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
