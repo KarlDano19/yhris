@@ -730,15 +730,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   <h2 className='text-xl font-bold text-indigo-dye'>
                     Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
                   </h2>
-                  <div className='self-start md:self-center flex items-center gap-2'>
-                    {/* <button
-                        onClick={() => setIsAddApplicantModalOpen(true)}
-                        className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-10 transition-colors"
-                        title="Add Applicant"
-                      >
-                        <PlusIconGreen />
-                    </button> */}
-                    
+                  <div className='self-start xl:self-center flex items-center gap-2'>
+
                     <SeederButton
                       viewType="screen_applicant"
                       jobPostingId={Number(params.id)}
@@ -817,8 +810,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 </div>
                 {whichModal && modals[whichModal].component}
 
-                {/* Desktop Layout */}
-                <div className='hidden md:block my-6'>
+                {/* Desktop Layout (xl+) — tablets (incl. iPad Pro 1024px) use the mobile layout below */}
+                <div className='hidden xl:block my-6'>
                   {/* Combined Date Range Filter and Action Buttons Row */}
                   <div className='flex justify-between items-center gap-4'>
                     {/* Date Range Filter - Left Side */}
@@ -853,11 +846,11 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       <button
                         onClick={handleDateSearch}
                         disabled={isSearching || isFetchingApplicants}
-                        className="rounded-lg bg-white hover:bg-gray-100 border-2 border-gray-300 disabled:bg-blue-400 disabled:cursor-not-allowed text-blue-700 py-1.5 px-3 flex items-center justify-center transition-colors"
+                        className="rounded-lg bg-white hover:bg-gray-100 border-2 border-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-blue-700 py-1.5 px-3 flex items-center justify-center transition-colors"
                         title="Search by date range"
                       >
                         {isSearching || isFetchingApplicants ? (
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-5 w-5 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
@@ -869,6 +862,16 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                     {/* Action Buttons - Right Side */}
                     <div className='flex items-center gap-4'>
+
+                      {/* temporary add applicant */}
+                      <button
+                        onClick={() => setIsAddApplicantModalOpen(true)}
+                        className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-10 transition-colors"
+                        title="Add Applicant"
+                      >
+                        <PlusIconGreen />
+                      </button>
+
                       <SmartButton
                         id="upload-resumes-btn"
                         onClick={handleOpenBatchUpload}
@@ -906,8 +909,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   </div>
                 </div>
 
-                {/* Mobile Layout */}
-                <div className='md:hidden my-6'>
+                {/* Mobile / Tablet Layout (below xl) */}
+                <div className='xl:hidden my-6'>
                   {/* Combined Date Range Filter and Action Buttons Row */}
                   <div className='flex flex-col gap-4'>
                     {/* Date Range Filter Row */}
@@ -942,15 +945,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           minDate={dateFrom}
                         />
                       </div>
-                      {/* Search Button - Mobile */}
+                      {/* Search Button - Mobile (matches desktop style) */}
                       <button
                         onClick={handleDateSearch}
                         disabled={isSearching || isFetchingApplicants}
-                        className="rounded-lg bg-savoy-blue hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-1.5 px-3 flex items-center justify-center transition-colors"
+                        className="rounded-lg bg-white hover:bg-gray-100 border-2 border-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-blue-700 py-1.5 px-3 flex items-center justify-center transition-colors"
                         title="Search by date range"
                       >
                         {isSearching || isFetchingApplicants ? (
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-5 w-5 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
@@ -962,6 +965,16 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                     {/* Action Buttons Row */}
                     <div className='flex justify-end items-center gap-2'>
+
+                      {/* temporary add applicant */}
+                      <button
+                          onClick={() => setIsAddApplicantModalOpen(true)}
+                          className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-sm flex items-center gap-2 transition-colors"
+                          title="Add Applicant"
+                        >
+                          <PlusIconGreen />
+                      </button>
+
                       <SmartButton
                         id="upload-resumes-btn"
                         onClick={handleOpenBatchUpload}
