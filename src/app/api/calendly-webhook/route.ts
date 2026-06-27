@@ -201,7 +201,7 @@ A prospect just booked a demo. Here is their info:
 - Number of employees: ${data.employeeCount || '(not provided)'}
 - Current HR/payroll process: ${data.currentProcess || '(not provided)'}
 - HR challenge: ${data.painPoint || '(not provided)'}
-- Demo scheduled: ${data.scheduledAt || '(not provided)'}
+- Demo scheduled: ${data.scheduledAt ? new Date(data.scheduledAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) + ' (Philippine Time)' : '(not provided)'}
 
 Company research:
 ---
