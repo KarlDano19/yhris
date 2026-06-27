@@ -40,6 +40,9 @@ interface LeadData {
   email: string;
   phone: string;
   companyName: string;
+  service: string;
+  employeeCount: string;
+  currentProcess: string;
   painPoint: string;
   scheduledAt: string;
   eventUri?: string;
@@ -96,6 +99,9 @@ function parsePayload(payload: any): LeadData | null {
       email,
       phone: payload?.phone ?? '',
       companyName: payload?.companyName ?? '',
+      service: payload?.service ?? '',
+      employeeCount: payload?.employeeCount ?? '',
+      currentProcess: payload?.currentProcess ?? '',
       painPoint: payload?.painPoint ?? '',
       scheduledAt: payload?.scheduledAt ?? '',
       eventUri: payload?.eventUri ?? '',
@@ -113,8 +119,8 @@ function parsePayload(payload: any): LeadData | null {
   const [firstName = '', ...rest] = fullName.trim().split(' ');
   const lastName = rest.join(' ');
 
-  // Parse custom question answers
-  const qa: { question: string; answer: string }[] = payload?.questions_and_answers ?? [];
+  // Parse custom question answers by keyword matching
+  const qa: { question: string; answer: string }[] = invitee?.questions_and_answers ?? [];
   const find = (keyword: string) =>
     qa.find(q => q.question.toLowerCase().includes(keyword.toLowerCase()))?.answer ?? '';
 
@@ -124,8 +130,12 @@ function parsePayload(payload: any): LeadData | null {
     email,
     phone: find('phone'),
     companyName: find('company'),
-    painPoint: find('challenge') || find('pain') || find('hr'),
+    service: find('service') || find('product') || find('avail'),
+    employeeCount: find('employee') || find('headcount') || find('staff'),
+    currentProcess: find('current') || find('process') || find('existing'),
+    painPoint: find('challenge') || find('pain') || find('problem') || find('hr'),
     scheduledAt,
+    eventUri: payload?.scheduled_event?.uri ?? '',
   };
 }
 
@@ -188,6 +198,9 @@ A prospect just booked a demo. Here is their info:
 - Company: ${data.companyName || '(not provided)'}
 - Email: ${data.email}
 - Phone: ${data.phone || '(not provided)'}
+- Service interested in: ${data.service || '(not provided)'}
+- Number of employees: ${data.employeeCount || '(not provided)'}
+- Current HR/payroll process: ${data.currentProcess || '(not provided)'}
 - HR challenge: ${data.painPoint || '(not provided)'}
 - Demo scheduled: ${data.scheduledAt || '(not provided)'}
 
@@ -211,9 +224,9 @@ Based on this, return a JSON object with these exact fields. All fields are requ
 }
 
 Scoring guide:
-- Hot (7-10): Established company, business email, urgent HR pain (payroll, DOLE compliance, headcount growth)
-- Warm (4-6): Growing company or moderate HR needs
-- Cold (1-3): Early stage, personal email, vague pain point
+- Hot (7-10): Established company, business email, 20+ employees, urgent HR pain (payroll, DOLE compliance, headcount growth)
+- Warm (4-6): Growing company, moderate HR needs, or fewer signals available
+- Cold (1-3): Early stage, personal email, very few employees, vague pain point
 
 Return only valid JSON, no explanation outside the JSON.`;
 
@@ -296,6 +309,9 @@ async function createLoopsContact(data: LeadData) {
     lastName: data.lastName,
     phone: data.phone,
     companyName: data.companyName,
+    service: data.service,
+    employeeCount: data.employeeCount,
+    currentProcess: data.currentProcess,
     source: 'calendly',
     leadStatus: 'booked',
     painPoint: data.painPoint,
@@ -456,6 +472,9 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     data.email,
     data.phone,
     data.companyName,
+    data.service,
+    data.employeeCount,
+    data.currentProcess,
     data.painPoint,
     data.scheduledAt,
     'booked',
@@ -469,7 +488,7 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   ]];
 
   const sheetsRes = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:P:append?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:S:append?valueInputOption=RAW`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
@@ -502,7 +521,10 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     `👤 *Name:* ${data.firstName} ${data.lastName}\n` +
     `🏢 *Company:* ${data.companyName}\n` +
     `📧 *Email:* ${data.email}\n` +
-    `📞 *Phone:* ${data.phone}\n` +
+    `📞 *Phone:* ${data.phone || 'N/A'}\n` +
+    (data.service ? `🛠 *Service:* ${data.service}\n` : '') +
+    (data.employeeCount ? `👥 *Employees:* ${data.employeeCount}\n` : '') +
+    (data.currentProcess ? `⚙️ *Current process:* ${data.currentProcess}\n` : '') +
     `😤 *Pain point:* ${data.painPoint}\n` +
     `🗓 *Scheduled:* ${bookedDate}\n\n` +
     (scoring
