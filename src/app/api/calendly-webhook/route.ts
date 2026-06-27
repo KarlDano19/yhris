@@ -146,10 +146,19 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   if (!tavilyKey || !anthropicKey) throw new Error('Missing TAVILY_API_KEY or ANTHROPIC_API_KEY');
 
   // Step 1: Search for company + person in parallel
+  const fullName = `${data.firstName} ${data.lastName}`;
+  const companyHint = data.companyName || data.email.split('@')[1];
+  const emailUsername = data.email.split('@')[0];
+
   const companyQuery = data.companyName
     ? `${data.companyName} Philippines company`
     : `${data.email.split('@')[1]} company Philippines`;
-  const personQuery = `"${data.firstName} ${data.lastName}" "${data.companyName || data.email.split('@')[1]}" LinkedIn Philippines`;
+
+  // Two targeted person queries: name+company together, and email username on LinkedIn
+  const personQuery1 = `"${fullName}" "${companyHint}" Philippines`;
+  const personQuery2 = `"${emailUsername}" site:linkedin.com OR "${fullName}" site:linkedin.com "${companyHint}"`;
+
+  type TavilyResult = { title: string; content: string; url: string };
 
   const tavilySearch = (query: string) =>
     fetch('https://api.tavily.com/search', {
@@ -164,26 +173,44 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
       }),
     }).then(r => r.ok ? r.json() : null);
 
-  const [companyTavily, personTavily] = await Promise.all([
+  const [companyTavily, personTavily1, personTavily2] = await Promise.all([
     tavilySearch(companyQuery),
-    tavilySearch(personQuery),
+    tavilySearch(personQuery1),
+    tavilySearch(personQuery2),
   ]);
 
-  const buildContext = (data: any) => [
-    data?.answer ? `Summary: ${data.answer}` : '',
-    ...(data?.results ?? []).map((r: { title: string; content: string; url: string }) =>
-      `Source: ${r.title}\n${r.content}\nURL: ${r.url}`
-    ),
+  // Validate: result must contain BOTH exact name AND company in the same source
+  const nameLower = fullName.toLowerCase();
+  const companyLower = companyHint.toLowerCase();
+
+  const isValidPersonResult = (r: TavilyResult) => {
+    const text = `${r.title} ${r.content}`.toLowerCase();
+    return text.includes(nameLower) && text.includes(companyLower);
+  };
+
+  const allPersonResults: TavilyResult[] = [
+    ...(personTavily1?.results ?? []),
+    ...(personTavily2?.results ?? []),
+  ];
+
+  const validatedPersonResults = allPersonResults.filter(isValidPersonResult);
+  const personValidated = validatedPersonResults.length > 0;
+
+  const buildContext = (results: TavilyResult[], answer?: string) => [
+    answer ? `Summary: ${answer}` : '',
+    ...results.map(r => `Source: ${r.title}\n${r.content}\nURL: ${r.url}`),
   ].filter(Boolean).join('\n\n');
 
-  const searchContext = buildContext(companyTavily);
-  const personContext = buildContext(personTavily);
+  const searchContext = buildContext(companyTavily?.results ?? [], companyTavily?.answer);
+  const personContext = personValidated
+    ? buildContext(validatedPersonResults)
+    : '';
 
   const companyResources: string[] = (companyTavily?.results ?? [])
-    .map((r: { url: string }) => r.url)
+    .map((r: TavilyResult) => r.url)
     .filter(Boolean);
-  const personResources: string[] = (personTavily?.results ?? [])
-    .map((r: { url: string }) => r.url)
+  const personResources: string[] = validatedPersonResults
+    .map(r => r.url)
     .filter(Boolean);
 
   // Step 2: Ask Claude to score + summarize intel
@@ -209,8 +236,9 @@ ${searchContext || 'No results found.'}
 ---
 
 Person research (the one who booked):
+[${personValidated ? `VALIDATED — results confirmed to match "${fullName}" at "${companyHint}"` : `NOT VALIDATED — no search results confirmed this exact person at this company`}]
 ---
-${personContext || 'No results found.'}
+${personContext || 'No confirmed results found.'}
 ---
 
 Based on this, return a JSON object with these exact fields. All fields are required and must never be empty strings:
@@ -219,7 +247,7 @@ Based on this, return a JSON object with these exact fields. All fields are requ
   "tier": <"hot" | "warm" | "cold">,
   "notes": <1 short sentence only — just the scoring rationale: why hot/warm/cold based on email domain and pain point. Do NOT include company background here.>,
   "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context for the sales team. Use search results if available; otherwise use your general knowledge. Never leave this empty.>,
-  "personIntel": <2-3 sentences about the person who booked. CRITICAL: Only use search result information if it explicitly and unambiguously matches the exact name "${data.firstName} ${data.lastName}" — do NOT use information about people with similar but different names (e.g. if the prospect is "Karl Dano" and results mention "Karl Brian Dano", ignore those results entirely). If no verified match is found, infer only from available signals: business vs personal email, the fact they booked themselves (likely decision-maker or influencer), their name, and their company role context. Never leave this empty.>
+  "personIntel": <2-3 sentences about the person who booked. ${personValidated ? `Search results above are pre-validated to match "${fullName}" at "${companyHint}" — you may use them.` : `Person research was NOT validated. Do NOT use any search results for person intel — infer only from available signals: business vs personal email, the fact they self-booked (likely evaluator or decision-maker), their name, their stated role context, pain points, and company type.`} Never leave this empty.>
 }
 
 Scoring guide:
