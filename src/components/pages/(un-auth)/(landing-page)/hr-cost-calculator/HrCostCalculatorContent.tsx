@@ -57,7 +57,7 @@ const fmt = (n: number) =>
   }).format(Math.round(n));
 
 const calcYahshuaMonthly = (employees: number): number => {
-  const base = 4000;
+  const base = 7000;
   if (employees <= 100) return base;
   let extra = 0;
   let rem = employees - 100;
