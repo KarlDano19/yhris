@@ -9,8 +9,11 @@ import CustomDatePicker from "@/components/CustomDatePicker";
 import Field from "../../common/Field";
 import { notify } from "../../utils/notify";
 
+import EditIcon from "@/svg/EditIcon";
+
 import { useGetSalaryHistory } from "../../hooks/useGetSalaryHistory";
 import { useCreateSalaryHistory } from "../../hooks/useCreateSalaryHistory";
+import { useUpdateSalaryHistory } from "../../hooks/useUpdateSalaryHistory";
 
 import type { SalaryHistoryEntry } from "../../hooks/useGetSalaryHistory";
 
@@ -65,11 +68,56 @@ export default function SalaryHistoryHistory({
     salary?: string;
     effDate?: string;
   }>({});
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editSalary, setEditSalary] = useState("");
+  const [editEffDate, setEditEffDate] = useState<Date | null>(null);
+  const [editErrors, setEditErrors] = useState<{ salary?: string; effDate?: string }>({});
+
   const { mutateAsync: createSalary, isLoading: isCreating } = useCreateSalaryHistory(employeeId);
+  const { mutateAsync: updateSalary, isLoading: isUpdating } = useUpdateSalaryHistory(employeeId);
 
   useEffect(() => {
     setPosition(defaultPosition || "");
   }, [defaultPosition]);
+
+  const startEdit = (entry: SalaryHistoryEntry) => {
+    if (!entry.id) return;
+    setEditingId(entry.id);
+    setEditSalary(String(entry.salary));
+    setEditEffDate(entry.effectiveDate ? new Date(entry.effectiveDate) : null);
+    setEditErrors({});
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditSalary("");
+    setEditEffDate(null);
+    setEditErrors({});
+  };
+
+  const handleUpdate = async (entry: SalaryHistoryEntry) => {
+    const e: typeof editErrors = {};
+    const num = Number(editSalary);
+    if (!editSalary.trim() || Number.isNaN(num) || num <= 0) e.salary = "Enter a valid amount > 0.";
+    if (!editEffDate || Number.isNaN(editEffDate.getTime())) e.effDate = "Effective date is required.";
+    setEditErrors(e);
+    if (Object.keys(e).length > 0) return;
+
+    const y = editEffDate!.getFullYear();
+    const m = String(editEffDate!.getMonth() + 1).padStart(2, "0");
+    const d = String(editEffDate!.getDate()).padStart(2, "0");
+    const effectiveDate = `${y}-${m}-${d}`;
+
+    try {
+      await updateSalary({ salaryId: entry.id!, salary: num, effectiveDate });
+      await refetch();
+      cancelEdit();
+      notify.success?.("Salary updated.");
+    } catch (err: any) {
+      notify.error?.(err?.message || "Failed to update salary.");
+    }
+  };
 
   const validate = () => {
     const e: typeof errors = {};
@@ -302,6 +350,7 @@ export default function SalaryHistoryHistory({
                 <Th>Position</Th>
                 <Th align="right">Salary</Th>
                 <Th align="right">Effective Date</Th>
+                <Th align="right">Actions</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
@@ -315,6 +364,9 @@ export default function SalaryHistoryHistory({
                   </Td>
                   <Td align="right">
                     <div className="h-4 w-24 rounded bg-gray-200 ml-auto" />
+                  </Td>
+                  <Td align="right">
+                    <div className="h-4 w-8 rounded bg-gray-200 ml-auto" />
                   </Td>
                 </tr>
               ))}
@@ -334,23 +386,107 @@ export default function SalaryHistoryHistory({
                 <Th>Position</Th>
                 <Th align="right">Salary</Th>
                 <Th align="right">Effective Date</Th>
+                <Th align="right">Actions</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
-              {pageItems.map((e, i) => (
-                <tr key={`${e.effectiveDate}-${i}`}>
-                  <Td>{e.position}</Td>
-                  <Td align="right">{formatMoney(e.salary)}</Td>
-                  <Td align="right">
-                    {new Date(e.effectiveDate).toLocaleDateString()}
-                  </Td>
-                </tr>
-              ))}
+              {pageItems.map((e, i) =>
+                editingId === e.id ? (
+                  <tr key={`${e.effectiveDate}-${i}`}>
+                    <Td>{e.position}</Td>
+                    <Td align="right">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editSalary}
+                        onChange={(ev) => {
+                          setEditSalary(ev.target.value);
+                          if (editErrors.salary) setEditErrors({ ...editErrors, salary: undefined });
+                        }}
+                        onBlur={(ev) => {
+                          const n = Number(ev.target.value);
+                          if (!Number.isNaN(n) && n > 0) setEditSalary(n.toFixed(2));
+                        }}
+                        className={`h-[39px] w-32 rounded-md px-2 text-sm text-right border ${
+                          editErrors.salary ? "border-red-500" : "border-gray-300 focus:border-[#355fd0]"
+                        }`}
+                      />
+                      {editErrors.salary && (
+                        <p className="text-xs text-red-600 mt-0.5">{editErrors.salary}</p>
+                      )}
+                    </Td>
+                    <Td align="right">
+                      <div className="flex flex-col items-end">
+                        <CustomDatePicker
+                          id={`edit-salary-effdate-${e.id}`}
+                          selected={editEffDate}
+                          pickerOnChange={(d: Date | null) => {
+                            setEditEffDate(d);
+                            if (editErrors.effDate) setEditErrors({ ...editErrors, effDate: undefined });
+                          }}
+                          inputOnChange={(d: Date | null) => {
+                            setEditEffDate(d);
+                            if (editErrors.effDate) setEditErrors({ ...editErrors, effDate: undefined });
+                          }}
+                          placeholder="MM/DD/YYYY"
+                          className={`h-[39px] w-36 rounded-md px-2 text-sm border ${
+                            editErrors.effDate ? "border-red-500" : "border-gray-300 focus:border-[#355fd0]"
+                          }`}
+                        />
+                        {editErrors.effDate && (
+                          <p className="text-xs text-red-600 mt-0.5">{editErrors.effDate}</p>
+                        )}
+                      </div>
+                    </Td>
+                    <Td align="right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdate(e)}
+                          disabled={isUpdating}
+                          className={`h-[39px] rounded-md px-3 text-xs text-white ${
+                            isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-[#355fd0]"
+                          }`}
+                        >
+                          {isUpdating ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          className="h-[39px] rounded-md border px-3 text-xs text-gray-700"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </Td>
+                  </tr>
+                ) : (
+                  <tr key={`${e.effectiveDate}-${i}`}>
+                    <Td>{e.position}</Td>
+                    <Td align="right">{formatMoney(e.salary)}</Td>
+                    <Td align="right">
+                      {new Date(e.effectiveDate).toLocaleDateString()}
+                    </Td>
+                    <Td align="right">
+                      {e.id && (
+                        <button
+                          type="button"
+                          onClick={() => startEdit(e)}
+                          disabled={editingId !== null}
+                          className={editingId !== null ? "opacity-40 cursor-not-allowed" : ""}
+                        >
+                          <EditIcon />
+                        </button>
+                      )}
+                    </Td>
+                  </tr>
+                )
+              )}
               {pageItems.length === 0 && (
                 <tr>
                   <td
                     className="px-4 py-6 text-center text-sm text-gray-500"
-                    colSpan={3}
+                    colSpan={4}
                   >
                     No salary records yet.
                   </td>

@@ -16,10 +16,12 @@ import CreateFolderModal from './modals/CreateFolderModal';
 import RenameFolderModal from './modals/RenameFolderModal';
 import DeleteFolderModal from './modals/DeleteFolderModal';
 import DownloadDocumentModal from './modals/DownloadDocumentModal';
+import FilePreviewModal from '@/components/FilePreviewModal';
 
 import useGetFolders from '../hooks/useGetFolders';
 import useGetDocuments from '../hooks/useGetDocuments';
 import { useDeleteDocument } from '../hooks/useDeleteDocument';
+import useGetFilePreviewUrl from '../hooks/useGetFilePreviewUrl';
 
 import type { Employee } from '@/types/employee-201-records/employee';
 import type { T_EmployeeDocument, T_EmployeeDocumentFolder } from '@/types/employee-201-records/document-repository';
@@ -40,6 +42,7 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
   const [isDeleteFolderModalOpen, setIsDeleteFolderModalOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<T_EmployeeDocumentFolder | null>(null);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<T_EmployeeDocument | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -59,6 +62,10 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
 
   // Delete document mutation
   const { mutate: deleteDocument } = useDeleteDocument(employeeId);
+
+  // Employee 201 docs are on a protected local path — need auth token to fetch
+  const { data: previewUrl = '', isFetching: isPreviewLoading } = useGetFilePreviewUrl(selectedDocument?.file ?? '');
+
 
   const handleFolderSelect = (folderId: number | null | undefined) => {
     setSelectedFolderId(folderId);
@@ -88,6 +95,18 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
   const handleDownload = (document: T_EmployeeDocument) => {
     setSelectedDocument(document);
     setIsDownloadModalOpen(true);
+  };
+
+  const handlePreview = (document: T_EmployeeDocument) => {
+    setSelectedDocument(document);
+    setIsPreviewModalOpen(true);
+  };
+
+  const handlePreviewDownload = () => {
+    setIsPreviewModalOpen(false);
+    if (selectedDocument) {
+      setIsDownloadModalOpen(true);
+    }
   };
 
   const handleConfirmDownload = async () => {
@@ -180,9 +199,9 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
       {isTrashViewOpen ? (
         <TrashView employeeId={employeeId} />
       ) : (
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar: Folder List */}
-          <div className="w-64 flex-shrink-0">
+          <div className="w-full md:w-64 md:flex-shrink-0">
             <DocumentFolderList
               folders={folders || []}
               selectedFolderId={selectedFolderId}
@@ -195,7 +214,7 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
           </div>
 
           {/* Main Content: Upload Zone + Document List */}
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 min-w-0 space-y-6">
             <DocumentUploadZone
               employeeId={employeeId}
               folderId={selectedFolderId}
@@ -207,6 +226,7 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
               isLoading={documentsLoading}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
+              onPreview={handlePreview}
               onDownload={handleDownload}
               onDelete={handleDeleteDocument}
             />
@@ -215,6 +235,18 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
       )}
 
       {/* Modals */}
+      <FilePreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => {
+          setIsPreviewModalOpen(false);
+          setTimeout(() => setSelectedDocument(null), 300);
+        }}
+        fileName={selectedDocument?.file_name ?? ''}
+        fileUrl={previewUrl}
+        isLoadingUrl={isPreviewLoading}
+        onDownload={handlePreviewDownload}
+      />
+
       <DownloadDocumentModal
         isOpen={isDownloadModalOpen}
         onClose={() => {
