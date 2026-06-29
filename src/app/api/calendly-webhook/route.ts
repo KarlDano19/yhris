@@ -245,7 +245,7 @@ Based on this, return a JSON object with these exact fields. All fields are requ
 {
   "score": <number 1-10, likelihood to buy YAHSHUA HRIS>,
   "tier": <"hot" | "warm" | "cold">,
-  "notes": <1 short sentence only — just the scoring rationale: why hot/warm/cold based on email domain and pain point. Do NOT include company background here.>,
+  "notes": <2 sentences max. Sentence 1: scoring rationale — why hot/warm/cold based on email domain, pain point, and employee count. Sentence 2: opportunity signal — estimated urgency, potential seat count or deal size based on employee count and company type, and one concrete action (e.g. prioritize same-day outreach, confirm payroll pain during demo, set low expectations and qualify first). Do NOT include company background here.>,
   "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context for the sales team. Use search results if available; otherwise use your general knowledge. Never leave this empty.>,
   "personIntel": <2-3 sentences about the person who booked. ${personValidated ? `Search results above are pre-validated to match "${fullName}" at "${companyHint}" — you may use them.` : `Person research was NOT validated. Do NOT use any search results for person intel — infer only from available signals: business vs personal email, the fact they self-booked (likely evaluator or decision-maker), their name, their stated role context, pain points, and company type.`} Never leave this empty.>
 }
