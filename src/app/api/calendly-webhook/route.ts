@@ -40,6 +40,9 @@ interface LeadData {
   email: string;
   phone: string;
   companyName: string;
+  service: string;
+  employeeCount: string;
+  currentProcess: string;
   painPoint: string;
   scheduledAt: string;
   eventUri?: string;
@@ -96,16 +99,18 @@ function parsePayload(payload: any): LeadData | null {
       email,
       phone: payload?.phone ?? '',
       companyName: payload?.companyName ?? '',
+      service: payload?.service ?? '',
+      employeeCount: payload?.employeeCount ?? '',
+      currentProcess: payload?.currentProcess ?? '',
       painPoint: payload?.painPoint ?? '',
       scheduledAt: payload?.scheduledAt ?? '',
       eventUri: payload?.eventUri ?? '',
     };
   }
 
-  // Native Calendly format
-  const invitee = payload?.invitee;
-  const email = invitee?.email;
-  const fullName: string = invitee?.name ?? '';
+  // Native Calendly format — invitee data is at the top level of payload.payload
+  const email = payload?.email;
+  const fullName: string = payload?.name ?? '';
   const scheduledAt: string = payload?.scheduled_event?.start_time ?? '';
 
   if (!email) return null;
@@ -113,7 +118,7 @@ function parsePayload(payload: any): LeadData | null {
   const [firstName = '', ...rest] = fullName.trim().split(' ');
   const lastName = rest.join(' ');
 
-  // Parse custom question answers
+  // Parse custom question answers by keyword matching
   const qa: { question: string; answer: string }[] = payload?.questions_and_answers ?? [];
   const find = (keyword: string) =>
     qa.find(q => q.question.toLowerCase().includes(keyword.toLowerCase()))?.answer ?? '';
@@ -124,8 +129,12 @@ function parsePayload(payload: any): LeadData | null {
     email,
     phone: find('phone'),
     companyName: find('company'),
-    painPoint: find('challenge') || find('pain') || find('hr'),
+    service: find('service') || find('product') || find('avail'),
+    employeeCount: find('employee') || find('headcount') || find('staff'),
+    currentProcess: find('current') || find('process') || find('existing'),
+    painPoint: find('challenge') || find('pain') || find('problem') || find('hr'),
     scheduledAt,
+    eventUri: payload?.scheduled_event?.uri ?? '',
   };
 }
 
@@ -137,10 +146,19 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   if (!tavilyKey || !anthropicKey) throw new Error('Missing TAVILY_API_KEY or ANTHROPIC_API_KEY');
 
   // Step 1: Search for company + person in parallel
+  const fullName = `${data.firstName} ${data.lastName}`;
+  const companyHint = data.companyName || data.email.split('@')[1];
+  const emailUsername = data.email.split('@')[0];
+
   const companyQuery = data.companyName
     ? `${data.companyName} Philippines company`
     : `${data.email.split('@')[1]} company Philippines`;
-  const personQuery = `"${data.firstName} ${data.lastName}" "${data.companyName || data.email.split('@')[1]}" LinkedIn Philippines`;
+
+  // Two targeted person queries: name+company together, and email username on LinkedIn
+  const personQuery1 = `"${fullName}" "${companyHint}" Philippines`;
+  const personQuery2 = `"${emailUsername}" site:linkedin.com OR "${fullName}" site:linkedin.com "${companyHint}"`;
+
+  type TavilyResult = { title: string; content: string; url: string };
 
   const tavilySearch = (query: string) =>
     fetch('https://api.tavily.com/search', {
@@ -155,26 +173,44 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
       }),
     }).then(r => r.ok ? r.json() : null);
 
-  const [companyTavily, personTavily] = await Promise.all([
+  const [companyTavily, personTavily1, personTavily2] = await Promise.all([
     tavilySearch(companyQuery),
-    tavilySearch(personQuery),
+    tavilySearch(personQuery1),
+    tavilySearch(personQuery2),
   ]);
 
-  const buildContext = (data: any) => [
-    data?.answer ? `Summary: ${data.answer}` : '',
-    ...(data?.results ?? []).map((r: { title: string; content: string; url: string }) =>
-      `Source: ${r.title}\n${r.content}\nURL: ${r.url}`
-    ),
+  // Validate: result must contain BOTH exact name AND company in the same source
+  const nameLower = fullName.toLowerCase();
+  const companyLower = companyHint.toLowerCase();
+
+  const isValidPersonResult = (r: TavilyResult) => {
+    const text = `${r.title} ${r.content}`.toLowerCase();
+    return text.includes(nameLower) && text.includes(companyLower);
+  };
+
+  const allPersonResults: TavilyResult[] = [
+    ...(personTavily1?.results ?? []),
+    ...(personTavily2?.results ?? []),
+  ];
+
+  const validatedPersonResults = allPersonResults.filter(isValidPersonResult);
+  const personValidated = validatedPersonResults.length > 0;
+
+  const buildContext = (results: TavilyResult[], answer?: string) => [
+    answer ? `Summary: ${answer}` : '',
+    ...results.map(r => `Source: ${r.title}\n${r.content}\nURL: ${r.url}`),
   ].filter(Boolean).join('\n\n');
 
-  const searchContext = buildContext(companyTavily);
-  const personContext = buildContext(personTavily);
+  const searchContext = buildContext(companyTavily?.results ?? [], companyTavily?.answer);
+  const personContext = personValidated
+    ? buildContext(validatedPersonResults)
+    : '';
 
   const companyResources: string[] = (companyTavily?.results ?? [])
-    .map((r: { url: string }) => r.url)
+    .map((r: TavilyResult) => r.url)
     .filter(Boolean);
-  const personResources: string[] = (personTavily?.results ?? [])
-    .map((r: { url: string }) => r.url)
+  const personResources: string[] = validatedPersonResults
+    .map(r => r.url)
     .filter(Boolean);
 
   // Step 2: Ask Claude to score + summarize intel
@@ -188,8 +224,11 @@ A prospect just booked a demo. Here is their info:
 - Company: ${data.companyName || '(not provided)'}
 - Email: ${data.email}
 - Phone: ${data.phone || '(not provided)'}
+- Service interested in: ${data.service || '(not provided)'}
+- Number of employees: ${data.employeeCount || '(not provided)'}
+- Current HR/payroll process: ${data.currentProcess || '(not provided)'}
 - HR challenge: ${data.painPoint || '(not provided)'}
-- Demo scheduled: ${data.scheduledAt || '(not provided)'}
+- Demo scheduled: ${data.scheduledAt ? new Date(data.scheduledAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) + ' (Philippine Time)' : '(not provided)'}
 
 Company research:
 ---
@@ -197,23 +236,24 @@ ${searchContext || 'No results found.'}
 ---
 
 Person research (the one who booked):
+[${personValidated ? `VALIDATED — results confirmed to match "${fullName}" at "${companyHint}"` : `NOT VALIDATED — no search results confirmed this exact person at this company`}]
 ---
-${personContext || 'No results found.'}
+${personContext || 'No confirmed results found.'}
 ---
 
 Based on this, return a JSON object with these exact fields. All fields are required and must never be empty strings:
 {
   "score": <number 1-10, likelihood to buy YAHSHUA HRIS>,
   "tier": <"hot" | "warm" | "cold">,
-  "notes": <1 short sentence only — just the scoring rationale: why hot/warm/cold based on email domain and pain point. Do NOT include company background here.>,
+  "notes": <2 sentences max. Sentence 1: scoring rationale — why hot/warm/cold based on email domain, pain point, and employee count. Sentence 2: opportunity signal — estimated urgency, potential seat count or deal size based on employee count and company type, and one concrete action (e.g. prioritize same-day outreach, confirm payroll pain during demo, set low expectations and qualify first). Do NOT include company background here.>,
   "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context for the sales team. Use search results if available; otherwise use your general knowledge. Never leave this empty.>,
-  "personIntel": <2-3 sentences about the person who booked. Use search results if available. If not found, infer from signals: business vs personal email, the fact they booked themselves (likely decision-maker or influencer), their name, and their company role context. Never leave this empty.>
+  "personIntel": <2-3 sentences about the person who booked. ${personValidated ? `Search results above are pre-validated to match "${fullName}" at "${companyHint}" — you may use them.` : `Person research was NOT validated. Do NOT use any search results for person intel — infer only from available signals: business vs personal email, the fact they self-booked (likely evaluator or decision-maker), their name, their stated role context, pain points, and company type.`} Never leave this empty.>
 }
 
 Scoring guide:
-- Hot (7-10): Established company, business email, urgent HR pain (payroll, DOLE compliance, headcount growth)
-- Warm (4-6): Growing company or moderate HR needs
-- Cold (1-3): Early stage, personal email, vague pain point
+- Hot (7-10): Established company, business email, 20+ employees, urgent HR pain (payroll, DOLE compliance, headcount growth)
+- Warm (4-6): Growing company, moderate HR needs, or fewer signals available
+- Cold (1-3): Early stage, personal email, very few employees, vague pain point
 
 Return only valid JSON, no explanation outside the JSON.`;
 
@@ -296,7 +336,10 @@ async function createLoopsContact(data: LeadData) {
     lastName: data.lastName,
     phone: data.phone,
     companyName: data.companyName,
-    source: 'calendly',
+    service: data.service,
+    employeeCount: data.employeeCount,
+    currentProcess: data.currentProcess,
+    source: 'YHRIS Web Booking',
     leadStatus: 'booked',
     painPoint: data.painPoint,
     demoBooked: true,
@@ -322,11 +365,13 @@ async function createLoopsContact(data: LeadData) {
         const updateErr = await updateRes.json().catch(() => ({}));
         throw new Error(`Loops update error: ${JSON.stringify(updateErr)}`);
       }
+      console.log('Loops contact updated');
       return updateRes.json();
     }
     throw new Error(`Loops create error: ${JSON.stringify(err)}`);
   }
 
+  console.log('Loops contact created');
   return res.json();
 }
 
@@ -456,6 +501,9 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     data.email,
     data.phone,
     data.companyName,
+    data.service,
+    data.employeeCount,
+    data.currentProcess,
     data.painPoint,
     data.scheduledAt,
     'booked',
@@ -469,7 +517,7 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   ]];
 
   const sheetsRes = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:P:append?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:S:append?valueInputOption=RAW`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
@@ -498,30 +546,40 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     : 'TBD';
 
   const message =
-    `📅 *Demo Booked via Calendly*\n\n` +
-    `👤 *Name:* ${data.firstName} ${data.lastName}\n` +
-    `🏢 *Company:* ${data.companyName}\n` +
-    `📧 *Email:* ${data.email}\n` +
-    `📞 *Phone:* ${data.phone}\n` +
-    `😤 *Pain point:* ${data.painPoint}\n` +
-    `🗓 *Scheduled:* ${bookedDate}\n\n` +
+    `📅 Demo Booked via Calendly\n\n` +
+    `👤 Name: ${data.firstName} ${data.lastName}\n` +
+    `🏢 Company: ${data.companyName}\n` +
+    `📧 Email: ${data.email}\n` +
+    `📞 Phone: ${data.phone || 'N/A'}\n` +
+    (data.service ? `🛠 Service: ${data.service}\n` : '') +
+    (data.employeeCount ? `👥 Employees: ${data.employeeCount}\n` : '') +
+    (data.currentProcess ? `⚙️ Current process: ${data.currentProcess}\n` : '') +
+    `😤 Pain point: ${data.painPoint}\n` +
+    `🗓 Scheduled: ${bookedDate}\n\n` +
     (scoring
-      ? `${tierEmoji} *Score:* ${scoring.score}/10 — *${scoring.tier.toUpperCase()}*\n📝 ${scoring.notes}` +
-        (scoring.personIntel ? `\n\n👤 *Person Intel:*\n${scoring.personIntel}` : '') +
+      ? `${tierEmoji} Score: ${scoring.score}/10 — ${scoring.tier.toUpperCase()}\n📝 ${scoring.notes}` +
+        (scoring.personIntel ? `\n\n👤 Person Intel:\n${scoring.personIntel}` : '') +
         (scoring.personResources?.length
-          ? `\n\n🔗 *Person Sources:*\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
+          ? `\n\n🔗 Person Sources:\n${scoring.personResources.map(u => `• ${u}`).join('\n')}`
           : '') +
-        (scoring.companyIntel ? `\n\n🔍 *Company Intel:*\n${scoring.companyIntel}` : '') +
+        (scoring.companyIntel ? `\n\n🔍 Company Intel:\n${scoring.companyIntel}` : '') +
         (scoring.companyResources?.length
-          ? `\n\n🔗 *Company Sources:*\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
+          ? `\n\n🔗 Company Sources:\n${scoring.companyResources.map(u => `• ${u}`).join('\n')}`
           : '')
-      : `_Scoring unavailable_`);
+      : `Scoring unavailable`);
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' }),
+    body: JSON.stringify({ chat_id: chatId, text: message }),
   });
+
+  if (!tgRes.ok) {
+    const err = await tgRes.json().catch(() => ({}));
+    console.error('Telegram error:', JSON.stringify(err));
+  } else {
+    console.log('Telegram notification sent');
+  }
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
