@@ -6,7 +6,7 @@ import { useFieldArray, Controller } from "react-hook-form";
 import { XCircleIcon, EyeIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import FilePreviewModal from "../modals/FilePreviewModal";
+import FilePreviewModal from "@/components/FilePreviewModal";
 import ReactQuill from "@/components/ReactQuillDynamic";
 
 import ClipIcon from "@/svg/ClipIcon";

@@ -5,6 +5,7 @@ import { getCookie } from "cookies-next";
 
 /** UI shape you already use elsewhere */
 export type SalaryHistoryEntry = {
+  id?: number;
   position: string;
   salary: number;
   effectiveDate: string; // ISO YYYY-MM-DD

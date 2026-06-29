@@ -5,6 +5,7 @@ import { getCookie } from "cookies-next";
 
 /** UI shape you already use */
 export type SalaryHistoryEntry = {
+  id?: number;
   position: string;
   salary: number;
   effectiveDate: string; // ISO
@@ -114,6 +115,7 @@ async function getSalaryHistory(
       }
 
       const mapped: SalaryHistoryEntry[] = records.map((r) => ({
+        id: r.id,
         position: r.position ?? "",
         salary: typeof r.salary === "string" ? Number(r.salary) : Number(r.salary ?? 0),
         effectiveDate: r.effective_date,

@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../modals/DrawSignatureModal";
-import FilePreviewModal from "../modals/FilePreviewModal";
+import FilePreviewModal from "@/components/FilePreviewModal";
 import ReactQuill from "@/components/ReactQuillDynamic";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
