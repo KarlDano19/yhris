@@ -8,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetLocationItems from '@/components/hooks/useGetLocationItems';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -70,10 +71,12 @@ function EmployeeProfile({
 }) {
   const [positionItems, setPositionItems] = useState<any>([]);
   const [employeeStatusItems, setEmployeeStatusItems] = useState<any>([]);
+  const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [locationItems, setLocationItems] = useState<any>([]);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const { data: positionData } = useGetPositionItems();
   const { data: employeeStatusData } = useGetEmployeeStatusItems();
+  const { data: employeeData } = useGetEmployeeItems();
   const { data: locationData } = useGetLocationItems();
 
   useEffect(() => {
@@ -81,6 +84,12 @@ function EmployeeProfile({
       setPositionItems(positionData);
     }
   }, [positionData]);
+
+  useEffect(() => {
+    if (employeeData) {
+      setEmployeeItems(employeeData);
+    }
+  }, [employeeData]);
 
   useEffect(() => {
     if (employeeStatusData) {
@@ -165,33 +174,42 @@ function EmployeeProfile({
               Movement Type
               <span className='text-red-600'>*</span>
             </label>
-            <div className='flex gap-8 mt-2'>
-              <label className='flex items-center gap-2 cursor-pointer'>
-                <input
-                  type='radio'
-                  {...register('movement_type', { required: true })}
-                  value='change_in_position'
-                  disabled={isEdit && !isEditable}
-                  onChange={() => {
-                    setMovementType('change_in_position');
-                    setValue('movement_type', 'change_in_position');
-                  }}
-                />
-                <span className='text-sm'>Change in Position</span>
-              </label>
-              <label className='flex items-center gap-2 cursor-pointer'>
-                <input
-                  type='radio'
-                  {...register('movement_type', { required: true })}
-                  value='reassignment'
-                  disabled={isEdit && !isEditable}
-                  onChange={() => {
-                    setMovementType('reassignment');
-                    setValue('movement_type', 'reassignment');
-                  }}
-                />
-                <span className='text-sm'>Re-assignment</span>
-              </label>
+            <div className='grid grid-cols-2 gap-4 mt-2'>
+              {/* Change in Position card */}
+              <button
+                type='button'
+                disabled={isEdit && !isEditable}
+                onClick={() => {
+                  setMovementType('change_in_position');
+                  setValue('movement_type', 'change_in_position');
+                }}
+                className={`relative text-left rounded-lg border-2 px-4 py-3 transition-all ${
+                  movementType === 'change_in_position'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                } ${isEdit && !isEditable ? 'cursor-default opacity-80' : 'cursor-pointer'}`}
+              >
+                <p className='text-sm font-semibold text-gray-900'>Change in Position</p>
+                <p className='text-xs text-gray-500 mt-0.5'>Update title or department</p>
+              </button>
+
+              {/* Re-assignment card */}
+              <button
+                type='button'
+                disabled={isEdit && !isEditable}
+                onClick={() => {
+                  setMovementType('reassignment');
+                  setValue('movement_type', 'reassignment');
+                }}
+                className={`relative text-left rounded-lg border-2 px-4 py-3 transition-all ${
+                  movementType === 'reassignment'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                } ${isEdit && !isEditable ? 'cursor-default opacity-80' : 'cursor-pointer'}`}
+              >
+                <p className='text-sm font-semibold text-gray-900'>Re-assignment</p>
+                <p className='text-xs text-gray-500 mt-0.5'>Relocate to a new office or branch</p>
+              </button>
             </div>
             {errors?.movement_type && (
               <p className='text-red-600 text-sm mt-1'>Movement type is required</p>
@@ -248,8 +266,9 @@ function EmployeeProfile({
                     }
 
                     // Auto-fill current location from employee data
-                    if (selectedOption.location) {
-                      setCurrentLocation(selectedOption.location);
+                    const matchingEmployee = employeeItems.find((item: any) => item.id === selectedOption.value);
+                    if (matchingEmployee?.location) {
+                      setCurrentLocation(matchingEmployee.location);
                     }
                   } else if (!isEdit || isEditable) {
                     setEmployeeSearch('');
