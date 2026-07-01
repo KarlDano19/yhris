@@ -190,7 +190,7 @@ function EmployeeProfile({
                 } ${isEdit && !isEditable ? 'cursor-default opacity-80' : 'cursor-pointer'}`}
               >
                 <p className='text-sm font-semibold text-gray-900'>Change in Position</p>
-                <p className='text-xs text-gray-500 mt-0.5'>Update title or department</p>
+                <p className='text-sm text-gray-500 mt-0.5'>Update title or department</p>
               </button>
 
               {/* Re-assignment card */}
@@ -208,7 +208,7 @@ function EmployeeProfile({
                 } ${isEdit && !isEditable ? 'cursor-default opacity-80' : 'cursor-pointer'}`}
               >
                 <p className='text-sm font-semibold text-gray-900'>Re-assignment</p>
-                <p className='text-xs text-gray-500 mt-0.5'>Relocate to a new office or branch</p>
+                <p className='text-sm text-gray-500 mt-0.5'>Relocate to a new office or branch</p>
               </button>
             </div>
             {errors?.movement_type && (
@@ -631,7 +631,7 @@ function EmployeeProfile({
                       })}
                       disabled={watch('proposed_rate') !== 'Apply Increase' || (isEdit && !isEditable)}
                       placeholder='Enter percentage'
-                      className='rounded-md w-32 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500'
+                      className='rounded-md w-32 border-0 px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500'
                     />
                     <span className='ml-2 text-sm text-gray-500'>%</span>
                   </div>
@@ -660,7 +660,7 @@ function EmployeeProfile({
                       })}
                       disabled={watch('proposed_rate') !== 'Apply Amount Increase' || (isEdit && !isEditable)}
                       placeholder='Enter monthly amount'
-                      className='rounded-md w-40 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500'
+                      className='rounded-md w-40 border-0 px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500'
                     />
                     <span className='ml-2 text-sm text-gray-500'>/ month</span>
                   </div>
