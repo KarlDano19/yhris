@@ -238,7 +238,7 @@ function EmployeeProfile({
                 employeeSearch={employeeSearch}
                 setEmployeeSearch={setEmployeeSearch}
                 employeeName={employeeName}
-                className=""
+                className="text-sm"
                 onChange={(selectedOption: any) => {
                   if ((!isEdit || isEditable) && selectedOption && !selectedOption.isShowMore) {
                     setEmployeeSearch(selectedOption.label);
