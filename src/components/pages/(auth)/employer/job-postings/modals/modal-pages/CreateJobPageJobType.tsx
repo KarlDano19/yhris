@@ -397,7 +397,7 @@ export default function CreateJobPageJobType({
             </div>
           </div>
         )}
-        <div className='sm:col-span-4 mt-4'>
+        <div className='sm:col-span-4 mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
           <div>
             <label htmlFor='hireCount' className='block text-sm font-medium leading-6 text-gray-900'>
               How many people do you want to hire for this opening?
@@ -413,6 +413,15 @@ export default function CreateJobPageJobType({
                 id='hireCount'
                 {...register('hireCount')}
                 onChange={e => {
+                  const raw = e.target.value;
+                  if (raw === '') return;
+                  const value = parseInt(raw);
+                  const minValue = Math.max(1, hiredCount);
+                  if (!isNaN(value) && value < minValue) {
+                    setValue('hireCount', minValue);
+                  }
+                }}
+                onBlur={e => {
                   const value = parseInt(e.target.value);
                   const minValue = Math.max(1, hiredCount);
                   if (isNaN(value) || value < minValue) {
@@ -424,15 +433,13 @@ export default function CreateJobPageJobType({
                 type='number'
                 min={Math.max(1, hiredCount)}
                 defaultValue={1}
-                className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
               />
             </div>
             {manualInputFocus.hireCount && (
               <p className='text-xs text-red-600 mt-1'>Minimum 1 person required.</p>
             )}
           </div>
-        </div>
-        <div className='sm:col-span-4 mt-4'>
           <div>
             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
               How soon do you need to hire?
