@@ -55,7 +55,13 @@ export default function SalaryHistoryHistory({
     enabledFetch ? remoteItems : localItems
   );
   useEffect(() => {
-    setItems(enabledFetch ? remoteItems : localItems);
+    const source = enabledFetch ? remoteItems : localItems;
+    const sorted = [...source].sort(
+      (a, b) =>
+        new Date(b.effectiveDate).getTime() -
+        new Date(a.effectiveDate).getTime()
+    );
+    setItems(sorted);
   }, [enabledFetch, remoteItems, localItems]);
 
   const [showForm, setShowForm] = useState(false);
