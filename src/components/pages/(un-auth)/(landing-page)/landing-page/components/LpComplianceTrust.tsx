@@ -6,6 +6,9 @@ const badges = [
   { src: "/SOC2 Type 2.svg", name: "SOC2 Type 2" },
   { src: "/ISO 27001.svg", name: "ISO 27001" },
   { src: "/DOLE-Ready.svg", name: "DOLE-Ready" },
+  { src: "/BIR Registration Seal Badge_1.png", name: "BIR Registration Seal 1" },
+  { src: "/BIR Registration Seal Badge_ 2.png", name: "BIR Registration Seal 2" },
+  { src: "/BIR Registration Seal Badge_3.png", name: "BIR Registration Seal 3" },
 ];
 
 const LpComplianceTrust = () => {
