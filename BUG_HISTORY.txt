@@ -109,6 +109,114 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-025
+DATE FILED: 2026-07-03
+DATE FIXED: 2026-07-03
+REPORTER: Internal - QA (Jam recording: dd117576-ba7b-4345-88cb-3d978de7440d)
+
+ISSUE DESCRIPTION:
+  Opening "Employment History Analysis" from any Employee 201 Record modal failed with:
+
+    Unexpected token '<', "<!doctype "... is not valid JSON
+
+  Network tab confirmed the root cause: the API request was built with a literal
+  "undefined" employee ID segment:
+
+    GET https://api.yahshuahris.com/api/employee-201/employees/undefined/employment-history/analysis/
+
+  This returned a 404 HTML page from the server. The client then tried to parse that
+  HTML as JSON, throwing the SyntaxError that was displayed in the modal.
+
+  Root cause — two bugs combined:
+
+  1. EmploymentHistoryAnalysis.tsx called the hook with no arguments:
+       const { data, error, loading, fetchAnalysis } = useEmploymentHistoryAnalysis();
+     This meant `employeeId` inside the hook was `undefined`, and `enabled: !!employeeId`
+     was `false`, so no query was registered with a valid ID.
+
+  2. A useEffect then called `fetchAnalysis(employeeId, { include_details: true }, ...)`.
+     `fetchAnalysis` is TanStack Query's `queryResult.refetch`, which does NOT accept new
+     variables — it simply re-runs the original query with the same key/fetcher it was
+     instantiated with. So even though `employeeId` was passed in, it was silently
+     discarded, and the URL was always built as `.../undefined/...`.
+
+  Secondary issue: when the server returned a non-JSON 404 HTML body, the error handler
+  did `throw res.json()`, which rejected with a SyntaxError. The catch block surfaced the
+  raw parse exception message ("Unexpected token '<'...") instead of a friendly error.
+
+DESIRED OUTCOME:
+  The Employment History Analysis should load and display correctly for the selected
+  employee. If the request fails, the modal should show a clean error message rather than
+  a raw JSON parse exception.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/modals/EmploymentDetails/EmploymentHistoryAnalysis.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useEmploymentHistoryAnalysis.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Opening Employment History Analysis for a valid employee loads data correctly ✓
+  - Employee ID is no longer "undefined" in the request URL ✓
+  - API failure returns a clean error message (e.g. "Request failed with status 404") ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+
+  Fix 1 — EmploymentHistoryAnalysis.tsx (primary fix):
+  Replaced the broken no-argument hook call + useEffect pattern with a direct call that
+  passes employeeId and params:
+
+    Before:
+      const { data, error, loading, fetchAnalysis } = useEmploymentHistoryAnalysis();
+
+      useEffect(() => {
+        const abort = new AbortController();
+        fetchAnalysis(employeeId, { include_details: true }, abort.signal).catch(() => {});
+        return () => abort.abort();
+      }, [employeeId, fetchAnalysis]);
+
+    After:
+      const { data, error, loading } = useEmploymentHistoryAnalysis(employeeId, { include_details: true });
+
+  TanStack Query re-fetches automatically when `employeeId` changes, and the existing
+  `enabled: !!employeeId` guard already prevents the query from firing when the ID is
+  absent. The useEffect, the fetchAnalysis call, and the unused `useEffect` import were
+  all removed.
+
+  Fix 2 — useEmploymentHistoryAnalysis.ts (error handling):
+  Changed `throw res.json()` (which could reject with a SyntaxError on HTML responses)
+  to a safe pattern that falls back to a status-code message if the body is not JSON:
+
+    Before:
+      if (!res.ok) {
+        throw res.json();
+      }
+
+    After:
+      if (!res.ok) {
+        let errorBody: any;
+        try {
+          errorBody = await res.json();
+        } catch {
+          throw new Error(`Request failed with status ${res.status}`);
+        }
+        throw errorBody;
+      }
+
+================================================================================
+
 BUG ID: HRIS-2026-024
 DATE FILED: 2026-06-05
 DATE FIXED: 2026-06-05
