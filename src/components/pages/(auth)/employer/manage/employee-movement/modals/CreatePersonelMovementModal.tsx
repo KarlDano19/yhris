@@ -32,6 +32,11 @@ function CreatePersonelMovementModal({
   const [currentEmploymentStatus, setCurrentEmploymentStatus] = useState('');
   const [newEmploymentStatus, setNewEmploymentStatus] = useState('');
 
+  // Local state for movement type and location
+  const [movementType, setMovementType] = useState('change_in_position');
+  const [currentLocation, setCurrentLocation] = useState('');
+  const [newLocation, setNewLocation] = useState('');
+
   // Reset form and local state only after successful submit
   const resetForm = () => {
     reset();
@@ -39,15 +44,32 @@ function CreatePersonelMovementModal({
     setNewPosition('');
     setCurrentEmploymentStatus('');
     setNewEmploymentStatus('');
+    setMovementType('change_in_position');
+    setCurrentLocation('');
+    setNewLocation('');
     setSelectedTab(1);
   };
 
   const onSubmit = (data: any) => {
     const payload = { ...data };
-    if (payload.proposed_rate !== 'Apply Increase') {
+    if (payload.movement_type === 'reassignment') {
+      payload.new_position = undefined;
+      payload.new_employment_status = undefined;
+      payload.proposed_rate = undefined;
       payload.percentage_increase = null;
+      payload.amount_increase = null;
     } else {
-      payload.percentage_increase = payload.percentage_increase !== '' ? parseInt(payload.percentage_increase, 10) : null;
+      payload.new_location = undefined;
+      if (payload.proposed_rate === 'Apply Increase') {
+        payload.percentage_increase = payload.percentage_increase !== '' ? parseInt(payload.percentage_increase, 10) : null;
+        payload.amount_increase = null;
+      } else if (payload.proposed_rate === 'Apply Amount Increase') {
+        payload.amount_increase = payload.amount_increase !== '' ? parseFloat(payload.amount_increase) : null;
+        payload.percentage_increase = null;
+      } else {
+        payload.percentage_increase = null;
+        payload.amount_increase = null;
+      }
     }
 
     const callbackReq = {
@@ -121,6 +143,12 @@ function CreatePersonelMovementModal({
                     setCurrentEmploymentStatus={setCurrentEmploymentStatus}
                     newEmploymentStatus={newEmploymentStatus}
                     setNewEmploymentStatus={setNewEmploymentStatus}
+                    movementType={movementType}
+                    setMovementType={setMovementType}
+                    currentLocation={currentLocation}
+                    setCurrentLocation={setCurrentLocation}
+                    newLocation={newLocation}
+                    setNewLocation={setNewLocation}
                     errors={errors}
                   />
                 )}

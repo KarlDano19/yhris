@@ -14,11 +14,13 @@ import BackButton from '@/components/BackButton';
 import Details from './Details';
 import Settings from './Settings';
 import useUpdateProfile from './hooks/useUpdateProfile';
+import useUpdateTourProgress from '@/components/hooks/useUpdateTourProgress';
 import classNames from '@/helpers/classNames';
 import ConfirmEditEmployerProfileModal from '../employer-profile/modal/ConfirmEditEmployerProfileModal'
 import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
 
 import { T_EmployerProfile } from '@/types/globals';
+import { useTour } from '@/components/tour/useTour';
 
 function Content() {
   const router = useRouter();
@@ -31,6 +33,8 @@ function Content() {
   const [formData, setFormData] = useState<T_EmployerProfile | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const { mutate, isLoading } = useUpdateProfile();
+  const { mutate: markTourDone } = useUpdateTourProgress();
+  const { stopTour } = useTour();
 
   // Function to check if all required fields are filled
   const areRequiredFieldsFilled = () => {
@@ -112,7 +116,17 @@ function Content() {
     }
   }, [cachedProfile, profileData, setValue]);
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { stepId } = (e as CustomEvent<{ stepId: string }>).detail ?? {};
+      if (stepId === 'tour-profile-next') setProgressBar(0);
+    };
+    window.addEventListener('tour-previous-step', handler);
+    return () => window.removeEventListener('tour-previous-step', handler);
+  }, []);
+
   const openConfirmModal = handleSubmit((data) => {
+    stopTour(); // hide tour tooltip before confirm modal opens
     setFormData(data);
     setIsSuccessModalOpen(true);
   });
@@ -124,6 +138,8 @@ function Content() {
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
           setIsSuccessModalOpen(false);
           setIsNavigating(true);
+          markTourDone({ is_header_tour_done: true });
+          window.dispatchEvent(new CustomEvent('tour-action-complete', { detail: { action: 'profile-saved' } }));
           queryClient.refetchQueries({ queryKey: ['employerProfileCache'] });
           setTimeout(() => {
             window.location.href = '/dashboard';
@@ -142,7 +158,7 @@ function Content() {
       <div className='flex p-4'>
         <BackButton label="Dashboard" href="/dashboard" />
       </div>
-      <div className='px-2 md:px-8 lg:px-4 pb-8'>
+      <div className='px-2 md:px-8 lg:px-4 pb-28'>
         <h2 className='text-xl font-bold text-indigo-dye mb-6'>My Profile</h2>
         
         {isProfileLoading ? (

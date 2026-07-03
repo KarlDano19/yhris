@@ -16,6 +16,7 @@ const menus = [
     text: 'General Settings',
     link: '/settings/general-settings',
     isAvailable: true,
+    tourId: 'tour-settings-general',
   },
   {
     icon: <UserLogo />,

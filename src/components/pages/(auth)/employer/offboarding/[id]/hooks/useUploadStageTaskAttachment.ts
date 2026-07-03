@@ -31,6 +31,7 @@ function useUploadStageTaskAttachment(separationId: number | string, stage: stri
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['stageTasksCache', separationId, stage]);
+        queryClient.invalidateQueries(['separationCaseCache', String(separationId)]);
       },
     }
   );

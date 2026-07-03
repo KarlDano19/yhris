@@ -5,6 +5,9 @@ import { useState, useEffect } from 'react';
 
 import toast from 'react-hot-toast';
 
+import { useTour } from '@/components/tour/useTour';
+import { PROFILE_SAVE_STEP } from '@/components/tour/dashboardTourSteps';
+
 import CustomToast from '@/components/CustomToast';
 import { getRegions, getProvinces, getMunicipalities, getBarangays } from '@/utils/philippines';
 
@@ -29,6 +32,8 @@ const Details = ({
   clearErrors: any;
   trigger: any;
 }) => {
+  const { isRunning, startTour } = useTour();
+
   // State for autocomplete dropdowns
   const [showRegionDropdown, setShowRegionDropdown] = useState(false);
   const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
@@ -192,6 +197,13 @@ const Details = ({
     }
     
     setProgressBar(1);
+    if (isRunning) {
+      // Tour is active — the completeTrigger listener will advance it
+      window.dispatchEvent(new CustomEvent('tour-action-complete', { detail: { action: 'profile-form-next' } }));
+    } else {
+      // Tour was dismissed — start the save step directly so the user still sees guidance
+      setTimeout(() => startTour([PROFILE_SAVE_STEP], { segmentKey: 'header' }), 300);
+    }
   };
 
   const uploadImgOnChange = ({ target }: { target: any }) => {
@@ -800,6 +812,7 @@ const Details = ({
       <div className='flex justify-center lg:justify-end mt-8'>
         <button
           type='submit'
+          data-tour-id='tour-profile-next'
           className='w-full lg:w-52 uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
         >
           Next

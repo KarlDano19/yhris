@@ -6,6 +6,7 @@ import Papa from 'papaparse';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import { useTour } from '@/components/tour/useTour';
 import classNames from '@/helpers/classNames';
 import useAddImportEmployeeItems from '../hooks/useAddImportEmployeeItems';
 
@@ -19,6 +20,13 @@ export default function ImportModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
+  const { hideOverlay, showOverlay } = useTour();
+
+  useEffect(() => {
+    if (isOpen) hideOverlay();
+    else showOverlay();
+  }, [isOpen]);
+
   const allowHeaders: any = {
     'Date Hired (mm/dd/yyyy)*': 'date_hired',
     'Date Hired': 'date_hired',
@@ -140,6 +148,7 @@ export default function ImportModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
+        window.dispatchEvent(new CustomEvent('tour-action-complete', { detail: { action: 'employee-data-added' } }));
         refetch();
         customCloseModal();
       },

@@ -924,7 +924,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               <DialogPanel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
-                  viewCV ? 'max-w-4xl' : 'max-w-3xl'
+                  viewCV || jobPostingDetails?.is_video_intro_enabled ? 'max-w-4xl' : 'max-w-3xl'
                 )}
               >
                 <div className='flex bg-savoy-blue p-2 items-center gap-4'>

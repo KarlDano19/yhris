@@ -12,12 +12,12 @@ import { useSendVerification } from './hooks/useSendVerification';
 import useVerifyDirective from './hooks/useVerifyDirective';
 import EmailSelectionModal from './modals/EmailSelectionModal';
 import VerificationCodeModal from './modals/VerificationCodeModal';
-import FilePreviewModal from './modals/FilePreviewModal';
+import FilePreviewModal from '@/components/FilePreviewModal';
 
 import DropDownArrow from '@/svg/DropDownArrow';
 import { linkify } from '@/helpers/linkify';
 
-import { DirectiveData, MaskedEmail } from '@/types/directives';
+import { DirectiveAttachment, DirectiveData, MaskedEmail } from '@/types/directives';
 
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -90,12 +90,16 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
           ? attachments[attachmentIndex]
           : attachments[0];
 
-        const attachmentUrl = typeof attachment === 'object'
-          ? attachment.attachment
-          : attachment;
-        const attachmentName = typeof attachment === 'object'
-          ? attachment.attachment_name || 'Attachment'
-          : 'Attachment';
+        const attachmentUrl = typeof attachment === 'object' && 'attachment' in attachment
+          ? (attachment as DirectiveAttachment).attachment
+          : attachment instanceof File
+            ? URL.createObjectURL(attachment)
+            : String(attachment);
+        const attachmentName = typeof attachment === 'object' && 'attachment_name' in attachment
+          ? (attachment as DirectiveAttachment).attachment_name || 'Attachment'
+          : attachment instanceof File
+            ? attachment.name
+            : 'Attachment';
 
         setFilePreviewUrl(attachmentUrl as string);
         setFilePreviewTitle(attachmentName);

@@ -97,8 +97,16 @@ export default function Content({ loginType, hasActiveSubscription }: { loginTyp
       {
         onSuccess: (data) => {
           const { summary } = data;
-          const message = `Sync complete: ${summary.created} created, ${summary.updated} updated${summary.errors > 0 ? `, ${summary.errors} errors` : ''}`;
-          toast.custom(() => <CustomToast message={message} type="success" />);
+          const hasErrors = summary.errors > 0;
+          const message = `Sync complete: ${summary.created} created, ${summary.updated} updated${hasErrors ? `, ${summary.errors} failed` : ''}`;
+          toast.custom(() => <CustomToast message={message} type={hasErrors ? 'warning' : 'success'} />, { duration: hasErrors ? 8000 : 5000 });
+          if (hasErrors && (summary.error_details?.length ?? 0) > 0) {
+            const failedNames = (summary.error_details ?? [])
+              .map((e: any) => e.name || e.system_id || 'Unknown')
+              .join(', ');
+            const errorMsg = `Failed to sync: ${failedNames}. Reason: ${summary.error_details?.[0]?.error || 'unknown error'}`;
+            toast.custom(() => <CustomToast message={errorMsg} type="error" />, { duration: 10000 });
+          }
         },
         onError: (error: any) => {
           const errorMessage = typeof error === 'string' ? error : 'Failed to sync employees to Payroll';

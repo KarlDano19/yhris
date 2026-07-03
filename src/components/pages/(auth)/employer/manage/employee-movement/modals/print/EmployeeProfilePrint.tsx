@@ -1,5 +1,7 @@
 'use client';
 
+'use client';
+
 import { useEffect, useState } from 'react';
 
 import { Controller, useForm } from 'react-hook-form';
@@ -7,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
+import useGetLocationItems from '@/components/hooks/useGetLocationItems';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
@@ -32,8 +35,10 @@ function EmployeeProfilePrint({
   const queryClient = useQueryClient();
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [positionItems, setPositionItems] = useState<any>([]);
+  const [locationItems, setLocationItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
   const { data: positionData } = useGetPositionItems();
+  const { data: locationData } = useGetLocationItems();
 
   useEffect(() => {
     if (employeeData) {
@@ -46,6 +51,12 @@ function EmployeeProfilePrint({
       setPositionItems(positionData);
     }
   }, [positionData]);
+
+  useEffect(() => {
+    if (locationData) {
+      setLocationItems(locationData);
+    }
+  }, [locationData]);
 
   const onSubmit = (data: any) => {
     if (isEdit) {
@@ -232,8 +243,21 @@ function EmployeeProfilePrint({
               Proposed Rate
               <span className='text-red-600'>*</span>
             </label>
-            <h1>{watch('proposed_rate')}</h1>
-            <h1>{watch('percentage_increase')}</h1>
+            <h1>{watch('movement_type') === 'reassignment' ? 'Re-assignment' : 'Change in Position'}</h1>
+            {watch('movement_type') !== 'reassignment' && (
+              <>
+                <h1>{watch('proposed_rate')}</h1>
+                {watch('proposed_rate') === 'Apply Increase' && (
+                  <h1>{watch('percentage_increase')}%</h1>
+                )}
+                {watch('proposed_rate') === 'Apply Amount Increase' && (
+                  <h1>{watch('amount_increase')} / month</h1>
+                )}
+              </>
+            )}
+            {watch('movement_type') === 'reassignment' && (
+              <h1>New Location: {locationItems.find((i: any) => String(i.id) === String(watch('new_location')))?.name || ''}</h1>
+            )}
             {/* <div className='relative mt-2'>
               <div className='space-y-2'>
                 <div>
