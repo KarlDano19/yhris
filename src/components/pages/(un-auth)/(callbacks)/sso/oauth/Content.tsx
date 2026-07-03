@@ -6,13 +6,16 @@ import { LockClosedIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { EyeIcon } from '@heroicons/react/24/solid';
 
 import { useParams, useSearchParams } from 'next/navigation';
+import { setCookie } from 'cookies-next';
+
+import updateSession from '@/helpers/updateSession';
+import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 
 import useVerifyOauth from './hooks/useVerifyOauth';
 import useGoogleLoginComplete from './hooks/useGoogleLoginComplete';
 import useGoogleLoginLink from './hooks/useGoogleLoginLink';
 
 function Content() {
-  const broadcastChannel = new BroadcastChannel('integration-channel');
   const params = useParams();
   const searchParams = useSearchParams();
   const code = searchParams.get('code') || '';
@@ -29,25 +32,52 @@ function Content() {
   const { mutate: completeGoogleLogin, isLoading: isCompletingGoogle } = useGoogleLoginComplete();
   const { mutate: linkGoogleAccount, isLoading: isLinking } = useGoogleLoginLink();
 
-  const postAndClose = (postMessageData: any) => {
-    try {
-      window.opener?.postMessage(postMessageData, '*');
-    } catch (e) {
-      console.warn('window.opener.postMessage failed:', e);
+  // Same-tab SSO completion. This page lands on the FRONTEND origin, so it can
+  // establish the session and navigate itself — no popup / window.opener handoff
+  // (that breaks across the backend/provider/frontend domains).
+  const redirectAfterLogin = (data: any) => {
+    const redirect = searchParams.get('redirect');
+    if (data.account_type === 'employer') {
+      window.location.href = data.has_profile ? redirect || '/dashboard' : '/setup-employer-profile';
+    } else if (data.account_type === 'admin' || data.account_type === 'superadmin') {
+      window.location.href = '/admin/dashboard';
+    } else {
+      localStorage.removeItem('postAuthRedirect');
+      if (data.has_profile) {
+        window.location.href = redirect || '/personal-mode';
+      } else {
+        window.location.href = redirect
+          ? `/setup-applicant-profile?redirect=${encodeURIComponent(redirect)}`
+          : '/setup-applicant-profile';
+      }
     }
+  };
+
+  const finishLogin = async (data: any) => {
+    // JWT cookie used by API requests
+    setCookie('token', data.token, {
+      maxAge: ACCESS_TOKEN_LIFETIME_SECONDS,
+      sameSite: 'strict',
+      httpOnly: false,
+      secure: true,
+    });
+    // iron-session cookie the middleware reads to grant /dashboard access.
+    // Relative URL -> hits the Next.js frontend (same origin), not Django.
     try {
-      broadcastChannel.postMessage(postMessageData);
-    } catch (e) {
-      console.warn('BroadcastChannel postMessage failed:', e);
+      await updateSession({
+        token: data.token,
+        email: data.email,
+        hasPendingTransaction: data.has_pending_transaction,
+        hasActiveSubscription: data.has_active_subscription,
+        hasProfile: data.has_profile,
+        accountType: data.account_type,
+        loginType: data.login_type,
+        isLoggedIn: true,
+      });
+    } catch (err) {
+      console.error('SSO updateSession failed:', err);
     }
-    try {
-      localStorage.setItem('sso_result', JSON.stringify({ ...postMessageData, _ts: Date.now() }));
-    } catch (e) {
-      console.warn('localStorage SSO fallback failed:', e);
-    }
-    setTimeout(() => {
-      window.close();
-    }, 1500);
+    redirectAfterLogin(data);
   };
 
   useEffect(() => {
@@ -81,17 +111,7 @@ function Content() {
                 { google_access_token: data.google_access_token, account_type: presetAccountType },
                 {
                   onSuccess: (created: any) => {
-                    postAndClose({
-                      isGranted: created.is_granted,
-                      provider: params?.provider,
-                      token: created.token,
-                      email: created.email,
-                      has_pending_transaction: created.has_pending_transaction,
-                      has_active_subscription: created.has_active_subscription,
-                      has_profile: created.has_profile,
-                      account_type: created.account_type,
-                      login_type: created.login_type,
-                    });
+                    finishLogin(created);
                   },
                   onError: (err: any) => {
                     setErrorMessage(typeof err === 'string' ? err : 'Something went wrong. Please try again.');
@@ -106,39 +126,18 @@ function Content() {
             return;
           }
 
-          const postMessageData: any = {
-            isGranted: data.is_granted,
-            provider: params?.provider,
-          };
-          if (['yahshua-payroll', 'yg-payroll', 'google'].includes(data.login_type)) {
-            postMessageData.token = data.token;
-            postMessageData.email = data.email;
-            postMessageData.has_pending_transaction = data.has_pending_transaction;
-            postMessageData.has_active_subscription = data.has_active_subscription;
-            postMessageData.has_profile = data.has_profile;
-            postMessageData.account_type = data.account_type;
-            postMessageData.login_type = data.login_type;
-          }
-          postAndClose(postMessageData);
+          finishLogin(data);
         },
         onError: (err: any) => {
           const message = typeof err === 'string' && err ? err : 'Login failed. Please try again.';
           setErrorMessage(message);
           setHasError(true);
-          postAndClose({ isGranted: false, error: message, provider: params?.provider });
         },
       };
       mutate(data, callbackRequest);
     } else if (error) {
-      if (error === 'access_denied') {
-        setErrorMessage('Access denied');
-      } else {
-        setErrorMessage(error);
-      }
+      setErrorMessage(error === 'access_denied' ? 'Access denied' : error);
       setHasError(true);
-      setTimeout(() => {
-        window.close();
-      }, 1000);
     }
   }, []);
 
@@ -147,18 +146,7 @@ function Content() {
       { google_access_token: googleAccessToken, account_type: selectedAccountType },
       {
         onSuccess: (data: any) => {
-          const postMessageData: any = {
-            isGranted: data.is_granted,
-            provider: params?.provider,
-            token: data.token,
-            email: data.email,
-            has_pending_transaction: data.has_pending_transaction,
-            has_active_subscription: data.has_active_subscription,
-            has_profile: data.has_profile,
-            account_type: data.account_type,
-            login_type: data.login_type,
-          };
-          postAndClose(postMessageData);
+          finishLogin(data);
         },
         onError: (err: any) => {
           setErrorMessage(typeof err === 'string' ? err : 'Something went wrong. Please try again.');
@@ -173,18 +161,7 @@ function Content() {
       { google_access_token: googleAccessToken, password: linkPassword },
       {
         onSuccess: (data: any) => {
-          const postMessageData: any = {
-            isGranted: data.is_granted,
-            provider: params?.provider,
-            token: data.token,
-            email: data.email,
-            has_pending_transaction: data.has_pending_transaction,
-            has_active_subscription: data.has_active_subscription,
-            has_profile: data.has_profile,
-            account_type: data.account_type,
-            login_type: data.login_type,
-          };
-          postAndClose(postMessageData);
+          finishLogin(data);
         },
         onError: (err: any) => {
           setErrorMessage(typeof err === 'string' ? err : 'Something went wrong. Please try again.');
@@ -379,6 +356,14 @@ function Content() {
                   </div>
                   <h1 className='text-center text-[#d65846] text-[32px] font-bold'>ERROR</h1>
                   <h1 className='text-xl text-center'>{errorMessage}</h1>
+                  <div className='flex justify-center mt-4'>
+                    <a
+                      href='/login'
+                      className='text-blue-600 hover:underline font-semibold text-sm'
+                    >
+                      Return to login
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

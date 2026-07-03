@@ -299,43 +299,17 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
     return false;
   };
 
+  // Full-page (same-tab) redirect. A popup can't hand the result back here:
+  // it travels backend domain -> Payroll domain -> frontend callback, which
+  // severs window.opener (cross-origin + COOP), so BroadcastChannel/localStorage
+  // (same-origin only) and postMessage all fail. The callback page now finishes
+  // the login itself and navigates to the dashboard.
   const loginWithGoogle = () => {
-    localStorage.removeItem('sso_result');
-    const left = (window.innerWidth - 500) / 2;
-    const top = (window.innerHeight - 600) / 2;
-    const popup = window.open(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/google-login/`,
-      'popup',
-      `width=500,height=600,left=${left},top=${top}`
-    );
-    const checkOAuthStatus = setInterval(function () {
-      if (popup?.closed) {
-        clearInterval(checkOAuthStatus);
-        setTimeout(() => consumeStoredSSOResult(), 300);
-      }
-    }, 500);
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/google-login/`;
   };
 
   const loginWithYahshuaPayroll = () => {
-    // Clear any stale SSO result before starting
-    localStorage.removeItem('sso_result');
-
-    const left = (window.innerWidth - 900) / 2;
-    const top = (window.innerHeight - 700) / 2;
-    const popup = window.open(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth`,
-      'popup',
-      `width=900, height=900, left=${left}, top=${top}`
-    );
-    const checkOAuthStatus = setInterval(function () {
-      if (popup?.closed) {
-        clearInterval(checkOAuthStatus);
-        // Last-resort: poll localStorage after popup closes.
-        // Catches cases where BroadcastChannel and the storage event
-        // both fail (e.g. macOS Chrome cross-origin popup isolation).
-        setTimeout(() => consumeStoredSSOResult(), 300);
-      }
-    }, 500);
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth`;
   };
 
   // Show the login page but redirect if already logged in
