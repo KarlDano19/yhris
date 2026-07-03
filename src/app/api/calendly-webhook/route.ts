@@ -13,6 +13,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 
+// ─── Partner domains ──────────────────────────────────────────────────────────
+// Bookings from these email domains are partner reps booking on behalf of a client.
+// The company field = the client company, not the partner's own company.
+const PARTNER_DOMAINS: Record<string, string> = {
+  'globe.com.ph': 'Globe Telecom',
+  'globe.com': 'Globe Telecom',
+  'rcbc.com': 'RCBC',
+  'rcbc.com.ph': 'RCBC',
+  'pbbank.com.ph': 'Philippine Business Bank (PBB)',
+  'pbb.com.ph': 'Philippine Business Bank (PBB)',
+  'sterlingbankasia.com': 'Sterling Bank of Asia',
+  'sterling.com.ph': 'Sterling Bank of Asia',
+};
+
 // ─── Dedup cache ──────────────────────────────────────────────────────────────
 // Keyed by event URI. TTL of 30 min is enough to survive a double-fire within
 // a single Make polling window without persisting stale entries indefinitely.
@@ -217,20 +231,25 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
   const client = new Anthropic({ apiKey: anthropicKey });
 
+  const emailDomain = data.email.split('@')[1]?.toLowerCase() ?? '';
+  const partnerName = PARTNER_DOMAINS[emailDomain] ?? null;
+  const isPartner = partnerName !== null;
+  const serviceLabel = data.service?.trim() || 'YAHSHUA HRIS';
+
   const prompt = `You are a sales intelligence analyst for YAHSHUA HRIS, a Philippine HR and payroll software company.
 
-A prospect just booked a demo. Here is their info:
+A ${isPartner ? `PARTNER REP from ${partnerName}` : 'prospect'} just booked a demo. Here is their info:
 - Name: ${data.firstName} ${data.lastName}
-- Company: ${data.companyName || '(not provided)'}
-- Email: ${data.email}
+- Email: ${data.email}${isPartner ? ` (${partnerName} partner)` : ''}
+- Client company: ${data.companyName || '(not provided)'}
 - Phone: ${data.phone || '(not provided)'}
-- Service interested in: ${data.service || '(not provided)'}
+- Service interested in: ${serviceLabel}
 - Number of employees: ${data.employeeCount || '(not provided)'}
 - Current HR/payroll process: ${data.currentProcess || '(not provided)'}
 - HR challenge: ${data.painPoint || '(not provided)'}
 - Demo scheduled: ${data.scheduledAt ? new Date(data.scheduledAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) + ' (Philippine Time)' : '(not provided)'}
 
-Company research:
+${isPartner ? `IMPORTANT: This booking was made by a ${partnerName} partner rep on behalf of the client company listed above. The company field refers to their CLIENT, not ${partnerName} itself.\n\n` : ''}Company research (about the client company):
 ---
 ${searchContext || 'No results found.'}
 ---
@@ -245,14 +264,16 @@ Based on this, return a JSON object with these exact fields. All fields are requ
 {
   "score": <number 1-10, likelihood to buy YAHSHUA HRIS>,
   "tier": <"hot" | "warm" | "cold">,
-  "notes": <2 sentences max. Sentence 1: scoring rationale — why hot/warm/cold based on email domain, pain point, and employee count. Sentence 2: opportunity signal — estimated urgency, potential seat count or deal size based on employee count and company type, and one concrete action (e.g. prioritize same-day outreach, confirm payroll pain during demo, set low expectations and qualify first). Do NOT include company background here.>,
-  "companyIntel": <3-5 sentences about the company: what they do, industry, estimated size, relevant business context for the sales team. Use search results if available; otherwise use your general knowledge. Never leave this empty.>,
-  "personIntel": <2-3 sentences about the person who booked. ${personValidated ? `Search results above are pre-validated to match "${fullName}" at "${companyHint}" — you may use them.` : `Person research was NOT validated. Do NOT use any search results for person intel — infer only from available signals: business vs personal email, the fact they self-booked (likely evaluator or decision-maker), their name, their stated role context, pain points, and company type.`} Never leave this empty.>
+  "notes": <2 sentences max. Sentence 1: scoring rationale — why hot/warm/cold based on the client company's profile, pain point, and employee count. Always reference the specific service they are interested in (${serviceLabel}) — do NOT substitute a different service name. Sentence 2: opportunity signal — estimated urgency, potential seat count or deal size, and one concrete action. ${isPartner ? `Flag this as a partner-sourced deal from ${partnerName} and suggest coordinating with the partner rep.` : ''} Do NOT include company background here.>,
+  "companyIntel": <3-5 sentences about the CLIENT company (${data.companyName || 'the company listed'}): what they do, industry, estimated size, and context relevant to a ${serviceLabel} sale. Use search results if available; otherwise use general knowledge. Never leave this empty.>,
+  "personIntel": <${isPartner
+    ? `2-3 sentences describing this as a PARTNER booking. State clearly that ${data.firstName} ${data.lastName} is a rep from ${partnerName} — a YAHSHUA partner — who booked this demo on behalf of their client (${data.companyName || 'the listed company'}). Note what this means for the sales approach: this is a partner-led deal, coordinate with the ${partnerName} rep, treat the client company as the end buyer. Do not describe this person as a direct prospect.`
+    : `2-3 sentences about the person who booked. ${personValidated ? `Search results above are pre-validated to match "${fullName}" at "${companyHint}" — you may use them.` : `Person research was NOT validated. Do NOT use any search results for person intel — infer only from available signals: business vs personal email, the fact they self-booked (likely evaluator or decision-maker), their name, their stated role context, pain points, and company type.`}`} Never leave this empty.>
 }
 
 Scoring guide:
-- Hot (7-10): Established company, business email, 20+ employees, urgent HR pain (payroll, DOLE compliance, headcount growth)
-- Warm (4-6): Growing company, moderate HR needs, or fewer signals available
+- Hot (7-10): Established company, business email, 20+ employees, urgent pain point matching ${serviceLabel}${isPartner ? `, or partner-referred (partner referrals carry higher close rate)` : ''}
+- Warm (4-6): Growing company, moderate needs, or fewer signals available
 - Cold (1-3): Early stage, personal email, very few employees, vague pain point
 
 Return only valid JSON, no explanation outside the JSON.`;
