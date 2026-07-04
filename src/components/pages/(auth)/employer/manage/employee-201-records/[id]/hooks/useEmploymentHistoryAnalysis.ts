@@ -83,7 +83,13 @@ async function getEmploymentHistoryAnalysis(
     if (token) {
       const res = await fetch(url, config);
       if (!res.ok) {
-        throw res.json();
+        let errorBody: any;
+        try {
+          errorBody = await res.json();
+        } catch {
+          throw new Error(`Request failed with status ${res.status}`);
+        }
+        throw errorBody;
       }
       return res.json();
     }
