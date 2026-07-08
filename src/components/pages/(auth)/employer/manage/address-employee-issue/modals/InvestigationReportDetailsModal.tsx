@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
@@ -10,11 +10,23 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 
 function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; setIsOpen: Dispatch<any> }) {
   const cancelButtonRef = useRef(null);
+  const summaryRef = useRef<HTMLDivElement>(null);
   const { data: investigationReportData, remove: removeInvestigationReport } = useGetInvestigationReportDetails(
     isOpen.id
   );
   const { data: employeeIssueData, remove: removeEmployeeIssue } = useGetEmployeeIssueDetails(isOpen.id);
   const [currentView, setCurrentView] = useState<'default' | 'summary' | 'attachment'>('default');
+
+  // Auto-size read-only textareas to fit their content (up to a max height, then scroll)
+  useEffect(() => {
+    const container = summaryRef.current;
+    if (!container) return;
+    const textareas = container.querySelectorAll<HTMLTextAreaElement>('textarea[data-autosize]');
+    textareas.forEach((textarea) => {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    });
+  }, [investigationReportData, currentView]);
 
   const customCloseModal = () => {
     removeInvestigationReport();
@@ -75,12 +87,12 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <DialogPanel className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-2 sm:my-4 w-full max-w-4xl ${
-                  currentView === 'summary' 
-                    ? 'h-auto max-h-[80vh]' 
+                <DialogPanel className={`relative transform rounded-lg bg-white text-left shadow-xl transition-all my-2 sm:my-4 w-full max-w-4xl ${
+                  currentView === 'summary'
+                    ? 'h-auto'
                     : currentView === 'attachment'
-                    ? 'h-[98vh] sm:h-[95vh]'
-                    : 'h-[98vh] sm:h-[95vh]'
+                    ? 'h-[98vh] sm:h-[95vh] overflow-hidden'
+                    : 'h-[98vh] sm:h-[95vh] overflow-hidden'
                 }`}>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Investigation Report</h3>
@@ -128,7 +140,7 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
                         
                         <div className={`${currentView === 'summary' ? '' : 'flex-1 overflow-hidden'}`}>
                           {currentView === 'summary' ? (
-                            <div className='space-y-4'>
+                            <div className='space-y-4' ref={summaryRef}>
                               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                 <div>
                                   <label htmlFor='date-of-investigation' className='block text-sm font-bold text-gray-700 mb-1'>
@@ -182,33 +194,61 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
                                   />
                                 </div>
                                 
-                                <div>
-                                  <label htmlFor='decision' className='block text-sm font-bold text-gray-700 mb-1'>
-                                    Decision:
-                                  </label>
-                                  <input
-                                    id='decision'
-                                    type='text'
-                                    value={investigationReportData?.decision || 'N/A'}
-                                    readOnly
-                                    className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
-                                  />
-                                </div>
-                                
-                                {investigationReportData?.custom_decision && (
-                                  <div>
-                                    <label htmlFor='custom-decision' className='block text-sm font-bold text-gray-700 mb-1'>
-                                      Custom Decision:
-                                    </label>
-                                    <input
-                                      id='custom-decision'
-                                      type='text'
-                                      value={investigationReportData.custom_decision}
-                                      readOnly
-                                      className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
-                                    />
-                                  </div>
-                                )}
+                                {(() => {
+                                  const rawCustomDecision = investigationReportData?.custom_decision;
+                                  const customDecision =
+                                    rawCustomDecision && String(rawCustomDecision).trim().toLowerCase() !== 'null'
+                                      ? String(rawCustomDecision)
+                                      : '';
+                                  const isOther = investigationReportData?.decision === 'Other...';
+                                  const decisionValue = isOther
+                                    ? customDecision || 'N/A'
+                                    : investigationReportData?.decision || 'N/A';
+
+                                  return (
+                                    <>
+                                      <div className={isOther ? 'md:col-span-2' : ''}>
+                                        <label htmlFor='decision' className='block text-sm font-bold text-gray-700 mb-1'>
+                                          {isOther ? 'Custom Decision:' : 'Decision:'}
+                                        </label>
+                                        {isOther ? (
+                                          <textarea
+                                            id='decision'
+                                            rows={3}
+                                            value={decisionValue}
+                                            readOnly
+                                            data-autosize
+                                            className='cursor-not-allowed w-full overflow-hidden px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
+                                          />
+                                        ) : (
+                                          <input
+                                            id='decision'
+                                            type='text'
+                                            value={decisionValue}
+                                            readOnly
+                                            className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
+                                          />
+                                        )}
+                                      </div>
+
+                                      {!isOther && customDecision && (
+                                        <div>
+                                          <label htmlFor='custom-decision' className='block text-sm font-bold text-gray-700 mb-1'>
+                                            Custom Decision:
+                                          </label>
+                                          <textarea
+                                            id='custom-decision'
+                                            rows={3}
+                                            value={customDecision}
+                                            readOnly
+                                            data-autosize
+                                            className='cursor-not-allowed w-full overflow-hidden px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
+                                          />
+                                        </div>
+                                      )}
+                                    </>
+                                  );
+                                })()}
                               </div>
                               
                               <div>
@@ -217,9 +257,11 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
                                 </label>
                                 <textarea
                                   id='results'
+                                  rows={4}
                                   value={investigationReportData?.results || 'N/A'}
                                   readOnly
-                                  className='cursor-not-allowed w-full h-32 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
+                                  data-autosize
+                                  className='cursor-not-allowed w-full overflow-hidden px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
                                 />
                               </div>
                               

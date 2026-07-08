@@ -109,6 +109,71 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-026
+DATE FILED: 2026-07-08
+DATE FIXED: 2026-07-08
+REPORTER: Client
+
+ISSUE DESCRIPTION:
+On the Address Employee Issue investigation form, selecting "Other..." for the
+Decision and typing a custom decision failed to send the Notice of Decision.
+Longer custom decisions triggered a backend length error surfaced as the
+generic "Something went wrong. Please contact system administrator." toast.
+Additionally, in the Investigation Report viewing modal:
+  - The Custom Decision field displayed the literal string "null" when empty.
+  - When the decision was "Other...", both "Decision: Other..." and the custom
+    decision were shown (redundant/confusing).
+  - The custom decision / results fields did not grow with long content and the
+    modal used an internal scrollbar instead of growing like other modals.
+(Linear I-595)
+
+DESIRED OUTCOME:
+Long custom decisions should be enterable and sendable. The custom decision
+input should behave like the "Result of Investigation" textarea (multi-line,
+auto-growing). In the viewing modal: hide the custom decision when empty/null;
+when the decision is "Other...", show only the custom decision (labeled
+"Custom Decision") at full width; and let the modal grow with content so the
+page scrolls rather than an inner scrollbar.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/address-employee-issue/modals/InvestigationModal.tsx
+    (custom decision input -> auto-growing textarea; auto-grow for Result of Investigation)
+- src/components/pages/(auth)/employer/manage/address-employee-issue/modals/InvestigationReportDetailsModal.tsx
+    (hide null/empty custom decision; show custom decision in place of "Other...";
+     full-width custom decision labeled "Custom Decision"; auto-sizing read-only
+     textareas; modal grows so the page scrolls)
+
+Backend (see backend BUG_HISTORY HRIS-2026-026):
+- app/models/employee_issue.py (custom_decision CharField -> TextField)
+- app/migrations/0163_alter_investigationreport_custom_decision.py
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Components tested (manual: InvestigationModal + InvestigationReportDetailsModal)
+☑ TypeScript types verified (fixed FormEvent typing on the auto-grow handler)
+☑ Manual verification completed (long "Other..." decision now saves and sends;
+  viewing modal hides empty custom decision, labels it correctly, and grows)
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (empty custom decision, literal "null" string, very long text)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+The root cause was a backend CharField(max_length=100) on custom_decision
+(fixed in the backend as a TextField). On the frontend, the custom decision
+input was changed to an auto-growing multi-line textarea to match the Result
+of Investigation field. The viewing modal now normalizes the custom decision
+(treating null/"" and the literal "null" string as empty), renders the custom
+decision in place of the "Other..." option at full width under a
+"Custom Decision" label, and auto-sizes the read-only textareas so the modal
+lengthens naturally and the page (overlay) scrolls instead of an inner scrollbar.
+
+================================================================================
+
 BUG ID: HRIS-2026-025
 DATE FILED: 2026-07-03
 DATE FIXED: 2026-07-03
