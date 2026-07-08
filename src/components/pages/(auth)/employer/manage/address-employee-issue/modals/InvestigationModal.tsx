@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useEffect, useRef, useState, DragEvent, ChangeEvent } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState, DragEvent, ChangeEvent, FormEvent } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -51,6 +51,13 @@ export default function InvestigationModal({
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   const cancelButtonRef = useRef(null);
+
+  // Auto-grow textareas as the user types
+  const autoGrowTextarea = (event: FormEvent<HTMLTextAreaElement>) => {
+    const el = event.currentTarget;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  };
 
   // Watch the decision field to conditionally show the custom decision input
   const selectedDecision = watch('decision');
@@ -357,8 +364,9 @@ export default function InvestigationModal({
                             {...register('resultOfInvestigation', {
                               required: true,
                             })}
+                            onInput={autoGrowTextarea}
                             id='resultOfInvestigation'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                            className='block w-full max-h-96 overflow-y-auto rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 resize-none'
                           />
                         </div>
                         {errors.resultOfInvestigation && (
@@ -399,11 +407,12 @@ export default function InvestigationModal({
                             <span className='text-red-600'>*</span>
                           </label>
                           <div className='mt-2'>
-                            <input
+                            <textarea
                               id='other'
+                              rows={3}
                               {...register('other', { required: selectedDecision === 'Other...' })}
-                              type='name'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                              onInput={autoGrowTextarea}
+                              className='block w-full max-h-96 overflow-y-auto rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 resize-y'
                             />
                           </div>
                           {errors.other && (
