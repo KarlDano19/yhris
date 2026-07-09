@@ -75,10 +75,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // For create modal
     const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
     const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
+    const [createEmployeeDateHired, setCreateEmployeeDateHired] = useState<string | null>(null);
 
     // For edit modal
     const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
     const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
+    const [editEmployeeDateHired, setEditEmployeeDateHired] = useState<string | null>(null);
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -712,6 +714,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setEmployeeSearch={setCreateEmployeeSearch}
           employeeSelected={createEmployeeSelected}
           setEmployeeSelected={setCreateEmployeeSelected}
+          employeeDateHired={createEmployeeDateHired}
+          setEmployeeDateHired={setCreateEmployeeDateHired}
         />
       )}
       {isWorkAccidentIllnessReportDeleteModalOpen && (
@@ -744,6 +748,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setEmployeeSearch={setEditEmployeeSearch}
           employeeSelected={editEmployeeSelected}
           setEmployeeSelected={setEditEmployeeSelected}
+          employeeDateHired={editEmployeeDateHired}
+          setEmployeeDateHired={setEditEmployeeDateHired}
         />
       )}
       {isExportProgressModalOpen && (

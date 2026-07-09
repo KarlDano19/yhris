@@ -3,6 +3,7 @@
 import React from "react";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+import { Tooltip } from "react-tooltip";
 
 function EmploymentDetails({
   register,
@@ -110,13 +111,18 @@ function EmploymentDetails({
             <div className="relative mt-2">
               <input
                 type="number"
+                step="any"
                 {...register("length_of_service", { required: true })}
                 id="length_of_service"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                readOnly
+                data-tooltip-id="length-of-service-tooltip"
+                data-tooltip-content="Auto-calculated from the employee's date hired and date of accident/illness"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100"
               />
+              <Tooltip id="length-of-service-tooltip" place="bottom" style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }} />
             </div>
             {errors?.length_of_service && (
-              <p className="text-xs text-red-600 mt-1">Length of Service is required.</p>
+              <p className="text-xs text-red-600 mt-1">Length of Service could not be calculated — select an employee and Date of Accident first.</p>
             )}
           </div>
           <div>
