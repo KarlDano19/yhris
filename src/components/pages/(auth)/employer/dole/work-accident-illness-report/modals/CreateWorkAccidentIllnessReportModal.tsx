@@ -20,6 +20,8 @@ function CreateWorkAccidentIllnessReportModal({
   setEmployeeSearch,
   employeeSelected,
   setEmployeeSelected,
+  employeeDateHired,
+  setEmployeeDateHired,
 }: {
   refetch: any;
   isOpen: boolean;
@@ -29,6 +31,8 @@ function CreateWorkAccidentIllnessReportModal({
   setEmployeeSearch: (value: string) => void;
   employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
+  employeeDateHired: string | null;
+  setEmployeeDateHired: (value: string | null) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = formMethods;
@@ -46,6 +50,7 @@ function CreateWorkAccidentIllnessReportModal({
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
+        setEmployeeDateHired(null);
         refetch();
       },
       onError: (err: any) => {
@@ -108,6 +113,8 @@ function CreateWorkAccidentIllnessReportModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
+                    employeeDateHired={employeeDateHired}
+                    setEmployeeDateHired={setEmployeeDateHired}
                     errors={errors}
                   />
                 )}

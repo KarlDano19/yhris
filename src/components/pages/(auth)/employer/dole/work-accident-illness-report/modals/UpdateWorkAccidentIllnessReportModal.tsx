@@ -26,6 +26,8 @@ export default function UpdateWorkAccidentIllnessReportModal({
   setEmployeeSearch,
   employeeSelected,
   setEmployeeSelected,
+  employeeDateHired,
+  setEmployeeDateHired,
 }: {
   refetch: any;
   isOpen: T_ModalData;
@@ -35,6 +37,8 @@ export default function UpdateWorkAccidentIllnessReportModal({
   setEmployeeSearch: (value: string) => void;
   employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
+  employeeDateHired: string | null;
+  setEmployeeDateHired: (value: string | null) => void;
 }) {
     const cancelButtonRef = useRef(null);
     const {
@@ -100,6 +104,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
     reset();
     setEmployeeSearch('');
     setEmployeeSelected(false);
+    setEmployeeDateHired(null);
     removeWorkAccidentIllnessReport();
     setIsOpen(null);
   }
@@ -171,6 +176,8 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
+                    employeeDateHired={employeeDateHired}
+                    setEmployeeDateHired={setEmployeeDateHired}
                     employeeName={workAccidentIllnessReportData?.employee_name}
                     errors={errors}
                   />

@@ -347,7 +347,7 @@ export default function EmployeeSelect({
     const filtered = employeeItems.filter((item: any) => !excludeValues.includes(item.id));
       const limitedItems = filtered.slice(0, employeeLimit);
     
-    const options = limitedItems.map((item: any) => ({
+    const options: any[] = limitedItems.map((item: any) => ({
       value: item.id,
       label: `${item.firstname} ${item.lastname}`,
       department: item.department,
@@ -357,10 +357,11 @@ export default function EmployeeSelect({
       gender: item.gender,
       email: item.email,
       birthdate: item.birthdate,
+      date_hired: item.date_hired,
     }));
 
     // Only add department options for multi-select (not for single select)
-    let finalOptions = [...options];
+    let finalOptions: any[] = [...options];
     
     if (isMulti) {
       const allDepartments = new Set();
