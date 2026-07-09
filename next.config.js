@@ -18,6 +18,14 @@ const nextConfig = {
         port: '9000',
         pathname: '/**',
       },
+      // Portless local dev (main checkout or worktree — see NEXT_REMOTE_PATTERNS_HOSTNAME in .env)
+      ...(process.env.NEXT_REMOTE_PATTERNS_HOSTNAME
+        ? [{
+            protocol: 'https',
+            hostname: process.env.NEXT_REMOTE_PATTERNS_HOSTNAME,
+            pathname: '/**',
+          }]
+        : []),
       // Staging
       {
         protocol: 'https',

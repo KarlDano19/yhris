@@ -78,6 +78,14 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
     setTimeout(() => setActionState(initialActionState), 400);
   };
 
+  const handleDialogClose = () => {
+    if (viewCV) {
+      setViewCV(false);
+      return;
+    }
+    handleClose();
+  };
+
   const handleGenerateSummary = () => {
     // Use the applicant.id from the state, which is the correct applicant_form_id
     if (!applicant?.id) {
@@ -898,7 +906,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   return (
     <>
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-30' initialFocus={cancelButtonRef} onClose={handleClose}>
+      <Dialog as='div' className='relative z-30' initialFocus={cancelButtonRef} onClose={handleDialogClose}>
         <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
@@ -929,7 +937,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               >
                 <div className='flex bg-savoy-blue p-2 items-center gap-4'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>{title}</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer self-start' onClick={handleClose} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer self-start' onClick={handleDialogClose} />
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
