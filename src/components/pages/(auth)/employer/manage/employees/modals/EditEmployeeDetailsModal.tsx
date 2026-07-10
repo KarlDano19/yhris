@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetEmployeeDetails from '../hooks/useGetEmployeeDetails';
 import useEditEmployeeDetails from '../hooks/useEditEmployeeDetails';
 
@@ -40,7 +41,10 @@ export default function EditEmployeeDetailsModal({
     data: employeeDetailsData,
     refetch: refetchEmployeeDetails,
     remove: removeEmployeeDetails,
+    isFetching: isEmployeeDetailsFetching,
   } = useGetEmployeeDetails(isOpen.id);
+  const isEmployeeDetailsReady =
+    !isOpen.open || (!isEmployeeDetailsFetching && employeeDetailsData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm();
   const { mutate, isLoading: isLoadingEditEmployeeDetails } = useEditEmployeeDetails();
 
@@ -155,7 +159,12 @@ export default function EditEmployeeDetailsModal({
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
-                  <div className='mx-4 md:mx-6 my-4'>
+                  {!isEmployeeDetailsReady ? (
+                    <div className='flex min-h-[560px] items-center justify-center'>
+                      <LoadingSpinner size='xl' showText text='Loading employee details...' />
+                    </div>
+                  ) : (
+                  <div className='mx-4 md:mx-6 my-4 min-h-[560px]'>
                     <form onSubmit={onSubmit}>
                       <div className='px-2 sm:px-4 pt-4 pb-6'>
                         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
@@ -449,6 +458,7 @@ export default function EditEmployeeDetailsModal({
                       </div>
                     </form>
                   </div>
+                  )}
                 </DialogPanel>
               </TransitionChild>
             </div>

@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 import usePatchEmployeeIssueItems, { EmployeeIssueUpdateData } from '../hooks/usePatchEmployeeIssueItems';
@@ -52,9 +53,15 @@ export default function EditIncidentReportModal({
   // Add data fetching hook similar to UpdateWorkAccidentIllnessReportModal
   const {
     data: employeeIssueDetailsData,
+    isFetching: isEmployeeIssueDetailsFetching,
     refetch: refetchEmployeeIssueDetails,
     remove: removeEmployeeIssueDetails,
   } = useGetEmployeeIssueDetails(selectedIssue?.id || null);
+
+  // No id means there's nothing to wait on (e.g. modal not really targeting an issue yet);
+  // otherwise only render once the fetch for this issue has resolved.
+  const isEmployeeIssueDetailsReady =
+    !isOpen || !selectedIssue?.id || (!isEmployeeIssueDetailsFetching && !!employeeIssueDetailsData);
   const { register, handleSubmit, setValue, reset, control, trigger, watch } = useForm<T_IncidentReport>({
     defaultValues: {
       name: '',
@@ -213,6 +220,11 @@ export default function EditIncidentReportModal({
                   </h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
+                {!isEmployeeIssueDetailsReady ? (
+                  <div className='flex min-h-[420px] items-center justify-center'>
+                    <LoadingSpinner size='xl' showText text='Loading incident report details...' />
+                  </div>
+                ) : (
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
                     {!briefBackgroundFullView && (
@@ -553,6 +565,7 @@ export default function EditIncidentReportModal({
                     </div>
                   </div>
                 </form>
+                )}
               </DialogPanel>
             </TransitionChild>
           </div>

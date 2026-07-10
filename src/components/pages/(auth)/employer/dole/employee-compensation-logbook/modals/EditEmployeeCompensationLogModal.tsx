@@ -5,6 +5,7 @@ import { Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useGetEmployeeCompensationLogbookDetails from '../hooks/useGetEmployeeCompensationLogbookDetails';
@@ -33,7 +34,10 @@ export default function EditEmployeeCompensationLogModal({
     data: employeeCompensationLogbookData,
     refetch: refetchEmployeeCompensationLogbook,
     remove: removeEmployeeCompensationLogbook,
+    isFetching: isEmployeeCompensationLogbookFetching,
   } = useGetEmployeeCompensationLogbookDetails(isOpen.id);
+  const isEmployeeCompensationLogbookReady =
+    !isOpen.open || (!isEmployeeCompensationLogbookFetching && employeeCompensationLogbookData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = formMethods;
   const { mutate, isLoading: isLoadingEditEmployeeCompensationLogbook } = useUpdateEmployeeCompensationLogbook();
   
@@ -122,6 +126,11 @@ export default function EditEmployeeCompensationLogModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Employee Compensation Log</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
+                {!isEmployeeCompensationLogbookReady ? (
+                  <div className='flex min-h-[420px] items-center justify-center'>
+                    <LoadingSpinner size='xl' showText text='Loading employee compensation log...' />
+                  </div>
+                ) : (
                 <form onSubmit={onSubmit}>
                   <div className='px-2 pt-4 pb-6 md:px-8'>
                     <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
@@ -344,6 +353,7 @@ export default function EditEmployeeCompensationLogModal({
                     </button>
                   </div>
                 </form>
+                )}
               </DialogPanel>
             </TransitionChild>
           </div>

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useCreatePermission from '../hooks/useCreatePermission';
 import useUpdatePermission from '../hooks/useUpdatePermission';
 import useGetPermissionDetails from '../hooks/useGetPermissionDetails';
@@ -29,13 +30,19 @@ export default function CreateEditPermissionModal({
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm();
-  const { data: permissionDetailsData, refetch: refetchPermissionDetails } = useGetPermissionDetails(isOpen.id);
+  const {
+    data: permissionDetailsData,
+    refetch: refetchPermissionDetails,
+    isFetching: isFetchingPermissionDetails,
+  } = useGetPermissionDetails(isOpen.id);
   const { data: categoriesData } = useGetPermissionCategories();
   const { mutate: createPermission, isLoading: isLoadingCreatePermission } = useCreatePermission();
   const { mutate: updatePermission, isLoading: isLoadingUpdatePermission } = useUpdatePermission();
 
   const isEditing = isOpen.mode === 'edit';
   const isLoading = isLoadingCreatePermission || isLoadingUpdatePermission;
+  const isPermissionDetailsReady =
+    !isOpen.open || !isEditing || !isOpen.id || (!isFetchingPermissionDetails && permissionDetailsData?.id === isOpen.id);
 
   useEffect(() => {
     if (isOpen.open && isEditing && isOpen.id !== null) {
@@ -114,6 +121,11 @@ export default function CreateEditPermissionModal({
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
+                  {!isPermissionDetailsReady ? (
+                    <div className='flex min-h-[300px] items-center justify-center'>
+                      <LoadingSpinner size='xl' showText text='Loading permission details...' />
+                    </div>
+                  ) : (
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
                       <div className='px-4 pt-4 pb-6'>
@@ -258,6 +270,7 @@ export default function CreateEditPermissionModal({
                       </div>
                     </form>
                   </div>
+                  )}
                 </DialogPanel>
               </TransitionChild>
             </div>

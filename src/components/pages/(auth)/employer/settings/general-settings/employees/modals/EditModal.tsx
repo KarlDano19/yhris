@@ -6,6 +6,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import useEditLocationDetails from '../hooks/location/useEditLocationDetails';
 import useGetLocationDetails from '../hooks/location/useGetLocationDetails';
@@ -43,21 +44,25 @@ export default function EditModal({
     data: locationDetailsData,
     refetch: refetchLocationDetails,
     remove: removeLocation,
+    isFetching: isLocationDetailsFetching,
   } = useGetLocationDetails(isOpen.id);
   const {
     data: departmentDetailsData,
     refetch: refetchDepartmentDetails,
     remove: removeDepartment,
+    isFetching: isDepartmentDetailsFetching,
   } = useGetDepartmentDetails(isOpen.id);
   const {
     data: positionDetailsData,
     refetch: refetchPositionDetails,
     remove: removePosition,
+    isFetching: isPositionDetailsFetching,
   } = useGetPositionDetails(isOpen.id);
   const {
     data: employeeStatusDetailsData,
     refetch: refetchEmployeeStatusDetails,
     remove: removeEmployeeStatus,
+    isFetching: isEmployeeStatusDetailsFetching,
   } = useGetEmployeeStatusDetails(isOpen.id);
   const { mutate: editLocation, isLoading: isLoadingEditLocation } = useEditLocationDetails();
   const { mutate: editDepartment, isLoading: isLoadingEditDepartment } = useEditDepartmentDetails();
@@ -98,6 +103,14 @@ export default function EditModal({
       }
     }
   }, [locationDetailsData, departmentDetailsData, positionDetailsData, employeeStatusDetailsData]);
+
+  const isDetailsReady =
+    !isOpen.open ? true :
+    module === 'location' ? !isLocationDetailsFetching && locationDetailsData?.id === isOpen.id :
+    module === 'department' ? !isDepartmentDetailsFetching && departmentDetailsData?.id === isOpen.id :
+    module === 'position' ? !isPositionDetailsFetching && positionDetailsData?.id === isOpen.id :
+    module === 'employee-status' ? !isEmployeeStatusDetailsFetching && employeeStatusDetailsData?.id === isOpen.id :
+    true;
 
   const onSubmit = handleSubmit((data) => {
     // Add description to data if it's a position
@@ -165,6 +178,11 @@ export default function EditModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit {module}</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
+                {!isDetailsReady ? (
+                  <div className={`flex items-center justify-center ${module === 'position' ? 'min-h-[420px]' : 'min-h-[200px]'}`}>
+                    <LoadingSpinner size='lg' showText text={`Loading ${module} details...`} />
+                  </div>
+                ) : (
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
                     <label htmlFor='name' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -237,6 +255,7 @@ export default function EditModal({
                     </button>
                   </div>
                 </form>
+                )}
               </DialogPanel>
             </TransitionChild>
           </div>

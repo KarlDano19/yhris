@@ -15,6 +15,7 @@ import WorkplaceWelfare from "./tabs/WorkplaceWelfare";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import CustomToast from "@/components/CustomToast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import useGetAnnualMedicalReportDetails from "../hooks/useGetAnnualMedicalReportDetails";
 import useUpdateAnnualMedicalReport from "../hooks/useUpdateAnnualMedicalReport";
 
@@ -39,7 +40,10 @@ function EditAnnualMedicalReportModal({
     data: annualMedicalReportData,
     refetch: refetchAnnualMedicalReport,
     remove: removeAnnualMedicalReport,
+    isFetching: isAnnualMedicalReportFetching,
   } = useGetAnnualMedicalReportDetails(isOpen.id);
+  const isAnnualMedicalReportReady =
+    !isOpen.open || (!isAnnualMedicalReportFetching && annualMedicalReportData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: updateAnnualMedicalReport,
@@ -711,7 +715,12 @@ function EditAnnualMedicalReportModal({
                     onClick={customCloseModal}
                   />
                 </div>
-                <div>
+                {!isAnnualMedicalReportReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading annual medical report..." />
+                  </div>
+                ) : (
+                <div className="min-h-[560px]">
                   <div className="pt-4 pb-2 pl-4 pr-4 flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide">
                     <div 
                       className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
@@ -773,7 +782,6 @@ function EditAnnualMedicalReportModal({
                   <div className="pl-4">
                     <h1 className="text-sm font-semibold text-gray-500">Step {selectedTab} out of 8</h1>
                   </div>
-                </div>
                 {selectedTab === 1 && (
                   <GeneralInfo
                     control={control}
@@ -863,6 +871,8 @@ function EditAnnualMedicalReportModal({
                     setError={setError}
                     clearErrors={clearErrors}
                   />
+                )}
+                </div>
                 )}
               </DialogPanel>
             </TransitionChild>

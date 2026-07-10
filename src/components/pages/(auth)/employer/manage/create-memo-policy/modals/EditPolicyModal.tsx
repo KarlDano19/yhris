@@ -5,6 +5,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useTagTo from '@/components/hooks/useTagTo';
 import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
 import useUpdateDirective from '../hooks/useUpdateDirective';
@@ -53,7 +54,8 @@ export default function EditPolicyModal({
   const updateMutation = useUpdateDirective();
 
   // load existing directive details
-  const { data, refetch: refetchDetails } = useGetDirectiveDetails(directiveId);
+  const { data, refetch: refetchDetails, isFetching } = useGetDirectiveDetails(directiveId);
+  const isPolicyDetailsReady = !isOpen || (!isFetching && data?.id === directiveId);
   useEffect(() => {
     if (isOpen && directiveId) refetchDetails();
   }, [isOpen, directiveId, refetchDetails]);
@@ -217,7 +219,11 @@ export default function EditPolicyModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Policy</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
-                {!isNextForm ? (
+                {!isPolicyDetailsReady ? (
+                  <div className='flex min-h-[560px] items-center justify-center'>
+                    <LoadingSpinner size='xl' showText text='Loading policy details...' />
+                  </div>
+                ) : !isNextForm ? (
                   <div className="policy-form-step-1">
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>

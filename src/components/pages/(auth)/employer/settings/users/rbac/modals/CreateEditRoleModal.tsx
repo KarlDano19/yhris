@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useCreateRole from '../hooks/useCreateRole';
 import useUpdateRole from '../hooks/useUpdateRole';
 import useGetRoleDetails from '../hooks/useGetRoleDetails';
@@ -33,13 +34,19 @@ export default function CreateEditRoleModal({
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   
-  const { data: roleDetailsData, refetch: refetchRoleDetails } = useGetRoleDetails(isOpen.id);
+  const {
+    data: roleDetailsData,
+    refetch: refetchRoleDetails,
+    isFetching: isFetchingRoleDetails,
+  } = useGetRoleDetails(isOpen.id);
   const { data: permissionsData } = useGetPermissionsList({ pageSize: 1000 });
   const { mutate: createRole, isLoading: isLoadingCreateRole } = useCreateRole();
   const { mutate: updateRole, isLoading: isLoadingUpdateRole } = useUpdateRole();
 
   const isEditing = isOpen.mode === 'edit';
   const isLoading = isLoadingCreateRole || isLoadingUpdateRole;
+  const isRoleDetailsReady =
+    !isOpen.open || !isEditing || !isOpen.id || (!isFetchingRoleDetails && roleDetailsData?.id === isOpen.id);
 
   useEffect(() => {
     if (isOpen.open && isEditing && isOpen.id !== null) {
@@ -222,6 +229,11 @@ export default function CreateEditRoleModal({
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
+                  {!isRoleDetailsReady ? (
+                    <div className='flex min-h-[560px] items-center justify-center'>
+                      <LoadingSpinner size='xl' showText text='Loading role details...' />
+                    </div>
+                  ) : (
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
                       <div className='px-4 pt-4 pb-6'>
@@ -599,6 +611,7 @@ export default function CreateEditRoleModal({
                       </div>
                     </form>
                   </div>
+                  )}
                 </DialogPanel>
               </TransitionChild>
             </div>
