@@ -109,6 +109,72 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-027
+DATE FILED: 2026-07-10
+DATE FIXED: 2026-07-10
+REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+When an employer's session token expired (or was already invalid/missing on
+load), the "Session is expired." toast would appear while a dashboard product
+tour popup (e.g. "Your Company Profile" onboarding tour) was still showing or
+could still pop up on top of it, confusing the user right before they were
+redirected to /login.
+
+Root cause: MainHeader.tsx only dispatched the `session-expiring` window event
+from the 30-second warning branch of its expiration check. The immediate/hard
+expiry path (`remaining <= 0`), the missing-token-cookie check on mount, and
+the "Invalid token" API error path all called `logout(true)` directly without
+dispatching any event. `logout()` is asynchronous (waits for the logout API
+call before redirecting), so during that window Home.tsx's tour auto-start
+effect (a 600ms delayed timer, gated only on tour progress data) had no signal
+that the session was already dead and could start/continue showing a tour
+segment.
+
+DESIRED OUTCOME:
+No tour popup should appear (or remain visible) once the session is known to
+be expired/invalid — the user should only see the "Session is expired." toast
+before being redirected to /login.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/MainHeader.tsx
+    (dispatch `session-expiring` event in all three logout(true) paths:
+     immediate full expiry, missing token cookie on mount, invalid-token API error)
+- src/components/pages/(auth)/employer/Home.tsx
+    (listen for `session-expiring`; immediately stopTour() if a tour is running,
+     and block the tour auto-start / completion-modal effects via an
+     isSessionExpiring flag + ref so the 600ms delayed auto-start timer cannot
+     fire after the session has expired)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript types verified (no type errors)
+☑ Manual verification completed (forced expiry / cleared token cookie; tour no
+  longer appears alongside or after the "Session is expired." toast)
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (hard expiry while tour already running; hard expiry
+  during the 600ms auto-start delay before a tour has started; missing/cleared
+  token cookie on page load)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+Added a `session-expiring` event dispatch to every code path in MainHeader.tsx
+that calls `logout(true)`, not just the 30-second warning branch, so any
+listener is notified as soon as the session is known to be dead — even before
+the async logout API call resolves and the redirect happens. Home.tsx now
+subscribes to that event: it immediately calls the tour context's `stopTour()`
+to dismiss any currently-visible tour popup, and sets an `isSessionExpiring`
+flag (mirrored into a ref for the delayed timer callback) that short-circuits
+both the tour auto-start effect and the tour-completion-modal effect so
+neither can trigger once the session has started expiring.
+
+================================================================================
+
 BUG ID: HRIS-2026-026
 DATE FILED: 2026-07-08
 DATE FIXED: 2026-07-08

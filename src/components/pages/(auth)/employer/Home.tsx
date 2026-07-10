@@ -38,7 +38,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   const isOnboardingEnabled = isUsersLoading ? false : (usersData?.is_onboarding_enabled ?? true);
   const isDeveloper = usersData?.is_developer === true;
 
-  const { isRunning, isNavigating, startTour } = useTour();
+  const { isRunning, isNavigating, startTour, stopTour } = useTour();
   const { mutate: updateTourProgress } = useUpdateTourProgress();
   const { data: tourProgress, isLoading: isTourProgressLoading } = useGetTourProgress();
 
@@ -51,6 +51,19 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   const isPayrollUser = PAYROLL_LOGIN_TYPES.includes(usersData?.login_type ?? '');
 
   const [snoozedKeys, setSnoozedKeys] = useState<Set<string>>(new Set());
+  const [isSessionExpiring, setIsSessionExpiring] = useState(false);
+
+  // Session is expiring/expired (MainHeader dispatches this before redirecting to
+  // /login) — block the tour from auto-starting and dismiss it if already showing,
+  // so it doesn't pop up over the "Session is expired" toast during the redirect.
+  useEffect(() => {
+    const handler = () => {
+      setIsSessionExpiring(true);
+      stopTour();
+    };
+    window.addEventListener('session-expiring', handler);
+    return () => window.removeEventListener('session-expiring', handler);
+  }, [stopTour]);
 
   const snoozeSegment = useCallback((key: string) => {
     setSnoozedKeys(prev => {
@@ -116,6 +129,9 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   const pendingSegmentsRef = useRef(pendingSegments);
   pendingSegmentsRef.current = pendingSegments;
 
+  const isSessionExpiringRef = useRef(isSessionExpiring);
+  isSessionExpiringRef.current = isSessionExpiring;
+
   const autoStartedRef = useRef(false);
 
   useEffect(() => {
@@ -127,26 +143,30 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   useEffect(() => {
     if (isUsersLoading || isTourProgressLoading) return;
     if (isRunning || isNavigating || tourIsNavigating) return;
+    if (isSessionExpiring) return;
     if (pendingSegments.length === 0) return;
     if (autoStartedRef.current) return;
 
     autoStartedRef.current = true;
-    setTimeout(() => {
+    const id = setTimeout(() => {
+      if (isSessionExpiringRef.current) return;
       if (pendingSegmentsRef.current.length > 0) {
         startSegmentTour(0, pendingSegmentsRef.current);
       }
     }, 600);
-  }, [isUsersLoading, isTourProgressLoading, pendingSegments.length, isRunning, isNavigating]);
+    return () => clearTimeout(id);
+  }, [isUsersLoading, isTourProgressLoading, pendingSegments.length, isRunning, isNavigating, isSessionExpiring]);
 
   useEffect(() => {
     if (isUsersLoading || isTourProgressLoading) return;
+    if (isSessionExpiring) return;
     const flag = localStorage.getItem('hris_show_tour_completion');
     if (!flag) return;
     localStorage.removeItem('hris_show_tour_completion');
     if (pendingSegments.length === 0 && !isRunning) {
       setIsTourCompletionModalOpen(true);
     }
-  }, [isUsersLoading, isTourProgressLoading, pendingSegments.length, isRunning]);
+  }, [isUsersLoading, isTourProgressLoading, pendingSegments.length, isRunning, isSessionExpiring]);
 
   const handleReset = () => {
     resetOnboarding(undefined, {
