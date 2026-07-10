@@ -862,7 +862,7 @@ const Content = () => {
                     ? 'max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-250px)]'
                     : 'max-h-[calc(100vh-120px)] lg:max-h-[calc(100vh-50px)]'
                 )}>
-                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
+                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                     <>
                       {!isGetJobsLoading
                         ? jobsItems.map((job: any) => (

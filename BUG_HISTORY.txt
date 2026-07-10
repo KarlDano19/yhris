@@ -109,6 +109,72 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-030
+DATE FILED: 2026-07-10
+DATE FIXED: 2026-07-10
+REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+  On the public jobs listing page (yahshuahris.com/jobs) on mobile, some job
+  cards displayed correctly at full screen width, but other cards (usually
+  ones with a longer company name or address) stretched wider than the
+  phone screen, cutting off text and adding horizontal scrolling. The same
+  card component was used for every job, so the inconsistency only showed
+  up depending on the length/breakability of that job's text content.
+
+  Root cause: the job/gig/talent card list (`Content.tsx` and the three
+  tabs in `Tabs.tsx`) used `grid md:grid-cols-2 lg:grid-cols-1 ...` with no
+  explicit column count at the base (mobile) breakpoint. Below `md`, the
+  grid had no `grid-template-columns` set, so CSS Grid's default
+  `min-width: auto` on grid items let a card's implicit column grow to fit
+  its widest unbreakable content (e.g. a long company name or address with
+  no natural break point), instead of staying constrained to the viewport
+  width. Cards with shorter text never hit this and looked fine.
+
+DESIRED OUTCOME:
+  Every job/gig/talent card on mobile should stay within the screen width
+  and wrap its text, regardless of how long the title, company name, or
+  location string is.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(un-auth)/apply-job-without-signup/jobs/Content.tsx
+- src/components/pages/(un-auth)/apply-job-without-signup/jobs/Tabs.tsx
+- src/components/pages/(un-auth)/apply-job-without-signup/jobs/components/tabs/company-jobs/JobCard.tsx
+
+Backend:
+- N/A — frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only, CSS/layout-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — layout/CSS fix)
+☑ TypeScript types verified (no logic changes)
+☑ Manual verification completed:
+  - Public jobs listing page on mobile viewport (e.g. iPhone XR, 414px):
+    all cards, including ones with long company names/addresses, now stay
+    within screen width ✓
+  - md/lg breakpoints (2-column and single-column layouts) unchanged ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (long unbreakable company name/address strings)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added an explicit `grid-cols-1` at the base breakpoint (alongside the
+  existing `md:grid-cols-2 lg:grid-cols-1`) in the job/gig/talent card grid
+  containers in `Content.tsx` and `Tabs.tsx`, so mobile always renders a
+  single, screen-width column instead of an unconstrained implicit grid.
+  Also added `min-w-0` to `JobCard.tsx`'s card containers and `break-words`
+  to the title/company/location text, so long unbreakable strings wrap
+  inside the card instead of forcing the grid track wider.
+
+================================================================================
+
 BUG ID: HRIS-2026-029
 DATE FILED: 2026-07-10
 DATE FIXED: 2026-07-10

@@ -41,7 +41,7 @@ const JobCard = ({
       />
       <div
         className={classNames(
-          'card border rounded-md p-4 cursor-pointer',
+          'card border rounded-md p-4 cursor-pointer min-w-0',
           isJobView && isSelected ? 'border-savoy-blue' : 'border-gray-300'
         )}
         onClick={() => onJobClick(job.id)}
@@ -54,14 +54,14 @@ const JobCard = ({
             </span>
           )}
         </div>
-        <div className='flex flex-col'>
+        <div className='flex flex-col min-w-0'>
           <span className='mt-1 ml-1'>
             <FileCaseIcon className='h-6 w-6' />
           </span>
-          <div className='ml-0 mt-2'>
-            <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>{job.title}</h5>
-            <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
-            <h6 className='text-indigo-dye text-sm'>{job.country}</h6>
+          <div className='ml-0 mt-2 min-w-0'>
+            <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye break-words'>{job.title}</h5>
+            <h6 className='text-indigo-dye text-sm font-medium mt-1 break-words'>{job.company}</h6>
+            <h6 className='text-indigo-dye text-sm break-words'>{job.country}</h6>
             <button
               onClick={(e) => { e.stopPropagation(); setIsModalOpen(true); }}
               className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
