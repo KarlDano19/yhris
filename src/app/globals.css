@@ -291,8 +291,32 @@ div.remove-height {
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
-.ql-editor ul { 
+.ql-editor ul {
   padding-left: unset !important;
+}
+
+/* quill.snow.css sizes headings via ".ql-snow .ql-editor h1/h2 { font-size: ... }",
+   which requires a .ql-snow ancestor. The live editor always has one
+   (react-quill-new wraps it in <div class="ql-container ql-snow">), but
+   read-only previews render bare <span class="ql-editor"> with no .ql-snow
+   wrapper, so that rule never matches and Tailwind's Preflight reset
+   (h1-h6 { font-size: inherit }) wins instead, collapsing headings to body
+   text size. Re-declare the sizes without requiring the .ql-snow ancestor. */
+.ql-editor h1 {
+  font-size: 2em;
+}
+
+.ql-editor h2 {
+  font-size: 1.5em;
+}
+
+/* getSemanticHTML() saves a deliberate blank line as a truly empty <p></p>
+   (no <br>), unlike the live editor's own blank line which always has a
+   placeholder <br> giving it height. Quill's own CSS sets margin/padding to
+   0 on .ql-editor p, so a childless <p> collapses to zero height in
+   read-only previews. Give it back a line's worth of height. */
+.ql-editor p:empty {
+  min-height: 1em;
 }
 
 /* Real editor lists (bullet, ordered, checklist) are always wrapped in an
