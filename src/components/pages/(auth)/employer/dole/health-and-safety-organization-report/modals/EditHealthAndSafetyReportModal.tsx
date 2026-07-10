@@ -4,6 +4,7 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import useGetHealthAndSafetyReportDetails from "../hooks/useGetHealthAndSafetyReportDetails";
 import useUpdateHealthAndSafetyReport from "../hooks/useUpdateHealthAndSafetyReport";
 import ReportInformation from "./tabs/ReportInformation";
@@ -33,7 +34,10 @@ function EditHealthAndSafetyReportModal({
     data: healthAndSafetyReportData,
     refetch: refetchHealthAndSafetyReport,
     remove: removeHealthAndSafetyReport,
+    isFetching: isHealthAndSafetyReportFetching,
   } = useGetHealthAndSafetyReportDetails(isOpen.id);
+  const isHealthAndSafetyReportReady =
+    !isOpen.open || (!isHealthAndSafetyReportFetching && healthAndSafetyReportData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: updateHealthAndSafetyReport,
@@ -194,43 +198,51 @@ function EditHealthAndSafetyReportModal({
                     onClick={() => customCloseModal()}
                   />
                 </div>
-                {selectedTab === 1 && (
-                  <ReportInformation
-                    control={control}
-                    setValue={setValue}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    watch={watch}
-                    errors={errors}
-                  />
-                )}
-                {selectedTab === 2 && (
-                  <PolicyAndComittee
-                    control={control}
-                    setValue={setValue}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    watch={watch}
-                    isCreateModal={false}
-                    errors={errors}
-                  />
-                )}
-                {selectedTab === 3 && (
-                  <TechnicalAndSignature
-                    control={control}
-                    setValue={setValue}
-                    register={register}
-                    onSubmit={onSubmit}
-                    setSelectedTab={setSelectedTab}
-                    watch={watch}
-                    isCreateModal={false}
-                    isLoading={isLoadingUpdateHealthAndSafetyReport}
-                    errors={errors}
-                    setError={setError}
-                    clearErrors={clearErrors}
-                  />
+                {!isHealthAndSafetyReportReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading health and safety report..." />
+                  </div>
+                ) : (
+                  <div className="min-h-[560px]">
+                    {selectedTab === 1 && (
+                      <ReportInformation
+                        control={control}
+                        setValue={setValue}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        watch={watch}
+                        errors={errors}
+                      />
+                    )}
+                    {selectedTab === 2 && (
+                      <PolicyAndComittee
+                        control={control}
+                        setValue={setValue}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        watch={watch}
+                        isCreateModal={false}
+                        errors={errors}
+                      />
+                    )}
+                    {selectedTab === 3 && (
+                      <TechnicalAndSignature
+                        control={control}
+                        setValue={setValue}
+                        register={register}
+                        onSubmit={onSubmit}
+                        setSelectedTab={setSelectedTab}
+                        watch={watch}
+                        isCreateModal={false}
+                        isLoading={isLoadingUpdateHealthAndSafetyReport}
+                        errors={errors}
+                        setError={setError}
+                        clearErrors={clearErrors}
+                      />
+                    )}
+                  </div>
                 )}
               </DialogPanel>
             </TransitionChild>

@@ -3,6 +3,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentIllnessReportDetails';
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
 import PersonalInformation from './tabs/PersonalInformation';
@@ -45,7 +46,10 @@ export default function UpdateWorkAccidentIllnessReportModal({
         data: workAccidentIllnessReportData,
         refetch: refetchWorkAccidentIllnessReport,
         remove: removeWorkAccidentIllnessReport,
+        isFetching: isWorkAccidentIllnessReportFetching,
   } = useGetWorkAccidentIllnessReportDetails(isOpen.id);
+  const isWorkAccidentIllnessReportReady =
+    !isOpen.open || (!isWorkAccidentIllnessReportFetching && workAccidentIllnessReportData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -165,47 +169,55 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     onClick={() => customCloseModal()}
                   />
                 </div>
-                {selectedTab === 1 && (
-                  <PersonalInformation
-                    control={control}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    setValue={setValue}
-                    employeeSearch={employeeSearch}
-                    setEmployeeSearch={setEmployeeSearch}
-                    employeeSelected={employeeSelected}
-                    setEmployeeSelected={setEmployeeSelected}
-                    employeeDateHired={employeeDateHired}
-                    setEmployeeDateHired={setEmployeeDateHired}
-                    employeeName={workAccidentIllnessReportData?.employee_name}
-                    errors={errors}
-                  />
-                )}
-                {selectedTab === 2 && (
-                  <EmploymentDetails
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    errors={errors}
-                  />
-                )}
-                {selectedTab === 3 && (
-                  <IllnessDetails
-                    control={control}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                  />
-                )}
-                {selectedTab === 4 && (
-                  <InjuryDetails
-                    control={control}
-                    register={register}
-                    onSubmit={onSubmit}
-                    isLoading={isLoadingUpdateWorkAccidentIllnessReport}
-                    setSelectedTab={setSelectedTab}
-                  />
+                {!isWorkAccidentIllnessReportReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading work accident/illness report..." />
+                  </div>
+                ) : (
+                  <div className="min-h-[560px]">
+                    {selectedTab === 1 && (
+                      <PersonalInformation
+                        control={control}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        setValue={setValue}
+                        employeeSearch={employeeSearch}
+                        setEmployeeSearch={setEmployeeSearch}
+                        employeeSelected={employeeSelected}
+                        setEmployeeSelected={setEmployeeSelected}
+                        employeeDateHired={employeeDateHired}
+                        setEmployeeDateHired={setEmployeeDateHired}
+                        employeeName={workAccidentIllnessReportData?.employee_name}
+                        errors={errors}
+                      />
+                    )}
+                    {selectedTab === 2 && (
+                      <EmploymentDetails
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        errors={errors}
+                      />
+                    )}
+                    {selectedTab === 3 && (
+                      <IllnessDetails
+                        control={control}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                      />
+                    )}
+                    {selectedTab === 4 && (
+                      <InjuryDetails
+                        control={control}
+                        register={register}
+                        onSubmit={onSubmit}
+                        isLoading={isLoadingUpdateWorkAccidentIllnessReport}
+                        setSelectedTab={setSelectedTab}
+                      />
+                    )}
+                  </div>
                 )}
               </DialogPanel>
             </TransitionChild>

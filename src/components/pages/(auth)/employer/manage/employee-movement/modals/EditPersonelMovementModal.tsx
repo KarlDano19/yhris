@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import EmployeeProfile from "./tabs/EmployeeProfile";
 import Recommendation from "./tabs/Recommendation";
 import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
@@ -40,10 +41,13 @@ function PrintPersonelMovementModal({
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
-  const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
+  const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement, isFetching: isFetchingPersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
   const { mutate: editPersonelMovement, isLoading: isLoadingEditPersonelMovement } = useEditPersonelMovementDetails();
-  const { approvals, currentUserApproval, refetch: refetchApprovals } = useGetPersonnelMovementApprovals(isOpen.id);
+  const { approvals, currentUserApproval, refetch: refetchApprovals, isFetching: isFetchingApprovals } = useGetPersonnelMovementApprovals(isOpen.id);
   const { mutate: submitApproval, isLoading: isLoadingSubmitApproval } = useSubmitApproval();
+
+  const isPersonelMovementDetailsReady =
+    !isOpen.open || (!isFetchingPersonelMovement && !isFetchingApprovals && personelMovementData?.id === isOpen.id);
 
   const isEditable = !approvals.some((a: any) => a.status === 'approved' || a.status === 'rejected') && !currentUserApproval;
 
@@ -235,6 +239,12 @@ const onSubmit = handleSubmit((data) => {
                     onClick={() => customCloseModal()}
                   />
                 </div>
+                {!isPersonelMovementDetailsReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading personnel movement details..." />
+                  </div>
+                ) : (
+                <>
                 {selectedTab === 1 && (
                   <EmployeeProfile
                     control={control}
@@ -280,6 +290,8 @@ const onSubmit = handleSubmit((data) => {
                     setError={setError}
                     clearErrors={clearErrors}
                   />
+                )}
+                </>
                 )}
               </DialogPanel>
             </TransitionChild>

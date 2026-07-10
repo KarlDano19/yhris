@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import ReactQuill from '@/components/ReactQuillDynamic';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
@@ -66,8 +67,13 @@ export default function CreateEditEmailTemplateModal({
     data: dataEmailTemplateDetail,
     refetch: refetchEmailTemplateDetail,
     remove: removeEmailTemplateDetail,
+    isFetching: isEmailTemplateDetailFetching,
   } = useGetEmailTemplateDetails(isOpen.id);
-  
+
+  // Create mode has nothing to fetch, so it's always ready; edit mode waits for the matching record
+  const isEmailTemplateReady =
+    !isOpen.open || !isEditing || (!isEmailTemplateDetailFetching && dataEmailTemplateDetail?.id === isOpen.id);
+
   const { mutate: createEmailTemplate, isLoading: isLoadingCreate } = useAddEmailTemplate();
   const { mutate: updateEmailTemplate, isLoading: isLoadingUpdate } = useUpdateEmailTemplate();
 
@@ -299,6 +305,11 @@ export default function CreateEditEmailTemplateModal({
                   </h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
+                {!isEmailTemplateReady ? (
+                  <div className='flex min-h-[560px] items-center justify-center'>
+                    <LoadingSpinner size='xl' showText text='Loading email template...' />
+                  </div>
+                ) : (
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto'>
                     <div className='sm:col-span-4 mt-2 w-full space-y-2'>
@@ -654,6 +665,7 @@ export default function CreateEditEmailTemplateModal({
                     </div>
                   </div>
                 </form>
+                )}
               </DialogPanel>
             </TransitionChild>
           </div>

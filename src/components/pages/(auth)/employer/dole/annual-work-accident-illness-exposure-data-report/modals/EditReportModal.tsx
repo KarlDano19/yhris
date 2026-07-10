@@ -4,6 +4,7 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import ExposureData from './tabs/ExposureData';
 import InjurySummary from './tabs/InjurySummary';
 import useGetAnnualAccidentIllnessReportDetails from '../hooks/useGetAnnualAccidentIllnessReportDetails';
@@ -32,7 +33,10 @@ export default function EditReportModal({
     data: annualAccidentIllnessReportData,
     refetch: refetchAnnualAccidentIllnessReport,
     remove: removeAnnualAccidentIllnessReport,
+    isFetching: isAnnualAccidentIllnessReportFetching,
   } = useGetAnnualAccidentIllnessReportDetails(isOpen.id);
+  const isAnnualAccidentIllnessReportReady =
+    !isOpen.open || (!isAnnualAccidentIllnessReportFetching && annualAccidentIllnessReportData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = formMethods;
   const { mutate, isLoading: isLoadingUpdateAnnualAccidentIllnessReport } = useUpdateAnnualAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -151,6 +155,12 @@ export default function EditReportModal({
                     onClick={() => customCloseModal()}
                   />
                 </div>
+                {!isAnnualAccidentIllnessReportReady ? (
+                  <div className="flex min-h-[400px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading report details..." />
+                  </div>
+                ) : (
+                <div className="min-h-[400px]">
                 {selectedTab === 1 && (
                   <ExposureData
                     control={control}
@@ -174,6 +184,8 @@ export default function EditReportModal({
                     initialDaysLost={annualAccidentIllnessReportData?.days_lost || 0}
                     errors={errors}
                   />
+                )}
+                </div>
                 )}
               </DialogPanel>
             </TransitionChild>

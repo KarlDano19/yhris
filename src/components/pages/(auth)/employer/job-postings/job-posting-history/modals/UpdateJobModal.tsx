@@ -5,6 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import SalaryRangeModal from '../../modals/SalaryRangeModal';
 import CreateJobPageJobTitleInfo from '../../modals/modal-pages/CreateJobPageJobTitleInfo';
 import CreateJobPageJobType from '../../modals/modal-pages/CreateJobPageJobType';
@@ -64,7 +65,12 @@ export default function UpdateJobModal({
     data: jobPostDataDetails,
     refetch: refetchJobPostDetails,
     remove: removeJobPostDetails,
+    isFetching: isJobPostDetailsFetching,
   } = useGetJobDetails(isOpen.id);
+
+  // Data is only safe to render once it belongs to the job currently being edited
+  const isJobPostDetailsReady =
+    !isOpen.open || (!isJobPostDetailsFetching && jobPostDataDetails?.id === isOpen.id);
 
   useEffect(() => {
     if (isOpen.id) {
@@ -564,6 +570,12 @@ export default function UpdateJobModal({
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
 
+                  {!isJobPostDetailsReady ? (
+                    <div className='flex min-h-[560px] items-center justify-center'>
+                      <LoadingSpinner size='xl' showText text='Loading job details...' />
+                    </div>
+                  ) : (
+                    <div className='min-h-[560px]'>
                   {/* Tab Navigation */}
                   <div className='pt-4 pb-2 px-4'>
                     <div className='flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide'>
@@ -778,6 +790,8 @@ export default function UpdateJobModal({
                     />
 
                   </div>
+                    </div>
+                  )}
                   <SalaryRangeModal
                     setPageNumber={setPageNumber}
                     isOpen={isSalaryRangeModalOpen}

@@ -10,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 
 import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import ReactQuill from '@/components/ReactQuillDynamic';
 import useUpdateDirective from '../hooks/useUpdateDirective';
 import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
@@ -71,6 +72,7 @@ export default function EditMemoModal({
   };
 
   const { data, refetch: refetchDetails, isFetching } = useGetDirectiveDetails(directiveId);
+  const isMemoDetailsReady = !isOpen || (!isFetching && data?.id === directiveId);
 
   useEffect(() => {
     if (isOpen && directiveId) {
@@ -335,6 +337,11 @@ export default function EditMemoModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Memo</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
+                {!isMemoDetailsReady ? (
+                  <div className='flex min-h-[560px] items-center justify-center'>
+                    <LoadingSpinner size='xl' showText text='Loading memo details...' />
+                  </div>
+                ) : (
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
                     <div className='sm:col-span-4'>
@@ -786,6 +793,7 @@ export default function EditMemoModal({
                     </button>
                   </div>
                 </form>
+                )}
               </DialogPanel>
             </TransitionChild>
           </div>
