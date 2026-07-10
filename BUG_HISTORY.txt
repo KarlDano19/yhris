@@ -109,6 +109,98 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-028
+DATE FILED: 2026-07-10
+DATE FIXED: 2026-07-10
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  Bulleted/numbered lists typed into any React Quill field (Job Description
+  "Role", "Qualifications", "Notes/Remarks", etc.) rendered correctly inside
+  the editor itself, but the bullet/number marker disappeared in every
+  read-only preview of that saved content — the Job Posting Preview modal,
+  the public "apply without signup" job details page, and the personal-mode
+  (Yahshua Connect) job details modal. The list text was still indented, but
+  with no "•" or "1." marker in front of it, making multi-item lists look
+  like unrelated indented lines.
+
+  Root cause: react-quill-new saves editor content via Quill's
+  getSemanticHTML() API (see react-quill-new/lib/index.js), which produces
+  clean semantic <ul>/<ol><li> markup. Quill's own editing DOM, by contrast,
+  always wraps every list type (bullet, ordered, checklist) in an <ol>
+  container with a data-list="bullet|ordered|checked" attribute on each <li>,
+  plus a runtime-only <span class="ql-ui"> child that quill.snow.css uses via
+  a `li[data-list=bullet] > .ql-ui::before { content: '•' }` rule to draw the
+  marker. Because getSemanticHTML() strips both the data-list attribute and
+  the .ql-ui span (they are editor-only UI aids, not semantic content), the
+  saved HTML has no attribute/element for quill.snow.css's marker rule to
+  match. Every preview page renders this saved HTML inside a
+  <span className="ql-editor" dangerouslySetInnerHTML=.../>, and
+  quill.snow.css's `.ql-editor li { list-style-type: none; }` rule strips the
+  browser's own default bullet too — leaving no marker at all.
+
+DESIRED OUTCOME:
+  Saved list content (bulleted or numbered) should display with a visible
+  bullet/number marker in every read-only preview, with spacing/indentation
+  visually consistent with how the same list looks while being typed in the
+  React Quill editor.
+
+FILES CHANGED:
+Frontend:
+- src/app/globals.css
+    (global stylesheet, loaded on every page via app/layout.tsx; no
+     component-level changes needed since every preview already reuses the
+     shared `.ql-editor` class)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only, CSS-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS fix)
+☑ TypeScript types verified (no code changes, CSS only)
+☑ Manual verification completed:
+  - Create Job Posting → Role/Qualifications editor: bullets/numbers display
+    correctly while typing (unchanged, real editor markup) ✓
+  - Job Posting Preview modal: bullets now visible for Role and
+    Qualifications lists ✓
+  - Public "apply without signup" job details page: bullets now visible ✓
+  - Personal-mode (Yahshua Connect) job details modal: bullets now visible
+    for Role and Qualifications ✓
+  - Editor and preview list indentation/spacing adjusted to look visually
+    consistent with each other ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (multiple consecutive bullet items, ordered-list numbering
+  via CSS counters, nested/plain <li> without data-list)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added CSS rules to globals.css targeting `<li>` elements that lack a
+  data-list attribute (i.e., saved/semantic HTML, not the live editor's own
+  markup) inside any `.ql-editor` container:
+
+  - `.ql-editor ul > li:not([data-list])` and
+    `.ql-editor ol > li:not([data-list])` — set `list-style: none` and
+    `position: relative`, with a fixed `padding-left` reserved for the marker.
+  - A `::before` pseudo-element positioned absolutely within that padding
+    draws the marker: a bullet character ('\2022') for unordered lists, or
+    a CSS counter (`counter-increment`/`counter-reset` on `ql-plain-ol`) for
+    ordered lists, formatted as "1.", "2.", etc.
+  - The existing `.ql-editor ol > li` real-editor-list rule was likewise
+    adjusted (targeting `.ql-editor ol:has(> li[data-list])`, since Quill
+    always wraps every list type in an <ol> container, differentiated only
+    by the data-list attribute — not by <ul> vs <ol>) so the editor's own
+    list indentation visually matches the preview's marker offset.
+
+  This leaves Quill's own `.ql-ui`-based marker rendering for the live,
+  interactive editor completely untouched, and only adds a fallback marker
+  for the semantic HTML that getSemanticHTML() produces for storage/preview.
+
+================================================================================
+
 BUG ID: HRIS-2026-027
 DATE FILED: 2026-07-10
 DATE FIXED: 2026-07-10

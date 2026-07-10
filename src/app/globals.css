@@ -295,8 +295,56 @@ div.remove-height {
   padding-left: unset !important;
 }
 
-.ql-editor ul > li {
-  padding-left: 0.5em !important;
+/* Real editor lists (bullet, ordered, checklist) are always wrapped in an
+   <ol> with a data-list attribute on each <li> — Quill uses <ol> as the
+   container tag for every list type, differentiating via data-list.
+   li keeps its default 1.5em padding-left, so text starts at
+   0.9em (ol) + 1.5em (li) = 2.4em from the container edge — matching the
+   preview's li padding-left of 2.4em below. The marker's own margin-left is
+   overridden from Quill's default -1.5em to -0.8em so the marker sits at
+   2.4em - 0.8em = 1.6em, matching the preview's marker offset. */
+.ql-editor ol:has(> li[data-list]) {
+  padding-left: 0.9em !important;
+}
+
+.ql-editor li[data-list] > .ql-ui::before {
+  margin-left: -0.8em !important;
+  width: auto !important;
+}
+
+/* Saved job posting/qualification HTML is generated via getSemanticHTML(),
+   which omits the data-list attribute + .ql-ui marker span that
+   quill.snow.css relies on to draw bullets/numbers in the live editor.
+   Restore a marker for plain <li> elements (no data-list) using the same
+   inline ::before + negative-margin technique quill.snow.css uses for
+   .ql-ui, so the gap between marker and text matches the editor exactly. */
+.ql-editor ul > li:not([data-list]) {
+  list-style: none !important;
+  position: relative;
+  padding-left: 2.4em !important;
+}
+
+.ql-editor ul > li:not([data-list])::before {
+  content: '\2022';
+  position: absolute;
+  left: 1.6em;
+}
+
+.ql-editor ol > li:not([data-list]) {
+  list-style: none !important;
+  position: relative;
+  padding-left: 2.4em !important;
+  counter-increment: ql-plain-ol;
+}
+
+.ql-editor ol:not(:has(> li[data-list])) {
+  counter-reset: ql-plain-ol;
+}
+
+.ql-editor ol > li:not([data-list])::before {
+  content: counter(ql-plain-ol) '.';
+  position: absolute;
+  left: 1.2em;
 }
 
 /* Style the scroll container */
