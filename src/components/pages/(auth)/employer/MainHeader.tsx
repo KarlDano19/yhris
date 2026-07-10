@@ -133,6 +133,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
       setProfile(data);
     }
     if (error && error.detail === 'string' && error.detail.includes('Invalid token')) {
+      window.dispatchEvent(new Event('session-expiring'));
       logout(true);
     }
   }, [data, error]);
@@ -140,6 +141,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
   useEffect(() => {
     const token = getCookie('token');
     if (!token) {
+      window.dispatchEvent(new Event('session-expiring'));
       logout(true);
     }
   }, []);
@@ -177,6 +179,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
         if (!isRefreshing) {
           setIsExpiring(false);
           setTokenExpiresAt(undefined); // Clear expiration to stop checking
+          // Notify listeners (e.g. tour auto-start) so they stop before the redirect happens
+          window.dispatchEvent(new Event('session-expiring'));
           // Timer reached 0 - session token has expired, logout immediately
           logout(true);
         }
