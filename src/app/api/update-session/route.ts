@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
       'email',
       'accountType',
       'loginType',
+      'hasYpIntegration',
       'isLoggedIn',
     ];
     for (const [key, value] of Object.entries(data)) {

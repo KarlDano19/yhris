@@ -18,8 +18,9 @@ import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 
-export default function Content({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) {
+export default function Content({ loginType, hasActiveSubscription, hasYpIntegration }: { loginType: string, hasActiveSubscription: boolean, hasYpIntegration?: boolean }) {
   const router = useRouter();
   const [q, setQ] = useState('');
 
@@ -147,7 +148,7 @@ export default function Content({ loginType, hasActiveSubscription }: { loginTyp
             }}
           />
           
-          {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
+          {canSyncWithPayroll(loginType, hasYpIntegration) && (
           <button
             className='px-4 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2'
             onClick={() => {

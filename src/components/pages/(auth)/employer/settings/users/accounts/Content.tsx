@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 import CustomToast from '@/components/CustomToast';
 import BackButton from '@/components/BackButton';
 
@@ -48,6 +49,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
   const [loginType, setLoginType] = useState<string>('');
+  const [hasYpIntegration, setHasYpIntegration] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
@@ -106,6 +108,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
       setLoginType(cachedUserDetails.state.data.login_type);
+      setHasYpIntegration(cachedUserDetails.state.data.has_yp_integration === true);
     }
   }, [cachedUserDetails]);
 
@@ -263,7 +266,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end gap-3'>
-              {loginType !== 'password' && (
+              {canSyncWithPayroll(loginType, hasYpIntegration) && (
                 <SmartButton
                   id="sync-yp-users-btn"
                   onClick={handleSyncUsers}

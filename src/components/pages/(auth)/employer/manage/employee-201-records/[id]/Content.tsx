@@ -10,6 +10,7 @@ import React, {
 
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { canSyncWithPayroll } from "@/helpers/payrollSync";
 import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -53,6 +54,7 @@ export interface ContentProps {
   emp?: Partial<Employee>;
   hasActiveSubscription: boolean;
   loginType: string;
+  hasYpIntegration?: boolean;
 }
 
 export default function Employee201Content({
@@ -60,6 +62,7 @@ export default function Employee201Content({
   emp,
   hasActiveSubscription,
   loginType,
+  hasYpIntegration,
 }: ContentProps) {
   const router = useRouter();
 
@@ -730,7 +733,7 @@ export default function Employee201Content({
                 ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
                 : (saving ? "Saving…" : "Save")}
             </SmartButton>
-            {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
+            {canSyncWithPayroll(loginType, hasYpIntegration) && (
             <button
               id="sync-to-yp-btn"
               disabled={isUpdating}

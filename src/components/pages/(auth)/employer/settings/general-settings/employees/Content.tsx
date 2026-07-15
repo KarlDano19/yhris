@@ -13,6 +13,7 @@ import EmployeeStatus from './tabs/EmployeeStatus';
 import CustomToast from '@/components/CustomToast';
 import BackButton from '@/components/BackButton';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 
 import useSyncLocation from './hooks/location/useSyncLocation';
 import useSyncDepartment from './hooks/department/useSyncDepartment';
@@ -25,7 +26,7 @@ import useSyncEmployeeStatusFromYP from './hooks/employee-status/useSyncEmployee
 
 import EmployeeId from './tabs/Employee-id';
 
-const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
+const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { loginType: string, hasActiveSubscription: boolean, hasYpIntegration?: boolean }) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('location');
 
@@ -284,7 +285,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
             </div>
             
             {/* Sync All Button */}
-            {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
+            {canSyncWithPayroll(loginType, hasYpIntegration) && (
             <div>
               <SmartButton
                 id="sync-all-btn"
