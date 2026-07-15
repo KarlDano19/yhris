@@ -62,6 +62,8 @@ export async function POST(request: NextRequest) {
       session['hasProfile'] = data.has_profile;
       session['hasCompletedOnboarding'] = data.has_onboarded ?? false;
       session['loginType'] = data.login_type || 'password';
+      // Employer-level YP sync capability (see helpers/payrollSync).
+      session['hasYpIntegration'] = data.has_yp_integration === true;
 
       await session.save();
       await sleep(250);

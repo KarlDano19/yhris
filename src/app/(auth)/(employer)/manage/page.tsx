@@ -16,7 +16,7 @@ async function getSession() {
 
 const ManagePage = async () => {
     const session = await getSession()
-    return <Content loginType={session.loginType} />
+    return <Content loginType={session.loginType} hasYpIntegration={session.hasYpIntegration} />
 }
 
 export default ManagePage

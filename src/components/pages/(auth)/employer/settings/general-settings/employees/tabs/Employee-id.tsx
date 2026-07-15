@@ -16,11 +16,13 @@ import usePushEmployeeIdSettingsToPayroll from '../hooks/employee-id-settings/us
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 
 const EmployeeId = () => {
   const queryClient = useQueryClient();
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
   const [loginType, setLoginType] = useState<string>('');
+  const [hasYpIntegration, setHasYpIntegration] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState(false);
   const [previewId, setPreviewId] = useState<string>('');
   const [previewDate, setPreviewDate] = useState<string>('');
@@ -55,6 +57,7 @@ const EmployeeId = () => {
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
       setLoginType(cachedUserDetails.state.data.login_type);
+      setHasYpIntegration(cachedUserDetails.state.data.has_yp_integration === true);
     }
   }, [cachedUserDetails]);
 
@@ -310,7 +313,7 @@ const EmployeeId = () => {
             </div>
 
             {/* Sync with Payroll Section */}
-            {loginType !== 'password' && (
+            {canSyncWithPayroll(loginType, hasYpIntegration) && (
             <div className='border-t mt-8 pt-6'>
               <h3 className='text-lg font-semibold text-gray-900 mb-4'>Sync with Payroll System</h3>
               <p className='text-sm text-gray-600 mb-4'>

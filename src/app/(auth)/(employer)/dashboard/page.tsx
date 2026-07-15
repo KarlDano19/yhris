@@ -20,7 +20,8 @@ const HomePage = async () => {
   const session = await getSession();
   const loginType = session.loginType;
   const hasActiveSubscription = session.hasActiveSubscription;
-  return <Home loginType={loginType} hasActiveSubscription={hasActiveSubscription} />;
+  const hasYpIntegration = session.hasYpIntegration;
+  return <Home loginType={loginType} hasActiveSubscription={hasActiveSubscription} hasYpIntegration={hasYpIntegration} />;
 };
 
 export default HomePage;

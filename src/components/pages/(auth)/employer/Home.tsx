@@ -9,6 +9,7 @@ import useGetTourProgress from '@/components/hooks/useGetTourProgress';
 
 import { SmartDashboardItem } from '@/components/SmartPermissions/SmartDashboardItem';
 import FloatingSyncButton from '../../../FloatingSyncButton';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 import { TOUR_SEGMENTS, TourSegmentConfig, getManageSteps } from '@/components/tour/dashboardTourSteps';
 
 import AddPostLogo from '@/svg/AddPostLogo';
@@ -29,9 +30,7 @@ import TourCompletionModal from './modals/TourCompletionModal';
 import { useTour } from '@/components/tour/useTour';
 import { tourIsNavigating } from '@/components/tour/TourProvider';
 
-const PAYROLL_LOGIN_TYPES = ['yahshua-payroll', 'yg-payroll'];
-
-const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
+const Home = ({ loginType, hasActiveSubscription, hasYpIntegration }: { loginType: string, hasActiveSubscription?: boolean, hasYpIntegration?: boolean }) => {
   const router = useRouter();
   const { mutate: resetOnboarding, isLoading: isResetting } = useResetOnboarding();
   const { data: usersData, isLoading: isUsersLoading } = useGetUserDetails() as { data: any; isLoading: boolean };
@@ -48,7 +47,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   const [intendedRedirectLink, setIntendedRedirectLink] = useState<string | null>(null);
   const [restrictedFeatureName, setRestrictedFeatureName] = useState<string>('');
 
-  const isPayrollUser = PAYROLL_LOGIN_TYPES.includes(usersData?.login_type ?? '');
+  const isPayrollUser = canSyncWithPayroll(usersData?.login_type, usersData?.has_yp_integration);
 
   const [snoozedKeys, setSnoozedKeys] = useState<Set<string>>(new Set());
   const [isSessionExpiring, setIsSessionExpiring] = useState(false);
@@ -328,7 +327,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
 
   return (
     <>
-      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingSyncButton />}
+      {canSyncWithPayroll(loginType, hasYpIntegration) && <FloatingSyncButton />}
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <div className='flex items-center gap-3 flex-wrap'>

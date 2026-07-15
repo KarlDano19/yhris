@@ -14,6 +14,7 @@ export interface SessionData {
   accountType: string;
   isAdmin: boolean;
   loginType: string;
+  hasYpIntegration: boolean;
   hasProfile: boolean;
   hasCompletedOnboarding: boolean;
   hasOnboarded: boolean;
@@ -32,6 +33,7 @@ export const defaultSession: SessionData = {
   accountType: '',
   isAdmin: false,
   loginType: '',
+  hasYpIntegration: false,
   hasProfile: false,
   hasCompletedOnboarding: false,
   hasOnboarded: false,

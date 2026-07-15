@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import { formatDateToLocal } from '@/helpers/date';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
@@ -79,7 +80,7 @@ const columnDefinitions = [
 
 const PAYROLL_LOGIN_TYPES = ['yahshua-payroll', 'yg-payroll'];
 
-const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
+const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { loginType: string, hasActiveSubscription: boolean, hasYpIntegration?: boolean }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -658,7 +659,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
   };
   return (
     <>
-      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
+      {canSyncWithPayroll(loginType, hasYpIntegration) && <FloatingProgress />}
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <BackButton label="Manage" href="/manage" />

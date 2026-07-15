@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import BackButton from '@/components/BackButton';
 import FloatingSyncButton from '@/components/FloatingSyncButton';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 import { useIncompleteEmployeeCount } from "./employee-201-records/hooks/useIncompleteEmployeeCount";
 
 import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
@@ -68,14 +69,12 @@ const menus = [
   },
 ];
 
-const PAYROLL_LOGIN_TYPES = ['yahshua-payroll', 'yg-payroll'];
-
-const Content = ({ loginType }: { loginType?: string }) => {
+const Content = ({ loginType, hasYpIntegration }: { loginType?: string, hasYpIntegration?: boolean }) => {
   const { count, isLoading } = useIncompleteEmployeeCount();
 
   return (
     <>
-    {loginType && PAYROLL_LOGIN_TYPES.includes(loginType) && <FloatingSyncButton />}
+    {canSyncWithPayroll(loginType, hasYpIntegration) && <FloatingSyncButton />}
     <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
       <div className="flex p-4">
         <BackButton label="Dashboard" href="/dashboard" data-tour-id="tour-back-to-dashboard" />

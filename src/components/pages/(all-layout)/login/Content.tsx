@@ -211,6 +211,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       hasProfile: data.has_profile,
       accountType: data.account_type,
       loginType: data.login_type,
+      hasYpIntegration: data.has_yp_integration === true,
       isLoggedIn: true,
     })
       .catch((err) => {

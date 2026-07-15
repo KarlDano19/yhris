@@ -25,12 +25,14 @@ const EmployeeDetail = async ({ params }: PageProps) => {
   const [resolvedParams, session] = await Promise.all([params, getSession()]);
   const loginType = session.loginType;
   const hasActiveSubscription = session.hasActiveSubscription;
+  const hasYpIntegration = session.hasYpIntegration;
 
   return (
     <Content
       params={resolvedParams}
       loginType={loginType}
       hasActiveSubscription={hasActiveSubscription}
+      hasYpIntegration={hasYpIntegration}
     />
   );
 };
