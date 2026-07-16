@@ -43,7 +43,7 @@ const SssContributionTable2026Article = () => {
         <div className="lp-section-container max-w-3xl mx-auto pt-10 pb-0">
           <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: "360px" }}>
             <Image
-              src="/blog/sss-contribution-2026.png"
+              src="/blog/2026 Philippine Statutory Contribution Changes.png"
               alt="2026 Philippine Statutory Contribution Changes: SSS, PhilHealth and Pag-IBIG"
               fill
               className="object-cover"
