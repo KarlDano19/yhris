@@ -109,6 +109,176 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-032
+DATE FILED: 2026-07-17
+DATE FIXED: 2026-07-17
+REPORTER: Internal (Ian Brylle, YAHSHUA)
+
+ISSUE DESCRIPTION:
+  In the Talent Search "Profile Details" modal, under Work Experience → Key
+  Responsibilities, long entries rendered on a single unbroken line and ran
+  off the right edge of the modal/viewport instead of wrapping — trailing
+  text was only reachable by horizontal scroll. Shorter entries displayed
+  fine, and some longer entries wrapped correctly while others didn't,
+  pointing to a missing CSS safety net rather than a universal "never
+  wraps" bug (some stored rich-text content likely contains long
+  unbreakable runs, e.g. non-breaking spaces from copy-pasted text, that
+  the browser won't break at normal word boundaries without
+  `overflow-wrap` allowing it). Seen across multiple candidates (e.g. Rica
+  Agno, Johanna Cebuan).
+
+  Root cause: the Key Responsibilities `dangerouslySetInnerHTML` container
+  in WorkExperience.tsx had no `overflow-wrap`/`word-break` rule. Because
+  the modal's DialogPanel (ApplicantProfileModal.tsx) uses
+  `overflow-visible`, the overflow wasn't clipped or scrolled within the
+  modal — it spilled out past the modal's right edge onto the page.
+
+DESIRED OUTCOME:
+  Key Responsibilities text should always wrap within the modal's column,
+  regardless of content length or whether it contains long unbreakable
+  runs.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+
+Backend:
+- N/A — frontend-only, CSS-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only, CSS-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS fix)
+☑ TypeScript types verified (tsc --noEmit run across project; no new errors
+  introduced by the edited file)
+☐ Manual browser verification completed (not yet performed — recommended
+  before shipping)
+
+Integration & E2E:
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (long single-line responsibility text with no
+  natural break points)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added `break-words` (`overflow-wrap: break-word`) to the Key
+  Responsibilities container's className in WorkExperience.tsx. This is
+  the same Tailwind utility already used for every other potentially-long
+  text field in this same modal's sibling component, ApplicantProfile.tsx
+  (location, nationality, contact number, email) — this component had
+  simply missed applying the existing convention. `break-words` also
+  shrinks the element's flex-item min-content width, so it doesn't force
+  the parent flex column wider than its allotted width either.
+
+================================================================================
+
+BUG ID: HRIS-2026-031
+DATE FILED: 2026-07-17
+DATE FIXED: 2026-07-17
+REPORTER: Internal
+
+ISSUE DESCRIPTION:
+  Saving a Work Experience entry on /profile with no Start Date — including
+  when "I currently work here" was checked — stored the start date as null.
+  Every place that later displayed the entry (Talent Search Profile Details
+  modal, Compare Applicants modal, Screen Applicants candidate view)
+  rendered it as "January 1970" (e.g. candidate Johainna Cebuan's entry
+  showed "January 1970 - January 1970"), since `new Date(null)` resolves to
+  the Unix epoch.
+
+  Root cause (three gaps):
+  1. AddWorkExperienceModal.tsx required Job Title/Company but had no
+     `required` rule on Start Date at all, and "I currently work here" only
+     nulled End Date — it never required Start Date.
+  2. The backend accepted work_experience as an unvalidated JSONField with
+     no check for a missing dateFrom.
+  3. Four separate display components each inlined `new Date(exp.dateFrom)`
+     with no null guard, and three inconsistent checks for whether dateTo
+     meant "Present".
+
+DESIRED OUTCOME:
+  Start Date should be required to save a Work Experience entry (even when
+  marked as current). Missing/invalid dates should render as "Not
+  specified" instead of blank or the Unix epoch. The backend should reject
+  work_experience entries missing a start date as defense-in-depth.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/yahshua-connect/profile/modals/AddWorkExperienceModal.tsx
+    (Start Date, Job Title, Company all required with visible RHF error
+     messages; Start Date required unconditionally, even when "I currently
+     work here" is checked)
+- src/helpers/date.ts
+    (added formatMonthYear, isWorkExperienceOngoing,
+     formatWorkExperienceDateRange — null-safe date-range formatting,
+     unifying three previously-inconsistent "is this ongoing" checks)
+- src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+- src/components/pages/(auth)/employer/talent-search/profile/ApplicantProfile.tsx
+- src/components/pages/(auth)/employer/talent-search/modal/CompareApplicantsModal.tsx
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/ApplicantForm.tsx
+    (all four: replaced inline unguarded new Date(...) formatting with
+     formatWorkExperienceDateRange)
+
+Backend (see backend BUG_HISTORY HRIS-2026-031):
+- app/views/applicant.py
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Manual verification completed (see backend BUG_HISTORY entry)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript types verified (tsc --noEmit run across project; the six
+  edited files introduced no new type errors)
+☑ Form validation tested (React Hook Form required rules added and
+  reasoned through; not yet exercised in a live browser)
+☐ Manual browser verification completed (not yet performed — recommended
+  before shipping: Add/Edit Work Experience form, Talent Search / Compare
+  Applicants / Screen Applicants displays)
+
+Integration & E2E:
+☐ API integration tests completed (frontend ↔ backend) — not performed
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (empty Start Date, "I currently work here" checked
+  with no Start Date, pre-existing null dateFrom legacy records rendering
+  as "Not specified")
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  1. AddWorkExperienceModal.tsx: added `required` validation (with visible
+     error messages via formState.errors) to Start Date, Job Title, and
+     Company. Start Date is required unconditionally — an ongoing role
+     still needs a start date.
+  2. src/helpers/date.ts: added formatWorkExperienceDateRange (and its two
+     helpers formatMonthYear / isWorkExperienceOngoing) as the single
+     source of truth for formatting a work-experience date range, replacing
+     four near-duplicate, inconsistent inline implementations. Missing/
+     invalid dates render as "Not specified"; ongoing roles render as
+     "Present".
+  3. The four display components were switched to call
+     formatWorkExperienceDateRange instead of inlining `new Date(...)` —
+     pure JSX substitutions, no prop/interface changes.
+  4. Backend defense-in-depth: a required-dateFrom check was added directly
+     in ApplicantProfileAPIView.patch() (app/views/applicant.py) — see
+     backend BUG_HISTORY HRIS-2026-031 for details. (Note: this was
+     initially implemented as a serializer-level validator on
+     ApplicantCreateUpdateSerializer, then moved to the view layer per team
+     convention — the serializer was reverted to its original, unvalidated
+     state.)
+  5. No data migration was performed for existing bad records (e.g.
+     Cebuan's dateFrom: null) — the display fix (#2/#3) renders them as
+     "Not specified" going forward with no data change. Because the whole
+     work_experience array is resent on every save from that modal, the
+     backend validation (#4) means an applicant with a legacy null
+     dateFrom entry will be required to fix/remove it the next time they
+     save any change to their Work Experience section.
+
+================================================================================
+
 BUG ID: HRIS-2026-030
 DATE FILED: 2026-07-10
 DATE FIXED: 2026-07-10
