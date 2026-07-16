@@ -109,6 +109,107 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-033
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Consultant
+
+ISSUE DESCRIPTION:
+  The evaluator-facing Evaluation Form's first page ("Details" tab, showing
+  the template name + description above Employee Name / Date of Evaluation)
+  still displayed unwrapped, overflowing text, even though HRIS-2026-031 had
+  already added the `ql-editor` class to this exact element to fix wrapping.
+  Repro data:
+
+    <p>This&nbsp;evaluation&nbsp;form&nbsp;lists&nbsp;the&nbsp;criteria...</p>
+
+  Root cause: `.ql-editor`'s wrapping rule (`white-space: pre-wrap;
+  word-wrap: break-word;`) only exists because `react-quill-new/dist/
+  quill.snow.css` is imported somewhere in the page's component tree — the
+  class name alone does nothing without that stylesheet. HRIS-2026-031 added
+  the `ql-editor` className to this file but never imported the stylesheet
+  in it. The public evaluation-form route never mounts a live Quill editor
+  anywhere, so nothing else on that route pulled the CSS in either — the
+  class was present in the markup with no matching rule, and an
+  `&nbsp;`-joined description (pasted content with no real spaces = no
+  legal wrap point without `word-wrap: break-word`) overflowed the box
+  exactly as in the client's original HRIS-2026-031 report.
+
+  Auditing every other file touched by HRIS-2026-031's `ql-editor` className
+  fix found the same gap in all of them: `EvaluationDetails.tsx`,
+  `QuestionsTab.tsx`, `WorkExperience.tsx`, `ViewEvaluationTemplateModal.tsx`,
+  `PreviewTab.tsx`, and `ApplicantForm.tsx` also lacked the stylesheet
+  import. Those happened to render fine in production only because they
+  share an authenticated app bundle with some other component elsewhere
+  that imports the Quill CSS — a fragile, incidental dependency, not a
+  guarantee.
+
+DESIRED OUTCOME:
+  Every read-only preview of Quill-authored HTML must reliably load
+  `.ql-editor`'s wrapping CSS regardless of what else is or isn't on its
+  page, instead of accidentally depending on unrelated components sharing
+  its bundle.
+
+FILES CHANGED:
+Frontend:
+- src/app/layout.tsx
+    (added `import 'react-quill-new/dist/quill.snow.css';` once, at the
+     root layout that wraps every route in the app)
+- Removed the now-redundant per-file `import 'react-quill-new/dist/
+  quill.snow.css';` from all 43 files that previously imported it
+  individually (editors and read-only previews alike), including the 6
+  files identified above plus
+  `src/components/pages/(un-auth)/(forms)/evaluation-form/Content.tsx`
+  (the file with the reported bug) — the global import in the root layout
+  makes every one of these redundant.
+
+Backend:
+- N/A - frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS
+  import relocation, no component logic changed)
+☑ TypeScript types verified: `npx tsc --noEmit` run before and after: same
+  pre-existing, unrelated errors only; none of the 44 changed files appear
+  in the error output
+☑ Manual verification completed: reproduced the exact `&nbsp;`-joined
+  repro data on the public evaluation-form page, confirmed it now wraps
+  correctly inside the bordered card
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (import removal spot-checked via
+  `git diff` on multiple files to confirm no stray blank lines/syntax
+  issues left behind)
+☑ Edge cases considered (verified via full-repo grep that no file still
+  references the per-file import except the new global one in
+  `layout.tsx`)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Moved the Quill stylesheet import from being scattered across 43
+  individual files to a single import in `src/app/layout.tsx`, the root
+  layout every route in the app renders through:
+
+    import 'react-quill-new/dist/quill.snow.css';
+    import './globals.css';
+
+  This guarantees `.ql-editor`'s base wrapping CSS is present on every
+  page — including standalone, unauthenticated routes like the public
+  evaluation form that never mount a live Quill editor — instead of
+  depending on whichever components happen to share that route's bundle.
+  All 43 previously-existing per-file imports (both single- and
+  double-quoted variants) were then removed as redundant duplicates; CSS
+  imports are deduplicated by the bundler, so removing them changes
+  nothing about what loads, only removes the now-unnecessary repetition.
+
+================================================================================
+
 BUG ID: HRIS-2026-032
 DATE FILED: 2026-07-16
 DATE FIXED: 2026-07-16

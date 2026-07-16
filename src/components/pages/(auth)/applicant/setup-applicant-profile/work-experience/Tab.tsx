@@ -11,7 +11,6 @@ import { PlusIcon } from '@heroicons/react/24/solid';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 function WorkExperienceTab({
   control,

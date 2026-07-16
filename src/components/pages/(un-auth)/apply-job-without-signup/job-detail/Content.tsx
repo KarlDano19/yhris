@@ -21,7 +21,6 @@ import {
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 const Content = () => {
   const params = useParams();

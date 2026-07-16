@@ -9,7 +9,6 @@ import FileCaseIcon from '@/svg/FileCaseIcon';
 
 import * as DOMPurify from 'dompurify';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
-import 'react-quill-new/dist/quill.snow.css';
 
 interface JobDetailsProp {
   jobId: any;

@@ -11,6 +11,7 @@ import GlobalPixelTracker from '@/components/GlobalPixelTracker';
 import NetworkStatusWatcher from '@/components/NetworkStatusWatcher';
 import TourProvider from '@/components/tour/TourProvider';
 
+import 'react-quill-new/dist/quill.snow.css';
 import './globals.css';
   
 export const metadata = {

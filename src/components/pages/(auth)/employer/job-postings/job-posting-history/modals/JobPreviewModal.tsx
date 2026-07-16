@@ -11,7 +11,6 @@ import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 export default function JobPreviewModal({
   isOpen,

@@ -24,7 +24,6 @@ import CalendarIcon from '@/svg/CalendarIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {

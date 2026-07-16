@@ -14,7 +14,6 @@ import useAddPosition from '../hooks/position/useAddPosition';
 import useAddEmployeeStatus from '../hooks/employee-status/useAddEmployeeStatus';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill-new/dist/quill.snow.css';
 import ReactQuill from '@/components/ReactQuillDynamic';
 
 export default function CreateLocationModal({

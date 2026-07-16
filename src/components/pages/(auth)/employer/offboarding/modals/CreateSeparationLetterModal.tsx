@@ -11,7 +11,6 @@ import CustomToast from '@/components/CustomToast';
 import ReactQuill from '@/components/ReactQuillDynamic';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill-new/dist/quill.snow.css';
 
 interface CreateSeparationLetterModalProps {
   isOpen: boolean;

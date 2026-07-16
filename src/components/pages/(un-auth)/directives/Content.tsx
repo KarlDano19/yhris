@@ -19,7 +19,6 @@ import { linkify } from '@/helpers/linkify';
 
 import { DirectiveAttachment, DirectiveData, MaskedEmail } from '@/types/directives';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 interface ContentProps {
   initialDirective: Omit<DirectiveData, 'to'> | null;

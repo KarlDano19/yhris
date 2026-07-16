@@ -9,7 +9,6 @@ import toast from 'react-hot-toast';
 
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 import CritiriaSubItem from './CritiriaSubItem';
 import CustomToast from '@/components/CustomToast';
 import ReactQuill from '@/components/ReactQuillDynamic';

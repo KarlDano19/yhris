@@ -4,7 +4,6 @@ import ReactQuill from '@/components/ReactQuillDynamic';
 
 import { QUILL_FORMATS, QUILL_MODULES, CREATEJOB_TEMPLATE } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 export default function CreateJobPageJobDescription({
   setValue,

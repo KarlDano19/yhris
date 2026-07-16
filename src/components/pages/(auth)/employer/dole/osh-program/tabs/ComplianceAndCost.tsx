@@ -4,7 +4,6 @@ import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import ReactQuill from "@/components/ReactQuillDynamic";
-import 'react-quill-new/dist/quill.snow.css';
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 

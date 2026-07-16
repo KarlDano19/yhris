@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react';
 
-import 'react-quill-new/dist/quill.snow.css';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 

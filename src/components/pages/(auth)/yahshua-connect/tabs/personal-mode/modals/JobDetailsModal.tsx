@@ -14,7 +14,6 @@ import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
 import formatPrice from '@/helpers/currencyFormat';
-import 'react-quill-new/dist/quill.snow.css';
 
 interface JobDetailsModalProps {
   isOpen: boolean;

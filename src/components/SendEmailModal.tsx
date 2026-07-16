@@ -21,7 +21,6 @@ import EyePassword from "@/svg/EyePassword";
 import InfoIcon from "@/svg/InfoIcon";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import "react-quill-new/dist/quill.snow.css";
 
 interface Field {
   onChange: (value: any) => void;
