@@ -18,6 +18,7 @@ import CustomToast from "@/components/CustomToast";
 import SendEmailModal from "@/components/SendEmailModal";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ReactQuill from "@/components/ReactQuillDynamic";
+import { normalizeNbsp } from "@/helpers/linkify";
 import useGetSafetyAndHealthPolicyDetails from "../hooks/useGetSafetyANdHelathPolicyDetails";
 import useUpdateSafetyAndHealthPolicy from "../hooks/useUpdateSafetyAndHealthPolicy";
 import useSendEmail from "../hooks/useSendEmail";
@@ -452,10 +453,12 @@ function SafetyAndHealthPolicyModal({
                             <div
                               className="policy-content"
                               dangerouslySetInnerHTML={{
-                                __html: safetyAndHealthPolicyDetails?.body?.replace(
-                                  /{{company_name}}/g,
-                                  companyName
-                                ) ?? '',
+                                __html: normalizeNbsp(
+                                  safetyAndHealthPolicyDetails?.body?.replace(
+                                    /{{company_name}}/g,
+                                    companyName
+                                  ) ?? ''
+                                ),
                               }}
                             />
                           </div>
