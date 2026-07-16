@@ -109,6 +109,117 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-032
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+  Two unrelated bugs found on the OSH Program page ("OSH Program and Policy"
+  tab) while validating the ql-editor fix from HRIS-2026-031:
+
+  1. On a hard refresh landing directly on /dole/osh-program (or any time it
+     was the first Quill-using page visited in the session), the React Quill
+     toolbar rendered its icon buttons as giant, unstyled black shapes (e.g. a
+     huge solid triangle) instead of small icons. The bug was NOT visible when
+     navigating in from another page via the app's normal in-app links (e.g.
+     DOLE -> OSH Program), only after a hard browser refresh.
+
+     Root cause: `ProgramAndPolicy.tsx`, `SafetyMeasures.tsx`, and
+     `ComplianceAndCost.tsx` (the three OSH Program tabs using
+     `ReactQuillDynamic`) were the only Quill-using components in the entire
+     codebase that did NOT `import 'react-quill-new/dist/quill.snow.css'`
+     directly in their own file — every other Quill usage across the app
+     does. That stylesheet is what sizes the toolbar's icon SVGs down to
+     their small, correct dimensions; without it the browser renders their
+     raw, unstyled path data at a huge default size. It "worked" when
+     navigating in from another page only because that other page's own
+     `quill.snow.css` import was already injected into the document, and
+     Next.js keeps client-side-navigation stylesheets in the page - a hard
+     refresh starts the document fresh, so if OSH Program is the first (or
+     only) Quill page loaded, the stylesheet never arrives.
+
+  2. The "< DOLE" back button on the OSH Program page required repeatedly
+     clicking ("spamming") it before it would actually navigate away.
+
+     Root cause: a `useEffect` installing a `popstate`/`beforeunload` guard
+     (to warn on unsaved changes) had `hasUnsavedChangesCallback` in its
+     dependency array. That callback itself depends on `watch`,
+     `selectedTab`, and `oshProgramDetails` - all of which change as the user
+     switches tabs or data refetches. Every time the effect re-ran (cleanup +
+     re-setup), it called `window.history.pushState(...)` again, permanently
+     adding another entry to the browser's session history stack - there is
+     no way to "unpush" a history entry, so these accumulated for the whole
+     time the user stayed on the page. The Back button's handler calls
+     `window.history.go(-2)`, a heuristic tuned for exactly ONE extra guard
+     entry (pushed once on mount) plus the real navigation step. As soon as
+     the user switched even one tab, more than one extra entry had
+     accumulated, so `go(-2)` undershot and the user had to click Back
+     multiple times to actually get past the leftover phantom entries.
+
+DESIRED OUTCOME:
+  The OSH Program editor's toolbar icons should render correctly at their
+  normal small size on a hard refresh, not just when navigating in from
+  another page. The "< DOLE" back button should navigate away in a single
+  click regardless of how many tabs the user has switched between or how
+  many times the underlying data has refetched.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/ProgramAndPolicy.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/SafetyMeasures.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/ComplianceAndCost.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/Content.tsx
+
+Backend:
+- N/A - frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS
+  import + effect-dependency fix)
+☑ TypeScript types verified (no type errors on all edited files)
+☑ Manual verification completed:
+  - Hard refresh directly on /dole/osh-program, OSH Program and Policy tab:
+    toolbar icons render at correct small size ✓
+  - Hard refresh on Safety Measures and Compliance and Cost tabs: same ✓
+  - Navigating in from the DOLE page (already-warm session): unaffected,
+    still correct ✓
+  - Switch between multiple OSH Program tabs, then click "< DOLE" once:
+    navigates away immediately ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (cold hard-refresh landing directly on the page vs. warm
+  in-app navigation; multiple tab switches before attempting to go back)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Fix 1 — missing quill.snow.css import:
+  Added `import 'react-quill-new/dist/quill.snow.css';` to all three OSH
+  Program tab files that render a `ReactQuillDynamic` editor, matching the
+  same import already present in every other Quill-using component across
+  the codebase (SendEmailModal, job posting description editors, evaluation
+  criterion editors, etc.).
+
+  Fix 2 — Back button requiring multiple clicks:
+  Added a `hasUnsavedChangesRef` ref, kept current via a small separate
+  effect (`useEffect(() => { hasUnsavedChangesRef.current = ... }, [hasUnsavedChangesCallback])`).
+  Changed the popstate/beforeunload guard effect's dependency array to `[]`
+  so it only runs once on mount (and therefore only calls
+  `window.history.pushState` once as a result), with its `handleBeforeUnload`
+  and `handlePopState` closures reading `hasUnsavedChangesRef.current()`
+  instead of closing over the changing `hasUnsavedChangesCallback` directly.
+  The Back button's existing `window.history.go(-2)` heuristic now reliably
+  matches the actual history stack, since exactly one guard entry is ever
+  added regardless of tab switches or data refetches.
+
+================================================================================
+
 BUG ID: HRIS-2026-031
 DATE FILED: 2026-07-16
 DATE FIXED: 2026-07-16
