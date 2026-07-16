@@ -97,7 +97,7 @@ export default function ViewEvaluationModal({
             <h4 className='text-base font-semibold text-gray-900'>{sectionTitle}</h4>
             {section.section_description && (
               <div
-                className='text-xs text-gray-500'
+                className='ql-editor !p-0 text-xs text-gray-500'
                 dangerouslySetInnerHTML={{ __html: linkify(section.section_description) }}
               />
             )}
@@ -107,7 +107,7 @@ export default function ViewEvaluationModal({
               {section.criterion.map((criterion: any, criterionIndex: number) => (
                 <div key={criterion.id || `${sectionTitle}-${criterionIndex}`} className='rounded-md bg-gray-50 p-3'>
                   <div
-                    className='text-sm font-semibold text-gray-900'
+                    className='ql-editor !p-0 text-sm font-semibold text-gray-900'
                     dangerouslySetInnerHTML={{ __html: linkify(criterion.title || `Criterion ${criterionIndex + 1}`) }}
                   />
                   <p className='text-xs text-gray-500 mt-2'>
@@ -231,7 +231,7 @@ export default function ViewEvaluationModal({
                           <section className='space-y-2'>
                             <h4 className='text-lg font-semibold text-gray-900'>Description</h4>
                             <div
-                              className='text-sm text-gray-700'
+                              className='ql-editor !p-0 text-sm text-gray-700'
                               dangerouslySetInnerHTML={{ __html: linkify(evaluationTemplateData.description) }}
                             />
                           </section>
