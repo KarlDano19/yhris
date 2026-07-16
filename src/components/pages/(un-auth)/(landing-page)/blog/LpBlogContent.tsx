@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "payroll-registration-checklist-philippines",
+    category: "Operations Playbook",
+    title: "The Philippine Business Payroll Setup Checklist: Registering with BIR, SSS, PhilHealth, and Pag-IBIG",
+    excerpt: "Every form, fee, and deadline for setting up payroll compliance from scratch. Covers the correct registration sequence, why Pag-IBIG must come last, and what triggers penalties before your first remittance.",
+    date: "July 2026",
+    readTime: "9 min read",
+    image: "/blog/payroll-registration-checklist.png",
+  },
+  {
     slug: "sss-contribution-table-2026-philippines",
     category: "Statutory Compliance",
     title: "2026 Philippine Statutory Contribution Changes: SSS, PhilHealth and Pag-IBIG Rates Employers Must Update Now",
