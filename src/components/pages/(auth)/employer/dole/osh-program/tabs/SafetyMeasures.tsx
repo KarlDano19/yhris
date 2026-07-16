@@ -8,6 +8,7 @@ import { XCircleIcon, EyeIcon, MinusIcon } from "@heroicons/react/24/solid";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import FilePreviewModal from "@/components/FilePreviewModal";
 import ReactQuill from "@/components/ReactQuillDynamic";
+import 'react-quill-new/dist/quill.snow.css';
 
 import ClipIcon from "@/svg/ClipIcon";
 

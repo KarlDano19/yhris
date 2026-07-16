@@ -324,16 +324,25 @@ div.remove-height {
    container tag for every list type, differentiating via data-list.
    li keeps its default 1.5em padding-left, so text starts at
    0.9em (ol) + 1.5em (li) = 2.4em from the container edge — matching the
-   preview's li padding-left of 2.4em below. The marker's own margin-left is
-   overridden from Quill's default -1.5em to -0.8em so the marker sits at
-   2.4em - 0.8em = 1.6em, matching the preview's marker offset. */
+   preview's li padding-left of 2.4em below.
+
+   Quill's own `.ql-ui::before` is `display:inline-block; text-align:right`,
+   so with a FIXED width the marker's right edge (where the item text
+   starts) stays constant no matter how many digits/characters the marker
+   has — a bullet, "9.", or "12." all right-align flush to the same edge.
+   `width: auto` (sizing the box to its content) or a width that's too
+   narrow/wide both break this: the box's right edge = (2.4em text-start)
+   + margin-left + width, so margin-left and width must be solved together
+   so that edge lands at a fixed, comfortable gap before the text (~0.4em)
+   for every possible marker width, not just the single-digit case that was
+   eyeballed originally. */
 .ql-editor ol:has(> li[data-list]) {
   padding-left: 0.9em !important;
 }
 
 .ql-editor li[data-list] > .ql-ui::before {
-  margin-left: -0.8em !important;
-  width: auto !important;
+  margin-left: -2em !important;
+  width: 1.6em !important;
 }
 
 /* Saved job posting/qualification HTML is generated via getSemanticHTML(),
@@ -368,7 +377,14 @@ div.remove-height {
 .ql-editor ol > li:not([data-list])::before {
   content: counter(ql-plain-ol) '.';
   position: absolute;
-  left: 1.2em;
+  /* Fixed-width, right-aligned box (not `left: <fixed value>` with the
+     content growing rightward from it) so the marker's right edge stays
+     put for "1.", "9.", and "12." alike - li padding-left is 2.4em, so a
+     2em-wide box starting at the li's left edge leaves a steady ~0.4em
+     gap before the text regardless of how many digits the counter has. */
+  left: 0;
+  width: 2em;
+  text-align: right;
 }
 
 /* Style the scroll container */
