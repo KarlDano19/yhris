@@ -65,8 +65,8 @@ function WorkExperience({ workExperience }: WorkExperienceProps) {
             {experience.responsibilities && (
               <div>
                 <h5 className="font-medium text-gray-800 mb-2">Key Responsibilities:</h5>
-                <div 
-                  className="text-sm text-gray-700 [&>ul]:list-disc [&>ul]:list-inside [&>ul]:space-y-1 [&>ul>li]:text-gray-700"
+                <div
+                  className="ql-editor !p-0 text-sm text-gray-700"
                   dangerouslySetInnerHTML={{ __html: experience.responsibilities }}
                 />
               </div>

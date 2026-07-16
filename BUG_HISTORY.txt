@@ -109,7 +109,7 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
-BUG ID: HRIS-2026-032
+BUG ID: HRIS-2026-034
 DATE FILED: 2026-07-17
 DATE FIXED: 2026-07-17
 REPORTER: Internal (Ian Brylle, YAHSHUA)
@@ -175,7 +175,7 @@ FIX EXPLANATION:
 
 ================================================================================
 
-BUG ID: HRIS-2026-031
+BUG ID: HRIS-2026-033
 DATE FILED: 2026-07-17
 DATE FIXED: 2026-07-17
 REPORTER: Internal
@@ -276,6 +276,271 @@ FIX EXPLANATION:
      backend validation (#4) means an applicant with a legacy null
      dateFrom entry will be required to fix/remove it the next time they
      save any change to their Work Experience section.
+
+================================================================================
+
+BUG ID: HRIS-2026-032
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+  Two unrelated bugs found on the OSH Program page ("OSH Program and Policy"
+  tab) while validating the ql-editor fix from HRIS-2026-031:
+
+  1. On a hard refresh landing directly on /dole/osh-program (or any time it
+     was the first Quill-using page visited in the session), the React Quill
+     toolbar rendered its icon buttons as giant, unstyled black shapes (e.g. a
+     huge solid triangle) instead of small icons. The bug was NOT visible when
+     navigating in from another page via the app's normal in-app links (e.g.
+     DOLE -> OSH Program), only after a hard browser refresh.
+
+     Root cause: `ProgramAndPolicy.tsx`, `SafetyMeasures.tsx`, and
+     `ComplianceAndCost.tsx` (the three OSH Program tabs using
+     `ReactQuillDynamic`) were the only Quill-using components in the entire
+     codebase that did NOT `import 'react-quill-new/dist/quill.snow.css'`
+     directly in their own file — every other Quill usage across the app
+     does. That stylesheet is what sizes the toolbar's icon SVGs down to
+     their small, correct dimensions; without it the browser renders their
+     raw, unstyled path data at a huge default size. It "worked" when
+     navigating in from another page only because that other page's own
+     `quill.snow.css` import was already injected into the document, and
+     Next.js keeps client-side-navigation stylesheets in the page - a hard
+     refresh starts the document fresh, so if OSH Program is the first (or
+     only) Quill page loaded, the stylesheet never arrives.
+
+  2. The "< DOLE" back button on the OSH Program page required repeatedly
+     clicking ("spamming") it before it would actually navigate away.
+
+     Root cause: a `useEffect` installing a `popstate`/`beforeunload` guard
+     (to warn on unsaved changes) had `hasUnsavedChangesCallback` in its
+     dependency array. That callback itself depends on `watch`,
+     `selectedTab`, and `oshProgramDetails` - all of which change as the user
+     switches tabs or data refetches. Every time the effect re-ran (cleanup +
+     re-setup), it called `window.history.pushState(...)` again, permanently
+     adding another entry to the browser's session history stack - there is
+     no way to "unpush" a history entry, so these accumulated for the whole
+     time the user stayed on the page. The Back button's handler calls
+     `window.history.go(-2)`, a heuristic tuned for exactly ONE extra guard
+     entry (pushed once on mount) plus the real navigation step. As soon as
+     the user switched even one tab, more than one extra entry had
+     accumulated, so `go(-2)` undershot and the user had to click Back
+     multiple times to actually get past the leftover phantom entries.
+
+DESIRED OUTCOME:
+  The OSH Program editor's toolbar icons should render correctly at their
+  normal small size on a hard refresh, not just when navigating in from
+  another page. The "< DOLE" back button should navigate away in a single
+  click regardless of how many tabs the user has switched between or how
+  many times the underlying data has refetched.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/ProgramAndPolicy.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/SafetyMeasures.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/ComplianceAndCost.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/Content.tsx
+
+Backend:
+- N/A - frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS
+  import + effect-dependency fix)
+☑ TypeScript types verified (no type errors on all edited files)
+☑ Manual verification completed:
+  - Hard refresh directly on /dole/osh-program, OSH Program and Policy tab:
+    toolbar icons render at correct small size ✓
+  - Hard refresh on Safety Measures and Compliance and Cost tabs: same ✓
+  - Navigating in from the DOLE page (already-warm session): unaffected,
+    still correct ✓
+  - Switch between multiple OSH Program tabs, then click "< DOLE" once:
+    navigates away immediately ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (cold hard-refresh landing directly on the page vs. warm
+  in-app navigation; multiple tab switches before attempting to go back)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Fix 1 — missing quill.snow.css import:
+  Added `import 'react-quill-new/dist/quill.snow.css';` to all three OSH
+  Program tab files that render a `ReactQuillDynamic` editor, matching the
+  same import already present in every other Quill-using component across
+  the codebase (SendEmailModal, job posting description editors, evaluation
+  criterion editors, etc.).
+
+  Fix 2 — Back button requiring multiple clicks:
+  Added a `hasUnsavedChangesRef` ref, kept current via a small separate
+  effect (`useEffect(() => { hasUnsavedChangesRef.current = ... }, [hasUnsavedChangesCallback])`).
+  Changed the popstate/beforeunload guard effect's dependency array to `[]`
+  so it only runs once on mount (and therefore only calls
+  `window.history.pushState` once as a result), with its `handleBeforeUnload`
+  and `handlePopState` closures reading `hasUnsavedChangesRef.current()`
+  instead of closing over the changing `hasUnsavedChangesCallback` directly.
+  The Back button's existing `window.history.go(-2)` heuristic now reliably
+  matches the actual history stack, since exactly one guard entry is ever
+  added regardless of tab switches or data refetches.
+
+================================================================================
+
+BUG ID: HRIS-2026-031
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Client (Linear I-610) + Internal - Dev
+
+ISSUE DESCRIPTION:
+  Linear I-610 reported that Performance Evaluation form text was not wrapping
+  properly — long text ran off the edge of the container instead of moving to
+  the next line, in both the evaluator's and the recipient's view. The same
+  underlying pattern turned out to affect several other screens that render
+  saved React Quill rich-text HTML read-only via `dangerouslySetInnerHTML`:
+
+  1. Root cause: read-only previews of Quill-authored HTML (evaluation
+     section/criterion text, applicant work-experience "responsibilities",
+     employee-issue decision messages, etc.) were rendered as bare
+     `<div>`/`<span>` elements with NO `.ql-editor` class. Quill's own vendor
+     CSS (`.ql-editor { white-space: pre-wrap; word-wrap: break-word; }`)
+     only applies when that class is present — the live editor always gets it
+     automatically (react-quill-new wraps it in `.ql-container.ql-snow`), but
+     hand-rolled previews elsewhere in the app never added it. Content with a
+     non-breaking-space-joined phrase (common in Word/Quill-pasted text) has
+     no legal wrap point without `word-wrap: break-word`, so it overflowed the
+     modal instead of wrapping, and the modal's `overflow-hidden` clipped it —
+     matching the client's screenshot exactly.
+  2. A full codebase audit (grepping every `dangerouslySetInnerHTML` site and
+     cross-referencing against every field authored via a Quill editor) found
+     the bug present in: Evaluation History detail modal, Evaluation Questions
+     tab, Talent Search applicant profile (Work Experience), the View
+     Evaluation Template modal, the Evaluation Template Preview tab, the live
+     evaluator-facing evaluation form, and the Screen Applicants profile
+     modal's Job Experience tab.
+  3. Secondary bug found and fixed while validating the list-marker CSS: the
+     OSH Program editor showed ordered-list numbers overlapping the item text
+     (e.g. "10The company..." with no space), for TWO independent reasons:
+       a. `globals.css`'s custom marker-positioning rules for Quill's
+          `.ql-ui::before` pseudo-element (added in HRIS-2026-028 to restore
+          bullet/number markers in read-only previews) used `width: auto`,
+          which sizes the marker box to its own content. Quill draws the
+          marker with `text-align: right`, so a FIXED width is required to
+          keep the marker's right edge (where the item text starts) constant
+          regardless of digit count — `auto` let two-digit numbers ("10.",
+          "11.") push their right edge into the following text. The
+          equivalent fallback rule for semantic (non-editor) `<ol>` markup
+          had the same flaw via `left: <fixed>` instead of a fixed-width,
+          right-aligned box.
+       b. Separately, `utils/osh_program.py`'s `generate_basic_components()`
+          split every topic into TWO `<li>` elements in the same `<ol>` — one
+          for the heading-like title ("Safety and Health Policy") and one for
+          its explanation paragraph — so both got auto-numbered as if they
+          were sequential list items, producing a duplicated/confusing count
+          on top of the CSS overlap.
+  4. While auditing, also found `employee-issue-decision/Content.tsx`
+     rendering `decision_message` as raw Quill HTML in the web acknowledgment
+     page — but the authoritative decision document (the generated NTE PDF,
+     `utils/employee_issue.py: generate_nte_html_with_response()`) already
+     strips all HTML from `decision_message` via `convert_html_to_text()` and
+     renders it as plain text. The web-page HTML rendering was redundant and
+     removed instead of fixed.
+
+DESIRED OUTCOME:
+  All read-only previews of Quill-authored rich text should wrap correctly
+  within their containers, regardless of content length, matching the live
+  editor's own behavior. Ordered-list markers in the live editor (and in
+  semantic non-editor list markup) should stay clear of the item text for any
+  digit count, not just single digits. Newly created OSH Programs should
+  present each basic component as a single, correctly numbered list item.
+
+FILES CHANGED:
+Frontend:
+- src/app/globals.css
+    (`.ql-editor li[data-list] > .ql-ui::before`: `width: auto` -> a fixed
+     `width: 1.6em` with `margin-left: -2em`, recalculated so the marker's
+     right edge stays a constant ~0.4em before the text for any digit count;
+     `.ql-editor ol > li:not([data-list])::before`: switched from
+     `left: 1.2em` growing rightward with content, to a fixed `left: 0;
+     width: 2em; text-align: right;` box with the same guarantee)
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/EvaluationDetails.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+- src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-template/tabs/PreviewTab.tsx
+- src/components/pages/(un-auth)/(forms)/evaluation-form/Content.tsx
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/ApplicantForm.tsx
+- src/components/pages/(un-auth)/(forms)/employee-issue/employee-issue-decision/Content.tsx
+    (removed the "Decision Message Display" block entirely — decision content
+     is already delivered via the NTE PDF attachment as plain text)
+
+Backend:
+- yahshua-hris-be/utils/osh_program.py
+    (`generate_basic_components()`: merged each topic's title + explanation
+     into a single `<li>` instead of two, and removed no-op `start="N"` HTML
+     attributes — Quill doesn't read the native `start` attribute; it tracks
+     ordered-list numbering internally and already continues the count across
+     intervening bullet lists on its own)
+- No data migration was applied for existing production OSH Program records.
+  A migration was drafted and tested locally to backfill only rows whose
+  `basic_components` exactly matched the old auto-generated default (leaving
+  any admin-edited content untouched), but was reverted per developer
+  decision — this generator only runs once per employer
+  (`create_osh_program`), so only newly created employers get the corrected
+  numbering; existing employers' OSH Program content is unaffected until
+  manually edited or a migration is deliberately reintroduced.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — content-generator change only, no schema/behavior change requiring
+Python tests
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS +
+  markup fix)
+☑ TypeScript types verified (no type errors on all edited files)
+☑ Manual verification completed:
+  - Evaluation History detail modal: long section/criterion text wraps ✓
+  - Evaluation Questions tab: criterion titles wrap ✓
+  - Talent Search applicant profile (Work Experience): responsibilities wrap,
+    bullets render ✓
+  - View Evaluation Template modal: description/section/criterion text wraps ✓
+  - Evaluation Template Preview tab: same ✓
+  - Live evaluator-facing evaluation form ("Details" tab): section
+    description and criterion titles wrap ✓
+  - Screen Applicants profile modal (Job Experience tab): responsibilities
+    wrap, bullets render ✓
+  - OSH Program editor: single-digit AND double-digit ordered-list items no
+    longer overlap the item text ✓
+  - Employee-issue decision acknowledgment page: no longer shows a redundant
+    HTML decision block ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (nbsp-joined long phrases forcing a mid-run break,
+  double-digit and single-digit ordered-list counters, flex rows with a
+  number/icon sibling needing `min-w-0`)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added the `ql-editor` class (matching the existing convention already used
+  for job-posting/public-page previews) to every read-only render of
+  Quill-authored HTML found missing it, restoring Quill's own
+  `white-space: pre-wrap; word-wrap: break-word` plus this app's centralized
+  heading-size, empty-paragraph-height, and list-marker rules in globals.css.
+  Where the rich-text container sat next to a sibling (a numbering `<span>` or
+  icon) inside a `flex` row, also added `min-w-0`/`shrink-0` as needed —
+  flex items default to `min-width: auto`, which lets a wide content item
+  overflow its row instead of wrapping when the row itself isn't wide enough.
+
+  Separately fixed the marker-positioning math in globals.css so it holds for
+  any digit count instead of only the single-digit case it was originally
+  eyeballed against, and fixed the OSH Program basic-components generator to
+  stop splitting one logical list item into two numbered fragments.
 
 ================================================================================
 

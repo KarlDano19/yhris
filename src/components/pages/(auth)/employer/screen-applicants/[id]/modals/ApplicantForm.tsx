@@ -520,7 +520,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 <p>{formatWorkExperienceDateRange(exp.dateFrom, exp.dateTo)}</p>
                 <p>{exp.companyOrg}</p>
                 <p className='font-semibold mt-4'>Description/Responsibilities:</p>
-                <div className='pl-2' dangerouslySetInnerHTML={{ __html: exp.responsibilities }} />
+                <div className='ql-editor !p-0 !pl-2' dangerouslySetInnerHTML={{ __html: exp.responsibilities }} />
               </div>
             </div>
           );

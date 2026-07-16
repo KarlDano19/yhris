@@ -387,14 +387,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return hasUnsavedChanges(watch, selectedTab, oshProgramDetails);
   }, [watch, selectedTab, oshProgramDetails]);
 
+  // Keep a ref to the latest callback so the mount-only effect below can read
+  // current data without needing hasUnsavedChangesCallback in its deps.
+  const hasUnsavedChangesRef = React.useRef(hasUnsavedChangesCallback);
+  useEffect(() => {
+    hasUnsavedChangesRef.current = hasUnsavedChangesCallback;
+  }, [hasUnsavedChangesCallback]);
+
   // ============================================================================
   // BROWSER NAVIGATION HANDLING
   // ============================================================================
 
-  // Handle browser back button and beforeunload events
+  // Handle browser back button and beforeunload events.
+  // This must run (and pushState) only ONCE on mount, not whenever
+  // hasUnsavedChangesCallback changes (e.g. on every tab switch or data
+  // refetch) - otherwise each re-run pushes another permanent history entry,
+  // and the Back button's `window.history.go(-2)` (tuned for exactly one
+  // extra entry) undershoots, requiring multiple clicks to actually leave.
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChangesCallback()) {
+      if (hasUnsavedChangesRef.current()) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -405,7 +417,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         allowNavigationRef.current = false;
         return;
       }
-      if (hasUnsavedChangesCallback()) {
+      if (hasUnsavedChangesRef.current()) {
         e.preventDefault();
         // Show browser's default warning by triggering beforeunload
         const beforeUnloadEvent = new Event('beforeunload');
@@ -427,7 +439,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [hasUnsavedChangesCallback]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle navigation with unsaved changes check
   const handleNavigation = (url: string) => {
