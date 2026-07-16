@@ -3,6 +3,7 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import useGetApplicantDetails from "../hook/useGetApplicantDetails";
 import Image from 'next/image';
+import { formatWorkExperienceDateRange } from '@/helpers/date';
 
 type T_CompareModalData = {
   applicantIds: number[];
@@ -127,17 +128,7 @@ function CompareApplicantsModal({
                   <div className="font-medium text-sm">{exp.position}</div>
                   <div className="text-xs text-gray-600">{exp.companyOrg}</div>
                   <div className="text-xs text-gray-500">
-                    {new Date(exp.dateFrom).toLocaleDateString('en-US', {
-                      month: 'short',
-                      year: 'numeric',
-                    })}{' '}
-                    -{' '}
-                    {exp.dateTo === 'Present' || exp.dateTo === 'present'
-                      ? 'Present'
-                      : new Date(exp.dateTo).toLocaleDateString('en-US', {
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                    {formatWorkExperienceDateRange(exp.dateFrom, exp.dateTo, true)}
                   </div>
                 </div>
               ))}
