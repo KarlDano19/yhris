@@ -32,7 +32,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/sss-contribution-table-2026-philippines#article",
       "headline": "2026 Philippine Statutory Contribution Changes: SSS, PhilHealth and Pag-IBIG Rates Every Employer Must Update Now",
       "description": "SSS is now at 15% with a ₱35,000 MSC ceiling. PhilHealth is at 5% with a ₱100,000 ceiling. Pag-IBIG caps at ₱400 per month. Updated contribution tables, computation examples, and employer checklist.",
-      "image": "https://yahshuahris.com/blog/2026 Philippine Statutory Contribution Changes.png",
+      "image": "https://yahshuahris.com/blog/sss-contribution-2026.png",
       "datePublished": "2026-07-14T00:00:00.000Z",
       "dateModified": "2026-07-14T00:00:00.000Z",
       "author": {

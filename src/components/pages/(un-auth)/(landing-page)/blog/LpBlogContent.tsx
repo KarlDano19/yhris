@@ -13,7 +13,7 @@ const posts = [
     excerpt: "SSS raised its total rate to 15% with a ₱35,000 MSC ceiling. PhilHealth is finalized at 5% with a ₱100,000 ceiling. Pag-IBIG caps at ₱400 per month. Updated tables and computation examples for every salary level.",
     date: "July 2026",
     readTime: "10 min read",
-    image: "/blog/2026 Philippine Statutory Contribution Changes.png",
+    image: "/blog/sss-contribution-2026.png",
   },
   {
     slug: "philippine-payroll-errors-msme",
