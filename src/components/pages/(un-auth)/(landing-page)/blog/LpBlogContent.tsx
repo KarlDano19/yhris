@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "sss-contribution-table-2026-philippines",
+    category: "Statutory Compliance",
+    title: "2026 Philippine Statutory Contribution Changes: SSS, PhilHealth and Pag-IBIG Rates Employers Must Update Now",
+    excerpt: "SSS raised its total rate to 15% with a ₱35,000 MSC ceiling. PhilHealth is finalized at 5% with a ₱100,000 ceiling. Pag-IBIG caps at ₱400 per month. Updated tables and computation examples for every salary level.",
+    date: "July 2026",
+    readTime: "10 min read",
+    image: "/blog/sss-contribution-2026.png",
+  },
+  {
     slug: "philippine-payroll-errors-msme",
     category: "Payroll Compliance",
     title: "What Philippine Payroll Errors Actually Cost MSMEs",
