@@ -6,7 +6,6 @@ import { InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import useGetEmailMonitoringLogDetails from '../hooks/useGetEmailMonitoringLogDetails';
 import { formatDateTimeSeparate } from '@/helpers/date';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 type T_ModalData = {
   id: number;

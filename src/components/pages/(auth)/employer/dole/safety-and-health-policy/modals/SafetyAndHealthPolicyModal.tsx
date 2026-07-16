@@ -12,7 +12,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import "react-quill-new/dist/quill.snow.css";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import CustomToast from "@/components/CustomToast";

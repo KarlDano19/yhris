@@ -8,7 +8,6 @@ import { Tooltip } from 'react-tooltip';
 
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 import DeleteModal from '@/components/DeleteModal';
 import ReactQuill from '@/components/ReactQuillDynamic';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';

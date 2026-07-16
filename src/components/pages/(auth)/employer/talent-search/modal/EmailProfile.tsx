@@ -18,7 +18,6 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 type FormValues = {
   template: string;

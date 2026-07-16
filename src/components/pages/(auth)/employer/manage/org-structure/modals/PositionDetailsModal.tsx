@@ -1,6 +1,5 @@
 import React, { Fragment, useState, useEffect, useRef, useMemo } from 'react';
 
-import 'react-quill-new/dist/quill.snow.css';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon, StarIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';

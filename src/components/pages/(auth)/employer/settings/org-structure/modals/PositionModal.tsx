@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import 'react-quill-new/dist/quill.snow.css';
 
 import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';

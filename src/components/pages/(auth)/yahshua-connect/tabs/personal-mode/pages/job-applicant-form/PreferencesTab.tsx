@@ -11,7 +11,6 @@ import { PlusIcon } from '@heroicons/react/24/solid';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 // Helper to detect empty rich text (only tags/nbsp)
 const isQuillEmpty = (html?: string) =>
