@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import useSetPrimaryEmployee from '../hooks/useSetPrimaryEmployee';
 import useGetPositionEmployees from '../hooks/useGetPositionEmployees';
 import useGetPositionEmployeesAutocomplete from '../hooks/useGetPositionEmployeesAutocomplete';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
 
@@ -285,7 +286,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                       <div className="bg-gray-50 rounded-lg overflow-hidden">
                         <div 
                           className="ql-editor"
-                          dangerouslySetInnerHTML={{ __html: data.description }}
+                          dangerouslySetInnerHTML={{ __html: normalizeNbsp(data.description || '') }}
                         />
                       </div>
                     </div>

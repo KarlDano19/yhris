@@ -7,6 +7,7 @@ import CustomToast from '@/components/CustomToast';
 import EAFModal from './EAFModal';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
+import { normalizeNbsp } from '@/helpers/linkify';
 import useGetApplicantDetails from '../../hooks/applicant/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../../hooks/applicant/useGenerateApplicantSummary';
 import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScreeningAnswersPDF';
@@ -525,7 +526,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 </p>
                 <p>{exp.companyOrg}</p>
                 <p className='font-semibold mt-4'>Description/Responsibilities:</p>
-                <div className='ql-editor !p-0 !pl-2' dangerouslySetInnerHTML={{ __html: exp.responsibilities }} />
+                <div className='ql-editor !p-0 !pl-2' dangerouslySetInnerHTML={{ __html: normalizeNbsp(exp.responsibilities || '') }} />
               </div>
             </div>
           );

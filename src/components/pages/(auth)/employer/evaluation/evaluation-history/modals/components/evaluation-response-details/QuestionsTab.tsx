@@ -4,6 +4,7 @@ import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 
 import Pagination from '@/components/Pagination';
 import QuestionResponseBarChart from '../../charts-and-graphs/QuestionResponseBarChart';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 interface PaginationState {
   totalRecords: number;
@@ -96,7 +97,7 @@ const QuestionsTab = ({
                         )}
                         <span className='min-w-0'>
                           {globalIndex + 1}.{' '}
-                          <span className='ql-editor !p-0 inline' dangerouslySetInnerHTML={{ __html: criterion.title }} />
+                          <span className='ql-editor !p-0 inline' dangerouslySetInnerHTML={{ __html: normalizeNbsp(criterion.title || '') }} />
                         </span>
                       </h5>
                       {totalScore > 0 && (

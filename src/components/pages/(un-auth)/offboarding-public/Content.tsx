@@ -13,6 +13,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import SignatureModal from '../(forms)/employee-issue/modals/SignatureModal';
 import { useGetSeparationById } from './hooks/useGetSeparationById';
 import useAcknowledgeSeparation from './hooks/useAcknowledgeSeparation';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import ConfettiLogo from '@/svg/Confetti';
 
@@ -205,7 +206,7 @@ const Content = () => {
                         </div>
                       </div>
                       {separation.message ? (
-                        <div className="ql-editor !p-0 text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: separation.message }} />
+                        <div className="ql-editor !p-0 text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: normalizeNbsp(separation.message || '') }} />
                       ) : (
                         <p className="text-gray-500 italic">No letter content available.</p>
                       )}

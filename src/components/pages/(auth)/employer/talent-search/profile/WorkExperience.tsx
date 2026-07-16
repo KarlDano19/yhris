@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 interface WorkExperienceItem {
   id?: number;
@@ -75,7 +76,7 @@ function WorkExperience({ workExperience }: WorkExperienceProps) {
                 <h5 className="font-medium text-gray-800 mb-2">Key Responsibilities:</h5>
                 <div
                   className="ql-editor !p-0 text-sm text-gray-700"
-                  dangerouslySetInnerHTML={{ __html: experience.responsibilities }}
+                  dangerouslySetInnerHTML={{ __html: normalizeNbsp(experience.responsibilities) }}
                 />
               </div>
             )}

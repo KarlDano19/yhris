@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 type DescriptionModalProps = {
   isOpen: boolean;
@@ -59,7 +60,7 @@ const DescriptionModal: React.FC<DescriptionModalProps> = ({
                   {description ? (
                     <div 
                       className="ql-editor text-sm leading-relaxed bg-gray-50 p-4 rounded-lg"
-                      dangerouslySetInnerHTML={{ __html: description }}
+                      dangerouslySetInnerHTML={{ __html: normalizeNbsp(description || '') }}
                     />
                   ) : (
                     <p className="text-gray-500 text-center py-8">No description available.</p>

@@ -7,6 +7,7 @@ import { XCircleIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, 
 import { T_JobPreviewModal } from "@/types/globals";
 import { T_JobPostingTable } from "@/types/job_posting";
 import formatPrice from '@/helpers/currencyFormat';
+import { normalizeNbsp } from '@/helpers/linkify';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
@@ -26,17 +27,17 @@ export default function JobPreviewModal({
   const cancelButtonRef = useRef(null);
 
   const renderRoleDescription = (jobDescription: any) => {
-    const markup = { __html: jobDescription };
+    const markup = { __html: normalizeNbsp(jobDescription || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderQualificationsDescription = (qualifications: any) => {
-    const markup = { __html: qualifications };
+    const markup = { __html: normalizeNbsp(qualifications || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
-  
+
   const renderNotesRemarks = (notesRemarks: any) => {
-    const markup = { __html: notesRemarks };
+    const markup = { __html: normalizeNbsp(notesRemarks || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
