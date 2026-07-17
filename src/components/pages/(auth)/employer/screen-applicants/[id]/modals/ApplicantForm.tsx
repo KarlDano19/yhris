@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import EAFModal from './EAFModal';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
+import { normalizeNbsp } from '@/helpers/linkify';
 import { formatDateToLocal, formatDateTimeSeparate, formatWorkExperienceDateRange } from '@/helpers/date';
 import useGetApplicantDetails from '../../hooks/applicant/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../../hooks/applicant/useGenerateApplicantSummary';
@@ -520,7 +522,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 <p>{formatWorkExperienceDateRange(exp.dateFrom, exp.dateTo)}</p>
                 <p>{exp.companyOrg}</p>
                 <p className='font-semibold mt-4'>Description/Responsibilities:</p>
-                <div className='ql-editor !p-0 !pl-2' dangerouslySetInnerHTML={{ __html: exp.responsibilities }} />
+                <div className='ql-editor !p-0 !pl-2' dangerouslySetInnerHTML={{ __html: normalizeNbsp(exp.responsibilities || '') }} />
               </div>
             </div>
           );

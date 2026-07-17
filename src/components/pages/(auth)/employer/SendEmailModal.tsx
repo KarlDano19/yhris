@@ -13,7 +13,6 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import { T_DocumentsModal } from '@/types/globals';
 
-import 'react-quill-new/dist/quill.snow.css';
 import InfoIcon from '@/svg/InfoIcon';
 
 type FormValues = {

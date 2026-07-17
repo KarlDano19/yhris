@@ -18,7 +18,6 @@ import useGetEmployeeStatusDetails from '../hooks/employee-status/useGetEmployee
 import useEditEmployeeStatusDetails from '../hooks/employee-status/useEditEmployeeStatusDetails';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill-new/dist/quill.snow.css';
 import ReactQuill from '@/components/ReactQuillDynamic';
 
 type T_ModalData = {

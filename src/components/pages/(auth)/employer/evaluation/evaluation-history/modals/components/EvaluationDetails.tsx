@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 interface EvaluationDetailsProps {
   evaluationHistoryDetails: any;
@@ -55,9 +56,9 @@ const EvaluationDetails = ({ evaluationHistoryDetails }: EvaluationDetailsProps)
               <div className='p-6 border-b-2'>
                 <p className='text-[1.2rem] font-semibold'>
                   {convertToRoman(evaluationCriterionIndex + 1)}.{' '}
-                  <span className='ql-editor !p-0 inline' dangerouslySetInnerHTML={{ __html: evaluationForm[currentFormIndex].section_title }} />
+                  <span className='ql-editor !p-0 inline' dangerouslySetInnerHTML={{ __html: normalizeNbsp(evaluationForm[currentFormIndex].section_title || '') }} />
                 </p>
-                <span className='ql-editor !p-0 block' dangerouslySetInnerHTML={{ __html: evaluationForm[currentFormIndex].section_description }} />
+                <span className='ql-editor !p-0 block' dangerouslySetInnerHTML={{ __html: normalizeNbsp(evaluationForm[currentFormIndex].section_description || '') }} />
               </div>
             )}
             {evaluationForm[currentFormIndex].criterion.map((criterionItem: any, index: number) => (
@@ -65,7 +66,7 @@ const EvaluationDetails = ({ evaluationHistoryDetails }: EvaluationDetailsProps)
                 <div className='flex justify-between gap-4 mb-2'>
                   <div className='min-w-0'>
                     {index + 1}.{' '}
-                    <span className='ql-editor !p-0 inline' dangerouslySetInnerHTML={{ __html: criterionItem.title }} />
+                    <span className='ql-editor !p-0 inline' dangerouslySetInnerHTML={{ __html: normalizeNbsp(criterionItem.title || '') }} />
                   </div>
                   <div className='shrink-0'>
                     <p className='text-base font-semibold'>Score:</p>

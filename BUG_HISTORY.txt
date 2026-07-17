@@ -279,6 +279,280 @@ FIX EXPLANATION:
 
 ================================================================================
 
+BUG ID: HRIS-2026-034
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Consultant (Christen Daayata)
+
+ISSUE DESCRIPTION:
+  After HRIS-2026-033 fixed the missing `.ql-editor` CSS load, long
+  descriptions on the Evaluation Form no longer overflowed the page, but
+  reported a new, related problem: words were splitting awkwardly mid-word
+  instead of wrapping cleanly between words (e.g. "important" rendering as
+  "importan" / "t" on two lines, "success" as "succe" / "ss"). The same
+  pattern was independently found on the public job listing page (/jobs),
+  in the "Role Summary" / "What You'll Do" section of a job's details —
+  e.g. "Administrative" splitting as "Admini" / "strative".
+
+  Root cause: content pasted into a Quill editor from Word/Google Docs
+  commonly saves every space as a non-breaking space (`&nbsp;`, i.e.
+  U+00A0) instead of a regular space — confirmed via the client's repro
+  HTML:
+
+    <p>This&nbsp;evaluation&nbsp;form&nbsp;lists&nbsp;the&nbsp;criteria...</p>
+
+  A real nbsp is defined (by Unicode and the CSS Text spec) to NEVER
+  provide a line-break opportunity — that is its entire purpose, not a
+  rendering bug. `.ql-editor`'s `overflow-wrap: break-word` rule (loaded
+  correctly since HRIS-2026-033) therefore has no real word boundary to
+  wrap at, and is forced to prevent overflow the only way it can: breaking
+  at an arbitrary character position instead of between words. No CSS
+  property can fix this — nbsp's non-breaking behavior can't be overridden
+  by any stylesheet rule without contradicting what the character means.
+  The only fix is to replace the nbsp character with a real space before
+  the browser ever sees it.
+
+  A backend fix (normalize on save in ~10 serializers, across job
+  postings, evaluation templates, applicant work experience, directives,
+  benefits, OSH program, positions, and offboarding letters, plus a data
+  migration to clean existing rows) was evaluated and explicitly rejected
+  for this hotfix branch: it only fixes NEW saves without a migration, the
+  migration itself is a one-way, irreversible bulk mutation across many
+  live tables with real locking/runtime risk, and it touches 8+ unrelated
+  features in one change — disproportionate risk for what is fundamentally
+  a display/rendering problem, not a data-correctness problem.
+
+DESIRED OUTCOME:
+  Every read-only preview of Quill-authored rich text should wrap at real
+  word boundaries, regardless of whether the saved content happens to be
+  nbsp-joined, matching how the text looks in a normal document — no
+  mid-word splitting, on both new and already-existing records, with no
+  database migration required.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/linkify.ts
+    (added and exported `normalizeNbsp()` — replaces `&nbsp;` and the
+     literal U+00A0 character with a regular space; `linkify()` now calls
+     it on its input before doing anything else, so every existing
+     `linkify()` call site gets the fix for free)
+- src/components/pages/(un-auth)/(forms)/evaluation-form/Content.tsx,
+  src/components/pages/(auth)/employer/evaluation/evaluation-template/tabs/PreviewTab.tsx,
+  src/components/pages/(auth)/employer/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal.tsx,
+  src/components/pages/(un-auth)/directives/Content.tsx
+    (no changes needed — already render their Quill content through
+     `linkify()`, so they inherited the fix automatically)
+- The following 16 files render saved Quill HTML directly via
+  `dangerouslySetInnerHTML` without going through `linkify()`, and were
+  each updated to wrap their HTML value with `normalizeNbsp()` before
+  rendering:
+  - src/components/pages/(auth)/applicant/apply-for-job/JobDetails.tsx
+  - src/components/pages/(auth)/employer/audit-logs/modals/ViewAuditLogDetails.tsx
+  - src/components/pages/(auth)/employer/dole/safety-and-health-policy/modals/SafetyAndHealthPolicyModal.tsx
+  - src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/EvaluationDetails.tsx
+  - src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+  - src/components/pages/(auth)/employer/job-postings/job-posting-history/modals/JobPreviewModal.tsx
+  - src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPagePreview.tsx
+  - src/components/pages/(auth)/employer/manage/org-structure/modals/PositionDetailsModal.tsx
+  - src/components/pages/(auth)/employer/screen-applicants/[id]/modals/ApplicantForm.tsx
+  - src/components/pages/(auth)/employer/settings/general-settings/employees/modals/DescriptionModal.tsx
+  - src/components/pages/(auth)/employer/settings/org-structure/modals/PositionModal.tsx
+  - src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+  - src/components/pages/(auth)/yahshua-connect/tabs/personal-mode/modals/JobDetailsModal.tsx
+  - src/components/pages/(un-auth)/apply-job-without-signup/job-detail/Content.tsx
+    (this + JobDetails.tsx below are the likely source of the /jobs
+     "Role Summary" repro)
+  - src/components/pages/(un-auth)/apply-job-without-signup/jobs/components/tabs/company-jobs/JobDetails.tsx
+  - src/components/pages/(un-auth)/offboarding-public/Content.tsx
+- Explicitly investigated and left unchanged (not Quill/rich-text content):
+  - src/components/pages/(auth)/employer/manage/create-memo-policy/modals/ResponsesModal.tsx
+    (`read.read_at` is a plain ISO datetime string per
+    `T_ReadData`/`DirectiveReadSerializer`, not saved rich text — using
+    `dangerouslySetInnerHTML` on it is a pre-existing, unrelated code
+    smell, not a source of nbsp)
+  - src/components/tour/TourTooltip.tsx
+    (`step.description` is hardcoded static tour copy authored directly in
+    TypeScript config files like `dashboardTourSteps.ts`, never passes
+    through a Quill editor, so it can never contain nbsp)
+  - src/app/(un-auth)/(landing-page)/blog/*/page.tsx
+    (`dangerouslySetInnerHTML` there renders `JSON.stringify(jsonLd)` for
+    SEO structured data, not user content)
+
+Backend:
+- N/A - frontend-only fix (backend normalization was considered and
+  explicitly deferred; see ISSUE DESCRIPTION)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — text
+  normalization + call-site wiring, no component logic changed)
+☑ TypeScript types verified: `npx tsc --noEmit` run before and after; byte-
+  for-byte identical error output both times (same pre-existing, unrelated
+  errors only) — confirms zero new errors across all 17 changed files
+☑ Manual verification completed: reproduced the exact `&nbsp;`-joined
+  repro data from the client screenshot and confirmed words now wrap
+  cleanly between words instead of splitting mid-word
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (verified via `git diff` that every
+  edit is a minimal, additive wrap around existing `dangerouslySetInnerHTML`
+  values — no unrelated logic touched)
+☑ Edge cases considered (confirmed via grep that no file still imports the
+  fix from an intermediate `richText.ts` helper that was tried and then
+  consolidated back into `linkify.ts` for a single source of truth)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added `normalizeNbsp()` to `linkify.ts` — a plain string `.replace()`
+  swapping `&nbsp;`/U+00A0 for a regular space (visually identical,
+  restores real word-break opportunities). `linkify()` calls it
+  internally on its input before doing any URL-detection work, so the 4
+  files already calling `linkify()` for their Quill content got the fix
+  with zero additional changes.
+
+  For the 16 files that render saved Quill HTML directly via
+  `dangerouslySetInnerHTML` without going through `linkify()` (mostly
+  job-posting/job-detail description renderers using a local
+  `const markup = { __html: ... }` pattern, plus evaluation history,
+  work experience, audit logs, position descriptions, and the offboarding
+  letter), each call site was updated to wrap its HTML value with
+  `normalizeNbsp(...)` directly.
+
+  An intermediate version of this fix put `normalizeNbsp` in a new,
+  separate `src/helpers/richText.ts` file (reasoning: `linkify.ts`'s name
+  is specifically about URL-linking, not nbsp cleanup) and had `linkify.ts`
+  import it. Per developer feedback, this was consolidated back into a
+  single `normalizeNbsp` export inside `linkify.ts` — one file, one source
+  of truth, rather than splitting one small helper's logic and its
+  wrapper across two files.
+
+  Two render sites using `dangerouslySetInnerHTML` were explicitly checked
+  and left alone because they never contain Quill-authored content:
+  `ResponsesModal.tsx`'s `read.read_at` (a plain date string) and
+  `TourTooltip.tsx`'s `step.description` (hardcoded tour copy, never
+  passes through a Quill editor).
+
+  A backend-only fix (normalize on save + a one-time data migration to
+  clean existing rows across ~10 models) was designed and prototyped, then
+  explicitly reverted in favor of this frontend fix: the backend approach
+  needs a migration to fix any already-existing data (the actual bug
+  reports were all about existing records), that migration is a one-way,
+  irreversible change across many live production tables, and the fix
+  would touch 8+ unrelated features (job postings, evaluations,
+  applicants, directives, benefits, OSH program, positions, offboarding)
+  in a single hotfix change. The frontend fix has none of that risk: it is
+  purely additive display-layer logic, fixes both old and new data
+  immediately with no migration, and is trivially revertible as a single
+  commit if anything is wrong.
+
+================================================================================
+
+BUG ID: HRIS-2026-033
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Consultant
+
+ISSUE DESCRIPTION:
+  The evaluator-facing Evaluation Form's first page ("Details" tab, showing
+  the template name + description above Employee Name / Date of Evaluation)
+  still displayed unwrapped, overflowing text, even though HRIS-2026-031 had
+  already added the `ql-editor` class to this exact element to fix wrapping.
+  Repro data:
+
+    <p>This&nbsp;evaluation&nbsp;form&nbsp;lists&nbsp;the&nbsp;criteria...</p>
+
+  Root cause: `.ql-editor`'s wrapping rule (`white-space: pre-wrap;
+  word-wrap: break-word;`) only exists because `react-quill-new/dist/
+  quill.snow.css` is imported somewhere in the page's component tree — the
+  class name alone does nothing without that stylesheet. HRIS-2026-031 added
+  the `ql-editor` className to this file but never imported the stylesheet
+  in it. The public evaluation-form route never mounts a live Quill editor
+  anywhere, so nothing else on that route pulled the CSS in either — the
+  class was present in the markup with no matching rule, and an
+  `&nbsp;`-joined description (pasted content with no real spaces = no
+  legal wrap point without `word-wrap: break-word`) overflowed the box
+  exactly as in the client's original HRIS-2026-031 report.
+
+  Auditing every other file touched by HRIS-2026-031's `ql-editor` className
+  fix found the same gap in all of them: `EvaluationDetails.tsx`,
+  `QuestionsTab.tsx`, `WorkExperience.tsx`, `ViewEvaluationTemplateModal.tsx`,
+  `PreviewTab.tsx`, and `ApplicantForm.tsx` also lacked the stylesheet
+  import. Those happened to render fine in production only because they
+  share an authenticated app bundle with some other component elsewhere
+  that imports the Quill CSS — a fragile, incidental dependency, not a
+  guarantee.
+
+DESIRED OUTCOME:
+  Every read-only preview of Quill-authored HTML must reliably load
+  `.ql-editor`'s wrapping CSS regardless of what else is or isn't on its
+  page, instead of accidentally depending on unrelated components sharing
+  its bundle.
+
+FILES CHANGED:
+Frontend:
+- src/app/layout.tsx
+    (added `import 'react-quill-new/dist/quill.snow.css';` once, at the
+     root layout that wraps every route in the app)
+- Removed the now-redundant per-file `import 'react-quill-new/dist/
+  quill.snow.css';` from all 43 files that previously imported it
+  individually (editors and read-only previews alike), including the 6
+  files identified above plus
+  `src/components/pages/(un-auth)/(forms)/evaluation-form/Content.tsx`
+  (the file with the reported bug) — the global import in the root layout
+  makes every one of these redundant.
+
+Backend:
+- N/A - frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS
+  import relocation, no component logic changed)
+☑ TypeScript types verified: `npx tsc --noEmit` run before and after: same
+  pre-existing, unrelated errors only; none of the 44 changed files appear
+  in the error output
+☑ Manual verification completed: reproduced the exact `&nbsp;`-joined
+  repro data on the public evaluation-form page, confirmed it now wraps
+  correctly inside the bordered card
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (import removal spot-checked via
+  `git diff` on multiple files to confirm no stray blank lines/syntax
+  issues left behind)
+☑ Edge cases considered (verified via full-repo grep that no file still
+  references the per-file import except the new global one in
+  `layout.tsx`)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Moved the Quill stylesheet import from being scattered across 43
+  individual files to a single import in `src/app/layout.tsx`, the root
+  layout every route in the app renders through:
+
+    import 'react-quill-new/dist/quill.snow.css';
+    import './globals.css';
+
+  This guarantees `.ql-editor`'s base wrapping CSS is present on every
+  page — including standalone, unauthenticated routes like the public
+  evaluation form that never mount a live Quill editor — instead of
+  depending on whichever components happen to share that route's bundle.
+  All 43 previously-existing per-file imports (both single- and
+  double-quoted variants) were then removed as redundant duplicates; CSS
+  imports are deduplicated by the bundler, so removing them changes
+  nothing about what loads, only removes the now-unnecessary repetition.
+
+================================================================================
+
 BUG ID: HRIS-2026-032
 DATE FILED: 2026-07-16
 DATE FIXED: 2026-07-16

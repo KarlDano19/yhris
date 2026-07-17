@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 
-import "react-quill-new/dist/quill.snow.css";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import EmployeeSelect from "@/components/common/EmployeeSelect";
 import ReactQuill from "@/components/ReactQuillDynamic";

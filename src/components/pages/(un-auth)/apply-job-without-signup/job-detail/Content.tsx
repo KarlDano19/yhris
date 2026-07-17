@@ -8,6 +8,7 @@ import ApplyNowModal from '@/components/pages/(un-auth)/apply-job-without-signup
 
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from './hooks/useGetJobDetails';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import {
   CheckCircleIcon,
@@ -21,7 +22,6 @@ import {
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 const Content = () => {
   const params = useParams();
@@ -36,17 +36,17 @@ const Content = () => {
   }, [data]);
 
   const renderRoleDescription = (jobDescription: any) => {
-    const markup = { __html: jobDescription };
+    const markup = { __html: normalizeNbsp(jobDescription || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderQualificationsDescription = (qualifications: any) => {
-    const markup = { __html: qualifications };
+    const markup = { __html: normalizeNbsp(qualifications || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderNotesRemarks = (notesRemarks: any) => {
-    const markup = { __html: notesRemarks };
+    const markup = { __html: normalizeNbsp(notesRemarks || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 

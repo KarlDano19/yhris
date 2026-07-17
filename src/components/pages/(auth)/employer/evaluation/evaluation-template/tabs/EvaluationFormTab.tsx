@@ -7,7 +7,6 @@ import classNames from '@/helpers/classNames';
 
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 import ReactQuill from '@/components/ReactQuillDynamic';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';

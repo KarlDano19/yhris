@@ -5,12 +5,12 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import 'react-quill-new/dist/quill.snow.css';
 
 import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import CreateModal from '../../general-settings/employees/modals/CreateModal';
 import EditModal from '../../general-settings/employees/modals/EditModal';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
@@ -308,7 +308,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                             >
                               <div 
                                 className="ql-editor"
-                                dangerouslySetInnerHTML={{ __html: selectedPosition.description }}
+                                dangerouslySetInnerHTML={{ __html: normalizeNbsp(selectedPosition.description || '') }}
                               />
                             </div>
                           ) : (

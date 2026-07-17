@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from '../../../hooks/useGetJobDetails';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import {
   CheckCircleIcon,
@@ -18,7 +19,6 @@ import FileCaseIcon from '@/svg/FileCaseIcon';
 
 import * as DOMPurify from 'dompurify';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
-import 'react-quill-new/dist/quill.snow.css';
 
 interface JobDetailsProp {
   jobId: any;
@@ -35,17 +35,17 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
   }, [data]);
 
   const renderRoleDescription = (jobDescription: any) => {
-    const markup = { __html: jobDescription };
+    const markup = { __html: normalizeNbsp(jobDescription || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderQualificationsDescription = (qualifications: any) => {
-    const markup = { __html: qualifications };
+    const markup = { __html: normalizeNbsp(qualifications || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderNotesRemarks = (notesRemarks: any) => {
-    const markup = { __html: notesRemarks };
+    const markup = { __html: normalizeNbsp(notesRemarks || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 

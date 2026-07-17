@@ -21,7 +21,6 @@ import EyePassword from '@/svg/EyePassword';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 type T_EmailTemplateModalData = {
   id: number | null;

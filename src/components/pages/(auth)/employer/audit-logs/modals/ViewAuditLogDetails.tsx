@@ -5,6 +5,7 @@ import { Switch } from '@headlessui/react';
 
 import useGetAuditLogDetails from '../hooks/useGetAuditLogDetails';
 import { formatDateTimeSeparate } from '@/helpers/date';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import {
   ClockIcon,
@@ -16,7 +17,6 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline';
 
-import 'react-quill-new/dist/quill.snow.css';
 
 type T_ModalData = {
   id: number;
@@ -129,7 +129,7 @@ export default function EditEmployeeCompensationLogModal({
       if (typeof val === "string") {
         // Check if the string contains HTML tags
         if (val.includes('<') && val.includes('>')) {
-          const markup = { __html: val };
+          const markup = { __html: normalizeNbsp(val) };
           return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
         }
 

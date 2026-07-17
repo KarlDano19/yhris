@@ -7,7 +7,6 @@ import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../modals/DrawSignatureModal";
 import FilePreviewModal from "@/components/FilePreviewModal";
 import ReactQuill from "@/components/ReactQuillDynamic";
-import 'react-quill-new/dist/quill.snow.css';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
