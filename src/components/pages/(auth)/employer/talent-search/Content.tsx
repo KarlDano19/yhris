@@ -326,6 +326,8 @@ const Content = () => {
   const handleSearch = () => {
     // Mark that search has been performed
     setHasSearched(true);
+    // A new search means a different result set, so drop stale selections
+    clearSelection();
 
     // Add current input as a tag if it's not empty
     let updatedTags = tagsSearch;
@@ -417,6 +419,8 @@ const Content = () => {
   const handleFilterUpdate = (filterData: { location: string[]; gender: string; salary: string }) => {
     // Mark that search has been performed (when filters are applied)
     setHasSearched(true);
+    // Filters change the result set, so drop stale selections
+    clearSelection();
 
     // Build search query from current tags if any exist
     const searchQuery = buildSearchQuery(tagsSearch, starredTags);
@@ -890,33 +894,44 @@ const Content = () => {
                             : 'No profiles yet'}
                         </p>
                       </div>
-                      {selectedApplicants.size > 0 && (
-                        <div className='flex items-center gap-2'>
-                          <span className='text-sm text-gray-600'>{selectedApplicants.size} selected</span>
-                          {selectedApplicants.size >= 2 && (
-                            <button
-                              onClick={handleCompareSelected}
-                              className='bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md text-sm font-semibold transition-colors'
-                            >
-                              Compare Selected ({selectedApplicants.size})
-                            </button>
-                          )}
-                          <button
-                            onClick={clearSelection}
-                            className='text-gray-500 hover:text-gray-700 text-sm underline'
-                          >
-                            Clear Selection
-                          </button>
-                        </div>
+                      {applicants && applicants.length > 0 && (
+                        <button
+                          onClick={() =>
+                            setSelectedApplicants(new Set(applicants.map((applicant: any) => applicant.id)))
+                          }
+                          className='self-start text-sm text-blue-600 underline hover:text-blue-800 md:self-center'
+                        >
+                          Select all loaded ({applicants.length})
+                        </button>
                       )}
                     </div>
+
+                    {/* Sticky selection bar - stays visible while scrolling/loading more pages */}
+                    {selectedApplicants.size > 0 && (
+                      <div className='sticky top-0 z-20 -mx-6 mb-4 flex flex-wrap items-center gap-2 border-b border-gray-200 bg-white/95 px-6 py-3 backdrop-blur'>
+                        <span className='text-sm font-medium text-gray-700'>
+                          {selectedApplicants.size} applicant{selectedApplicants.size === 1 ? '' : 's'} selected
+                        </span>
+                        {selectedApplicants.size >= 2 && (
+                          <button
+                            onClick={handleCompareSelected}
+                            className='bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md text-sm font-semibold transition-colors'
+                          >
+                            Compare Selected ({Math.min(selectedApplicants.size, 5)})
+                          </button>
+                        )}
+                        <button onClick={clearSelection} className='text-gray-500 hover:text-gray-700 text-sm underline'>
+                          Clear Selection
+                        </button>
+                      </div>
+                    )}
 
                     {/* Instructions */}
                     {selectedApplicants.size === 0 && (
                       <div className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
                         <p className='text-sm text-blue-800'>
-                          💡 <strong>Tip:</strong> Click the &ldquo;Compare&rdquo; button next to &ldquo;View
-                          Profile&rdquo; to select up to 5 profiles for comparison.
+                          💡 <strong>Tip:</strong> Use the checkbox on a profile card to select applicants — your
+                          selection is kept as you load more profiles, and up to 5 selected can be compared at once.
                         </p>
                       </div>
                     )}
@@ -941,6 +956,17 @@ const Content = () => {
                                 selectedApplicants.has(applicant.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
                               }`}
                             >
+                              {/* Selection Checkbox - Top Left Corner */}
+                              <div className='absolute top-3 left-3 z-10'>
+                                <input
+                                  type='checkbox'
+                                  checked={selectedApplicants.has(applicant.id)}
+                                  onChange={() => handleSelectApplicant(applicant.id)}
+                                  className='h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                                  aria-label={`Select ${applicant.firstname} ${applicant.lastname}`}
+                                />
+                              </div>
+
                               {/* Bookmark Icon - Top Right Corner */}
                               <div>
                                 <button
