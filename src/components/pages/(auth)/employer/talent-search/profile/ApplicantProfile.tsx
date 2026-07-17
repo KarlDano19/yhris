@@ -5,6 +5,7 @@ import Image from 'next/image';
 
 import EmailProfileModal from '../modal/EmailProfile';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+import { formatWorkExperienceDateRange } from '@/helpers/date';
 
 type T_ModalData = {
   id: number;
@@ -111,20 +112,7 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
               <h1 className='text-sm mb-1'>{mostRecentExperience ? mostRecentExperience.position : 'No experience'}</h1>
               {mostRecentExperience && (
                 <h1 className='text-sm mb-1'>
-                  {new Date(mostRecentExperience.dateFrom).toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric',
-                  })}{' '}
-                  -{' '}
-                  {mostRecentExperience.dateTo === 'Present' ||
-                  mostRecentExperience.dateTo === 'present' ||
-                  mostRecentExperience.dateTo === '' ||
-                  !mostRecentExperience.dateTo
-                    ? 'Present'
-                    : new Date(mostRecentExperience.dateTo).toLocaleDateString('en-US', {
-                        month: 'short',
-                        year: 'numeric',
-                      })}
+                  {formatWorkExperienceDateRange(mostRecentExperience.dateFrom, mostRecentExperience.dateTo, true)}
                 </h1>
               )}
             </div>

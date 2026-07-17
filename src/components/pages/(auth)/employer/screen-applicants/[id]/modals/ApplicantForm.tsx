@@ -6,8 +6,8 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import EAFModal from './EAFModal';
 import classNames from '@/helpers/classNames';
-import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
 import { normalizeNbsp } from '@/helpers/linkify';
+import { formatDateToLocal, formatDateTimeSeparate, formatWorkExperienceDateRange } from '@/helpers/date';
 import useGetApplicantDetails from '../../hooks/applicant/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../../hooks/applicant/useGenerateApplicantSummary';
 import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScreeningAnswersPDF';
@@ -518,12 +518,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               </div>
               <div>
                 <p className='font-semibold'>{exp.position}</p>
-                <p>
-                  {new Date(exp.dateFrom).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} -{' '}
-                  {exp.dateTo
-                    ? new Date(exp.dateTo).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                    : 'Present'}
-                </p>
+                <p>{formatWorkExperienceDateRange(exp.dateFrom, exp.dateTo)}</p>
                 <p>{exp.companyOrg}</p>
                 <p className='font-semibold mt-4'>Description/Responsibilities:</p>
                 <div className='ql-editor !p-0 !pl-2' dangerouslySetInnerHTML={{ __html: normalizeNbsp(exp.responsibilities || '') }} />

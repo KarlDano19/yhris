@@ -133,6 +133,54 @@ export const formatDateTimeSeparate = (isoString: string | null): { formattedDat
     .getMinutes()
     .toString()
     .padStart(2, '0')}`;
-  
+
   return { formattedDate, formattedTime };
-}; 
+};
+
+/**
+ * Format a date string as "Month Year" (e.g. "January 2026" or "Jan 2026")
+ * @param dateString - The date string to format
+ * @param useShortMonth - If true, uses short month format (e.g. "Jan"), otherwise full month name
+ * @returns Formatted "Month Year" string, or '' if the input is missing/invalid
+ */
+export const formatMonthYear = (dateString: string | null | undefined, useShortMonth: boolean = false): string => {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+
+  return date.toLocaleDateString('en-US', {
+    month: useShortMonth ? 'short' : 'long',
+    year: 'numeric',
+  });
+};
+
+/**
+ * Determine whether a work experience's end date represents an ongoing/current role
+ * @param dateTo - The end date value from a work experience entry
+ * @returns true if the role should be treated as ongoing ("Present")
+ */
+export const isWorkExperienceOngoing = (dateTo: string | null | undefined): boolean => {
+  if (!dateTo) return true;
+  const normalized = dateTo.trim().toLowerCase();
+  return normalized === '' || normalized === 'present';
+};
+
+/**
+ * Format a work experience's start/end dates into a display range, e.g.
+ * "January 2026 - Present" or "Not specified - May 2026"
+ * @param dateFrom - The start date value from a work experience entry
+ * @param dateTo - The end date value from a work experience entry
+ * @param useShortMonth - If true, uses short month format for both dates
+ * @returns Formatted date range string, using "Not specified" for missing/invalid dates
+ */
+export const formatWorkExperienceDateRange = (
+  dateFrom: string | null | undefined,
+  dateTo: string | null | undefined,
+  useShortMonth: boolean = false
+): string => {
+  const from = formatMonthYear(dateFrom, useShortMonth) || 'Not specified';
+  const to = isWorkExperienceOngoing(dateTo) ? 'Present' : formatMonthYear(dateTo, useShortMonth) || 'Not specified';
+
+  return `${from} - ${to}`;
+};

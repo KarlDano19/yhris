@@ -3,6 +3,8 @@
 import React from 'react';
 import { normalizeNbsp } from '@/helpers/linkify';
 
+import { formatWorkExperienceDateRange } from '@/helpers/date';
+
 interface WorkExperienceItem {
   id?: number;
   position: string;
@@ -49,17 +51,7 @@ function WorkExperience({ workExperience }: WorkExperienceProps) {
                 {experience.companyOrg}
               </p>
               <p className="text-sm text-gray-500">
-                {new Date(experience.dateFrom).toLocaleDateString('en-US', {
-                  month: 'long',
-                  year: 'numeric',
-                })}{' '}
-                -{' '}
-                {experience.dateTo === 'Present' || experience.dateTo === 'present' || experience.dateTo === ''
-                  ? 'Present'
-                  : new Date(experience.dateTo).toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                {formatWorkExperienceDateRange(experience.dateFrom, experience.dateTo)}
               </p>
             </div>
             
