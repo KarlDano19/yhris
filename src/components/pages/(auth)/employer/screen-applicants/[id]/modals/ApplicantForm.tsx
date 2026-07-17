@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import EAFModal from './EAFModal';
 import classNames from '@/helpers/classNames';
-import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
 import { normalizeNbsp } from '@/helpers/linkify';
 import { formatDateToLocal, formatDateTimeSeparate, formatWorkExperienceDateRange } from '@/helpers/date';
 import useGetApplicantDetails from '../../hooks/applicant/useGetApplicantDetails';
