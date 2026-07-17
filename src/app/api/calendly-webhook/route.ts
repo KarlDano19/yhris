@@ -610,6 +610,97 @@ async function patchCalendarEventColor(scheduledAt: string, assignee: 'Efie' | '
   }
 }
 
+// ─── Cancellation: Sheet update + Telegram ────────────────────────────────────
+async function updateSheetCancellation(email: string): Promise<string> {
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheetId) return '';
+
+  const token = await getGoogleAccessToken('https://www.googleapis.com/auth/spreadsheets');
+  if (!token) return '';
+
+  // Read D:T to find the row by email and grab the assignee (column T = index 16 in D:T)
+  const readRes = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!D:T`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  if (!readRes.ok) return '';
+  const json = await readRes.json();
+  const rows: string[][] = json.values ?? [];
+
+  // Search from the bottom to match the most recent booking for this email
+  let rowIndex = -1;
+  for (let i = rows.length - 1; i > 0; i--) {
+    if (rows[i][0]?.toLowerCase() === email.toLowerCase()) {
+      rowIndex = i;
+      break;
+    }
+  }
+
+  if (rowIndex === -1) {
+    console.warn('Sheet row not found for cancellation:', email);
+    return '';
+  }
+
+  const sheetRow = rowIndex + 1; // array is 0-indexed; row 1 is the header
+  const assignee = rows[rowIndex][16] ?? ''; // T is index 16 in D:T range
+
+  const updateRes = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchUpdate`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        valueInputOption: 'RAW',
+        data: [
+          { range: `Leads!L${sheetRow}`, values: [['cancelled']] },
+          { range: `Leads!T${sheetRow}`, values: [['']] },
+        ],
+      }),
+    }
+  );
+
+  if (!updateRes.ok) {
+    const err = await updateRes.json().catch(() => ({}));
+    console.error('Sheet cancellation update error:', JSON.stringify(err));
+  } else {
+    console.log(`Sheet row ${sheetRow} marked cancelled, assignee slot freed`);
+  }
+
+  return assignee;
+}
+
+async function sendTelegramCancellationAlert(data: LeadData, assignee: string) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+
+  const scheduledDate = data.scheduledAt
+    ? new Date(data.scheduledAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
+    : 'TBD';
+
+  const message =
+    `❌ Demo Cancelled\n\n` +
+    `👤 Name: ${data.firstName} ${data.lastName}\n` +
+    `🏢 Company: ${data.companyName}\n` +
+    `📧 Email: ${data.email}\n` +
+    `🗓 Was scheduled: ${scheduledDate}\n` +
+    (assignee ? `🎯 Was assigned to: ${assignee}\n` : '');
+
+  const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text: message }),
+  });
+
+  if (!tgRes.ok) {
+    const err = await tgRes.json().catch(() => ({}));
+    console.error('Telegram cancellation error:', JSON.stringify(err));
+  } else {
+    console.log('Telegram cancellation alert sent');
+  }
+}
+
 // ─── Telegram ─────────────────────────────────────────────────────────────────
 async function sendTelegramNotification(data: LeadData, scoring: ScoringResult | null, assignee: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -675,6 +766,14 @@ export async function POST(request: NextRequest) {
     payload = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  if (payload.event === 'invitee.cancelled') {
+    const data = parsePayload(payload.payload);
+    if (!data) return NextResponse.json({ received: true });
+    const assignee = await updateSheetCancellation(data.email);
+    await sendTelegramCancellationAlert(data, assignee);
+    return NextResponse.json({ success: true, cancelled: true });
   }
 
   if (payload.source !== 'make' && payload.event !== 'invitee.created') {
