@@ -3,19 +3,18 @@
  * Called by Calendly when someone books a demo.
  * 1. Verifies the webhook signature (skipped if CALENDLY_WEBHOOK_SECRET not set)
  * 2. Parses invitee info + custom question answers (phone, company, pain point)
- * 3. Creates Loops contact
- * 4. Scores lead with Claude
- * 5. Updates Loops contact with score/tier
- * 6. Fires demoBooked + demoLeadQualified events
- * 7. Logs to Google Sheets + sends Telegram notification
+ * 3. Computes lead assignment (70% Efie / 30% Mici, modulo on sheet count)
+ * 4. Creates Loops contact
+ * 5. Scores lead with Claude
+ * 6. Updates Loops contact with score/tier
+ * 7. Fires demoBooked + demoLeadQualified events
+ * 8. Logs to Google Sheets + patches calendar event color + sends Telegram notification
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 
 // ─── Partner domains ──────────────────────────────────────────────────────────
-// Bookings from these email domains are partner reps booking on behalf of a client.
-// The company field = the client company, not the partner's own company.
 const PARTNER_DOMAINS: Record<string, string> = {
   'globe.com.ph': 'Globe Telecom',
   'globe.com': 'Globe Telecom',
@@ -27,9 +26,18 @@ const PARTNER_DOMAINS: Record<string, string> = {
   'sterling.com.ph': 'Sterling Bank of Asia',
 };
 
+// ─── Assignee config ──────────────────────────────────────────────────────────
+// 70/30 split: every 10 leads, 7 go to Efie (slots 0-6), 3 go to Mici (slots 7-9)
+const ASSIGNEE_COLORS: Record<string, string> = {
+  Efie: '7',  // Peacock (blue)
+  Mici: '5',  // Sage (green)
+};
+
+function computeAssignee(assignedCount: number): 'Efie' | 'Mici' {
+  return assignedCount % 10 < 7 ? 'Efie' : 'Mici';
+}
+
 // ─── Dedup cache ──────────────────────────────────────────────────────────────
-// Keyed by event URI. TTL of 30 min is enough to survive a double-fire within
-// a single Make polling window without persisting stale entries indefinitely.
 const processedUris = new Map<string, number>();
 const DEDUP_TTL_MS = 30 * 60 * 1000;
 
@@ -122,7 +130,7 @@ function parsePayload(payload: any): LeadData | null {
     };
   }
 
-  // Native Calendly format — invitee data is at the top level of payload.payload
+  // Native Calendly format
   const email = payload?.email;
   const fullName: string = payload?.name ?? '';
   const scheduledAt: string = payload?.scheduled_event?.start_time ?? '';
@@ -132,7 +140,6 @@ function parsePayload(payload: any): LeadData | null {
   const [firstName = '', ...rest] = fullName.trim().split(' ');
   const lastName = rest.join(' ');
 
-  // Parse custom question answers by keyword matching
   const qa: { question: string; answer: string }[] = payload?.questions_and_answers ?? [];
   const find = (keyword: string) =>
     qa.find(q => q.question.toLowerCase().includes(keyword.toLowerCase()))?.answer ?? '';
@@ -152,6 +159,41 @@ function parsePayload(payload: any): LeadData | null {
   };
 }
 
+// ─── Google Auth ──────────────────────────────────────────────────────────────
+async function getGoogleAccessToken(scope: string): Promise<string | null> {
+  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  if (!serviceAccountEmail || !privateKey) return null;
+
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+  const claim = Buffer.from(JSON.stringify({
+    iss: serviceAccountEmail,
+    scope,
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  })).toString('base64url');
+
+  const { createSign } = await import('crypto');
+  const sign = createSign('RSA-SHA256');
+  sign.update(`${header}.${claim}`);
+  const signature = sign.sign(privateKey, 'base64url');
+  const jwt = `${header}.${claim}.${signature}`;
+
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  });
+
+  const { access_token } = await tokenRes.json();
+  return access_token ?? null;
+}
+
 // ─── AI Lead Scoring (Tavily + Claude) ───────────────────────────────────────
 async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   const tavilyKey = process.env.TAVILY_API_KEY;
@@ -159,7 +201,6 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
 
   if (!tavilyKey || !anthropicKey) throw new Error('Missing TAVILY_API_KEY or ANTHROPIC_API_KEY');
 
-  // Step 1: Search for company + person in parallel
   const fullName = `${data.firstName} ${data.lastName}`;
   const companyHint = data.companyName || data.email.split('@')[1];
   const emailUsername = data.email.split('@')[0];
@@ -168,7 +209,6 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
     ? `${data.companyName} Philippines company`
     : `${data.email.split('@')[1]} company Philippines`;
 
-  // Two targeted person queries: name+company together, and email username on LinkedIn
   const personQuery1 = `"${fullName}" "${companyHint}" Philippines`;
   const personQuery2 = `"${emailUsername}" site:linkedin.com OR "${fullName}" site:linkedin.com "${companyHint}"`;
 
@@ -193,7 +233,6 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
     tavilySearch(personQuery2),
   ]);
 
-  // Validate: result must contain BOTH exact name AND company in the same source
   const nameLower = fullName.toLowerCase();
   const companyLower = companyHint.toLowerCase();
 
@@ -216,18 +255,11 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   ].filter(Boolean).join('\n\n');
 
   const searchContext = buildContext(companyTavily?.results ?? [], companyTavily?.answer);
-  const personContext = personValidated
-    ? buildContext(validatedPersonResults)
-    : '';
+  const personContext = personValidated ? buildContext(validatedPersonResults) : '';
 
-  const companyResources: string[] = (companyTavily?.results ?? [])
-    .map((r: TavilyResult) => r.url)
-    .filter(Boolean);
-  const personResources: string[] = validatedPersonResults
-    .map(r => r.url)
-    .filter(Boolean);
+  const companyResources: string[] = (companyTavily?.results ?? []).map((r: TavilyResult) => r.url).filter(Boolean);
+  const personResources: string[] = validatedPersonResults.map(r => r.url).filter(Boolean);
 
-  // Step 2: Ask Claude to score + summarize intel
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
   const client = new Anthropic({ apiKey: anthropicKey });
 
@@ -307,7 +339,6 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
   let score = 1;
   const reasons: string[] = [];
 
-  // Email domain signal (+3 for business, 0 for personal)
   const personalDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'ymail.com'];
   const emailDomain = data.email.split('@')[1]?.toLowerCase() ?? '';
   if (!personalDomains.includes(emailDomain)) {
@@ -317,7 +348,6 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
     reasons.push('personal email');
   }
 
-  // Company name signal (+2 for established-sounding companies)
   const companyKeywords = ['corp', 'inc', 'group', 'holdings', 'industries', 'enterprise', 'solutions', 'ltd', 'co.', 'phils', 'philippines'];
   const companyLower = data.companyName.toLowerCase();
   if (companyKeywords.some(k => companyLower.includes(k))) {
@@ -325,7 +355,6 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
     reasons.push('established company name');
   }
 
-  // Pain point urgency (+3 for high fit, +2 for moderate, +0 for low)
   const painLower = data.painPoint.toLowerCase();
   if (painLower.includes('payroll') || painLower.includes('dole') || painLower.includes('compliance')) {
     score += 3;
@@ -337,9 +366,7 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
     reasons.push('low-urgency pain point');
   }
 
-  // Cap at 10
   score = Math.min(score, 10);
-
   const tier: 'hot' | 'warm' | 'cold' = score >= 7 ? 'hot' : score >= 4 ? 'warm' : 'cold';
   const notes = `Score ${score}/10 based on: ${reasons.join(', ')}. Pain point: "${data.painPoint}".`;
 
@@ -373,7 +400,6 @@ async function createLoopsContact(data: LeadData) {
     body: JSON.stringify(contactFields),
   });
 
-  // If contact already exists, update instead
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     if (err?.message?.toLowerCase().includes('already')) {
@@ -427,10 +453,7 @@ async function sendMetaLeadEvent(data: LeadData) {
   const { createHash } = await import('crypto');
   const hash = (value: string) => createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
 
-  const userData: Record<string, string> = {
-    em: hash(data.email),
-  };
-  // Normalize phone to E.164 — prepend +63 if no country code present
+  const userData: Record<string, string> = { em: hash(data.email) };
   if (data.phone) {
     const digits = data.phone.replace(/\D/g, '');
     const normalized = digits.startsWith('63') ? digits : `63${digits.replace(/^0/, '')}`;
@@ -447,22 +470,14 @@ async function sendMetaLeadEvent(data: LeadData) {
         event_time: eventTime,
         action_source: 'website',
         user_data: userData,
-        custom_data: {
-          lead_type: 'demo_booking',
-          company_name: data.companyName,
-          pain_point: data.painPoint,
-        },
+        custom_data: { lead_type: 'demo_booking', company_name: data.companyName, pain_point: data.painPoint },
       },
       {
         event_name: 'Schedule',
         event_time: eventTime,
         action_source: 'website',
         user_data: userData,
-        custom_data: {
-          lead_type: 'demo_booking',
-          company_name: data.companyName,
-          pain_point: data.painPoint,
-        },
+        custom_data: { lead_type: 'demo_booking', company_name: data.companyName, pain_point: data.painPoint },
       },
     ],
     access_token: accessToken,
@@ -481,39 +496,31 @@ async function sendMetaLeadEvent(data: LeadData) {
 }
 
 // ─── Google Sheets ────────────────────────────────────────────────────────────
-async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
-  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+async function getAssignedLeadCount(): Promise<number> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheetId) return 0;
 
-  if (!serviceAccountEmail || !privateKey || !sheetId) return;
+  const token = await getGoogleAccessToken('https://www.googleapis.com/auth/spreadsheets');
+  if (!token) return 0;
 
-  const now = Math.floor(Date.now() / 1000);
-  const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
-  const claim = Buffer.from(JSON.stringify({
-    iss: serviceAccountEmail,
-    scope: 'https://www.googleapis.com/auth/spreadsheets',
-    aud: 'https://oauth2.googleapis.com/token',
-    exp: now + 3600,
-    iat: now,
-  })).toString('base64url');
+  const res = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!T:T`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 
-  const { createSign } = await import('crypto');
-  const sign = createSign('RSA-SHA256');
-  sign.update(`${header}.${claim}`);
-  const signature = sign.sign(privateKey, 'base64url');
-  const jwt = `${header}.${claim}.${signature}`;
+  if (!res.ok) return 0;
+  const json = await res.json();
+  const rows: string[][] = json.values ?? [];
+  // Subtract header row, count non-empty assignee cells
+  return Math.max(0, rows.slice(1).filter(r => r[0]?.trim()).length);
+}
 
-  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      assertion: jwt,
-    }),
-  });
+async function appendToSheet(data: LeadData, scoring: ScoringResult | null, assignee: string) {
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheetId) return;
 
-  const { access_token } = await tokenRes.json();
+  const token = await getGoogleAccessToken('https://www.googleapis.com/auth/spreadsheets');
+  if (!token) return;
 
   const values = [[
     new Date().toISOString(),
@@ -535,13 +542,14 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
     scoring?.personIntel ?? '',
     (scoring?.companyResources ?? []).join(', '),
     (scoring?.personResources ?? []).join(', '),
+    assignee,
   ]];
 
   const sheetsRes = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:S:append?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!A:T:append?valueInputOption=RAW`,
     {
       method: 'POST',
-      headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ values }),
     }
   );
@@ -554,8 +562,147 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   }
 }
 
+// ─── Google Calendar ──────────────────────────────────────────────────────────
+async function patchCalendarEventColor(scheduledAt: string, assignee: 'Efie' | 'Mici'): Promise<void> {
+  const calendarId = process.env.GOOGLE_CALENDAR_ID;
+  if (!calendarId || !scheduledAt) return;
+
+  const token = await getGoogleAccessToken('https://www.googleapis.com/auth/calendar.events');
+  if (!token) return;
+
+  // Search in a 2-minute window around the booking start time
+  const start = new Date(scheduledAt);
+  const timeMin = new Date(start.getTime() - 60_000).toISOString();
+  const timeMax = new Date(start.getTime() + 60_000).toISOString();
+
+  const listRes = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  if (!listRes.ok) {
+    console.error('Calendar list error:', await listRes.text());
+    return;
+  }
+
+  const { items } = await listRes.json();
+  if (!items?.length) {
+    console.warn('No calendar event found at', scheduledAt);
+    return;
+  }
+
+  const eventId = items[0].id;
+  const colorId = ASSIGNEE_COLORS[assignee];
+
+  const patchRes = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
+    {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ colorId }),
+    }
+  );
+
+  if (!patchRes.ok) {
+    console.error('Calendar patch error:', await patchRes.text());
+  } else {
+    console.log(`Calendar event ${eventId} colored for ${assignee} (colorId ${colorId})`);
+  }
+}
+
+// ─── Cancellation: Sheet update + Telegram ────────────────────────────────────
+async function updateSheetCancellation(email: string): Promise<string> {
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheetId) return '';
+
+  const token = await getGoogleAccessToken('https://www.googleapis.com/auth/spreadsheets');
+  if (!token) return '';
+
+  // Read D:T to find the row by email and grab the assignee (column T = index 16 in D:T)
+  const readRes = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!D:T`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  if (!readRes.ok) return '';
+  const json = await readRes.json();
+  const rows: string[][] = json.values ?? [];
+
+  // Search from the bottom to match the most recent booking for this email
+  let rowIndex = -1;
+  for (let i = rows.length - 1; i > 0; i--) {
+    if (rows[i][0]?.toLowerCase() === email.toLowerCase()) {
+      rowIndex = i;
+      break;
+    }
+  }
+
+  if (rowIndex === -1) {
+    console.warn('Sheet row not found for cancellation:', email);
+    return '';
+  }
+
+  const sheetRow = rowIndex + 1; // array is 0-indexed; row 1 is the header
+  const assignee = rows[rowIndex][16] ?? ''; // T is index 16 in D:T range
+
+  const updateRes = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchUpdate`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        valueInputOption: 'RAW',
+        data: [
+          { range: `Leads!L${sheetRow}`, values: [['cancelled']] },
+          { range: `Leads!T${sheetRow}`, values: [['']] },
+        ],
+      }),
+    }
+  );
+
+  if (!updateRes.ok) {
+    const err = await updateRes.json().catch(() => ({}));
+    console.error('Sheet cancellation update error:', JSON.stringify(err));
+  } else {
+    console.log(`Sheet row ${sheetRow} marked cancelled, assignee slot freed`);
+  }
+
+  return assignee;
+}
+
+async function sendTelegramCancellationAlert(data: LeadData, assignee: string) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+
+  const scheduledDate = data.scheduledAt
+    ? new Date(data.scheduledAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
+    : 'TBD';
+
+  const message =
+    `❌ Demo Cancelled\n\n` +
+    `👤 Name: ${data.firstName} ${data.lastName}\n` +
+    `🏢 Company: ${data.companyName}\n` +
+    `📧 Email: ${data.email}\n` +
+    `🗓 Was scheduled: ${scheduledDate}\n` +
+    (assignee ? `🎯 Was assigned to: ${assignee}\n` : '');
+
+  const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text: message }),
+  });
+
+  if (!tgRes.ok) {
+    const err = await tgRes.json().catch(() => ({}));
+    console.error('Telegram cancellation error:', JSON.stringify(err));
+  } else {
+    console.log('Telegram cancellation alert sent');
+  }
+}
+
 // ─── Telegram ─────────────────────────────────────────────────────────────────
-async function sendTelegramNotification(data: LeadData, scoring: ScoringResult | null) {
+async function sendTelegramNotification(data: LeadData, scoring: ScoringResult | null, assignee: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -576,7 +723,8 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     (data.employeeCount ? `👥 Employees: ${data.employeeCount}\n` : '') +
     (data.currentProcess ? `⚙️ Current process: ${data.currentProcess}\n` : '') +
     `😤 Pain point: ${data.painPoint}\n` +
-    `🗓 Scheduled: ${bookedDate}\n\n` +
+    `🗓 Scheduled: ${bookedDate}\n` +
+    `🎯 Assigned to: ${assignee}\n\n` +
     (scoring
       ? `${tierEmoji} Score: ${scoring.score}/10 — ${scoring.tier.toUpperCase()}\n📝 ${scoring.notes}` +
         (scoring.personIntel ? `\n\n👤 Person Intel:\n${scoring.personIntel}` : '') +
@@ -620,6 +768,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
+  if (payload.event === 'invitee.cancelled') {
+    const data = parsePayload(payload.payload);
+    if (!data) return NextResponse.json({ received: true });
+    const assignee = await updateSheetCancellation(data.email);
+    await sendTelegramCancellationAlert(data, assignee);
+    return NextResponse.json({ success: true, cancelled: true });
+  }
+
   if (payload.source !== 'make' && payload.event !== 'invitee.created') {
     return NextResponse.json({ received: true });
   }
@@ -629,7 +785,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing invitee email' }, { status: 400 });
   }
 
-  // Dedup: skip if we've already processed this Calendly event URI within the last 30 min
   const dedupKey = data.eventUri || data.email;
   if (isDuplicate(dedupKey)) {
     console.log('Duplicate booking skipped:', dedupKey);
@@ -638,10 +793,13 @@ export async function POST(request: NextRequest) {
   markProcessed(dedupKey);
 
   try {
-    // Create contact in Loops
+    // Compute assignee before anything else — reads current sheet count
+    const assignedCount = await getAssignedLeadCount();
+    const assignee = computeAssignee(assignedCount);
+    console.log(`Lead assignment: count=${assignedCount}, assignee=${assignee}`);
+
     await createLoopsContact(data);
 
-    // Score lead with AI (Tavily research + Claude), fall back to rules if it fails
     let scoring: ScoringResult;
     try {
       scoring = await scoreLeadWithIntel(data);
@@ -650,7 +808,6 @@ export async function POST(request: NextRequest) {
       scoring = scoreLeadWithRules(data);
     }
 
-    // Update Loops with score and fire both events
     await updateLoopsContact(data.email, {
       score: scoring.score,
       tier: scoring.tier,
@@ -663,12 +820,13 @@ export async function POST(request: NextRequest) {
     ]);
 
     await Promise.allSettled([
-      appendToSheet(data, scoring),
-      sendTelegramNotification(data, scoring),
+      appendToSheet(data, scoring, assignee),
+      patchCalendarEventColor(data.scheduledAt, assignee),
+      sendTelegramNotification(data, scoring, assignee),
       sendMetaLeadEvent(data),
     ]);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, assignee });
   } catch (error) {
     console.error('Calendly webhook error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
