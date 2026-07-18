@@ -416,6 +416,18 @@ const Content = () => {
     setSelectedApplicants(new Set());
   };
 
+  const allLoadedSelected =
+    applicants && applicants.length > 0 && applicants.every((applicant: any) => selectedApplicants.has(applicant.id));
+
+  const handleSelectAll = () => {
+    if (!applicants || applicants.length === 0) return;
+    if (allLoadedSelected) {
+      clearSelection();
+    } else {
+      setSelectedApplicants(new Set(applicants.map((applicant: any) => applicant.id)));
+    }
+  };
+
   const handleFilterUpdate = (filterData: { location: string[]; gender: string; salary: string }) => {
     // Mark that search has been performed (when filters are applied)
     setHasSearched(true);
@@ -896,12 +908,12 @@ const Content = () => {
                       </div>
                       {applicants && applicants.length > 0 && (
                         <button
-                          onClick={() =>
-                            setSelectedApplicants(new Set(applicants.map((applicant: any) => applicant.id)))
-                          }
+                          onClick={handleSelectAll}
                           className='self-start text-sm text-blue-600 underline hover:text-blue-800 md:self-center'
                         >
-                          Select all loaded ({applicants.length})
+                          {allLoadedSelected
+                            ? 'Deselect All'
+                            : `Select All (${applicants.length} of ${totalRecords} loaded)`}
                         </button>
                       )}
                     </div>
@@ -917,7 +929,7 @@ const Content = () => {
                             onClick={handleCompareSelected}
                             className='bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md text-sm font-semibold transition-colors'
                           >
-                            Compare Selected ({Math.min(selectedApplicants.size, 5)})
+                            Compare Selected ({selectedApplicants.size})
                           </button>
                         )}
                         <button onClick={clearSelection} className='text-gray-500 hover:text-gray-700 text-sm underline'>
@@ -930,8 +942,8 @@ const Content = () => {
                     {selectedApplicants.size === 0 && (
                       <div className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
                         <p className='text-sm text-blue-800'>
-                          💡 <strong>Tip:</strong> Use the checkbox on a profile card to select applicants — your
-                          selection is kept as you load more profiles, and up to 5 selected can be compared at once.
+                          💡 <strong>Tip:</strong> Use the checkbox on a profile card, or Select All, to choose
+                          applicants — your selection is kept as you load more profiles.
                         </p>
                       </div>
                     )}

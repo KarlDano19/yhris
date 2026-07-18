@@ -1,7 +1,7 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Dispatch, Fragment, useRef, useEffect } from "react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import useGetApplicantDetails from "../hook/useGetApplicantDetails";
+import useCreateApplicantComparison from "../hook/useCreateApplicantComparison";
 import Image from 'next/image';
 import { formatWorkExperienceDateRange } from '@/helpers/date';
 
@@ -20,39 +20,31 @@ function CompareApplicantsModal({
   setIsOpen: Dispatch<T_CompareModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  
-  // Create individual hooks for each applicant (max 5 for performance)
-  const { data: applicant1Data, refetch: refetch1, isLoading: isLoading1 } = useGetApplicantDetails(isOpen.applicantIds[0] || 0);
-  const { data: applicant2Data, refetch: refetch2, isLoading: isLoading2 } = useGetApplicantDetails(isOpen.applicantIds[1] || 0);
-  const { data: applicant3Data, refetch: refetch3, isLoading: isLoading3 } = useGetApplicantDetails(isOpen.applicantIds[2] || 0);
-  const { data: applicant4Data, refetch: refetch4, isLoading: isLoading4 } = useGetApplicantDetails(isOpen.applicantIds[3] || 0);
-  const { data: applicant5Data, refetch: refetch5, isLoading: isLoading5 } = useGetApplicantDetails(isOpen.applicantIds[4] || 0);
-  
-  const applicantData = [applicant1Data, applicant2Data, applicant3Data, applicant4Data, applicant5Data];
-  const isLoadingArray = [isLoading1, isLoading2, isLoading3, isLoading4, isLoading5];
-  const refetchArray = [refetch1, refetch2, refetch3, refetch4, refetch5];
-  
+
+  const {
+    mutate: createComparison,
+    data: comparisonData,
+    isLoading,
+    isError,
+    reset: resetComparison,
+  } = useCreateApplicantComparison();
+
+  const applicants = comparisonData?.applicants || [];
+
   const customCloseModal = () => {
     refetch();
+    resetComparison();
     setIsOpen(null);
   };
 
   useEffect(() => {
     if (isOpen.open && isOpen.applicantIds.length > 0) {
-      refetchArray.forEach(refetch => refetch());
+      createComparison(isOpen.applicantIds);
     }
-  }, [isOpen.open, isOpen.applicantIds, refetchArray]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen.open, isOpen.applicantIds]);
 
-  const renderProfileSection = (applicant: any, isLoading: boolean, side: 'left' | 'right') => {
-    if (isLoading) {
-      return (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading profile...</p>
-        </div>
-      );
-    }
-
+  const renderProfileSection = (applicant: any) => {
     if (!applicant) {
       return (
         <div className="text-center py-8">
@@ -72,39 +64,39 @@ function CompareApplicantsModal({
             height={100}
             className="rounded-lg"
           />
-          <div className="flex-1">
-            <h4 className="font-semibold text-lg mb-1">
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-lg mb-1 break-words">
               {applicant.firstname} {applicant.lastname}
             </h4>
             <p className="text-sm text-gray-500 mb-1">{applicant.gender}</p>
             <p className="text-sm text-gray-500 mb-1">{applicant.nationality}</p>
-            <p className="text-sm text-gray-500">{applicant.email}</p>
+            <p className="text-sm text-gray-500 break-words">{applicant.email}</p>
           </div>
         </div>
 
         {/* Contact & Location */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
+          <div className="min-w-0">
             <div className="font-bold text-sm text-gray-700 mb-1">Location</div>
-            <div className="text-sm">{applicant.location || 'Not specified'}</div>
+            <div className="text-sm break-words">{applicant.location || 'Not specified'}</div>
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="font-bold text-sm text-gray-700 mb-1">Contact</div>
-            <div className="text-sm">{applicant.contact_number || applicant.mobile || 'Not specified'}</div>
+            <div className="text-sm break-words">{applicant.contact_number || applicant.mobile || 'Not specified'}</div>
           </div>
         </div>
 
         {/* Education */}
         <div>
           <div className="font-bold text-sm text-gray-700 mb-1">Education</div>
-          <div className="text-sm">{applicant.education || 'Not specified'}</div>
+          <div className="text-sm break-words">{applicant.education || 'Not specified'}</div>
         </div>
 
         {/* Skills */}
         {applicant.skills && (
           <div>
             <div className="font-bold text-sm text-gray-700 mb-1">Skills</div>
-            <div className="text-sm">
+            <div className="text-sm break-words">
               {Array.isArray(applicant.skills) ? applicant.skills.join(', ') : applicant.skills}
             </div>
           </div>
@@ -124,9 +116,9 @@ function CompareApplicantsModal({
           {applicant.work_experience && applicant.work_experience.length > 0 ? (
             <div className="space-y-2">
               {applicant.work_experience.slice(0, 3).map((exp: any, index: number) => (
-                <div key={index} className="border-l-2 border-blue-200 pl-3">
-                  <div className="font-medium text-sm">{exp.position}</div>
-                  <div className="text-xs text-gray-600">{exp.companyOrg}</div>
+                <div key={index} className="border-l-2 border-blue-200 pl-3 min-w-0">
+                  <div className="font-medium text-sm break-words">{exp.position}</div>
+                  <div className="text-xs text-gray-600 break-words">{exp.companyOrg}</div>
                   <div className="text-xs text-gray-500">
                     {formatWorkExperienceDateRange(exp.dateFrom, exp.dateTo, true)}
                   </div>
@@ -146,24 +138,16 @@ function CompareApplicantsModal({
     );
   };
 
-  const showQuickComparison = applicantData.slice(0, isOpen.applicantIds.length).every(data => data) ? (() => {
-    const applicants = applicantData.slice(0, isOpen.applicantIds.length);
-    const maxExp = Math.max(...applicants.map(a => a.work_experience?.length || 0), 1);
-    const maxSkills = Math.max(...applicants.map(a => Array.isArray(a.skills) ? a.skills.length : 0), 1);
-    const maxSalary = Math.max(...applicants.map(a => a.expected_salary || 0), 1);
+  const showQuickComparison = applicants.length > 0 ? (() => {
+    const maxExp = Math.max(...applicants.map((a: any) => a.work_experience?.length || 0), 1);
+    const maxSkills = Math.max(...applicants.map((a: any) => Array.isArray(a.skills) ? a.skills.length : 0), 1);
+    const maxSalary = Math.max(...applicants.map((a: any) => a.expected_salary || 0), 1);
     return (
       <div className="mt-8 border-t pt-6">
         <h4 className="font-semibold text-lg mb-4">Quick Comparison</h4>
-        <div className={`grid gap-6 ${
-          applicants.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-          applicants.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
-          applicants.length === 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' :
-          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
-        }`}>
-          {applicants.map((applicant, idx) => (
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {applicants.map((applicant: any, idx: number) => (
             <div key={idx} className="bg-gray-50 rounded-lg p-4 shadow flex flex-col items-center">
-              {/* Optionally add photo here if available */}
-              {/* <Image src={applicant.photo || '/assets/no-photo.png'} alt={applicant.firstname || 'Applicant'} width={60} height={60} className="rounded-full mb-2" /> */}
               <div className="font-semibold text-base mb-2 text-center">{applicant.firstname} {applicant.lastname}</div>
               {/* Experience Bar */}
               <div className="w-full mb-3">
@@ -249,27 +233,34 @@ function CompareApplicantsModal({
                     onClick={() => customCloseModal()}
                   />
                 </div>
-                <div className="p-6 max-h-[80vh] overflow-y-auto">
-                  <div className={`grid gap-6 ${
-                    isOpen.applicantIds.length === 2 ? 'grid-cols-1 lg:grid-cols-2' : 
-                    isOpen.applicantIds.length === 3 ? 'grid-cols-1 lg:grid-cols-3' : 
-                    'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'
-                  }`}>
-                    {isOpen.applicantIds.slice(0, 5).map((applicantId, index) => {
-                      const applicant = applicantData[index];
-                      const isLoading = isLoadingArray[index];
-                      const colors = ['text-blue-600', 'text-green-600', 'text-purple-600', 'text-orange-600', 'text-pink-600'];
-                      
-                      return (
-                        <div key={applicantId} className="border rounded-lg p-4">
-                          {renderProfileSection(applicant, isLoading, 'left')}
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div className="p-6 max-h-[80vh] overflow-y-auto" key={isOpen.applicantIds.join(',')}>
+                  {isLoading && (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="mt-2 text-gray-600">Loading profiles...</p>
+                    </div>
+                  )}
 
-                  {/* Comparison Summary */}
-                  {showQuickComparison}
+                  {isError && (
+                    <div className="text-center py-8">
+                      <p className="text-red-600">Failed to load comparison. Please try again.</p>
+                    </div>
+                  )}
+
+                  {!isLoading && !isError && applicants.length > 0 && (
+                    <>
+                      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+                        {applicants.map((applicant: any) => (
+                          <div key={applicant.id} className="border rounded-lg p-4 min-w-0">
+                            {renderProfileSection(applicant)}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Comparison Summary */}
+                      {showQuickComparison}
+                    </>
+                  )}
                 </div>
               </DialogPanel>
             </TransitionChild>
@@ -280,4 +271,4 @@ function CompareApplicantsModal({
   );
 }
 
-export default CompareApplicantsModal; 
+export default CompareApplicantsModal;
