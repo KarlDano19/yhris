@@ -1,9 +1,14 @@
-import { Dispatch, Fragment, useRef, useEffect } from "react";
+import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, Squares2X2Icon } from "@heroicons/react/24/solid";
 import useCreateApplicantComparison from "../hook/useCreateApplicantComparison";
 import Image from 'next/image';
 import { formatWorkExperienceDateRange } from '@/helpers/date';
+import ColorPaletteModal from '../../analytics/modals/ColorPaletteModal';
+
+const METRIC_COLOR_STORAGE_KEY = 'talentCompareMetricColors';
+const DEFAULT_METRIC_COLORS = ['#2563eb', '#22c55e', '#2c3f58'];
+const METRIC_NAMES = ['Experience', 'Skills', 'Salary'];
 
 type T_CompareModalData = {
   applicantIds: number[];
@@ -20,6 +25,8 @@ function CompareApplicantsModal({
   setIsOpen: Dispatch<T_CompareModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const [metricColors, setMetricColors] = useState<string[]>(DEFAULT_METRIC_COLORS);
 
   const {
     mutate: createComparison,
@@ -43,6 +50,22 @@ function CompareApplicantsModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen.open, isOpen.applicantIds]);
+
+  useEffect(() => {
+    const savedColors = localStorage.getItem(METRIC_COLOR_STORAGE_KEY);
+    if (savedColors) {
+      try {
+        setMetricColors(JSON.parse(savedColors));
+      } catch (error) {
+        console.error('Error loading saved metric colors:', error);
+      }
+    }
+  }, []);
+
+  const handleColorPaletteSave = (colors: string[]) => {
+    setMetricColors(colors);
+    localStorage.setItem(METRIC_COLOR_STORAGE_KEY, JSON.stringify(colors));
+  };
 
   const renderProfileSection = (applicant: any) => {
     if (!applicant) {
@@ -144,7 +167,17 @@ function CompareApplicantsModal({
     const maxSalary = Math.max(...applicants.map((a: any) => a.expected_salary || 0), 1);
     return (
       <div className="mt-8 border-t pt-6">
-        <h4 className="font-semibold text-lg mb-4">Quick Comparison</h4>
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="font-semibold text-lg">Quick Comparison</h4>
+          <button
+            onClick={() => setIsColorModalOpen(true)}
+            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+            title="Customize colors"
+          >
+            <Squares2X2Icon className="w-4 h-4" />
+            Colors
+          </button>
+        </div>
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {applicants.map((applicant: any, idx: number) => (
             <div key={idx} className="bg-gray-50 rounded-lg p-4 shadow flex flex-col items-center">
@@ -154,8 +187,8 @@ function CompareApplicantsModal({
                 <div className="text-xs font-bold text-gray-700 mb-1">EXPERIENCE</div>
                 <div className="w-full bg-gray-200 rounded-full h-4 flex items-center">
                   <div
-                    className="bg-blue-600 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
-                    style={{ width: `${((applicant.work_experience?.length || 0) / maxExp) * 100}%`, minWidth: '2.5rem' }}
+                    className="h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
+                    style={{ width: `${((applicant.work_experience?.length || 0) / maxExp) * 100}%`, minWidth: '2.5rem', backgroundColor: metricColors[0] }}
                   >
                     <span className="pl-2">{applicant.work_experience?.length || 0}</span>
                   </div>
@@ -166,8 +199,8 @@ function CompareApplicantsModal({
                 <div className="text-xs font-bold text-gray-700 mb-1">SKILLS</div>
                 <div className="w-full bg-gray-200 rounded-full h-4 flex items-center">
                   <div
-                    className="bg-green-500 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
-                    style={{ width: `${((Array.isArray(applicant.skills) ? applicant.skills.length : 0) / maxSkills) * 100}%`, minWidth: '2.5rem' }}
+                    className="h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
+                    style={{ width: `${((Array.isArray(applicant.skills) ? applicant.skills.length : 0) / maxSkills) * 100}%`, minWidth: '2.5rem', backgroundColor: metricColors[1] }}
                   >
                     <span className="pl-2">{Array.isArray(applicant.skills) ? applicant.skills.length : 0}</span>
                   </div>
@@ -178,8 +211,8 @@ function CompareApplicantsModal({
                 <div className="text-xs font-bold text-gray-700 mb-1">SALARY</div>
                 <div className="w-full bg-gray-200 rounded-full h-4 flex items-center">
                   <div
-                    className="bg-[#2c3f58] h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
-                    style={{ width: `${((applicant.expected_salary || 0) / maxSalary) * 100}%`, minWidth: '2.5rem' }}
+                    className="h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
+                    style={{ width: `${((applicant.expected_salary || 0) / maxSalary) * 100}%`, minWidth: '2.5rem', backgroundColor: metricColors[2] }}
                   >
                     <span className="pl-2">{applicant.expected_salary ? `₱${applicant.expected_salary.toLocaleString()}` : 'N/A'}</span>
                   </div>
@@ -193,6 +226,7 @@ function CompareApplicantsModal({
   })() : null;
 
   return (
+    <>
     <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
@@ -268,6 +302,15 @@ function CompareApplicantsModal({
         </div>
       </Dialog>
     </Transition>
+
+    <ColorPaletteModal
+      isOpen={isColorModalOpen}
+      onClose={() => setIsColorModalOpen(false)}
+      onSave={handleColorPaletteSave}
+      currentColors={metricColors}
+      departmentNames={METRIC_NAMES}
+    />
+    </>
   );
 }
 
