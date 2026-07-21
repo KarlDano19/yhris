@@ -5,12 +5,14 @@ const BASE_URL = 'https://yahshuahris.com'
 // Dates reflect actual content state, not build time.
 // Update these when content changes significantly.
 const DATES = {
+  homepage:    '2026-07-21', // Updated when homepage content or schema changes
   redesign:    '2026-06-02', // Light theme redesign shipped
   doleArticle: '2026-06-02', // Last reviewed June 2026
   pricing:     '2026-06-02', // Prices verified June 2026
   legal:       '2026-03-01', // Terms and privacy last updated
   stable:      '2026-01-01', // Stable pages with infrequent content changes
   blog:        '2026-07-15', // Updated when new posts are published — keep current
+  calculator:  '2026-06-20', // HR cost calculator launched
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -18,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Core conversion pages ────────────────────────────────────────────
     {
       url: BASE_URL,
-      lastModified: new Date(DATES.redesign),
+      lastModified: new Date(DATES.homepage),
       changeFrequency: 'weekly',
       priority: 1.0,
     },
@@ -147,7 +149,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Tools ─────────────────────────────────────────────────────────────
     {
       url: `${BASE_URL}/hr-cost-calculator`,
-      lastModified: new Date(DATES.redesign),
+      lastModified: new Date(DATES.calculator),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
@@ -177,6 +179,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Legal ─────────────────────────────────────────────────────────────
     {
       url: `${BASE_URL}/privacy-notice`,
+      lastModified: new Date(DATES.legal),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/privacy-policy`,
       lastModified: new Date(DATES.legal),
       changeFrequency: 'yearly',
       priority: 0.3,
