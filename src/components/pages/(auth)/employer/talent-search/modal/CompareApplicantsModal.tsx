@@ -1,14 +1,41 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import { XCircleIcon, Squares2X2Icon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 import useCreateApplicantComparison from "../hook/useCreateApplicantComparison";
-import Image from 'next/image';
-import { formatWorkExperienceDateRange } from '@/helpers/date';
-import ColorPaletteModal from '../../analytics/modals/ColorPaletteModal';
 
-const METRIC_COLOR_STORAGE_KEY = 'talentCompareMetricColors';
-const DEFAULT_METRIC_COLORS = ['#2563eb', '#22c55e', '#2c3f58'];
-const METRIC_NAMES = ['Experience', 'Skills', 'Salary'];
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const CHART_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
+
+const METRICS = {
+  experience: {
+    label: 'Experience',
+    getValue: (a: any) => a.work_experience?.length || 0,
+    format: (v: number) => `${v} role${v === 1 ? '' : 's'}`,
+  },
+  skills: {
+    label: 'Skills',
+    getValue: (a: any) => (Array.isArray(a.skills) ? a.skills.length : 0),
+    format: (v: number) => `${v} skill${v === 1 ? '' : 's'}`,
+  },
+  salary: {
+    label: 'Expected Salary',
+    getValue: (a: any) => a.expected_salary || 0,
+    format: (v: number) => (v ? `₱${v.toLocaleString()}` : 'Not specified'),
+  },
+} as const;
+
+type T_MetricKey = keyof typeof METRICS;
 
 type T_CompareModalData = {
   applicantIds: number[];
@@ -19,14 +46,15 @@ function CompareApplicantsModal({
   refetch,
   isOpen,
   setIsOpen,
+  onViewProfile,
 }: {
   refetch: any;
   isOpen: T_CompareModalData;
   setIsOpen: Dispatch<T_CompareModalData | null>;
+  onViewProfile: (applicantId: number) => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
-  const [metricColors, setMetricColors] = useState<string[]>(DEFAULT_METRIC_COLORS);
+  const [activeMetric, setActiveMetric] = useState<T_MetricKey>('experience');
 
   const {
     mutate: createComparison,
@@ -46,187 +74,86 @@ function CompareApplicantsModal({
 
   useEffect(() => {
     if (isOpen.open && isOpen.applicantIds.length > 0) {
+      setActiveMetric('experience');
       createComparison(isOpen.applicantIds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen.open, isOpen.applicantIds]);
 
-  useEffect(() => {
-    const savedColors = localStorage.getItem(METRIC_COLOR_STORAGE_KEY);
-    if (savedColors) {
-      try {
-        setMetricColors(JSON.parse(savedColors));
-      } catch (error) {
-        console.error('Error loading saved metric colors:', error);
-      }
-    }
-  }, []);
+  const activeMetricConfig = METRICS[activeMetric];
 
-  const handleColorPaletteSave = (colors: string[]) => {
-    setMetricColors(colors);
-    localStorage.setItem(METRIC_COLOR_STORAGE_KEY, JSON.stringify(colors));
+  const chartData = {
+    labels: applicants.map((a: any) => `${a.firstname} ${a.lastname}`),
+    datasets: [
+      {
+        label: activeMetricConfig.label,
+        data: applicants.map((a: any) => activeMetricConfig.getValue(a)),
+        backgroundColor: applicants.map((_: any, index: number) => CHART_COLORS[index % CHART_COLORS.length]),
+        borderColor: applicants.map((_: any, index: number) => CHART_COLORS[index % CHART_COLORS.length]),
+        borderWidth: 0,
+        borderRadius: 8,
+        maxBarThickness: 20,
+        categoryPercentage: 0.6,
+        barPercentage: 0.7,
+      },
+    ],
   };
 
-  const renderProfileSection = (applicant: any) => {
-    if (!applicant) {
-      return (
-        <div className="text-center py-8">
-          <p className="text-gray-600">No data available</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col h-full gap-4">
-        {/* Basic Info */}
-        <div className="flex items-start gap-4">
-          <Image
-            src={applicant.photo || '/assets/no-photo.png'}
-            alt={applicant.firstname || 'Applicant'}
-            width={100}
-            height={100}
-            className="rounded-lg"
-          />
-          <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-lg mb-1 break-words">
-              {applicant.firstname} {applicant.lastname}
-            </h4>
-            <p className="text-sm text-gray-500 mb-1">{applicant.gender}</p>
-            <p className="text-sm text-gray-500 mb-1">{applicant.nationality}</p>
-            <p className="text-sm text-gray-500 break-words">{applicant.email}</p>
-          </div>
-        </div>
-
-        {/* Contact & Location */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="min-w-0">
-            <div className="font-bold text-sm text-gray-700 mb-1">Location</div>
-            <div className="text-sm break-words">{applicant.location || 'Not specified'}</div>
-          </div>
-          <div className="min-w-0">
-            <div className="font-bold text-sm text-gray-700 mb-1">Contact</div>
-            <div className="text-sm break-words">{applicant.contact_number || applicant.mobile || 'Not specified'}</div>
-          </div>
-        </div>
-
-        {/* Education */}
-        <div>
-          <div className="font-bold text-sm text-gray-700 mb-1">Education</div>
-          <div className="text-sm break-words">{applicant.education || 'Not specified'}</div>
-        </div>
-
-        {/* Skills */}
-        {applicant.skills && (
-          <div>
-            <div className="font-bold text-sm text-gray-700 mb-1">Skills</div>
-            <div className="text-sm break-words">
-              {Array.isArray(applicant.skills) ? applicant.skills.join(', ') : applicant.skills}
-            </div>
-          </div>
-        )}
-
-        {/* Expected Salary */}
-        <div>
-          <div className="font-bold text-sm text-gray-700 mb-1">Expected Salary</div>
-          <div className="text-sm">
-            {applicant.expected_salary ? `₱${applicant.expected_salary.toLocaleString()}` : 'Not specified'}
-          </div>
-        </div>
-
-        {/* Work Experience Summary */}
-        <div>
-          <div className="font-bold text-sm text-gray-700 mb-2">Work Experience</div>
-          {applicant.work_experience && applicant.work_experience.length > 0 ? (
-            <div className="space-y-2">
-              {applicant.work_experience.slice(0, 3).map((exp: any, index: number) => (
-                <div key={index} className="border-l-2 border-blue-200 pl-3 min-w-0">
-                  <div className="font-medium text-sm break-words">{exp.position}</div>
-                  <div className="text-xs text-gray-600 break-words">{exp.companyOrg}</div>
-                  <div className="text-xs text-gray-500">
-                    {formatWorkExperienceDateRange(exp.dateFrom, exp.dateTo, true)}
-                  </div>
-                </div>
-              ))}
-              {applicant.work_experience.length > 3 && (
-                <div className="text-xs text-gray-500 italic">
-                  +{applicant.work_experience.length - 3} more experiences
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-sm text-gray-500">No work experience</div>
-          )}
-        </div>
-      </div>
-    );
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        callbacks: {
+          title: (context: any) => context[0].label,
+          label: (context: any) => {
+            const applicant = applicants[context.dataIndex];
+            return activeMetricConfig.format(activeMetricConfig.getValue(applicant));
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: '#f0f0f0',
+          drawBorder: false,
+          borderDash: [3, 3],
+        },
+        ticks: {
+          color: '#6b7280',
+          font: { size: 12 },
+        },
+      },
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#6b7280',
+          font: { size: 12 },
+          maxRotation: 45,
+          minRotation: 45,
+          autoSkip: false,
+        },
+      },
+    },
   };
 
-  const showQuickComparison = applicants.length > 0 ? (() => {
-    const maxExp = Math.max(...applicants.map((a: any) => a.work_experience?.length || 0), 1);
-    const maxSkills = Math.max(...applicants.map((a: any) => Array.isArray(a.skills) ? a.skills.length : 0), 1);
-    const maxSalary = Math.max(...applicants.map((a: any) => a.expected_salary || 0), 1);
-    return (
-      <div className="mt-8 border-t pt-6">
-        <div className="flex justify-between items-center mb-4">
-          <h4 className="font-semibold text-lg">Quick Comparison</h4>
-          <button
-            onClick={() => setIsColorModalOpen(true)}
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
-            title="Customize colors"
-          >
-            <Squares2X2Icon className="w-4 h-4" />
-            Colors
-          </button>
-        </div>
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {applicants.map((applicant: any, idx: number) => (
-            <div key={idx} className="bg-gray-50 rounded-lg p-4 shadow flex flex-col items-center">
-              <div className="font-semibold text-base mb-2 text-center">{applicant.firstname} {applicant.lastname}</div>
-              {/* Experience Bar */}
-              <div className="w-full mb-3">
-                <div className="text-xs font-bold text-gray-700 mb-1">EXPERIENCE</div>
-                <div className="w-full bg-gray-200 rounded-full h-4 flex items-center">
-                  <div
-                    className="h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
-                    style={{ width: `${((applicant.work_experience?.length || 0) / maxExp) * 100}%`, minWidth: '2.5rem', backgroundColor: metricColors[0] }}
-                  >
-                    <span className="pl-2">{applicant.work_experience?.length || 0}</span>
-                  </div>
-                </div>
-              </div>
-              {/* Skills Bar */}
-              <div className="w-full mb-3">
-                <div className="text-xs font-bold text-gray-700 mb-1">SKILLS</div>
-                <div className="w-full bg-gray-200 rounded-full h-4 flex items-center">
-                  <div
-                    className="h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
-                    style={{ width: `${((Array.isArray(applicant.skills) ? applicant.skills.length : 0) / maxSkills) * 100}%`, minWidth: '2.5rem', backgroundColor: metricColors[1] }}
-                  >
-                    <span className="pl-2">{Array.isArray(applicant.skills) ? applicant.skills.length : 0}</span>
-                  </div>
-                </div>
-              </div>
-              {/* Salary Bar */}
-              <div className="w-full mb-1">
-                <div className="text-xs font-bold text-gray-700 mb-1">SALARY</div>
-                <div className="w-full bg-gray-200 rounded-full h-4 flex items-center">
-                  <div
-                    className="h-4 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
-                    style={{ width: `${((applicant.expected_salary || 0) / maxSalary) * 100}%`, minWidth: '2.5rem', backgroundColor: metricColors[2] }}
-                  >
-                    <span className="pl-2">{applicant.expected_salary ? `₱${applicant.expected_salary.toLocaleString()}` : 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  })() : null;
+  const CHART_SLOT_WIDTH_PX = 56;
+  const chartMinWidthPx = Math.max(applicants.length * CHART_SLOT_WIDTH_PX, 100);
 
   return (
-    <>
     <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
@@ -283,16 +210,61 @@ function CompareApplicantsModal({
 
                   {!isLoading && !isError && applicants.length > 0 && (
                     <>
-                      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
-                        {applicants.map((applicant: any) => (
-                          <div key={applicant.id} className="border rounded-lg p-4 min-w-0">
-                            {renderProfileSection(applicant)}
-                          </div>
+                      {/* Metric Filter */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-sm font-medium text-gray-700 mr-1">Compare by:</span>
+                        {(Object.keys(METRICS) as T_MetricKey[]).map((key) => (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => setActiveMetric(key)}
+                            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
+                              activeMetric === key
+                                ? 'bg-savoy-blue text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                          >
+                            {METRICS[key].label}
+                          </button>
                         ))}
                       </div>
 
-                      {/* Comparison Summary */}
-                      {showQuickComparison}
+                      {/* Bar Chart */}
+                      <div className="border border-gray-200 rounded-lg p-3">
+                        <div className="overflow-x-auto">
+                          <div style={{ height: '240px', width: '100%', minWidth: `${chartMinWidthPx}px` }}>
+                            <Bar data={chartData} options={chartOptions} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Scrollable Applicant List */}
+                      <div className="mt-5">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Applicants</h4>
+                        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-48 overflow-y-auto space-y-2">
+                          {applicants.map((applicant: any, index: number) => (
+                            <button
+                              key={applicant.id}
+                              type="button"
+                              onClick={() => onViewProfile(applicant.id)}
+                              className="w-full flex items-center space-x-2 text-sm text-left bg-white rounded-md p-2 hover:bg-blue-50 transition-colors"
+                            >
+                              <div
+                                className="w-8 h-8 rounded flex-shrink-0"
+                                style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                              ></div>
+                              <span className="text-gray-700 flex-1 min-w-0">
+                                <span className="truncate block font-medium break-words">
+                                  {applicant.firstname} {applicant.lastname}
+                                </span>
+                                <span className="text-gray-500 text-xs break-words">
+                                  Experience: {METRICS.experience.getValue(applicant)} | Skills: {METRICS.skills.getValue(applicant)} | Salary: {METRICS.salary.format(METRICS.salary.getValue(applicant))}
+                                </span>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </>
                   )}
                 </div>
@@ -302,15 +274,6 @@ function CompareApplicantsModal({
         </div>
       </Dialog>
     </Transition>
-
-    <ColorPaletteModal
-      isOpen={isColorModalOpen}
-      onClose={() => setIsColorModalOpen(false)}
-      onSave={handleColorPaletteSave}
-      currentColors={metricColors}
-      departmentNames={METRIC_NAMES}
-    />
-    </>
   );
 }
 

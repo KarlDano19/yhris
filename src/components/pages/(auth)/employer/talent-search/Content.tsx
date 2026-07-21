@@ -1116,7 +1116,12 @@ const Content = () => {
           />
         )}
         {isCompareModalOpen && (
-          <CompareApplicantsModal isOpen={isCompareModalOpen} setIsOpen={setIsCompareModalOpen} refetch={refetch} />
+          <CompareApplicantsModal
+            isOpen={isCompareModalOpen}
+            setIsOpen={setIsCompareModalOpen}
+            refetch={refetch}
+            onViewProfile={(applicantId: number) => setIsApplicantProfileModalOpen({ id: applicantId, open: true })}
+          />
         )}
         {isFilterModalOpen && (
           <FilterModal
