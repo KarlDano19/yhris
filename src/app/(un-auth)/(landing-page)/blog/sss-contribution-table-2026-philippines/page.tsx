@@ -115,6 +115,30 @@ const jsonLd = {
           }
         }
       ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://yahshuahris.com/blog/sss-contribution-table-2026-philippines#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://yahshuahris.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://yahshuahris.com/blog"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "SSS, PhilHealth and Pag-IBIG Contribution Rates 2026",
+          "item": "https://yahshuahris.com/blog/sss-contribution-table-2026-philippines"
+        }
+      ]
     }
   ]
 };
