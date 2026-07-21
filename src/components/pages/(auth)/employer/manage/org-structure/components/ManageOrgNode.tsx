@@ -72,6 +72,83 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
 
   const avatarType = getAvatarType(primaryEmployee);
 
+  // Department nodes are pure grouping/header nodes - no employees, no avatar,
+  // no click-through modals, just a label distinguishing them from Position boxes.
+  if (data.node_type === 'department') {
+    // HTML/CSS box-model centering (flex, absolute+transform) is not reliably
+    // reproduced by html2canvas's manual render pass for this element - both
+    // approaches were tried and both still anchored wrapped 2-line department
+    // names off-center in the exported PDF/PNG. The floating chart title
+    // (above, in ManageOrgChart.tsx) solves the exact same export-fidelity
+    // problem by rendering text as SVG <text> with textAnchor/dominantBaseline
+    // instead of HTML text layout - coordinates instead of layout computation,
+    // so html2canvas paints it identically to the live browser. Do the same
+    // here: pre-wrap the department name ourselves and draw the dashed box +
+    // centered label entirely in SVG.
+    const departmentName = (data.department_name || '').toUpperCase();
+    const boxWidth = 150;
+    const maxCharsPerLine = 12; // wrap at roughly the same width the old text-xs HTML box wrapped at
+    const lineHeightPx = 18;
+    const paddingY = 12;
+
+    const words = departmentName.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (!currentLine || testLine.length <= maxCharsPerLine) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    const boxHeight = paddingY * 2 + lines.length * lineHeightPx;
+
+    return (
+      <div className="relative pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="text-center px-10 mb-2 flex flex-col items-center justify-center">
+          <svg
+            width={boxWidth}
+            height={boxHeight}
+            viewBox={`0 0 ${boxWidth} ${boxHeight}`}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="1"
+              y="1"
+              width={boxWidth - 2}
+              height={boxHeight - 2}
+              rx="8"
+              fill="#f9fafb"
+              stroke="#9ca3af"
+              strokeWidth="2"
+              strokeDasharray="4 3"
+            />
+            {lines.map((line, index) => (
+              <text
+                key={index}
+                x={boxWidth / 2}
+                y={paddingY + lineHeightPx * (index + 0.5)}
+                fill="#4b5563"
+                fontSize="14"
+                fontWeight="700"
+                letterSpacing="0.4"
+                fontFamily="inherit"
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
+                {line}
+              </text>
+            ))}
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   // Handle position click to show action modal
   const handlePositionClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent event bubbling
@@ -111,13 +188,6 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
   const handleCloseDetailsModal = () => {
     setShowDetailsModal(false);
     setClickedNodeId(null);
-  };
-
-  // Handle set primary employee
-  const handleSetPrimaryEmployee = (employeeId: number) => {
-    if (onSetPrimaryEmployee) {
-      onSetPrimaryEmployee(data.id, employeeId);
-    }
   };
 
   // Handle checkbox toggle
@@ -338,7 +408,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
       />
 
       {/* Details Modal */}
-      <PositionDetailsModal 
+      <PositionDetailsModal
         data={data}
         primaryEmployee={primaryEmployee}
         isVisible={showDetailsModal}

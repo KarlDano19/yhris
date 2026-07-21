@@ -8,6 +8,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import CreateModal from '../../general-settings/employees/modals/CreateModal';
 import EditModal from '../../general-settings/employees/modals/EditModal';
 import { normalizeNbsp } from '@/helpers/linkify';
@@ -19,6 +20,9 @@ interface OrgStructure {
   description: string;
   position_name: string;
   position?: number;
+  department?: number | null;
+  department_name?: string | null;
+  node_type?: 'position' | 'department' | 'unassigned';
   parent?: number | null;
   parent_position_name?: string;
   order?: number;
@@ -32,7 +36,7 @@ interface OrgStructure {
 interface PositionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (positionName: string, description: string, positionId: number) => void;
+  onSave: (label: string, description: string, id: number, nodeType: 'position' | 'department') => void;
   editingPosition?: OrgStructure;
   orgData?: OrgStructure | null;
 }
@@ -45,9 +49,16 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
   const [isLoading, setIsLoading] = useState(false);
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<{ id: number; open: boolean } | null>(null);
+  // Whether this node represents a Position (a job title) or a Department (a
+  // grouping/header node with no employees of its own).
+  const [nodeType, setNodeType] = useState<'position' | 'department'>(
+    editingPosition?.node_type === 'department' ? 'department' : 'position'
+  );
 
   // Fetch all positions for the dropdown (no pagination needed for select view type)
   const { data: positionData, refetch: refetchPositions } = useGetPositionItems();
+  // Fetch all departments for the dropdown, when in department mode
+  const { data: departmentData, refetch: refetchDepartments } = useGetDepartmentItems();
 
   // Helper function to check if an item was created within 24 hours
   const isWithin24Hours = (createdAt: string | Date): boolean => {
@@ -58,43 +69,22 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
     return diffInHours < 24;
   };
 
-  // Helper function to collect all used position names from org structure
-  const getUsedPositionNames = (node: OrgStructure): string[] => {
-    const usedNames: string[] = [];
-    if (node.position_name && !node.isAddButton) {
-      usedNames.push(node.position_name);
-    }
-    if (node.children) {
-      node.children.forEach(child => {
-        usedNames.push(...getUsedPositionNames(child));
-      });
-    }
-    return usedNames;
-  };
-  
-  // Transform position data for react-select with separation for newly added positions
+  // Transform position data for react-select with separation for newly added positions.
+  // Positions already used elsewhere in the tree are intentionally NOT filtered out here —
+  // the same Position can be attached under multiple parents (e.g. "Consultant" under
+  // several Business Unit Heads); the backend tracks per-node manual employee assignment
+  // for any position that ends up shared this way.
   const positionOptions = useMemo(() => {
     if (!positionData || !Array.isArray(positionData)) return [];
-    
-    // Get all used position names from the org structure
-    const usedPositionNames = orgData ? getUsedPositionNames(orgData) : [];
-    
-    const allPositions = positionData
-      .map((position: any) => ({
-        value: position.id,
-        label: position.name,
-        createdAt: position.created_at,
-        description: position.description,
-        id: position.id
-      }))
-      .filter((position: any) => {
-        // Filter out positions that are already used, unless we're editing this position
-        if (editingPosition && position.label === editingPosition.position_name) {
-          return true; // Allow the current position when editing
-        }
-        return !usedPositionNames.includes(position.label);
-      });
-    
+
+    const allPositions = positionData.map((position: any) => ({
+      value: position.id,
+      label: position.name,
+      createdAt: position.created_at,
+      description: position.description,
+      id: position.id
+    }));
+
     // Filter and sort newly added positions (within 24 hours of creation)
     const newPositions = allPositions
       .filter((pos: any) => isWithin24Hours(pos.createdAt))
@@ -143,42 +133,72 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
     }
     
     return options;
-  }, [positionData, orgData, editingPosition]);
+  }, [positionData]);
 
-  // Reset form when editing position changes
+  // Departments have no create-date/description concept, so a simple flat,
+  // alphabetically-sorted list is enough (no "New" grouping needed).
+  const departmentOptions = useMemo(() => {
+    if (!departmentData || !Array.isArray(departmentData)) return [];
+    return departmentData
+      .map((department: any) => ({ value: department.id, label: department.name, id: department.id }))
+      .sort((a: any, b: any) => a.label.localeCompare(b.label));
+  }, [departmentData]);
+
+  // Reset the type toggle and selection whenever a different node is opened for editing
   useEffect(() => {
+    setNodeType(editingPosition?.node_type === 'department' ? 'department' : 'position');
     setPositionName(editingPosition?.position_name || '');
-    
-    // Set selected position if editing
-    if (editingPosition) {
+  }, [editingPosition]);
+
+  // Set selected position/department once editing data and the matching options are both ready
+  useEffect(() => {
+    if (!editingPosition) {
+      setSelectedPosition(null);
+      return;
+    }
+
+    if (nodeType === 'department') {
+      const found = departmentOptions.find((dept: any) =>
+        dept.label === editingPosition.department_name || dept.value === editingPosition.department
+      );
+      setSelectedPosition(found || null);
+    } else {
       const flatOptions = positionOptions.flatMap(group => group.options);
-      const foundPosition = flatOptions.find((pos: any) => 
+      const foundPosition = flatOptions.find((pos: any) =>
         pos.label === editingPosition.position_name || pos.value === editingPosition.id
       );
       setSelectedPosition(foundPosition || null);
-    } else {
-      setSelectedPosition(null);
     }
-  }, [editingPosition, positionOptions]);
+  }, [editingPosition, nodeType, positionOptions, departmentOptions]);
 
   // Update selected position when position data changes (e.g., after editing description)
   useEffect(() => {
-    if (selectedPosition) {
+    if (nodeType === 'position' && selectedPosition) {
       const flatOptions = positionOptions.flatMap(group => group.options);
       const updatedPosition = flatOptions.find((pos: any) => pos.value === selectedPosition.value);
       if (updatedPosition && updatedPosition.description !== selectedPosition.description) {
         setSelectedPosition(updatedPosition);
       }
     }
-  }, [positionData]);
+  }, [positionData, nodeType]);
+
+  const handleTypeChange = (type: 'position' | 'department') => {
+    setNodeType(type);
+    setSelectedPosition(null);
+    clearErrors('position');
+  };
 
   const handleAddPosition = () => {
     setIsAddPositionModalOpen(true);
   };
 
   const handlePositionCreated = () => {
-    // Refresh positions list to get the updated data with new creation dates
-    refetchPositions();
+    // Refresh whichever list is active to pick up the newly created item
+    if (nodeType === 'department') {
+      refetchDepartments();
+    } else {
+      refetchPositions();
+    }
   };
 
   const handleEditDescription = () => {
@@ -203,7 +223,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
       setIsLoading(true);
       try {
         // Description is now managed in the Position model, so we pass empty string
-        onSave(selectedPosition.label, '', selectedPosition.value);
+        onSave(selectedPosition.label, '', selectedPosition.value, nodeType);
         setPositionName('');
         setSelectedPosition(null);
         onClose();
@@ -247,29 +267,54 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                 <DialogPanel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
-                      {editingPosition ? 'Edit Position' : 'Select Position'}
+                      {editingPosition
+                        ? (nodeType === 'department' ? 'Edit Department' : 'Edit Position')
+                        : (nodeType === 'department' ? 'Select Department' : 'Select Position')}
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={onClose} />
                   </div>
-                  <form onSubmit={handleSubmit}>      
+                  <form onSubmit={handleSubmit}>
                     <div className='px-4 pt-4 pb-6'>
+                      {/* Node type toggle - a node is either a Position (a job title) or a
+                          Department (a grouping/header node with no employees of its own) */}
+                      <div className='flex rounded-md border border-gray-300 p-1 mb-4'>
+                        <button
+                          type='button'
+                          onClick={() => handleTypeChange('position')}
+                          className={`flex-1 rounded py-1.5 text-sm font-medium transition-colors ${
+                            nodeType === 'position' ? 'bg-savoy-blue text-white' : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          Position
+                        </button>
+                        <button
+                          type='button'
+                          onClick={() => handleTypeChange('department')}
+                          className={`flex-1 rounded py-1.5 text-sm font-medium transition-colors ${
+                            nodeType === 'department' ? 'bg-savoy-blue text-white' : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          Department
+                        </button>
+                      </div>
+
                       <div className='flex items-center justify-between'>
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Position<span className='text-red-600'> *</span>
+                          {nodeType === 'department' ? 'Department' : 'Position'}<span className='text-red-600'> *</span>
                         </label>
                         <button
                           type='button'
                           onClick={handleAddPosition}
                           className='text-sm text-savoy-blue hover:text-blue-700 font-medium'
                         >
-                          + Add New Position
+                          + Add New {nodeType === 'department' ? 'Department' : 'Position'}
                         </button>
                       </div>
                       <div className='mt-2'>
                         <Select
                           className='text-sm'
                           classNamePrefix='select'
-                          options={positionOptions}
+                          options={nodeType === 'department' ? departmentOptions : positionOptions}
                           value={selectedPosition}
                           onChange={(val: any) => { setSelectedPosition(val); if (val) clearErrors('position'); }}
                           components={{
@@ -281,8 +326,8 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                             IndicatorSeparator: () => null,
                           }}
                           isClearable={false}
-                          noOptionsMessage={() => 'No positions available'}
-                          placeholder='Select a position...'
+                          noOptionsMessage={() => nodeType === 'department' ? 'No departments available' : 'No positions available'}
+                          placeholder={nodeType === 'department' ? 'Select a department...' : 'Select a position...'}
                           formatGroupLabel={(group: any) => (
                             <div className="text-xs font-semibold text-gray-500 py-1">
                               {group.label}
@@ -293,9 +338,9 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                       {errors?.position && (
                         <p className="text-xs text-red-600 mt-1">{errors.position.message as string}</p>
                       )}
-                      
-                      {/* Display Position Description */}
-                      {selectedPosition && (
+
+                      {/* Display Position Description - positions only, departments have no description */}
+                      {nodeType === 'position' && selectedPosition && (
                         <div className='mt-4'>
                           <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
                             Position Description
@@ -383,10 +428,10 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
             </div>
           </div>
 
-        {/* Position Creation Modal */}
+        {/* Position/Department Creation Modal */}
         {isAddPositionModalOpen && (
         <CreateModal
-          module='position'
+          module={nodeType}
           isOpen={isAddPositionModalOpen}
           setIsOpen={setIsAddPositionModalOpen}
           refetch={handlePositionCreated}

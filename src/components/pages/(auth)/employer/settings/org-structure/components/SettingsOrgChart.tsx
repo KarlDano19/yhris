@@ -453,31 +453,36 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
     }
   };
 
-  const handleSavePosition = async (positionName: string, description: string, positionId: number) => {
+  const handleSavePosition = async (
+    label: string,
+    description: string,
+    id: number,
+    nodeType: 'position' | 'department' = 'position'
+  ) => {
+    const isDepartment = nodeType === 'department';
     try {
       if (editingPosition && typeof editingPosition.id === 'number') {
-        // Update existing position
+        // Update existing node
         await updateMutation.mutateAsync({
           orgStructureId: editingPosition.id,
-          data: {
-            position: positionId,
-            description: description || positionName,
-          }
+          data: isDepartment
+            ? { department: id, position: null }
+            : { position: id, department: null, description: description || label },
         });
-        
-        toast.custom(() => <CustomToast message='Position updated successfully!' type='success' />, {
+
+        toast.custom(() => <CustomToast message={`${isDepartment ? 'Department' : 'Position'} updated successfully!`} type='success' />, {
           duration: 3000,
         });
-        
+
       } else {
-        // Add new position
-        await addMutation.mutateAsync({
-          position: positionId,
-          description: description || positionName,
-          parent: selectedParentId
-        });
-        
-        toast.custom(() => <CustomToast message='Position added successfully!' type='success' />, {
+        // Add new node
+        await addMutation.mutateAsync(
+          isDepartment
+            ? { department: id, description: '', parent: selectedParentId }
+            : { position: id, description: description || label, parent: selectedParentId }
+        );
+
+        toast.custom(() => <CustomToast message={`${isDepartment ? 'Department' : 'Position'} added successfully!`} type='success' />, {
           duration: 3000,
         });
       }
@@ -577,8 +582,8 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
         <PositionModal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
-          onSave={(positionName: string, description: string, positionId: number) => 
-            handleSavePosition(positionName, description, positionId)
+          onSave={(label: string, description: string, id: number, nodeType: 'position' | 'department') =>
+            handleSavePosition(label, description, id, nodeType)
           }
           orgData={orgData}
         />
@@ -694,8 +699,8 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
             setSelectedParentId(null);
             setEditingPosition(null);
           }}
-          onSave={(positionName: string, description: string, positionId: number) => 
-            handleSavePosition(positionName, description, positionId)
+          onSave={(label: string, description: string, id: number, nodeType: 'position' | 'department') =>
+            handleSavePosition(label, description, id, nodeType)
           }
           editingPosition={editingPosition || undefined}
           orgData={orgData}

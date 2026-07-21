@@ -10,8 +10,8 @@ import { Employee, PositionActionModalProps } from '../types';
 // Maximum number of employees to show in the chart before showing warning
 const MAX_EMPLOYEES_IN_CHART = 10;
 
-const PositionActionModal: React.FC<PositionActionModalProps> = ({ 
-  data, 
+const PositionActionModal: React.FC<PositionActionModalProps> = ({
+  data,
   primaryEmployee,
   isVisible,
   onClose,
@@ -33,6 +33,11 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
   // Check if there are many employees
   const otherEmployeesCount = data.employees?.filter((employee) => employee.id !== primaryEmployee?.id).length || 0;
   const hasManyEmployees = otherEmployeesCount > MAX_EMPLOYEES_IN_CHART;
+
+  // "View Details" must always be reachable, whether the node already has someone
+  // assigned or is empty and needs one - every position (shared or not) supports
+  // manual assignment now via the details modal.
+  const canOpenDetails = true;
 
   return (
     <Transition show={isVisible} as={Fragment}>
@@ -74,8 +79,8 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
 
                 {/* Content */}
                 <div className="p-6 space-y-4">
-                  {/* Position Info - only show if there are employees */}
-                  {primaryEmployee && data.employees && data.employees.length > 0 && (
+                  {/* Position Info - only show if someone is assigned */}
+                  {primaryEmployee && (
                     <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600">
                       <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden flex-shrink-0">
                         {primaryEmployee.photo ? (
@@ -91,13 +96,13 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                             }}
                           />
                         ) : null}
-                        <div 
+                        <div
                           className={`w-full h-full flex items-center justify-center ${primaryEmployee.photo ? 'hidden' : 'block'}`}
                         >
-                          <PlaceholderPicture 
-                            gender={getAvatarType(primaryEmployee)} 
-                            fillColor="#3B82F6" 
-                            width={32} 
+                          <PlaceholderPicture
+                            gender={getAvatarType(primaryEmployee)}
+                            fillColor="#3B82F6"
+                            width={32}
                             height={32}
                             style={{ opacity: 0.5 }}
                           />
@@ -119,38 +124,38 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                       <div className="text-sm text-blue-800">
                         <p className="font-medium mb-1">Large Team Position</p>
                         <p className="text-xs text-blue-700">
-                          This position has {otherEmployeesCount} additional employees. For better performance, 
+                          This position has {otherEmployeesCount} additional employees. For better performance,
                           only the first {MAX_EMPLOYEES_IN_CHART} will show in the chart. Use "View Details" to see everyone.
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Only show this text if there are employees to interact with */}
-                  {data.employees && data.employees.length > 0 && (
-                    <div className="text-center mb-6">
+                  {/* Only show this text if there's something to interact with */}
+                  {canOpenDetails && (
+                    <div className="text-center">
                       <p className="text-gray-600 mb-4">What would you like to do with this position?</p>
                     </div>
                   )}
 
                   {/* Action Buttons */}
                   <div className="space-y-3">
-                    {/* View Details Button - only show if there are employees */}
-                    {data.employees && data.employees.length > 0 && (
+                    {/* View Details Button - also shown for empty positions, so an employee can be assigned */}
+                    {canOpenDetails && (
                       <button
                         onClick={() => {
                           onClose();
                           onViewDetails();
                         }}
                         className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors group ${
-                          hasManyEmployees 
-                            ? 'bg-blue-600 hover:bg-blue-700 border-2 border-blue-700 shadow-md' 
+                          hasManyEmployees
+                            ? 'bg-blue-600 hover:bg-blue-700 border-2 border-blue-700 shadow-md'
                             : 'bg-blue-50 hover:bg-blue-100 border border-blue-200'
                         }`}
                       >
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                          hasManyEmployees 
-                            ? 'bg-blue-500 group-hover:bg-blue-600' 
+                          hasManyEmployees
+                            ? 'bg-blue-500 group-hover:bg-blue-600'
                             : 'bg-blue-100 group-hover:bg-blue-200'
                         }`}>
                           <EyeIcon className={`w-5 h-5 ${hasManyEmployees ? 'text-white' : 'text-blue-600'}`} />
@@ -167,7 +172,9 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                             )}
                           </div>
                           <p className={`text-sm ${hasManyEmployees ? 'text-blue-100' : 'text-gray-600'}`}>
-                            See position information and all {data.employees.length} employees
+                            {data.employees && data.employees.length > 0
+                              ? `See position information and all ${data.employees.length} employees`
+                              : 'Assign an employee to this position'}
                           </p>
                         </div>
                       </button>
@@ -190,7 +197,7 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                             {isExpanded ? 'Hide Employees' : 'Show Employees'}
                           </h5>
                           <p className="text-sm text-gray-600">
-                            {isExpanded 
+                            {isExpanded
                               ? 'Hide employees from the chart view'
                               : hasManyEmployees
                                 ? `Show first ${MAX_EMPLOYEES_IN_CHART} of ${otherEmployeesCount} employees in chart`
@@ -203,7 +210,7 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                       <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <UserGroupIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">
-                          {data.employees && data.employees.length > 0 
+                          {data.employees && data.employees.length > 0
                             ? 'Only the primary employee is assigned to this position'
                             : 'No employees are currently assigned to this position'
                           }

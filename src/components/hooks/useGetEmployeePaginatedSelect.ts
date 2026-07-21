@@ -6,6 +6,7 @@ interface newFiltersProps {
   current_page?: number;
   page_size?: number;
   search?: string;
+  department_id?: number;
 }
 
 async function getEmployeePaginatedSelect(filters: any) {
@@ -14,6 +15,7 @@ async function getEmployeePaginatedSelect(filters: any) {
     if (filters.current_page) newFilters.current_page = filters.current_page;
     if (filters.page_size) newFilters.page_size = filters.page_size;
     if (filters.search) newFilters.search = filters.search;
+    if (filters.department_id) newFilters.department_id = filters.department_id;
     
     const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie('token');
