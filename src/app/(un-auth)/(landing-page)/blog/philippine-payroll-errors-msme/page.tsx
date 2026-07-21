@@ -3,13 +3,16 @@ import PayrollErrorsArticle from "@/components/pages/(un-auth)/(landing-page)/bl
 
 export const metadata: Metadata = {
   title: 'What Philippine Payroll Errors Actually Cost MSMEs | YAHSHUA HRIS',
-  description: 'Philippine MSMEs running payroll on outdated SSS, PhilHealth, and BIR rates face surcharges of 25%, 12% annual interest, and up to ₱50,000 in compromise penalties. Here is what the cost actually looks like — and how to catch errors before the government does.',
+  description: 'Philippine MSMEs running payroll on outdated SSS, PhilHealth, and BIR rates face surcharges of 25%, 12% annual interest, and up to ₱50,000 in compromise penalties. Here is what the cost actually looks like, and how to catch errors before the government does.',
   keywords: 'payroll errors Philippines 2026, SSS contribution rate 2026, PhilHealth premium 2026, BIR withholding tax penalties Philippines, MSME payroll compliance Philippines',
   openGraph: {
     title: 'What Philippine Payroll Errors Actually Cost MSMEs',
     description: 'SSS is now at 15%, PhilHealth at 5%, and BIR penalties run 25% surcharge plus 12% annual interest. If your payroll system was not updated, errors have been accumulating since January.',
     type: 'article',
     locale: 'en_US',
+    publishedTime: '2026-06-22T00:00:00.000Z',
+    modifiedTime: '2026-06-22T00:00:00.000Z',
+    authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
     card: 'summary_large_image',

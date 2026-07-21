@@ -7,10 +7,13 @@ export const metadata: Metadata = {
   description: 'Philippine employers must pay 13th month pay by December 24. Learn the correct computation formula, who qualifies, common mistakes, and how to track it automatically every payroll run.',
   keywords: '13th month pay Philippines, how to compute 13th month pay, 13th month pay tracking, PD 851 Philippines, 13th month pay MSME',
   openGraph: {
-    title: 'Start Tracking 13th Month Pay Now — Or Pay For It in November',
+    title: 'Start Tracking 13th Month Pay Now. Or Pay For It in November.',
     description: 'The correct computation formula, who qualifies, and how Philippine MSMEs can track 13th month liability automatically instead of scrambling in November.',
     type: 'article',
     locale: 'en_US',
+    publishedTime: '2026-06-10T00:00:00.000Z',
+    modifiedTime: '2026-06-10T00:00:00.000Z',
+    authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
     card: 'summary_large_image',

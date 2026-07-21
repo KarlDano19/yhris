@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: 'Pay rates for regular and special holidays, rest day premiums, common computation mistakes, and what DOLE expects from employers on every payroll cycle.',
     type: 'article',
     locale: 'en_US',
+    publishedTime: '2026-06-10T00:00:00.000Z',
+    modifiedTime: '2026-06-10T00:00:00.000Z',
+    authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
     card: 'summary_large_image',

@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description: 'A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.',
     type: 'article',
     locale: 'en_US',
+    publishedTime: '2026-06-02T00:00:00.000Z',
+    modifiedTime: '2026-06-02T00:00:00.000Z',
+    authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
     card: 'summary_large_image',
