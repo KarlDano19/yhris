@@ -31,7 +31,7 @@ const jsonLd = {
       "@type": "Article",
       "@id": "https://yahshuahris.com/blog/payroll-automation-philippines#article",
       "headline": "Your Payroll Is a Message to Your Team",
-      "description": "Accurate, on-time payroll is one of the most consistent acts of leadership a Philippine business owner performs. Here is what payroll automation actually gives you — and what it costs when it goes wrong.",
+      "description": "Accurate, on-time payroll is one of the most consistent acts of leadership a Philippine business owner performs. Here is what payroll automation actually gives you, and what it costs when it goes wrong.",
       "image": "https://yahshuahris.com/blog/payroll-message.png",
       "datePublished": "2026-06-22T00:00:00.000Z",
       "dateModified": "2026-06-22T00:00:00.000Z",
@@ -71,7 +71,7 @@ const jsonLd = {
           "name": "What happens if a Philippine employer misses payroll contribution remittance deadlines?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Late SSS remittances carry a penalty of 3% per month on the unremitted amount. PhilHealth imposes a 2% monthly surcharge on late payments. Pag-IBIG charges 1/10 of 1% per day of delay plus a service fee. BIR late filing penalties include a 25% surcharge on the tax due plus 12% annual interest. Repeated non-remittance can result in criminal charges against responsible officers under each agency's enabling law."
+            "text": "Late SSS remittances carry a penalty of 3% per month on the unremitted amount. PhilHealth imposes a 3% per month surcharge on unpaid premiums. Pag-IBIG charges 1/10 of 1% per day of delay plus a service fee. BIR late filing penalties include a 25% surcharge on the tax due plus 12% annual interest. Repeated non-remittance can result in criminal charges against responsible officers under each agency's enabling law."
           }
         },
         {
@@ -87,7 +87,7 @@ const jsonLd = {
           "name": "How does payroll automation reduce compliance risk in the Philippines?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Payroll automation eliminates manual rate lookups and formula errors by maintaining up-to-date contribution tables (SSS, PhilHealth, Pag-IBIG) and BIR withholding schedules inside the system. When contribution rates change — as SSS did each year from 2019 to 2025 under RA 11199 — an automated system updates the computation immediately. Manual payroll requires HR to identify the change, update spreadsheet formulas, and verify the results before the next payroll run, leaving a window for errors."
+            "text": "Payroll automation eliminates manual rate lookups and formula errors by maintaining up-to-date contribution tables (SSS, PhilHealth, Pag-IBIG) and BIR withholding schedules inside the system. When contribution rates change, as SSS did each year from 2019 to 2025 under RA 11199, an automated system updates the computation immediately. Manual payroll requires HR to identify the change, update spreadsheet formulas, and verify the results before the next payroll run, leaving a window for errors."
           }
         },
         {
@@ -95,7 +95,7 @@ const jsonLd = {
           "name": "Is YAHSHUA HRIS built specifically for Philippine payroll compliance?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. YAHSHUA HRIS was built for Philippine businesses from the ground up. SSS, PhilHealth, Pag-IBIG, BIR, DOLE holiday rates, and 13th month pay are all computed natively inside the platform — not as add-ons or workarounds. Rate tables are maintained and updated as regulations change, so employers do not need to manually track every SSS or PhilHealth circular."
+            "text": "Yes. YAHSHUA HRIS was built for Philippine businesses from the ground up. SSS, PhilHealth, Pag-IBIG, BIR, DOLE holiday rates, and 13th month pay are all computed natively inside the platform, not as add-ons or workarounds. Rate tables are maintained and updated as regulations change, so employers do not need to manually track every SSS or PhilHealth circular."
           }
         }
       ]

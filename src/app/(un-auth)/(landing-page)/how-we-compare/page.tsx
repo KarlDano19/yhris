@@ -45,7 +45,7 @@ const jsonLd = {
           "name": "What makes YAHSHUA HRIS different from other HR software in the Philippines?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is the only HRIS in the Philippines with DOLE compliance automation built in — covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings — with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at PHP 4,000/month for up to 100 employees with no per-seat fees. Most Philippine HR software requires separate modules for compliance and charges per employee."
+            "text": "YAHSHUA HRIS is the only HRIS in the Philippines with DOLE compliance automation built in, covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings, with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at PHP 4,000/month for up to 100 employees with no per-seat fees. Most Philippine HR software requires separate modules for compliance and charges per employee."
           }
         },
         {
@@ -61,7 +61,7 @@ const jsonLd = {
           "name": "What HR software in the Philippines includes DOLE compliance?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is the only HR platform in the Philippines that includes full DOLE compliance automation as a built-in feature — not an add-on. This covers DOLE company registration, Occupational Safety and Health (OSH) reporting, annual medical reports, and AERW filing. Other Philippine HR software typically requires separate compliance modules or manual management of DOLE filings."
+            "text": "YAHSHUA HRIS is the only HR platform in the Philippines that includes full DOLE compliance automation as a built-in feature, not an add-on. This covers DOLE company registration, Occupational Safety and Health (OSH) reporting, annual medical reports, and AERW filing. Other Philippine HR software typically requires separate compliance modules or manual management of DOLE filings."
           }
         },
         {
