@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, Squares2X2Icon } from "@heroicons/react/24/solid";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,10 +12,24 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import useCreateApplicantComparison from "../hook/useCreateApplicantComparison";
+import ColorPaletteModal from '../../analytics/modals/ColorPaletteModal';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const CHART_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
+const APPLICANT_COLOR_STORAGE_KEY = 'talentCompareApplicantColors';
+
+function getNiceMax(value: number): number {
+  if (value <= 0) return 10;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  const residual = value / magnitude;
+  let niceResidual;
+  if (residual <= 1) niceResidual = 1;
+  else if (residual <= 2) niceResidual = 2;
+  else if (residual <= 5) niceResidual = 5;
+  else niceResidual = 10;
+  return niceResidual * magnitude;
+}
 
 const METRICS = {
   experience: {
@@ -55,6 +69,8 @@ function CompareApplicantsModal({
 }) {
   const cancelButtonRef = useRef(null);
   const [activeMetric, setActiveMetric] = useState<T_MetricKey>('experience');
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const [customColors, setCustomColors] = useState<Record<number, string>>({});
 
   const {
     mutate: createComparison,
@@ -65,6 +81,9 @@ function CompareApplicantsModal({
   } = useCreateApplicantComparison();
 
   const applicants = comparisonData?.applicants || [];
+
+  const getBarColor = (applicantId: number, index: number) =>
+    customColors[applicantId] || CHART_COLORS[index % CHART_COLORS.length];
 
   const customCloseModal = () => {
     refetch();
@@ -80,16 +99,40 @@ function CompareApplicantsModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen.open, isOpen.applicantIds]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem(APPLICANT_COLOR_STORAGE_KEY);
+    if (saved) {
+      try {
+        setCustomColors(JSON.parse(saved));
+      } catch (error) {
+        console.error('Error loading saved applicant colors:', error);
+      }
+    }
+  }, []);
+
+  const handleColorPaletteSave = (colors: string[]) => {
+    const merged = { ...customColors };
+    applicants.forEach((applicant: any, index: number) => {
+      merged[applicant.id] = colors[index];
+    });
+    setCustomColors(merged);
+    localStorage.setItem(APPLICANT_COLOR_STORAGE_KEY, JSON.stringify(merged));
+  };
+
   const activeMetricConfig = METRICS[activeMetric];
 
+  const chartLabels = applicants.map((a: any) => `${a.firstname} ${a.lastname}`);
+  const sharedYMax = getNiceMax(Math.max(...applicants.map((a: any) => activeMetricConfig.getValue(a)), 1));
+  const sharedYStepSize = sharedYMax / 5;
+
   const chartData = {
-    labels: applicants.map((a: any) => `${a.firstname} ${a.lastname}`),
+    labels: chartLabels,
     datasets: [
       {
         label: activeMetricConfig.label,
         data: applicants.map((a: any) => activeMetricConfig.getValue(a)),
-        backgroundColor: applicants.map((_: any, index: number) => CHART_COLORS[index % CHART_COLORS.length]),
-        borderColor: applicants.map((_: any, index: number) => CHART_COLORS[index % CHART_COLORS.length]),
+        backgroundColor: applicants.map((a: any, index: number) => getBarColor(a.id, index)),
+        borderColor: applicants.map((a: any, index: number) => getBarColor(a.id, index)),
         borderWidth: 0,
         borderRadius: 8,
         maxBarThickness: 20,
@@ -125,14 +168,16 @@ function CompareApplicantsModal({
     scales: {
       y: {
         beginAtZero: true,
+        min: 0,
+        max: sharedYMax,
         grid: {
           color: '#f0f0f0',
           drawBorder: false,
           borderDash: [3, 3],
         },
         ticks: {
-          color: '#6b7280',
-          font: { size: 12 },
+          display: false,
+          stepSize: sharedYStepSize,
         },
       },
       x: {
@@ -150,10 +195,59 @@ function CompareApplicantsModal({
     },
   };
 
+  const axisChartData = {
+    labels: chartLabels,
+    datasets: [
+      {
+        data: applicants.map(() => 0),
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const axisChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: false },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        min: 0,
+        max: sharedYMax,
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#6b7280',
+          font: { size: 12 },
+          stepSize: sharedYStepSize,
+        },
+      },
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: 'transparent',
+          font: { size: 12 },
+          maxRotation: 45,
+          minRotation: 45,
+          autoSkip: false,
+        },
+      },
+    },
+  };
+
   const CHART_SLOT_WIDTH_PX = 56;
   const chartMinWidthPx = Math.max(applicants.length * CHART_SLOT_WIDTH_PX, 100);
+  const CHART_HEIGHT_PX = 240;
 
   return (
+    <>
     <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
@@ -211,29 +305,47 @@ function CompareApplicantsModal({
                   {!isLoading && !isError && applicants.length > 0 && (
                     <>
                       {/* Metric Filter */}
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-sm font-medium text-gray-700 mr-1">Compare by:</span>
-                        {(Object.keys(METRICS) as T_MetricKey[]).map((key) => (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => setActiveMetric(key)}
-                            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
-                              activeMetric === key
-                                ? 'bg-savoy-blue text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            {METRICS[key].label}
-                          </button>
-                        ))}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-700 mr-1">Compare by:</span>
+                          {(Object.keys(METRICS) as T_MetricKey[]).map((key) => (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => setActiveMetric(key)}
+                              className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
+                                activeMetric === key
+                                  ? 'bg-savoy-blue text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {METRICS[key].label}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setIsColorModalOpen(true)}
+                          className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+                          title="Customize colors"
+                        >
+                          <Squares2X2Icon className="w-4 h-4" />
+                          Colors
+                        </button>
                       </div>
 
                       {/* Bar Chart */}
                       <div className="border border-gray-200 rounded-lg p-3">
-                        <div className="overflow-x-auto">
-                          <div style={{ height: '240px', width: '100%', minWidth: `${chartMinWidthPx}px` }}>
-                            <Bar data={chartData} options={chartOptions} />
+                        <div className="flex">
+                          <div
+                            className="sticky left-0 z-10 bg-white flex-shrink-0"
+                            style={{ height: `${CHART_HEIGHT_PX}px`, width: '48px' }}
+                          >
+                            <Bar data={axisChartData} options={axisChartOptions} />
+                          </div>
+                          <div className="overflow-x-auto flex-1">
+                            <div style={{ height: `${CHART_HEIGHT_PX}px`, width: '100%', minWidth: `${chartMinWidthPx}px` }}>
+                              <Bar data={chartData} options={chartOptions} />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -251,7 +363,7 @@ function CompareApplicantsModal({
                             >
                               <div
                                 className="w-8 h-8 rounded flex-shrink-0"
-                                style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                                style={{ backgroundColor: getBarColor(applicant.id, index) }}
                               ></div>
                               <span className="text-gray-700 flex-1 min-w-0">
                                 <span className="truncate block font-medium break-words">
@@ -274,6 +386,15 @@ function CompareApplicantsModal({
         </div>
       </Dialog>
     </Transition>
+
+    <ColorPaletteModal
+      isOpen={isColorModalOpen}
+      onClose={() => setIsColorModalOpen(false)}
+      onSave={handleColorPaletteSave}
+      currentColors={applicants.map((a: any, index: number) => getBarColor(a.id, index))}
+      departmentNames={applicants.map((a: any) => `${a.firstname} ${a.lastname}`)}
+    />
+    </>
   );
 }
 

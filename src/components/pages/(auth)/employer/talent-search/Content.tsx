@@ -912,7 +912,7 @@ const Content = () => {
                           className='self-start text-sm text-blue-600 underline hover:text-blue-800 md:self-center'
                         >
                           {allLoadedSelected
-                            ? 'Deselect All'
+                            ? 'Unselect All'
                             : `Select All (${applicants.length} of ${totalRecords} loaded)`}
                         </button>
                       )}
@@ -942,8 +942,8 @@ const Content = () => {
                     {selectedApplicants.size === 0 && (
                       <div className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
                         <p className='text-sm text-blue-800'>
-                          💡 <strong>Tip:</strong> Use the checkbox on a profile card, or Select All, to choose
-                          applicants — your selection is kept as you load more profiles.
+                          💡 <strong>Tip:</strong> Use the Compare button on a profile card, or Select All, to
+                          choose applicants — your selection is kept as you load more profiles.
                         </p>
                       </div>
                     )}
@@ -968,17 +968,6 @@ const Content = () => {
                                 selectedApplicants.has(applicant.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
                               }`}
                             >
-                              {/* Selection Checkbox - Top Left Corner */}
-                              <div className='absolute top-3 left-3 z-10'>
-                                <input
-                                  type='checkbox'
-                                  checked={selectedApplicants.has(applicant.id)}
-                                  onChange={() => handleSelectApplicant(applicant.id)}
-                                  className='h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                                  aria-label={`Select ${applicant.firstname} ${applicant.lastname}`}
-                                />
-                              </div>
-
                               {/* Bookmark Icon - Top Right Corner */}
                               <div>
                                 <button
