@@ -21,8 +21,73 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": "https://yahshuahris.com/blog/dole-compliance-requirements-philippines#article",
+      "headline": "DOLE Compliance Requirements Every Philippine Employer Must Know",
+      "description": "A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.",
+      "image": "https://yahshuahris.com/blog/dole-compliance-2026.png",
+      "datePublished": "2026-06-02T00:00:00.000Z",
+      "dateModified": "2026-06-02T00:00:00.000Z",
+      "author": {
+        "@type": "Organization",
+        "name": "YAHSHUA HRIS Team",
+        "url": "https://yahshuahris.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "YAHSHUA HRIS",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://yahshuahris.com/logo.png"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://yahshuahris.com/blog/dole-compliance-requirements-philippines"
+      },
+      "keywords": "DOLE compliance requirements Philippines, WAIR report, EC logbook, OSH annual report, Philippine labor compliance"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://yahshuahris.com/blog/dole-compliance-requirements-philippines#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://yahshuahris.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://yahshuahris.com/blog"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "DOLE Compliance Requirements for Philippine Employers",
+          "item": "https://yahshuahris.com/blog/dole-compliance-requirements-philippines"
+        }
+      ]
+    }
+  ]
+};
+
 const DoleCompliancePage = () => {
-  return <DoleComplianceArticle />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <DoleComplianceArticle />
+    </>
+  );
 };
 
 export default DoleCompliancePage;

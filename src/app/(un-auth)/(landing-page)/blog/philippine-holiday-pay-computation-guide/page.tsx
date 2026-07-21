@@ -23,31 +23,60 @@ export const metadata: Metadata = {
 };
 
 const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'BlogPosting',
-  headline: 'Philippine Holiday Pay Computation: A Complete Employer Guide',
-  description: 'Correct holiday pay rates for regular and special non-working holidays in the Philippines. Includes computation table, common employer mistakes, and DOLE compliance requirements.',
-  author: {
-    '@type': 'Organization',
-    name: 'YAHSHUA HRIS Team',
-    url: 'https://yahshuahris.com',
-  },
-  publisher: {
-    '@type': 'Organization',
-    name: 'YAHSHUA HRIS',
-    url: 'https://yahshuahris.com',
-    logo: {
-      '@type': 'ImageObject',
-      url: 'https://yahshuahris.com/logo.png',
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": "https://yahshuahris.com/blog/philippine-holiday-pay-computation-guide#article",
+      "headline": "Philippine Holiday Pay Computation: A Complete Employer Guide",
+      "description": "Correct holiday pay rates for regular and special non-working holidays in the Philippines. Includes computation table, common employer mistakes, and DOLE compliance requirements.",
+      "image": "https://yahshuahris.com/blog/philippine-holiday-pay.png",
+      "datePublished": "2026-06-10T00:00:00.000Z",
+      "dateModified": "2026-06-10T00:00:00.000Z",
+      "author": {
+        "@type": "Organization",
+        "name": "YAHSHUA HRIS Team",
+        "url": "https://yahshuahris.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "YAHSHUA HRIS",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://yahshuahris.com/logo.png"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://yahshuahris.com/blog/philippine-holiday-pay-computation-guide"
+      },
+      "keywords": "holiday pay Philippines, regular holiday, special non-working holiday, DOLE compliance, payroll Philippines"
     },
-  },
-  datePublished: '2026-06-10',
-  dateModified: '2026-06-10',
-  url: 'https://yahshuahris.com/blog/philippine-holiday-pay-computation-guide',
-  mainEntityOfPage: 'https://yahshuahris.com/blog/philippine-holiday-pay-computation-guide',
-  keywords: 'holiday pay Philippines, regular holiday, special non-working holiday, DOLE compliance, payroll Philippines',
-  articleSection: 'DOLE Compliance',
-  inLanguage: 'en-PH',
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://yahshuahris.com/blog/philippine-holiday-pay-computation-guide#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://yahshuahris.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://yahshuahris.com/blog"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Philippine Holiday Pay Computation Guide",
+          "item": "https://yahshuahris.com/blog/philippine-holiday-pay-computation-guide"
+        }
+      ]
+    }
+  ]
 };
 
 const HolidayPayComputationPage = () => {

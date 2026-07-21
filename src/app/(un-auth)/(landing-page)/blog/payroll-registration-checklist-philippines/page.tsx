@@ -131,6 +131,30 @@ const jsonLd = {
           }
         }
       ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://yahshuahris.com/blog/payroll-registration-checklist-philippines#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://yahshuahris.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://yahshuahris.com/blog"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Philippine Business Payroll Setup Checklist",
+          "item": "https://yahshuahris.com/blog/payroll-registration-checklist-philippines"
+        }
+      ]
     }
   ]
 };

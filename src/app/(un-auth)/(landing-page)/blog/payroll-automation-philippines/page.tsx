@@ -99,6 +99,30 @@ const jsonLd = {
           }
         }
       ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://yahshuahris.com/blog/payroll-automation-philippines#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://yahshuahris.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://yahshuahris.com/blog"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Your Payroll Is a Message to Your Team",
+          "item": "https://yahshuahris.com/blog/payroll-automation-philippines"
+        }
+      ]
     }
   ]
 };
