@@ -39,9 +39,6 @@ function useUnassignEmployeeFromNode() {
         queryClient.invalidateQueries(['orgStructurePositionEmployees']);
         queryClient.invalidateQueries(['employerProfileCache']);
       },
-      onError: (error: Error) => {
-        console.error('Failed to unassign employee:', error);
-      },
     }
   );
 

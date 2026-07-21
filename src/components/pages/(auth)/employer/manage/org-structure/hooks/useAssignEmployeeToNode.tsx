@@ -44,9 +44,6 @@ function useAssignEmployeeToNode() {
         queryClient.invalidateQueries(['orgStructurePositionEmployees']);
         queryClient.invalidateQueries(['employerProfileCache']);
       },
-      onError: (error: Error) => {
-        console.error('Failed to assign employee:', error);
-      },
     }
   );
 
