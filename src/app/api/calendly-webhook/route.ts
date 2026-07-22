@@ -768,7 +768,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  if (payload.event === 'invitee.cancelled') {
+  if (payload.event === 'invitee.canceled' || payload.event === 'invitee.cancelled') {
     const data = parsePayload(payload.payload);
     if (!data) return NextResponse.json({ received: true });
     const assignee = await updateSheetCancellation(data.email);
