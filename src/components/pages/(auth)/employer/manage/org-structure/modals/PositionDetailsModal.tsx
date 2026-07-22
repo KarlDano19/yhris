@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon, StarIcon, MagnifyingGlassIcon, UserPlusIcon, XMarkIcon } from '@heroicons/react/24/solid';
@@ -55,12 +56,35 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
   // searches company-wide.
   const [assignSearch, setAssignSearch] = useState('');
   const [showAssignResults, setShowAssignResults] = useState(false);
+  const assignInputRef = useRef<HTMLInputElement>(null);
+  const [assignDropdownPosition, setAssignDropdownPosition] = useState({ top: -9999, left: -9999, width: 0 });
   const { data: assignSearchData, isLoading: isAssignSearchLoading } = useGetEmployeePaginatedSelect(
     showAssignResults
       ? { search: assignSearch, page_size: 50, department_id: data.nearest_department_id || undefined }
       : null
   );
   const assignSearchResults = assignSearchData?.records || [];
+
+  // Keep the assign-employee dropdown positioned against the input's viewport
+  // rect (rendered via portal) so it isn't clipped by the modal's overflow.
+  const updateAssignDropdownPosition = () => {
+    if (assignInputRef.current) {
+      const rect = assignInputRef.current.getBoundingClientRect();
+      setAssignDropdownPosition({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  };
+
+  useEffect(() => {
+    if (!showAssignResults) return;
+    updateAssignDropdownPosition();
+
+    window.addEventListener('scroll', updateAssignDropdownPosition, true);
+    window.addEventListener('resize', updateAssignDropdownPosition);
+    return () => {
+      window.removeEventListener('scroll', updateAssignDropdownPosition, true);
+      window.removeEventListener('resize', updateAssignDropdownPosition);
+    };
+  }, [showAssignResults]);
 
   // Debounce search input for autocomplete (2 seconds like employee list)
   useEffect(() => {
@@ -370,6 +394,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                       </p>
                       <div className="relative max-w-md">
                         <input
+                          ref={assignInputRef}
                           type="text"
                           placeholder="Search employees to assign..."
                           autoComplete="off"
@@ -382,8 +407,15 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                           onBlur={() => setTimeout(() => setShowAssignResults(false), 150)}
                           className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                         />
-                        {showAssignResults && (
-                          <ul className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto shadow-lg">
+                        {showAssignResults && typeof document !== 'undefined' && createPortal(
+                          <ul
+                            className="fixed z-[9999] bg-white border border-gray-300 rounded-md max-h-60 overflow-y-auto shadow-lg"
+                            style={{
+                              top: assignDropdownPosition.top,
+                              left: assignDropdownPosition.left,
+                              width: assignDropdownPosition.width,
+                            }}
+                          >
                             {isAssignSearchLoading ? (
                               <li className="px-3 py-4 text-center">
                                 <LoadingSpinner size="sm" color="yellow" text="Searching employees..." showText className="py-2" />
@@ -410,7 +442,8 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                             ) : (
                               <li className="px-3 py-4 text-center text-sm text-gray-500">No employees found</li>
                             )}
-                          </ul>
+                          </ul>,
+                          document.body
                         )}
                       </div>
                     </div>
