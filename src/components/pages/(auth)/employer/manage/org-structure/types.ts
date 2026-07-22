@@ -74,6 +74,7 @@ export interface PositionDetailsModalProps {
   primaryEmployee?: Employee;
   isVisible: boolean;
   onClose: () => void;
+  onBack?: () => void; // Optional back navigation to the previous (action) modal
   departmentFilter?: string; // Optional department filter to apply to employee list
 }
 
