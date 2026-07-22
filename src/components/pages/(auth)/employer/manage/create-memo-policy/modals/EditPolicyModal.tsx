@@ -29,11 +29,13 @@ export default function EditPolicyModal({
   setIsOpen,
   directiveId,
   refetch,
+  viewOnly = false,
 }: {
   isOpen: boolean;
   setIsOpen: (v: boolean) => void;
   directiveId: number | null;
   refetch?: () => void;
+  viewOnly?: boolean;
 }) {
   const cancelButtonRef = useRef(null);
   const [isNextForm, setIsNextForm] = useState(false);
@@ -216,12 +218,101 @@ export default function EditPolicyModal({
             <TransitionChild as={Fragment} enter='ease-out duration-300' enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95' enterTo='opacity-100 translate-y-0 sm:scale-100' leave='ease-in duration-200' leaveFrom='opacity-100 translate-y-0 sm:scale-100' leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'>
               <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Policy</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>{viewOnly ? 'View Policy' : 'Edit Policy'}</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 {!isPolicyDetailsReady ? (
                   <div className='flex min-h-[560px] items-center justify-center'>
                     <LoadingSpinner size='xl' showText text='Loading policy details...' />
+                  </div>
+                ) : viewOnly ? (
+                  <div>
+                    <div className='px-4 pt-4 pb-6'>
+                      <div className='sm:col-span-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>Title</label>
+                        <div className='mt-2'>
+                          <input value={watch('title') || ''} disabled type='text' className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' />
+                        </div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>To</label>
+                        <div className='mt-2 flex rounded-md shadow-sm'>
+                          <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                            <EmailField
+                              tags={tagsTo}
+                              inputValue={''}
+                              onInputChange={() => {}}
+                              onInputFocus={() => {}}
+                              onInputBlur={() => {}}
+                              onKeyDown={() => {}}
+                              onEmployeeSelect={() => {}}
+                              onRemoveTag={() => {}}
+                              showTooltip={false}
+                              tooltipId="to-section-tooltip"
+                              isFocused={false}
+                              disabled
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      {fields.map((item: any, index: number) => (
+                        <div className='sm:col-span-4 mt-4' key={index}>
+                          <label className='block text-sm font-medium leading-6 text-gray-900'>
+                            {watchedFields?.[index]?.inputLabel}
+                          </label>
+                          <div className='mt-2'>
+                            <textarea rows={4} value={watchedFields?.[index]?.inputName || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' />
+                          </div>
+                        </div>
+                      ))}
+                      <p className='font-bold my-4'>Provisions</p>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>Eligibility</label>
+                        <div className='mt-2'><textarea rows={3} value={watch('eligibility') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>Application</label>
+                        <div className='mt-2'><textarea rows={3} value={watch('application') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>Coverage</label>
+                        <div className='mt-2'><textarea rows={3} value={watch('coverage') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>Termination</label>
+                        <div className='mt-2'><textarea rows={3} value={watch('termination') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>Attachments</label>
+                        <div className='mt-2'>
+                          <div className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 text-center'>
+                            {existingAttachments.length > 0 ? (
+                              <div>
+                                <p className='text-xs text-gray-600 mb-2'>Attachments:</p>
+                                {existingAttachments.map((att) => (
+                                  <div key={att.id} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
+                                    <div className='flex-1 min-w-0'>
+                                      <p className='text-sm text-slate-800 font-light truncate' title={att.attachment_name}>
+                                        {att.attachment_name}
+                                      </p>
+                                    </div>
+                                    <a href={att.attachment} target='_blank' rel='noopener noreferrer' className='cursor-pointer ml-2'>
+                                      <EyePassword visible />
+                                    </a>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className='text-sm text-gray-400'>No attachments</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr />
+                    <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4 mb-4'>
+                      <button type='button' className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto' onClick={() => setIsOpen(false)}>Close</button>
+                    </div>
                   </div>
                 ) : !isNextForm ? (
                   <div className="policy-form-step-1">
