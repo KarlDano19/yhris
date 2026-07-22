@@ -190,6 +190,12 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
     setClickedNodeId(null);
   };
 
+  // Handle going back from details modal to the action modal
+  const handleBackToActionModal = () => {
+    setShowDetailsModal(false);
+    setShowActionModal(true);
+  };
+
   // Handle checkbox toggle
   const handleCheckboxToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -413,6 +419,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
         primaryEmployee={primaryEmployee}
         isVisible={showDetailsModal}
         onClose={handleCloseDetailsModal}
+        onBack={handleBackToActionModal}
         departmentFilter={departmentFilter}
       />
       
