@@ -215,6 +215,7 @@ export type T_Investigation = {
   employee_issue: string;
   date: string;
   presider: string;
+  presiderId?: number | null;
   witness: string;
   resultOfInvestigation: string;
   decision: string;
