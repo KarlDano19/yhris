@@ -194,12 +194,12 @@ async function getGoogleAccessToken(scope: string): Promise<string | null> {
   return access_token ?? null;
 }
 
-// ─── AI Lead Scoring (Tavily + Claude) ───────────────────────────────────────
+// ─── AI Lead Scoring (Exa + Claude) ──────────────────────────────────────────
 async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
-  const tavilyKey = process.env.TAVILY_API_KEY;
+  const exaKey = process.env.EXA_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-  if (!tavilyKey || !anthropicKey) throw new Error('Missing TAVILY_API_KEY or ANTHROPIC_API_KEY');
+  if (!exaKey || !anthropicKey) throw new Error('Missing EXA_API_KEY or ANTHROPIC_API_KEY');
 
   const fullName = `${data.firstName} ${data.lastName}`;
   const companyHint = data.companyName || data.email.split('@')[1];
@@ -212,52 +212,42 @@ async function scoreLeadWithIntel(data: LeadData): Promise<ScoringResult> {
   const personQuery1 = `"${fullName}" "${companyHint}" Philippines`;
   const personQuery2 = `"${emailUsername}" site:linkedin.com OR "${fullName}" site:linkedin.com "${companyHint}"`;
 
-  type TavilyResult = { title: string; content: string; url: string };
+  type ExaResult = { title: string; text: string; url: string };
 
-  const tavilySearch = (query: string) =>
-    fetch('https://api.tavily.com/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        api_key: tavilyKey,
-        query,
-        search_depth: 'basic',
-        max_results: 3,
-        include_answer: true,
-      }),
-    }).then(r => r.ok ? r.json() : null);
+  const Exa = (await import('exa-js')).default;
+  const exa = new Exa(exaKey);
 
-  const [companyTavily, personTavily1, personTavily2] = await Promise.all([
-    tavilySearch(companyQuery),
-    tavilySearch(personQuery1),
-    tavilySearch(personQuery2),
+  const exaSearch = (query: string): Promise<ExaResult[]> =>
+    exa.searchAndContents(query, { numResults: 3, text: true })
+      .then(r => r.results as ExaResult[])
+      .catch(() => []);
+
+  const [companyResults, personResults1, personResults2] = await Promise.all([
+    exaSearch(companyQuery),
+    exaSearch(personQuery1),
+    exaSearch(personQuery2),
   ]);
 
   const nameLower = fullName.toLowerCase();
   const companyLower = companyHint.toLowerCase();
 
-  const isValidPersonResult = (r: TavilyResult) => {
-    const text = `${r.title} ${r.content}`.toLowerCase();
+  const isValidPersonResult = (r: ExaResult) => {
+    const text = `${r.title} ${r.text}`.toLowerCase();
     return text.includes(nameLower) && text.includes(companyLower);
   };
 
-  const allPersonResults: TavilyResult[] = [
-    ...(personTavily1?.results ?? []),
-    ...(personTavily2?.results ?? []),
-  ];
+  const allPersonResults: ExaResult[] = [...personResults1, ...personResults2];
 
   const validatedPersonResults = allPersonResults.filter(isValidPersonResult);
   const personValidated = validatedPersonResults.length > 0;
 
-  const buildContext = (results: TavilyResult[], answer?: string) => [
-    answer ? `Summary: ${answer}` : '',
-    ...results.map(r => `Source: ${r.title}\n${r.content}\nURL: ${r.url}`),
-  ].filter(Boolean).join('\n\n');
+  const buildContext = (results: ExaResult[]) =>
+    results.map(r => `Source: ${r.title}\n${r.text}\nURL: ${r.url}`).join('\n\n');
 
-  const searchContext = buildContext(companyTavily?.results ?? [], companyTavily?.answer);
+  const searchContext = buildContext(companyResults);
   const personContext = personValidated ? buildContext(validatedPersonResults) : '';
 
-  const companyResources: string[] = (companyTavily?.results ?? []).map((r: TavilyResult) => r.url).filter(Boolean);
+  const companyResources: string[] = companyResults.map(r => r.url).filter(Boolean);
   const personResources: string[] = validatedPersonResults.map(r => r.url).filter(Boolean);
 
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
