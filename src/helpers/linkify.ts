@@ -19,9 +19,12 @@ export const linkify = (text: string): string => {
 
   const normalized = normalizeNbsp(text);
 
-  // Convert plain URLs to links (skip if already inside <a> tags)
-  const withLinks = normalized.split(/(<a[^>]*>.*?<\/a>)/gi).map(part =>
-    part.startsWith('<a') ? part : part.replace(/(https?:\/\/[^\s<>"]+)/g,
+  // Split into HTML tags vs. plain text segments, and only linkify the plain text
+  // segments — never text inside a tag's attributes (e.g. <img src="https://...">),
+  // otherwise a URL there gets a whole <a> tag injected inside the attribute value,
+  // corrupting the markup (broken <img>, stray "> text visible on the page).
+  const withLinks = normalized.split(/(<[^>]+>)/g).map(part =>
+    part.startsWith('<') ? part : part.replace(/(https?:\/\/[^\s<>"]+)/g,
       `<a href="$1" target="_blank" rel="noopener noreferrer" class="${linkClass}">$1</a>`)
   ).join('');
 

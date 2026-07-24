@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -11,7 +11,7 @@ import { Tooltip } from 'react-tooltip';
 import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ReactQuill from '@/components/ReactQuillDynamic';
+import ReactQuill from '@/components/ReactQuillResizableDynamic';
 import useUpdateDirective from '../hooks/useUpdateDirective';
 import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
 import SignatureModal from './SignatureModal';
@@ -45,6 +45,7 @@ export default function EditMemoModal({
   viewOnly?: boolean;
 }) {
   const cancelButtonRef = useRef(null);
+  const bodyQuillRef = useRef<any>(null);
   const [signatureUrl, setSignatureUrl] = useState<string>('');
   const [signatureModalOpen, setSignatureModalOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -126,7 +127,6 @@ export default function EditMemoModal({
         toast.custom(() => <CustomToast message={'Successfully updated memo'} type='success' />, { duration: 5000 });
         setIsOpen(false);
         if (refetch) refetch();
-        reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
         setTagsTo([]);
@@ -231,6 +231,58 @@ export default function EditMemoModal({
   const handleRemoveFile = (index: number) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
+
+  // Memo body formats/toolbar: extends the shared Quill config with an image button,
+  // instead of changing the shared QUILL_MODULES/QUILL_FORMATS (used by ~28 other
+  // editors in the app). Images are embedded as base64 while drafting (same 5mb limit
+  // as attachments/QR code); on submit, useUpdateDirective extracts them and sends them
+  // alongside this same update request as `inline_images` — the backend uploads them,
+  // ties them to the directive, and swaps the body's base64 src for the resulting
+  // storage path, all in that one request/response cycle.
+  const memoQuillFormats = useMemo(() => [...QUILL_FORMATS, 'image'], []);
+  const memoQuillModules = useMemo(() => ({
+    toolbar: {
+      container: [...QUILL_MODULES.toolbar, ['image']],
+      handlers: {
+        image: function imageHandler(this: { quill: any }) {
+          const quill = this.quill;
+          const input = document.createElement('input');
+          input.setAttribute('type', 'file');
+          input.setAttribute('accept', 'image/*');
+          input.click();
+          input.onchange = () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+              toast.custom(() => <CustomToast message={'Maximum image size is 5mb.'} type='error' />, {
+                duration: 5000,
+              });
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+              const range = quill.getSelection(true);
+              quill.insertEmbed(range.index, 'image', reader.result, 'user');
+              quill.setSelection(range.index + 1);
+            };
+            reader.readAsDataURL(file);
+          };
+        },
+      },
+    },
+    resize: {
+      modules: ['Resize', 'DisplaySize'],
+      // quill-resize-module mutates the image's width/height directly on the DOM,
+      // bypassing Quill's own change events entirely — react-quill-new is a controlled
+      // component, so without this its next re-render's shouldComponentUpdate would see
+      // our (stale, pre-resize) `value` prop differ from the actual editor content and
+      // snap the DOM back to the stale value, silently undoing the resize.
+      onChangeSize: () => {
+        const editor = bodyQuillRef.current?.getEditor?.();
+        if (editor) setValue('body', editor.root.innerHTML);
+      },
+    },
+  }), []);
 
   // Clear errors when title changes
   const titleValue = watch('title');
@@ -416,12 +468,13 @@ export default function EditMemoModal({
                       <label htmlFor='body' className='block text-sm font-medium leading-6 text-gray-900'>
                         Body
                       </label>
-                      <div className='mt-2 h-72 mb-12'>
+                      <div className='mt-2 h-72 min-h-[18rem] mb-12 resize-y overflow-hidden memo-quill-resize-clip'>
                         <textarea rows={4} {...register('body')} id='body' hidden />
                         <ReactQuill
-                          onChange={(value) => setValue('body', value)}
-                          formats={QUILL_FORMATS}
-                          modules={QUILL_MODULES}
+                          ref={bodyQuillRef}
+                          onChange={(value: string) => setValue('body', value)}
+                          formats={memoQuillFormats}
+                          modules={memoQuillModules}
                           style={{ height: '100%', padding: '5px 8px !important' }}
                           value={watch('body') || ''}
                           readOnly={viewOnly}
