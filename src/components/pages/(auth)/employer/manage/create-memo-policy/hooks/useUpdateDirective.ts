@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 import { DirectiveData } from '@/types/directives';
+import { extractInlineImageFiles } from './extractInlineImageFiles';
 
 async function updateDirective(directive: DirectiveData) {
   try {
@@ -26,6 +27,14 @@ async function updateDirective(directive: DirectiveData) {
       if (directive.body !== undefined) formData.append('body', directive.body);
       if (directive.name !== undefined) formData.append('name', directive.name);
       if (directive.position !== undefined) formData.append('position', directive.position);
+
+      // Any images embedded (as base64) in the body get uploaded alongside this same
+      // request — the backend ties them to the directive and swaps the body's base64
+      // src for the resulting storage path.
+      if (directive.body) {
+        const inlineImageFiles = await extractInlineImageFiles(directive.body);
+        inlineImageFiles.forEach((file) => formData.append('inline_images', file));
+      }
       if (directive.signature) {
         if (typeof directive.signature === 'string' && directive.signature.length) {
           const signatureBlob = await fetch(directive.signature).then((res) => res.blob());
