@@ -512,7 +512,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
       <>
         {applicantProfile.work_experience.map((exp: any) => {
           return (
-            <div key={exp.id} className='flex mt-8 overflow-y-auto'>
+            <div key={exp.id} className='flex mt-8'>
               <div className='mr-3'>
                 <StarIcon className='h-6 w-6 text-blue-700' />
               </div>
