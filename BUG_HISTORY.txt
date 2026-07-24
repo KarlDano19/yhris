@@ -109,6 +109,82 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-035
+DATE FILED: 2026-07-24
+DATE FIXED: 2026-07-24
+REPORTER: Internal (Linear I-619), Offboarding module
+
+ISSUE DESCRIPTION:
+  Two related rich-text rendering issues:
+
+  1. Separation letters — Text in generated offboarding letters (Letter of
+     Acceptance of Resignation / Letter of Separation) ran off the right edge
+     of the PDF page instead of wrapping. Body paragraphs were clipped at the
+     page boundary and one even broke mid-word ("endea/vors"), while the
+     manually typed signer line wrapped fine. It looked correct in the editor
+     and only broke in the generated PDF, and only after the letter content had
+     been edited in the rich-text editor.
+
+     Root cause: ReactQuill (react-quill-new / Quill 2.0) serializes every
+     regular space in its content as a NON-BREAKING space (U+00A0 / &nbsp;).
+     The letter template contains zero &nbsp; — Quill injects them on
+     load/re-serialize. WeasyPrint (backend PDF renderer) cannot break a line
+     at a non-breaking space, so each paragraph became one unbreakable token
+     that overflowed the fixed page width. The freshly typed signer line used
+     real spaces, which is why it alone wrapped.
+
+  2. Safety & Health Policy editor — Bulleted and numbered lists rendered two
+     markers per item (e.g. "• •" or a doubled number). Quill 2.0 renders its
+     list markers via the .ql-ui span (li > .ql-ui::before), whereas the
+     existing CSS hid the Quill 1.x marker (ul > li::before). Since we render
+     our own native list-style markers, Quill's own markers were no longer
+     hidden and showed on top of ours.
+
+DESIRED OUTCOME:
+  Separation letter body text should wrap within the PDF page margins
+  regardless of how the content was authored/edited in Quill. Policy editor
+  lists should show exactly one marker per item.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/offboarding/modals/CreateSeparationLetterModal.tsx
+    (normalize U+00A0 and &nbsp; back to regular spaces in onSubmit before
+     sending the message to the backend)
+- src/components/pages/(auth)/employer/dole/safety-and-health-policy/styles.css
+    (updated the hidden-marker selector from ul > li::before to
+     li > .ql-ui::before for Quill 2.0, so native markers aren't doubled)
+
+Backend (see backend BUG_HISTORY HRIS-2026-033):
+- utils/separation_letter.py (render-time nbsp normalization safety-net)
+- utils/safety_and_health_policy.py (same nbsp normalization + wrap CSS)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Verified in backend BUG_HISTORY HRIS-2026-033 (re-rendered PDF, all lines
+  within page width, no mid-word breaks)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Edge cases considered (Quill-injected nbsp runs; Quill 2.0 vs 1.x list
+  marker markup)
+☐ Manual browser verification (recommended): generate an Acceptance and a
+  Separation letter after editing content in Quill; confirm PDF wraps
+☐ Manual browser verification (recommended): create bulleted and numbered
+  lists in the Safety & Health Policy editor; confirm a single marker per item
+
+FIX EXPLANATION:
+  For the letter overflow, the real defect is content, not layout: Quill emits
+  non-breaking spaces where normal spaces belong, leaving paragraphs with no
+  legal break points for the renderer. The frontend normalizes U+00A0 and the
+  &nbsp; entity back to regular spaces at submit time so newly saved content is
+  clean; the backend does the same at render time so already-saved letters
+  render correctly without a data migration. For the doubled list markers, the
+  hidden-marker CSS selector was updated to target Quill 2.0's .ql-ui span so
+  our native list markers are the only ones shown.
+
+================================================================================
+
 BUG ID: HRIS-2026-034
 DATE FILED: 2026-07-17
 DATE FIXED: 2026-07-17
