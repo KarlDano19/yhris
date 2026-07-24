@@ -1,5 +1,8 @@
-/* Hide Quill's custom bullet points */
-.quill-editor-container .ql-editor ul > li::before {
+/* Hide Quill's built-in list markers. Quill 2.0 renders bullets/numbers via the
+   .ql-ui span (not ul > li::before like Quill 1.x did). Since we render native
+   list-style markers below (list-style-type: disc/decimal), Quill's own markers
+   must be hidden to avoid doubled bullets/numbers (e.g. "• •"). */
+.quill-editor-container .ql-editor li > .ql-ui::before {
   display: none !important;
 }
 

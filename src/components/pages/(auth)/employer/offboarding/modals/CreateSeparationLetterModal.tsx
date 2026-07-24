@@ -89,10 +89,17 @@ export default function CreateSeparationLetterModal({
   const onSubmit = (data: FormData) => {
     setIsSubmitting(true);
 
+    // ReactQuill (Quill 2.0) serializes spaces as non-breaking spaces (  / &nbsp;).
+    // These prevent the PDF renderer from wrapping lines, causing text to overflow the
+    // page. Normalize them back to regular spaces so the letter body wraps correctly.
+    const normalizedMessage = data.message
+      .replace(/\u00a0/g, ' ')
+      .replace(/&nbsp;/g, ' ');
+
     generateLetter({
       separation_id: separationId,
       letter_type: letterType,
-      message: data.message,
+      message: normalizedMessage,
       approved_by: data.approvedBy
     }, {
       onSuccess: (responseData) => {
