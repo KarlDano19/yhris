@@ -12,13 +12,16 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '@/components/ConfirmModal';
 import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import useGetBenefitItems from './hooks/useGetBenefitItems';
+import useResendBenefit from './hooks/useResendBenefit';
 import DesignBenefitsModal from './modals/DesignBenefitsModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 import classNames from '@/helpers/classNames';
 
@@ -52,8 +55,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
   const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
-  
+
   const [isSearching, setIsSearching] = useState(false);
+
+  const [selectedBenefitId, setSelectedBenefitId] = useState<number | null>(null);
+  const [isResendConfirmOpen, setIsResendConfirmOpen] = useState(false);
+  const { mutate: resendBenefit, isLoading: isResending, variables: resendingBenefitId } = useResendBenefit();
+
+  const openResendConfirm = (benefitId: number) => {
+    setSelectedBenefitId(benefitId);
+    setIsResendConfirmOpen(true);
+  };
+
+  const handleConfirmResend = () => {
+    if (!selectedBenefitId) return;
+    resendBenefit(selectedBenefitId, {
+      onSuccess: () => {
+        setIsResendConfirmOpen(false);
+        toast.custom(() => <CustomToast message='Benefit email resent successfully.' type='success' />, { duration: 5000 });
+      },
+      onError: (error: any) => {
+        setIsResendConfirmOpen(false);
+        toast.custom(() => <CustomToast message={error?.message || 'Failed to resend benefit email.'} type='error' />, { duration: 5000 });
+      },
+    });
+  };
 
   useEffect(() => {
     if (dataBenefits) {
@@ -148,6 +174,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.title}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.purpose}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.eligibility}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button
+              type='button'
+              className='inline-flex items-center justify-center rounded p-1.5 border border-[#3d6cee9f] text-savoy-blue hover:bg-gray-50 disabled:opacity-50'
+              onClick={() => openResendConfirm(item.id)}
+              disabled={isResending && resendingBenefitId === item.id}
+              data-tooltip-id='resend-benefit-tooltip'
+              data-tooltip-content='Resend email'
+              data-tooltip-place='top'
+            >
+              {isResending && resendingBenefitId === item.id ? (
+                <LoadingSpinner size='xs' color='blue' />
+              ) : (
+                <ArrowPathIcon className='w-5 h-5' />
+              )}
+            </button>
+          </td>
         </tr>
       ));
     } else {
@@ -269,6 +312,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Eligibility
                       </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
@@ -298,7 +344,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
+      <ConfirmModal
+        message='Are you sure you want to resend this benefit email?'
+        isOpen={isResendConfirmOpen}
+        setIsOpen={setIsResendConfirmOpen}
+        confirmAction={handleConfirmResend}
+        isLoading={isResending}
+      />
+
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='resend-benefit-tooltip' />
     </>
   );
 };

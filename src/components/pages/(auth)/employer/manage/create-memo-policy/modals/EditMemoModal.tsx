@@ -36,11 +36,13 @@ export default function EditMemoModal({
   setIsOpen,
   directiveId,
   refetch,
+  viewOnly = false,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   directiveId: number | null;
   refetch?: any;
+  viewOnly?: boolean;
 }) {
   const cancelButtonRef = useRef(null);
   const [signatureUrl, setSignatureUrl] = useState<string>('');
@@ -333,7 +335,7 @@ export default function EditMemoModal({
             >
               <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Memo</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>{viewOnly ? 'View Memo' : 'Edit Memo'}</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 {!isMemoDetailsReady ? (
@@ -355,9 +357,9 @@ export default function EditMemoModal({
                       <div className='mt-2'>
                         <input
                           id='title'
-                          {...register('title', { required: true })}
+                          {...register('title', { required: true, disabled: viewOnly })}
                           type='text'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 disabled:bg-gray-100'
                         />
                       </div>
                     </div>
@@ -366,7 +368,7 @@ export default function EditMemoModal({
                           <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             To<span className='text-red-600'>*</span>
                           </label>
-                          {tagsTo.length > 1 && (
+                          {!viewOnly && tagsTo.length > 1 && (
                             <button
                               type='button'
                               className='text-xs text-red-600 hover:text-red-800 hover:underline'
@@ -405,6 +407,7 @@ export default function EditMemoModal({
                               showTooltip={showTooltip}
                               tooltipId="to-section-tooltip"
                               isFocused={isToFocused}
+                              disabled={viewOnly}
                             />
                           </div>
                         </div>
@@ -421,6 +424,7 @@ export default function EditMemoModal({
                           modules={QUILL_MODULES}
                           style={{ height: '100%', padding: '5px 8px !important' }}
                           value={watch('body') || ''}
+                          readOnly={viewOnly}
                         />
                       </div>
                     </div>
@@ -445,6 +449,7 @@ export default function EditMemoModal({
                             setEmployeeSelected={setEmployeeSelected}
                             employeeName={data?.name || ''}
                             className=""
+                            disabled={viewOnly}
                             onChange={(selectedOption: any) => {
                               if (selectedOption && !selectedOption.isShowMore) {
                                 setEmployeeSearch(selectedOption.label);
@@ -498,7 +503,8 @@ export default function EditMemoModal({
                         <button
                           id='draw'
                           type='button'
-                          className={`block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
+                          disabled={viewOnly}
+                          className={`block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 disabled:opacity-50 disabled:cursor-not-allowed ${
                             signatureUrl ? 'bg-savoy-blue text-white ' : ''
                           }`}
                           onClick={() => {
@@ -514,8 +520,10 @@ export default function EditMemoModal({
                         <input
                           id='signature'
                           type='file'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                          disabled={viewOnly}
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100 disabled:opacity-50'
                           {...register('signature', {
+                            disabled: viewOnly,
                             onChange: (e) => {
                               if (e.target.files && e.target.files.length > 0) {
                                 setSignatureUrl('');
@@ -526,7 +534,7 @@ export default function EditMemoModal({
                             }
                           })}
                         />
-                        {signatureFileExist && (
+                        {!viewOnly && signatureFileExist && (
                           <button
                             type='button'
                             className='underline text-savoy-blue text-sm mt-1'
@@ -566,8 +574,9 @@ export default function EditMemoModal({
                             id='qr_code'
                             ref={qrCodeInputRef}
                             type='file'
+                            disabled={viewOnly}
                             onChange={uploadOnChange}
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100 disabled:opacity-50'
                           />
                           {qrCodeUrl && !toSaveData?.qr_code && (
                             <div className='mt-2 flex items-center gap-2'>
@@ -577,7 +586,7 @@ export default function EditMemoModal({
                               <span className='text-xs text-gray-500'>Existing QR Code</span>
                             </div>
                           )}
-                          {qrCodeExist ? (
+                          {!viewOnly && qrCodeExist ? (
                             <button
                               type='button'
                               className='underline text-savoy-blue text-sm mt-1'
@@ -603,10 +612,10 @@ export default function EditMemoModal({
                         </label>
                         <div className='mt-2'>
                           <div
-                            onDragEnter={handleDrag}
-                            onDragLeave={handleDrag}
-                            onDragOver={handleDrag}
-                            onDrop={handleDrop}
+                            onDragEnter={viewOnly ? undefined : handleDrag}
+                            onDragLeave={viewOnly ? undefined : handleDrag}
+                            onDragOver={viewOnly ? undefined : handleDrag}
+                            onDrop={viewOnly ? undefined : handleDrop}
                             className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                           >
                             {existingAttachments.length > 0 && (
@@ -626,25 +635,30 @@ export default function EditMemoModal({
                                 ))}
                               </div>
                             )}
-                            <label
-                              className={`${
-                                files.length === 0
-                                  ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
-                                  : 'hidden'
-                              }`}
-                            >
-                              Drop files to upload or click to select
-                              <input
-                                name='attachments'
-                                id='attachments'
-                                ref={attachmentInputRef}
-                                type='file'
-                                multiple
-                                className='sr-only'
-                                onChange={handleAttachmentUpload}
-                                accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
-                              />
-                            </label>
+                            {!viewOnly && (
+                              <label
+                                className={`${
+                                  files.length === 0
+                                    ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
+                                    : 'hidden'
+                                }`}
+                              >
+                                Drop files to upload or click to select
+                                <input
+                                  name='attachments'
+                                  id='attachments'
+                                  ref={attachmentInputRef}
+                                  type='file'
+                                  multiple
+                                  className='sr-only'
+                                  onChange={handleAttachmentUpload}
+                                  accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                                />
+                              </label>
+                            )}
+                            {viewOnly && existingAttachments.length === 0 && (
+                              <p className='text-sm text-gray-400'>No attachments</p>
+                            )}
 
                             {/* Show uploaded files */}
                             {files.length > 0 && (
@@ -682,7 +696,7 @@ export default function EditMemoModal({
                             )}
 
                             {/* Show "Add more files" option when files exist */}
-                            {files.length > 0 && (
+                            {!viewOnly && files.length > 0 && (
                               <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
                                 + Add more files
                                 <input
@@ -704,6 +718,7 @@ export default function EditMemoModal({
                   </div>
                   <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
+                    {!viewOnly && (
                     <button
                       onClick={async (e) => {
                         const titleValue = watch('title');
@@ -782,6 +797,7 @@ export default function EditMemoModal({
                       )}
                       {!updateMutation.isLoading && 'Save'}
                     </button>
+                    )}
                     <button
                       type='button'
                       className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'

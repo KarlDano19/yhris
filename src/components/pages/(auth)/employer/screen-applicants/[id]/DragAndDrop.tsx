@@ -1,5 +1,6 @@
 import React, { useContext, useMemo } from "react"
 import { DragDropContext, Draggable } from "@hello-pangea/dnd"
+import { Tooltip } from "react-tooltip"
 import { StrictModeDroppable } from "../layouts/StrictModeDroppable"
 import Stage from "./Stage"
 import { useParams } from "next/navigation";
@@ -65,48 +66,51 @@ export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefe
   }
 
   return (
-    <DragDropContext
-      onDragEnd={(result) => (
-        dragStage(result)
-      )}
-    >
-      <StrictModeDroppable droppableId="stage" direction="horizontal">
-        {(provided) => (
-          <ul
-            {...provided.droppableProps}
-            ref={(el) => {
-              provided.innerRef(el)
-              containerRef.current = el
-            }}
-            style={allStagesGridCols}
-            className="grid mb-4 overflow-auto transition-all pb-2.5"
-          >
-            {sortedStages.map((stage: StageType, index: number) => {
-              return (
-                <Draggable
-                  key={stage.id}
-                  draggableId={stage.id.toString()}
-                  index={index}
-                  isDragDisabled={stage.isNewStage || stage.is_final_stage}
-                >
-                  {(provided, snapshot) => (
-                    <Stage
-                      stage={stage}
-                      index={index}
-                      provided={provided}
-                      snapshot={snapshot}
-                      jobPostDetailsRefetch={jobPostDetailsRefetch}
-                      appliedApplicantRefetch={appliedApplicantRefetch}
-                      filters={filters}
-                    />
-                  )}
-                </Draggable>
-              )
-            })}
-            {provided.placeholder}
-          </ul>
+    <>
+      <DragDropContext
+        onDragEnd={(result) => (
+          dragStage(result)
         )}
-      </StrictModeDroppable>
-    </DragDropContext>
+      >
+        <StrictModeDroppable droppableId="stage" direction="horizontal">
+          {(provided) => (
+            <ul
+              {...provided.droppableProps}
+              ref={(el) => {
+                provided.innerRef(el)
+                containerRef.current = el
+              }}
+              style={allStagesGridCols}
+              className="grid mb-4 overflow-auto transition-all pb-2.5"
+            >
+              {sortedStages.map((stage: StageType, index: number) => {
+                return (
+                  <Draggable
+                    key={stage.id}
+                    draggableId={stage.id.toString()}
+                    index={index}
+                    isDragDisabled={stage.isNewStage || stage.is_final_stage}
+                  >
+                    {(provided, snapshot) => (
+                      <Stage
+                        stage={stage}
+                        index={index}
+                        provided={provided}
+                        snapshot={snapshot}
+                        jobPostDetailsRefetch={jobPostDetailsRefetch}
+                        appliedApplicantRefetch={appliedApplicantRefetch}
+                        filters={filters}
+                      />
+                    )}
+                  </Draggable>
+                )
+              })}
+              {provided.placeholder}
+            </ul>
+          )}
+        </StrictModeDroppable>
+      </DragDropContext>
+      <Tooltip id='stage-header-tooltip' style={{ fontSize: '10px' }} />
+    </>
   )
 }

@@ -9,6 +9,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useAddInvestigationReportItems from '../hooks/useAddInvestigationReportItems';
 import { formatDateToLocal } from '@/helpers/date';
 
@@ -47,6 +48,7 @@ export default function InvestigationModal({
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [presiderSearch, setPresiderSearch] = useState('');
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -101,6 +103,7 @@ export default function InvestigationModal({
     setToAddData(null);
     setFile(null);
     setIsDragActive(false);
+    setPresiderSearch('');
     setValue('attachments', undefined as unknown as T_Investigation['attachments']);
   };
 
@@ -316,11 +319,18 @@ export default function InvestigationModal({
                           Presider<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
-                          <input
-                            id='presider'
-                            {...register('presider', { required: true })}
-                            type='name'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          <input type='hidden' {...register('presider', { required: true })} />
+                          <EmployeeSelect
+                            control={control}
+                            name='presiderId'
+                            isMulti={false}
+                            isClearable={true}
+                            placeholder='Select presider...'
+                            employeeSearch={presiderSearch}
+                            setEmployeeSearch={setPresiderSearch}
+                            onChange={(selectedOption: any) => {
+                              setValue('presider', selectedOption ? selectedOption.label : '', { shouldValidate: true });
+                            }}
                           />
                         </div>
                         {errors.presider && (
