@@ -1,12 +1,18 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
+import { Tooltip } from 'react-tooltip';
 
 import BackButton from '@/components/BackButton';
 const SettingsOrgChart = dynamic(() => import('./components/SettingsOrgChart'), { ssr: false });
 import ZoomControls from './components/ZoomControls';
 import useGetOrgStructureSettings from './hooks/useGetOrgStructureSettings';
+
+// Versioned so the guide hint can be re-triggered later if its content changes significantly.
+const GUIDE_SEEN_KEY = 'org-structure-settings-guide-seen-v1';
 
 const Content = () => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -24,6 +30,25 @@ const Content = () => {
   
   // Check if there's any org structure data
   const hasOrgData = orgStructureData && Array.isArray(orgStructureData) && orgStructureData.length > 0;
+
+  // Auto-show the guide tooltip briefly on a user's first visit to this page,
+  // then close it for good (regardless of cursor position) - after that it's
+  // only shown via a genuine hover. Kept fully controlled (never `undefined`)
+  // because react-tooltip doesn't reliably re-derive hover state once a
+  // controlled `isOpen` prop reverts to uncontrolled - it can get stuck open.
+  const [autoShowGuide, setAutoShowGuide] = useState(false);
+  const [isHoveringGuide, setIsHoveringGuide] = useState(false);
+  useEffect(() => {
+    const alreadySeen = localStorage.getItem(GUIDE_SEEN_KEY) === 'true';
+    if (alreadySeen) return;
+
+    setAutoShowGuide(true);
+    const timer = setTimeout(() => {
+      setAutoShowGuide(false);
+      localStorage.setItem(GUIDE_SEEN_KEY, 'true');
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Zoom handlers
   const handleZoomIn = () => {
@@ -69,7 +94,22 @@ const Content = () => {
 
       <div className='px-2 md:px-8 lg:px-4 pb-4 border-b-2 flex-shrink-0'>
         <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Organizational Structure</h2>
+          <div className='flex items-center gap-1.5'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Organizational Structure</h2>
+            <InformationCircleIcon
+              className='h-5 w-5 text-gray-400 cursor-help'
+              data-tooltip-id='org-structure-settings-guide-tooltip'
+              data-tooltip-content='Positions can now be grouped under a Department node (shown as a dashed box) to organize the chart - add one via Edit mode alongside regular positions.'
+              data-tooltip-place='bottom'
+              onMouseEnter={() => setIsHoveringGuide(true)}
+              onMouseLeave={() => setIsHoveringGuide(false)}
+            />
+            <Tooltip
+              id='org-structure-settings-guide-tooltip'
+              className='max-w-xs z-50'
+              isOpen={autoShowGuide || isHoveringGuide}
+            />
+          </div>
 
           {/* Only show View/Edit button when there's org structure data and not in fullscreen */}
           {hasOrgData && !isLoading && !isFullscreen && (

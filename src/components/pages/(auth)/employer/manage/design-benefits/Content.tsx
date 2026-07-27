@@ -12,15 +12,18 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '@/components/ConfirmModal';
 import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import useGetBenefitItems from './hooks/useGetBenefitItems';
+import useResendBenefit from './hooks/useResendBenefit';
 import DesignBenefitsModal from './modals/DesignBenefitsModal';
 import ResendBenefitEmailModal from './modals/ResendBenefitEmailModal';
 import BenefitFilterPopover, { T_BenefitFilterValues } from './components/BenefitFilterPopover';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 import classNames from '@/helpers/classNames';
@@ -65,6 +68,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [resendModalBenefit, setResendModalBenefit] = useState<any>(null);
 
   const [isSearching, setIsSearching] = useState(false);
+
+  const [selectedBenefitId, setSelectedBenefitId] = useState<number | null>(null);
+  const [isResendConfirmOpen, setIsResendConfirmOpen] = useState(false);
+  const { mutate: resendBenefit, isLoading: isResending, variables: resendingBenefitId } = useResendBenefit();
+
+  const openResendConfirm = (benefitId: number) => {
+    setSelectedBenefitId(benefitId);
+    setIsResendConfirmOpen(true);
+  };
+
+  const handleConfirmResend = () => {
+    if (!selectedBenefitId) return;
+    resendBenefit(selectedBenefitId, {
+      onSuccess: () => {
+        setIsResendConfirmOpen(false);
+        toast.custom(() => <CustomToast message='Benefit email resent successfully.' type='success' />, { duration: 5000 });
+      },
+      onError: (error: any) => {
+        setIsResendConfirmOpen(false);
+        toast.custom(() => <CustomToast message={error?.message || 'Failed to resend benefit email.'} type='error' />, { duration: 5000 });
+      },
+    });
+  };
 
   useEffect(() => {
     if (dataBenefits) {
