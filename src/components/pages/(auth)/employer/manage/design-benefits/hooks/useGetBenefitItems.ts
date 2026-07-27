@@ -8,6 +8,10 @@ async function getBenefitItems(filters: any) {
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
     if (!newFilters.from) delete newFilters.from;
     if (!newFilters.to) delete newFilters.to;
+    if (!newFilters.recipient_type || newFilters.recipient_type === 'all') delete newFilters.recipient_type;
+    if (!newFilters.department) delete newFilters.department;
+    if (!newFilters.position) delete newFilters.position;
+    if (!newFilters.employee_id) delete newFilters.employee_id;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -39,7 +43,18 @@ async function getBenefitItems(filters: any) {
 
 function useGetBenefitItems(filters: any) {
   const query = useQuery(
-    ['benefitsItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
+    [
+      'benefitsItemCache',
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to,
+      filters.recipient_type,
+      filters.department,
+      filters.position,
+      filters.employee_id,
+    ],
     () => getBenefitItems(filters),
     {
       refetchOnWindowFocus: false,
