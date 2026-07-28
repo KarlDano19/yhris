@@ -24,7 +24,6 @@ import BenefitFilterPopover, { T_BenefitFilterValues } from './components/Benefi
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 import classNames from '@/helpers/classNames';
 
