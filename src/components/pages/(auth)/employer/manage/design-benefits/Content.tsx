@@ -20,10 +20,11 @@ import useGetBenefitItems from './hooks/useGetBenefitItems';
 import useResendBenefit from './hooks/useResendBenefit';
 import DesignBenefitsModal from './modals/DesignBenefitsModal';
 import ResendBenefitEmailModal from './modals/ResendBenefitEmailModal';
+import ViewBenefitModal from './modals/ViewBenefitModal';
 import BenefitFilterPopover, { T_BenefitFilterValues } from './components/BenefitFilterPopover';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 import classNames from '@/helpers/classNames';
 
@@ -64,6 +65,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
   const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
   const [resendModalBenefit, setResendModalBenefit] = useState<any>(null);
+  const [viewModalBenefit, setViewModalBenefit] = useState<any>(null);
 
   const [isSearching, setIsSearching] = useState(false);
 
@@ -240,22 +242,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <tr key={item.id}>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
             {showNameColumn && (
-              <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{renderStackedColumn(recipientRows, 'name')}</td>
+              <td className='px-3 py-5 text-sm text-gray-500 whitespace-normal break-words'>{renderStackedColumn(recipientRows, 'name')}</td>
             )}
-            <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{renderStackedColumn(recipientRows, 'email')}</td>
+            <td className='px-3 py-5 text-sm text-gray-500 whitespace-normal break-words'>{renderStackedColumn(recipientRows, 'email')}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.title}</td>
-            <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.purpose}</td>
-            <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.eligibility}</td>
+            <td className='px-3 py-5 text-sm text-gray-500 max-w-0'>
+              <div className='truncate'>{item.purpose}</div>
+            </td>
+            <td className='px-3 py-5 text-sm text-gray-500 max-w-0'>
+              <div className='truncate'>{item.eligibility}</div>
+            </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-              <button
-                className='border rounded px-[0.65em] py-1 border-gray-500 text-black hover:bg-gray-100'
-                data-tooltip-id='resend-benefit-tooltip'
-                data-tooltip-content='Resend Email'
-                data-tooltip-place='bottom'
-                onClick={() => setResendModalBenefit(item)}
-              >
-                <ArrowPathIcon className='w-5 h-5' />
-              </button>
+              <div className='flex items-center justify-center gap-2'>
+                <button
+                  className='border rounded px-[0.65em] py-1 border-gray-500 text-black hover:bg-gray-100'
+                  data-tooltip-id='view-benefit-tooltip'
+                  data-tooltip-content='View Details'
+                  data-tooltip-place='bottom'
+                  onClick={() => setViewModalBenefit(item)}
+                >
+                  <EyeIcon className='w-5 h-5' />
+                </button>
+                <button
+                  className='border rounded px-[0.65em] py-1 border-gray-500 text-black hover:bg-gray-100'
+                  data-tooltip-id='resend-benefit-tooltip'
+                  data-tooltip-content='Resend Email'
+                  data-tooltip-place='bottom'
+                  onClick={() => setResendModalBenefit(item)}
+                >
+                  <ArrowPathIcon className='w-5 h-5' />
+                </button>
+              </div>
             </td>
           </tr>
         );
@@ -411,30 +428,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300 text-center'>
+                <table className='min-w-full table-fixed divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-24 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
                       {showNameColumn && (
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <th scope='col' className='w-40 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Employee Name
                         </th>
                       )}
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-40 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Sent to
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-32 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Title
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-64 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Purpose
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-64 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Eligibility
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-20 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Action
                       </th>
                     </tr>
@@ -477,7 +494,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
+      {viewModalBenefit && (
+        <ViewBenefitModal
+          isOpen={!!viewModalBenefit}
+          setIsOpen={(open: boolean) => {
+            if (!open) setViewModalBenefit(null);
+          }}
+          benefit={viewModalBenefit}
+        />
+      )}
+
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='view-benefit-tooltip'/>
       <Tooltip id='resend-benefit-tooltip'/>
     </>
   );
