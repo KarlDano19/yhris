@@ -43,7 +43,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     recipient_type: 'all',
     department: '',
     position: '',
-    employee_id: '',
   });
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'registered' | 'external'>('all');
@@ -171,7 +170,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setAppliedFilter((prev: any) => ({
       ...prev,
       recipient_type: activeTab,
-      ...(activeTab === 'external' ? { department: '', position: '', employee_id: '' } : {}),
+      ...(activeTab === 'external' ? { department: '', position: '' } : {}),
     }));
   }, [activeTab]);
 
@@ -196,7 +195,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       ...prev,
       department: vals.department !== 'ALL' ? vals.department : '',
       position: vals.position !== 'ALL' ? vals.position : '',
-      employee_id: vals.employeeId || '',
     }));
   };
 
@@ -368,7 +366,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for: Title/Purpose/Eligibility'
+                  data-tooltip-content='Search for specific column...'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setSearchText(e.target.value)}
@@ -403,7 +401,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     initial={{
                       department: appliedFilter.department || 'ALL',
                       position: appliedFilter.position || 'ALL',
-                      employeeId: appliedFilter.employee_id || undefined,
                     }}
                     onApply={handleApplyBenefitFilter}
                   />
