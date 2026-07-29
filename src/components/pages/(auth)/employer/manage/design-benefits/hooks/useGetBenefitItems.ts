@@ -11,7 +11,6 @@ async function getBenefitItems(filters: any) {
     if (!newFilters.recipient_type || newFilters.recipient_type === 'all') delete newFilters.recipient_type;
     if (!newFilters.department) delete newFilters.department;
     if (!newFilters.position) delete newFilters.position;
-    if (!newFilters.employee_id) delete newFilters.employee_id;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -53,7 +52,6 @@ function useGetBenefitItems(filters: any) {
       filters.recipient_type,
       filters.department,
       filters.position,
-      filters.employee_id,
     ],
     () => getBenefitItems(filters),
     {

@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useForm } from 'react-hook-form';
-
-import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 
@@ -12,7 +9,6 @@ import FilterIcon from '@/svg/FilterIcon';
 export type T_BenefitFilterValues = {
   department: string;
   position: string;
-  employeeId: number | undefined;
 };
 
 type ApiItem = { id: number; name: string };
@@ -42,8 +38,6 @@ const BenefitFilterPopover = ({
   onApply: (vals: T_BenefitFilterValues) => void;
 }) => {
   const [draft, setDraft] = useState<T_BenefitFilterValues>(initial);
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const employeeFormMethods = useForm();
 
   const { data: departmentItems, isLoading: isDeptLoading } = useGetDepartmentItems();
   const { data: positionItems, isLoading: isPosLoading } = useGetPositionItems();
@@ -54,21 +48,18 @@ const BenefitFilterPopover = ({
   useEffect(() => {
     if (open) {
       setDraft(initial);
-      employeeFormMethods.setValue('employeeId', initial.employeeId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const employeeId = employeeFormMethods.watch('employeeId');
   const anyLoading = isDeptLoading || isPosLoading;
 
   const handleReset = () => {
-    setDraft({ department: 'ALL', position: 'ALL', employeeId: undefined });
-    employeeFormMethods.setValue('employeeId', undefined);
+    setDraft({ department: 'ALL', position: 'ALL' });
   };
 
   const handleSearch = () => {
-    onApply({ ...draft, employeeId });
+    onApply(draft);
     onOpenChange(false);
   };
 
@@ -129,20 +120,6 @@ const BenefitFilterPopover = ({
                   <SelectChevronDown />
                 </div>
               </div>
-            </div>
-
-            {/* Employee */}
-            <div>
-              <label className='block text-xs font-semibold text-gray-800 mb-1'>Employee</label>
-              <EmployeeSelect
-                control={employeeFormMethods.control}
-                name='employeeId'
-                placeholder='Filter by employee...'
-                isMulti={false}
-                isClearable={true}
-                employeeSearch={employeeSearch}
-                setEmployeeSearch={setEmployeeSearch}
-              />
             </div>
 
             {/* Footer */}
