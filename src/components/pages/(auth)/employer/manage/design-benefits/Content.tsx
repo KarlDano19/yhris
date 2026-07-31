@@ -12,13 +12,19 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '@/components/ConfirmModal';
 import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import useGetBenefitItems from './hooks/useGetBenefitItems';
+import useResendBenefit from './hooks/useResendBenefit';
 import DesignBenefitsModal from './modals/DesignBenefitsModal';
+import ResendBenefitEmailModal from './modals/ResendBenefitEmailModal';
+import ViewBenefitModal from './modals/ViewBenefitModal';
+import BenefitFilterPopover, { T_BenefitFilterValues } from './components/BenefitFilterPopover';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 import classNames from '@/helpers/classNames';
 
@@ -35,8 +41,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     from: '',
     to: '',
     search: '',
+    recipient_type: 'all',
+    department: '',
+    position: '',
   });
   const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState<'all' | 'registered' | 'external'>('all');
+  const [showBenefitFilter, setShowBenefitFilter] = useState(false);
+  const filterRef = useRef<HTMLDivElement | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<{
@@ -52,8 +64,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
   const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
-  
+  const [resendModalBenefit, setResendModalBenefit] = useState<any>(null);
+  const [viewModalBenefit, setViewModalBenefit] = useState<any>(null);
+
   const [isSearching, setIsSearching] = useState(false);
+
+  const [selectedBenefitId, setSelectedBenefitId] = useState<number | null>(null);
+  const [isResendConfirmOpen, setIsResendConfirmOpen] = useState(false);
+  const { mutate: resendBenefit, isLoading: isResending, variables: resendingBenefitId } = useResendBenefit();
+
+  const openResendConfirm = (benefitId: number) => {
+    setSelectedBenefitId(benefitId);
+    setIsResendConfirmOpen(true);
+  };
+
+  const handleConfirmResend = () => {
+    if (!selectedBenefitId) return;
+    resendBenefit(selectedBenefitId, {
+      onSuccess: () => {
+        setIsResendConfirmOpen(false);
+        toast.custom(() => <CustomToast message='Benefit email resent successfully.' type='success' />, { duration: 5000 });
+      },
+      onError: (error: any) => {
+        setIsResendConfirmOpen(false);
+        toast.custom(() => <CustomToast message={error?.message || 'Failed to resend benefit email.'} type='error' />, { duration: 5000 });
+      },
+    });
+  };
 
   useEffect(() => {
     if (dataBenefits) {
@@ -117,10 +154,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     setCurrentPage(1);
     setIsSearching(true);
-    setAppliedFilter({
+    setAppliedFilter((prev: any) => ({
+      ...prev,
       ...itemsFilter,
       search: searchText
-    });
+    }));
   };
 
   useEffect(() => {
@@ -128,6 +166,62 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsSearching(false);
     }
   }, [isGetBenefitsLoading, isSearching]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    setAppliedFilter((prev: any) => ({
+      ...prev,
+      recipient_type: activeTab,
+      ...(activeTab === 'external' ? { department: '', position: '' } : {}),
+    }));
+  }, [activeTab]);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!filterRef.current?.contains(e.target as Node)) setShowBenefitFilter(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowBenefitFilter(false);
+    };
+    document.addEventListener('mousedown', onDocClick);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  const handleApplyBenefitFilter = (vals: T_BenefitFilterValues) => {
+    setCurrentPage(1);
+    setAppliedFilter((prev: any) => ({
+      ...prev,
+      department: vals.department !== 'ALL' ? vals.department : '',
+      position: vals.position !== 'ALL' ? vals.position : '',
+    }));
+  };
+
+  const showNameColumn = activeTab !== 'external';
+  const emptyStateColSpan = showNameColumn ? 7 : 6;
+
+  const getRecipientRows = (item: any): { name: string; email: string }[] => {
+    const registered = (item.registered_recipients || []).map((recipient: any) => ({ name: recipient.name, email: recipient.email }));
+    const external = (item.external_recipients || []).map((email: string) => ({ name: '', email }));
+
+    if (activeTab === 'registered') return registered;
+    if (activeTab === 'external') return external;
+    return [...registered, ...external];
+  };
+
+  const renderStackedColumn = (rows: { name: string; email: string }[], field: 'name' | 'email') => {
+    if (rows.length === 0) return <span className='text-gray-300'>—</span>;
+    return (
+      <div className='flex flex-col gap-0.5'>
+        {rows.map((row, index) => (
+          <span key={index}>{row[field] || '—'}</span>
+        ))}
+      </div>
+    );
+  };
 
   const renderRows = () => {
     if (isSearching || isGetBenefitsLoading) {
@@ -142,18 +236,51 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     if (designBenefitsItems && designBenefitsItems.length > 0) {
-      return designBenefitsItems.map((item: any) => (
-        <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.title}</td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.purpose}</td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.eligibility}</td>
-        </tr>
-      ));
+      return designBenefitsItems.map((item: any) => {
+        const recipientRows = getRecipientRows(item);
+        return (
+          <tr key={item.id}>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
+            {showNameColumn && (
+              <td className='px-3 py-5 text-sm text-gray-500 whitespace-normal break-words'>{renderStackedColumn(recipientRows, 'name')}</td>
+            )}
+            <td className='px-3 py-5 text-sm text-gray-500 whitespace-normal break-words'>{renderStackedColumn(recipientRows, 'email')}</td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.title}</td>
+            <td className='px-3 py-5 text-sm text-gray-500 max-w-0'>
+              <div className='truncate'>{item.purpose}</div>
+            </td>
+            <td className='px-3 py-5 text-sm text-gray-500 max-w-0'>
+              <div className='truncate'>{item.eligibility}</div>
+            </td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <div className='flex items-center justify-center gap-2'>
+                <button
+                  className='border rounded px-[0.65em] py-1 border-gray-500 text-black hover:bg-gray-100'
+                  data-tooltip-id='view-benefit-tooltip'
+                  data-tooltip-content='View Details'
+                  data-tooltip-place='bottom'
+                  onClick={() => setViewModalBenefit(item)}
+                >
+                  <EyeIcon className='w-5 h-5' />
+                </button>
+                <button
+                  className='border rounded px-[0.65em] py-1 border-gray-500 text-black hover:bg-gray-100'
+                  data-tooltip-id='resend-benefit-tooltip'
+                  data-tooltip-content='Resend Email'
+                  data-tooltip-place='bottom'
+                  onClick={() => setResendModalBenefit(item)}
+                >
+                  <ArrowPathIcon className='w-5 h-5' />
+                </button>
+              </div>
+            </td>
+          </tr>
+        );
+      });
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={emptyStateColSpan}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add benefit.</h4>
           </td>
@@ -175,6 +302,40 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          {/* Recipient tabs */}
+          <div className={classNames('flex flex-wrap gap-2 mb-5', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+            <div
+              onClick={() => setActiveTab('all')}
+              className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                activeTab === 'all'
+                  ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
+                  : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+              }`}
+            >
+              All
+            </div>
+            <div
+              onClick={() => setActiveTab('registered')}
+              className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                activeTab === 'registered'
+                  ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
+                  : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+              }`}
+            >
+              Registered Employees
+            </div>
+            <div
+              onClick={() => setActiveTab('external')}
+              className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                activeTab === 'external'
+                  ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
+                  : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+              }`}
+            >
+              External Emails
+            </div>
+          </div>
+
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
               <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
@@ -222,7 +383,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for: Title/Purpose/Eligibility'
+                  data-tooltip-content='Search for specific column...'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setSearchText(e.target.value)}
@@ -241,7 +402,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-2'>
               <SmartButton
                 id="create-benefit-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
@@ -249,25 +410,49 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 CREATE
               </SmartButton>
+              {activeTab !== 'external' && (
+                <div className='relative' ref={filterRef}>
+                  <BenefitFilterPopover
+                    open={showBenefitFilter}
+                    onOpenChange={setShowBenefitFilter}
+                    initial={{
+                      department: appliedFilter.department || 'ALL',
+                      position: appliedFilter.position || 'ALL',
+                    }}
+                    onApply={handleApplyBenefitFilter}
+                  />
+                </div>
+              )}
             </div>
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300 text-center'>
+                <table className='min-w-full table-fixed divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-24 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      {showNameColumn && (
+                        <th scope='col' className='w-40 px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Employee Name
+                        </th>
+                      )}
+                      <th scope='col' className='w-40 px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Sent to
+                      </th>
+                      <th scope='col' className='w-32 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Title
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-64 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Purpose
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='w-64 px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Eligibility
+                      </th>
+                      <th scope='col' className='w-20 px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -298,7 +483,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
+      {resendModalBenefit && (
+        <ResendBenefitEmailModal
+          isOpen={!!resendModalBenefit}
+          setIsOpen={(open: boolean) => {
+            if (!open) setResendModalBenefit(null);
+          }}
+          benefit={resendModalBenefit}
+          refetch={refetch}
+        />
+      )}
+
+      {viewModalBenefit && (
+        <ViewBenefitModal
+          isOpen={!!viewModalBenefit}
+          setIsOpen={(open: boolean) => {
+            if (!open) setViewModalBenefit(null);
+          }}
+          benefit={viewModalBenefit}
+        />
+      )}
+
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='view-benefit-tooltip'/>
+      <Tooltip id='resend-benefit-tooltip'/>
     </>
   );
 };

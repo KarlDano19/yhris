@@ -449,13 +449,7 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('purpose', { 
-                                required: true,
-                                maxLength: {
-                                  value: 100,
-                                  message: 'You have reached the 100 characters limit'
-                                }
-                              })}
+                              {...register('purpose', { required: true })}
                               id='purpose'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
@@ -471,13 +465,7 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('benefits', { 
-                                required: true,
-                                maxLength: {
-                                  value: 100,
-                                  message: 'You have reached the 100 characters limit'
-                                }
-                              })}
+                              {...register('benefits', { required: true })}
                               id='benefits'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
@@ -498,13 +486,7 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('coverage', { 
-                                required: true,
-                                maxLength: {
-                                  value: 100,
-                                  message: 'You have reached the 100 characters limit'
-                                }
-                              })}
+                              {...register('coverage', { required: true })}
                               id='coverage'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
@@ -522,13 +504,7 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('eligibility', { 
-                                required: true,
-                                maxLength: {
-                                  value: 100,
-                                  message: 'You have reached the 100 characters limit'
-                                }
-                              })}
+                              {...register('eligibility', { required: true })}
                               id='eligibility'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />

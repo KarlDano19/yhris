@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, ReactNode, useRef } from 'react';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 export default function ConfirmModal({
@@ -9,7 +9,7 @@ export default function ConfirmModal({
   cancelAction,
   isLoading,
 }: {
-  message?: string;
+  message?: ReactNode;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   confirmAction: Function;
