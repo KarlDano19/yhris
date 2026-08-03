@@ -109,6 +109,83 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-036
+DATE FILED: 2026-08-03
+DATE FIXED: 2026-08-03
+REPORTER: Internal (Brylle - QA), Employer Profile / Onboarding Tour
+
+ISSUE DESCRIPTION:
+  On the My Profile page (/employer-profile), the onboarding tour tooltip
+  "Review your account settings, then click Save to complete your company
+  profile..." kept appearing on the Account Settings step even for employers
+  who had already finished the setup tour. The tooltip highlighted the SAVE
+  button and showed a "Do it Later" link on every single visit, so it could
+  never be permanently dismissed.
+
+  Steps to reproduce:
+    1. Complete the onboarding tour (header segment) so is_header_tour_done
+       is true on the backend.
+    2. Go to Dashboard > My Profile (/employer-profile).
+    3. Fill/keep the Employer Details form and click "Next".
+    4. The Account Settings step loads and the tour tooltip pops up again.
+
+  Root cause: In Details.tsx, the "Next" handler checked ONLY whether a tour
+  was currently running. If no tour was running it unconditionally fired
+  startTour([PROFILE_SAVE_STEP]) as a fallback — a deliberate feature meant
+  for users who dismissed the tour partway through onboarding, so they'd still
+  get guidance on the Save step. That fallback never consulted the persisted
+  tour progress, so for employers who had already completed the header segment
+  the "not running" branch was always taken and the tooltip re-appeared
+  forever. Dismissing it via "Do it Later" does not write to the backend by
+  design, so there was no way for the user to stop it.
+
+DESIRED OUTCOME:
+  The Save-step tooltip should only appear for employers who have not yet
+  completed the header tour segment. Once is_header_tour_done is true on the
+  backend, navigating to Account Settings should show no tour tooltip at all.
+  Users who dismissed the tour mid-onboarding should still get the fallback
+  guidance.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/employer-profile/Details.tsx
+    (import useGetTourProgress; read tour progress in the component; gate the
+     fallback startTour call behind !tourProgress?.is_header_tour_done)
+
+Backend:
+- None (no backend change required — /api/tour-progress/ already exposes
+  is_header_tour_done and the value was being written correctly on save)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ N/A - no backend changes
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript types verified (TourProgressData already exposes
+  is_header_tour_done)
+☑ Existing behavior preserved (active tour still advances via the
+  'profile-form-next' completeTrigger; fallback still fires for users who
+  dismissed the tour before completing the header segment)
+☑ Edge case considered: tourProgress undefined while the query is in flight —
+  optional chaining means the fallback still fires, matching the pre-fix
+  behavior for genuinely-incomplete onboarding
+☐ Manual browser verification (recommended): with a completed tour, open
+  /employer-profile, click Next, confirm no tooltip appears
+☐ Manual browser verification (recommended): with a fresh employer, dismiss
+  the tour then click Next, confirm the Save tooltip still appears
+
+FIX EXPLANATION:
+  Added the useGetTourProgress hook to Details.tsx and changed the fallback
+  branch from a bare `else` to `else if (!tourProgress?.is_header_tour_done)`.
+  The fallback now only runs when the header tour segment has not been marked
+  complete on the backend, so employers who finished onboarding never see the
+  Save tooltip again, while the mid-onboarding guidance the fallback was built
+  for is left intact.
+
+================================================================================
+
 BUG ID: HRIS-2026-035
 DATE FILED: 2026-07-24
 DATE FIXED: 2026-07-24
