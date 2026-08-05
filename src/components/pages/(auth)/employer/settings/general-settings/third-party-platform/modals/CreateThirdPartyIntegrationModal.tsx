@@ -31,6 +31,14 @@ export default function CreateThirdPartyIntegrationModal({
       disabled: false,
     },
     {
+      title: 'Yahshua Payroll',
+      name: 'platform',
+      id: 'yahshuaPayroll',
+      value: 'yahshua-payroll',
+      redirect_url: `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth/`,
+      disabled: false,
+    },
+    {
       title: 'Microsoft Teams',
       name: 'platform',
       id: 'microsoftTeams',
@@ -50,6 +58,16 @@ export default function CreateThirdPartyIntegrationModal({
     }
     const platformDetail = platforms.find((platform) => platform.id === selectedPlatformId);
     const url = platformDetail?.redirect_url;
+
+    // Yahshua Payroll: use a full-page redirect (NOT a popup) to avoid the COOP/popup issues
+    // seen in production for YP OAuth. The connect flag tells the shared /sso/yahshua-payroll
+    // callback to link the current company instead of logging in / creating a new one.
+    if (platformDetail?.value === 'yahshua-payroll') {
+      localStorage.setItem('yp_oauth_mode', 'connect');
+      if (url) window.location.href = url;
+      return;
+    }
+
     const left = (window.innerWidth - 900) / 2;
     const top = (window.innerHeight - 700) / 2;
     const popup = window.open(url, 'popup', `width=900, height=900, left=${left}, top=${top}`);
