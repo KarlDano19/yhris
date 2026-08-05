@@ -59,13 +59,11 @@ export default function CreateThirdPartyIntegrationModal({
     const platformDetail = platforms.find((platform) => platform.id === selectedPlatformId);
     const url = platformDetail?.redirect_url;
 
-    // Yahshua Payroll: use a full-page redirect (NOT a popup) to avoid the COOP/popup issues
-    // seen in production for YP OAuth. The connect flag tells the shared /sso/yahshua-payroll
-    // callback to link the current company instead of logging in / creating a new one.
+    // Yahshua Payroll: flag this run as a "connect" so the shared /sso/yahshua-payroll callback
+    // links the current company instead of logging in. Uses the same popup flow as the other
+    // providers (popup + BroadcastChannel keeps the settings page open and is COOP-safe).
     if (platformDetail?.value === 'yahshua-payroll') {
       localStorage.setItem('yp_oauth_mode', 'connect');
-      if (url) window.location.href = url;
-      return;
     }
 
     const left = (window.innerWidth - 900) / 2;

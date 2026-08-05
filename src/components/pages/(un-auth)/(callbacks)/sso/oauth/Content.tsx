@@ -94,8 +94,8 @@ function Content() {
   useEffect(() => {
     if (code) {
       // Yahshua Payroll "connect existing company" flow (from Settings -> Third-Party Integration).
-      // This is a full-page redirect flow (not a popup) with the connect flag set in localStorage by
-      // the settings modal. Unlike login, it links the current company instead of logging in / creating one.
+      // This runs inside a popup with the connect flag set in localStorage by the settings modal.
+      // Unlike login, it links the current company instead of logging in / creating a new one.
       const ypOauthMode = typeof window !== 'undefined' ? localStorage.getItem('yp_oauth_mode') : null;
       if (params?.provider === 'yahshua-payroll' && ypOauthMode === 'connect') {
         localStorage.removeItem('yp_oauth_mode');
@@ -104,11 +104,15 @@ function Content() {
           { code },
           {
             onSuccess: () => {
-              // Same-tab redirect flow: go back to the integrations settings page, which
-              // refetches its list on mount and shows the newly connected provider.
-              setTimeout(() => {
-                window.location.href = '/settings/general-settings/third-party-platform';
-              }, 1200);
+              // Tell the opener settings tab to refetch the integrations list, then close the popup.
+              try {
+                const channel = new BroadcastChannel('settings-integration-channel');
+                channel.postMessage({ isGranted: true });
+                channel.close();
+              } catch (e) {
+                // BroadcastChannel unsupported — the settings page will refetch on window focus.
+              }
+              setTimeout(() => window.close(), 1200);
             },
             onError: (err: any) => {
               setErrorMessage(
