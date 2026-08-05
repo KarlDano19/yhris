@@ -14,6 +14,7 @@ import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 import useVerifyOauth from './hooks/useVerifyOauth';
 import useGoogleLoginComplete from './hooks/useGoogleLoginComplete';
 import useGoogleLoginLink from './hooks/useGoogleLoginLink';
+import useConnectYahshuaPayroll from './hooks/useConnectYahshuaPayroll';
 
 function Content() {
   const params = useParams();
@@ -23,6 +24,7 @@ function Content() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [hasError, setHasError] = useState<boolean>(false);
   const [needsAccountType, setNeedsAccountType] = useState<boolean>(false);
+  const [isYpConnect, setIsYpConnect] = useState<boolean>(false);
   const [emailConflict, setEmailConflict] = useState<boolean>(false);
   const [googleAccessToken, setGoogleAccessToken] = useState<string>('');
   const [selectedAccountType, setSelectedAccountType] = useState<string>('applicant');
@@ -31,6 +33,8 @@ function Content() {
   const { mutate, isLoading, isError, isSuccess } = useVerifyOauth();
   const { mutate: completeGoogleLogin, isLoading: isCompletingGoogle } = useGoogleLoginComplete();
   const { mutate: linkGoogleAccount, isLoading: isLinking } = useGoogleLoginLink();
+  const { mutate: connectYahshuaPayroll, isLoading: isConnectingYP, isSuccess: isConnectYPSuccess } =
+    useConnectYahshuaPayroll();
 
   // Same-tab SSO completion. This page lands on the FRONTEND origin, so it can
   // establish the session and navigate itself — no popup / window.opener handoff
@@ -89,6 +93,38 @@ function Content() {
 
   useEffect(() => {
     if (code) {
+      // Yahshua Payroll "connect existing company" flow (from Settings -> Third-Party Integration).
+      // This runs inside a popup with the connect flag set in localStorage by the settings modal.
+      // Unlike login, it links the current company instead of logging in / creating a new one.
+      const ypOauthMode = typeof window !== 'undefined' ? localStorage.getItem('yp_oauth_mode') : null;
+      if (params?.provider === 'yahshua-payroll' && ypOauthMode === 'connect') {
+        localStorage.removeItem('yp_oauth_mode');
+        setIsYpConnect(true);
+        connectYahshuaPayroll(
+          { code },
+          {
+            onSuccess: () => {
+              // Tell the opener settings tab to refetch the integrations list, then close the popup.
+              try {
+                const channel = new BroadcastChannel('settings-integration-channel');
+                channel.postMessage({ isGranted: true });
+                channel.close();
+              } catch (e) {
+                // BroadcastChannel unsupported — the settings page will refetch on window focus.
+              }
+              setTimeout(() => window.close(), 1200);
+            },
+            onError: (err: any) => {
+              setErrorMessage(
+                typeof err === 'string' && err ? err : 'Failed to connect Yahshua Payroll. Please try again.'
+              );
+              setHasError(true);
+            },
+          }
+        );
+        return;
+      }
+
       const data = {
         code: code,
         provider: params?.provider,
@@ -286,7 +322,7 @@ function Content() {
 
   return (
     <>
-      {isLoading && (
+      {(isLoading || isConnectingYP) && (
         <div className='w-screen h-screen flex justify-center items-center'>
           <div className='fixed z-20 inset-0 overflow-y-auto'>
             <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
@@ -312,7 +348,7 @@ function Content() {
           </div>
         </div>
       )}
-      {isSuccess && (
+      {(isSuccess || isConnectYPSuccess) && (
         <div className='w-screen h-screen flex justify-center items-center'>
           <div className='fixed z-20 inset-0 overflow-y-auto'>
             <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
@@ -359,10 +395,10 @@ function Content() {
                   <h1 className='text-xl text-center'>{errorMessage}</h1>
                   <div className='flex justify-center mt-4'>
                     <a
-                      href='/login'
+                      href={isYpConnect ? '/settings/general-settings/third-party-platform' : '/login'}
                       className='text-blue-600 hover:underline font-semibold text-sm'
                     >
-                      Return to login
+                      {isYpConnect ? 'Back to integrations' : 'Return to login'}
                     </a>
                   </div>
                 </div>

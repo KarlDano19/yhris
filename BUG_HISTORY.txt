@@ -109,6 +109,82 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-037
+DATE FILED: 2026-08-05
+DATE FIXED: 2026-08-05
+CLIENT/REPORTER: Internal (Michael Ian Labos, dev), Settings / Third-Party Integration
+COMPANION: Backend BUG_HISTORY HRIS-2026-036 | PRs fe#716, be#538
+
+ISSUE DESCRIPTION:
+  Companies that registered in HRIS the normal way (email/password) instead of via
+  "Login with Yahshua Payroll" SSO had no in-app way to connect their existing
+  company to Yahshua Payroll, so payroll sync could not work for them. The
+  Third-Party Platform settings page listed connected integrations (Google Meet,
+  Zoom) but had no "Yahshua Payroll" option, and the OAuth callback only handled the
+  login/verify path (which, for an existing company, would create a duplicate).
+
+  Follow-on during testing:
+  - First shipped as a full-page redirect (to mirror the YP login page and dodge the
+    production popup/COOP issue), then switched back to a POPUP per request so the
+    settings page stays open (matching how Google Meet/Zoom connect on the same page).
+  - A retained YP browser session made the OAuth silently reuse the previously
+    logged-in YP account (jumping straight to the "Authorize HRIS" consent screen), so
+    the connect ran with the wrong YP email and the backend email-match guard rejected
+    it. Clearing the app cookies forced a fresh YP login and it connected smoothly.
+
+DESIRED OUTCOME:
+  From Settings -> Third-Party Platform -> Create, an owner can pick "Yahshua Payroll",
+  authenticate once in a popup, and have their existing company connected — the
+  integration then appears in the list without creating a duplicate company.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/settings/general-settings/third-party-platform/
+  modals/CreateThirdPartyIntegrationModal.tsx (added Yahshua Payroll to the provider
+  list; sets a localStorage "yp_oauth_mode=connect" flag then opens the OAuth popup)
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/Content.tsx (when the callback
+  provider is yahshua-payroll AND the connect flag is set, calls the new connect hook
+  instead of the login/verify path, broadcasts on settings-integration-channel, and
+  closes the popup; error state shows a "Back to integrations" link)
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/hooks/useConnectYahshuaPayroll.ts
+  (new — POST /api/sso/connect/yahshua-payroll-oauth/ with the auth token)
+
+Backend (companion be#538):
+- app/views/yahshua_payroll.py (new YahshuaPayrollConnectAPIView)
+- app/urls.py (POST /api/sso/connect/yahshua-payroll-oauth/)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☑ Type-check clean for the changed files (npx tsc --noEmit — no new errors)
+☑ Reuses existing OAuth popup + /sso/[provider] callback pattern (same as Zoom/Google)
+☐ Automated component tests (N/A — UI wiring)
+☑ State management: connect flag via localStorage (shared across opener + popup tabs;
+  sessionStorage would NOT be shared and was intentionally avoided)
+
+Backend (Django REST Framework):
+☑ Covered by companion be#538 — 5 unit tests on YahshuaPayrollConnectAPIView.
+
+Integration & E2E:
+☑ Manual: owner -> Settings -> Third-Party Platform -> Create -> Yahshua Payroll
+  (popup) -> YP sign-in with the matching email -> popup closes -> integration appears.
+☑ Edge cases considered:
+  - Stale YP session reuses the wrong account -> caught by the backend email-match
+    guard; clear cookies / use incognito to force a fresh YP login.
+  - Google Meet / Zoom connect flows are unchanged (still use the popup path).
+
+FIX EXPLANATION:
+  Added "Yahshua Payroll" to the Third-Party Platform provider list. Selecting it sets
+  a localStorage "connect" flag and opens the existing YP OAuth authorize endpoint in a
+  popup. The shared /sso/yahshua-payroll callback detects the flag and calls the new
+  useConnectYahshuaPayroll hook (POST /api/sso/connect/yahshua-payroll-oauth/) instead
+  of the login/verify path, so the CURRENT company is linked rather than a new one
+  created. On success it broadcasts { isGranted: true } on the
+  settings-integration-channel (the settings page refetches its list) and closes the
+  popup; on failure it shows the backend error with a "Back to integrations" link.
+
+================================================================================
+
 BUG ID: HRIS-2026-036
 DATE FILED: 2026-08-03
 DATE FIXED: 2026-08-03
