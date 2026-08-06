@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "ai-guidance-vs-automation-hr-software",
+    category: "Future of Work",
+    title: "Why \"Telling You the Rule\" Is Not Compliance: The Real Difference Between AI Guidance and AI Automation in HR Software",
+    excerpt: "An AI assistant that quotes you the SSS rate is not the same as a payroll system that applies it correctly. One informs. The other acts. This is the distinction that determines your actual compliance exposure.",
+    date: "July 2026",
+    readTime: "10 min read",
+    image: "/blog/ai-guidance-vs-automation.png",
+  },
+  {
     slug: "payroll-registration-checklist-philippines",
     category: "Operations Playbook",
     title: "The Philippine Business Payroll Setup Checklist: Registering with BIR, SSS, PhilHealth, and Pag-IBIG",
