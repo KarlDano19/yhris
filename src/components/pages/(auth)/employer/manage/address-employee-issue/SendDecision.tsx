@@ -57,7 +57,13 @@ const SendDecision = ({
     // Employee responded: Investigation is required
     shouldDisableSendDecision = true;
   }
-  
+
+  // Resend is allowed while the employee has not acknowledged the decision yet.
+  // Once the decision is received (employee signed), no further sending is allowed.
+  if (isDecisionReceived) {
+    shouldDisableSendDecision = true;
+  }
+
   // Format decision_received_date as MM/DD/YYYY
   const formattedReceivedDate = formatDateToLocal(employeeIssueDetails?.decision_received_date);
   
@@ -72,9 +78,9 @@ const SendDecision = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
-          disabled={isDecisionSent || shouldDisableSendDecision}
+          disabled={shouldDisableSendDecision}
           onClick={() => {
-            if (!isDecisionSent && !shouldDisableSendDecision) {
+            if (!shouldDisableSendDecision) {
               setIsSendDecisionModalOpen({
                 isOpen: true,
                 id,
@@ -88,10 +94,14 @@ const SendDecision = ({
               ? 'NTE must be received before sending decision'
               : isResponded && hasInvestigationReport === false
               ? 'Investigation report is required before sending decision (employee has responded)'
-              : ''
+              : isDecisionReceived
+              ? 'Cannot resend decision after the employee has acknowledged it'
+              : isDecisionSent
+              ? 'Resend Decision'
+              : 'Send Decision'
           }
         >
-          {isDecisionSent ? 'Sent' : 'Send'}
+          {isDecisionSent ? 'Resend' : 'Send'}
         </SmartButton>
       </div>
       <div>

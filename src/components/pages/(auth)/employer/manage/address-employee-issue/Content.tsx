@@ -28,6 +28,8 @@ import SendEmailModal from '@/components/SendEmailModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import NTEAttachmentSection from './components/NTEAttachmentSection';
 import InvestigationDecisionSection from './components/InvestigationDecisionSection';
+import useGetUserDetails from '@/components/hooks/useGetUserDetails';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 import { useDeleteNTEAttachment } from './hooks/useDeleteNTEAttachment';
 import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 import SendNTE from './SendNTE';
@@ -100,6 +102,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [isNTEConfirmOpen, setIsNTEConfirmOpen] = useState(false);
   const [pendingNTEData, setPendingNTEData] = useState<any>(null);
+  const [isDecisionConfirmOpen, setIsDecisionConfirmOpen] = useState(false);
+  const [pendingDecisionData, setPendingDecisionData] = useState<any>(null);
+
+  // The "reflected in their kiosk" note only applies to employers linked to
+  // Yahshua Payroll — either the user signed in via YP SSO (login_type
+  // yahshua-payroll / yg-payroll) or they are a password sub-account under an
+  // employer that has a YP integration. Everyone else responds through the
+  // link in the email instead of the kiosk.
+  const { data: userDetails } = useGetUserDetails() as { data: any };
+  const isKioskReflected = canSyncWithPayroll(userDetails?.login_type, userDetails?.has_yp_integration);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
@@ -571,10 +583,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPendingNTEData(null);
   };
 
-  const handleDecisionSubmit = (data: any) => {
-    if (isSendDecisionModalOpen && isSendDecisionModalOpen.id) {
+  const executeDecisionSend = (data: any) => {
+    const decisionId = data?._decisionId;
+    if (decisionId) {
       const payload = {
-        id: isSendDecisionModalOpen.id.toString(),
+        id: decisionId.toString(),
         actionType: 'sending',
         emailType: 'decision',
         decision_subject: data.subject,
@@ -609,7 +622,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       };
 
       // Track which item is loading
-      setLoadingItemId(`${isSendDecisionModalOpen.id}-decision`);
+      setLoadingItemId(`${decisionId}-decision`);
       mutate(payload, {
         onSuccess: (data: any) => {
           setLoadingItemId(null);
@@ -629,6 +642,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  const handleDecisionSubmit = (data: any) => {
+    // Snapshot the id now — SendEmailModal calls onClose() synchronously after
+    // onSubmit(), which clears isSendDecisionModalOpen before the user can confirm.
+    setPendingDecisionData({
+      ...data,
+      _decisionId: isSendDecisionModalOpen?.id,
+      _isResend: !!decisionEmployeeIssueDetails?.is_decision_sent,
+    });
+    setIsDecisionConfirmOpen(true);
+  };
+
+  const handleDecisionConfirm = () => {
+    setIsDecisionConfirmOpen(false);
+    executeDecisionSend(pendingDecisionData);
+    setPendingDecisionData(null);
+  };
 
   const renderRows = () => {
     if (isSearching || isGetEmployeeIssuesLoading) {
@@ -1058,7 +1087,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       {isSendDecisionModalOpen && !isLoadingDecisionDetails && (
         <SendEmailModal
           key={`send-decision-${isSendDecisionModalOpen?.id || 'new'}`}
-          title="Send Decision"
+          title={decisionEmployeeIssueDetails?.is_decision_sent ? 'Resend Decision' : 'Send Decision'}
           isOpen={!!isSendDecisionModalOpen}
           onClose={() => setIsSendDecisionModalOpen(null)}
           onSubmit={handleDecisionSubmit}
@@ -1081,7 +1110,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               onDeleteAttachment={() => {}} // Empty function since delete is disabled
             />
           }
-          submitButtonText="Send"
+          submitButtonText={decisionEmployeeIssueDetails?.is_decision_sent ? 'Resend' : 'Send'}
           isLoading={isLoading}
           prePopulatedData={decisionEmployeeIssueDetails ? {
             subject: decisionEmployeeIssueDetails.decision_subject,
@@ -1122,10 +1151,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       <Tooltip id='search-tooltip'/>
       <ConfirmModal
-        message={`Are you sure you want to send the NTE to the employee?\n\nThis will be reflected in their kiosk.`}
+        message={
+          isKioskReflected
+            ? `Are you sure you want to send the NTE to the employee?\n\nThis will be reflected in their kiosk.`
+            : `Are you sure you want to send the NTE to the employee?\n\nThey will receive an email with a link to respond.`
+        }
         isOpen={isNTEConfirmOpen}
         setIsOpen={setIsNTEConfirmOpen}
         confirmAction={handleNTEConfirm}
+        isLoading={isLoading}
+      />
+      <ConfirmModal
+        message={
+          pendingDecisionData?._isResend
+            ? isKioskReflected
+              ? `Are you sure you want to resend the decision to the employee?\n\nThey will receive the decision email again, and it will be reflected in their kiosk.`
+              : `Are you sure you want to resend the decision to the employee?\n\nThey will receive the decision email again.`
+            : isKioskReflected
+            ? `Are you sure you want to send the decision to the employee?\n\nThis will be reflected in their kiosk.`
+            : `Are you sure you want to send the decision to the employee?\n\nThey will receive an email with a link to review it.`
+        }
+        isOpen={isDecisionConfirmOpen}
+        setIsOpen={setIsDecisionConfirmOpen}
+        confirmAction={handleDecisionConfirm}
         isLoading={isLoading}
       />
     </>
