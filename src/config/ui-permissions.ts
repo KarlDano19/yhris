@@ -72,6 +72,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   // Employee 201
   { elementId: 'view-employee-201-btn', permission: 'view_employee_201', type: 'button', fallbackBehavior: 'hide' },
   { elementId: 'edit-employee-201-btn', permission: 'edit_employee_201', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'view-salary-history-btn', permission: 'view_salary', type: 'section', fallbackBehavior: 'hide' },
 
   // Offboarding
   { elementId: 'create-offboarding-btn', permission: 'create_offboarding', type: 'button', fallbackBehavior: 'disable' },
