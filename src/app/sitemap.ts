@@ -11,7 +11,7 @@ const DATES = {
   pricing:     '2026-06-02', // Prices verified June 2026
   legal:       '2026-03-01', // Terms and privacy last updated
   stable:      '2026-01-01', // Stable pages with infrequent content changes
-  blog:        '2026-07-16', // Updated when new posts are published — keep current
+  blog:        '2026-07-21', // Updated when new posts are published — keep current
   calculator:  '2026-06-20', // HR cost calculator launched
 }
 
@@ -148,6 +148,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${BASE_URL}/blog/ai-guidance-vs-automation-hr-software`,
       lastModified: new Date('2026-07-16'),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/blog/ncr-minimum-wage-2026`,
+      lastModified: new Date('2026-07-21'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },

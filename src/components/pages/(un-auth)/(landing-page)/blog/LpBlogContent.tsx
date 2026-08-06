@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "ncr-minimum-wage-2026",
+    category: "Statutory Compliance",
+    title: "NCR Minimum Wage 2026: New Rates Under Wage Order No. 27 Are Now in Effect",
+    excerpt: "Non-agriculture workers in Metro Manila now earn a minimum of ₱755/day under Wage Order No. NCR-27, effective July 25, 2026. A second tranche of ₱25 follows January 20, 2027. Full rate table, who is covered, and employer payroll checklist.",
+    date: "July 2026",
+    readTime: "8 min read",
+    image: "/blog/ncr-minimum-wage-2026.png",
+  },
+  {
     slug: "ai-guidance-vs-automation-hr-software",
     category: "Future of Work",
     title: "Why \"Telling You the Rule\" Is Not Compliance: The Real Difference Between AI Guidance and AI Automation in HR Software",
