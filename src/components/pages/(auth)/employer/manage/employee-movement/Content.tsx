@@ -154,7 +154,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.id}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <span
+              className={
+                item.movement_type === 'reassignment'
+                  ? 'inline-flex rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-700'
+                  : 'inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700'
+              }
+            >
+              {item.movement_type === 'reassignment' ? 'Re-assignment' : 'Change in Position'}
+            </span>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {(item.movement_type === 'reassignment' ? item.new_location : item.new_position) || '—'}
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.reason}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <span
@@ -322,7 +335,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Employee Name
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Position
+                        Movement Type
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        New Position / Location
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Reason
