@@ -580,6 +580,7 @@ export default function Employee201Content({
           emergency_contact_number: employeeDetails?.emergency_contact?.phone ?? employeeDetails?.emergency_contact?.contact_number,
           gender: employeeDetails?.gender,
           birthdate: employeeDetails?.birthdate,
+          date_hired: employeeDetails?.date_hired,
           system_id: employeeDetails?.system_id,
           location: employeeDetails?.location,
           position: employeeDetails?.position,
