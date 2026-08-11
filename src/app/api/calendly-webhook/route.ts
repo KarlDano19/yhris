@@ -3,12 +3,11 @@
  * Called by Calendly when someone books a demo.
  * 1. Verifies the webhook signature (skipped if CALENDLY_WEBHOOK_SECRET not set)
  * 2. Parses invitee info + custom question answers (phone, company, pain point)
- * 3. Computes lead assignment (70% Efie / 30% Mici, modulo on sheet count)
- * 4. Creates Loops contact
- * 5. Scores lead with Claude
- * 6. Updates Loops contact with score/tier
- * 7. Fires demoBooked + demoLeadQualified events
- * 8. Logs to Google Sheets + patches calendar event color + sends Telegram notification
+ * 3. Creates Loops contact
+ * 4. Scores lead with Claude
+ * 5. Updates Loops contact with score/tier
+ * 6. Fires demoBooked + demoLeadQualified events
+ * 7. Logs to Google Sheets + sends Telegram notification
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -25,17 +24,6 @@ const PARTNER_DOMAINS: Record<string, string> = {
   'sterlingbankasia.com': 'Sterling Bank of Asia',
   'sterling.com.ph': 'Sterling Bank of Asia',
 };
-
-// ─── Assignee config ──────────────────────────────────────────────────────────
-// 70/30 split: every 10 leads, 7 go to Efie (slots 0-6), 3 go to Mici (slots 7-9)
-const ASSIGNEE_COLORS: Record<string, string> = {
-  Efie: '7',  // Peacock (blue)
-  Mici: '5',  // Sage (green)
-};
-
-function computeAssignee(assignedCount: number): 'Efie' | 'Mici' {
-  return assignedCount % 10 < 7 ? 'Efie' : 'Mici';
-}
 
 // ─── Dedup cache ──────────────────────────────────────────────────────────────
 const processedUris = new Map<string, number>();
@@ -486,26 +474,7 @@ async function sendMetaLeadEvent(data: LeadData) {
 }
 
 // ─── Google Sheets ────────────────────────────────────────────────────────────
-async function getAssignedLeadCount(): Promise<number> {
-  const sheetId = process.env.GOOGLE_SHEET_ID;
-  if (!sheetId) return 0;
-
-  const token = await getGoogleAccessToken('https://www.googleapis.com/auth/spreadsheets');
-  if (!token) return 0;
-
-  const res = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!T:T`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-
-  if (!res.ok) return 0;
-  const json = await res.json();
-  const rows: string[][] = json.values ?? [];
-  // Subtract header row, count non-empty assignee cells
-  return Math.max(0, rows.slice(1).filter(r => r[0]?.trim()).length);
-}
-
-async function appendToSheet(data: LeadData, scoring: ScoringResult | null, assignee: string) {
+async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   const sheetId = process.env.GOOGLE_SHEET_ID;
   if (!sheetId) return;
 
@@ -532,7 +501,7 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null, assi
     scoring?.personIntel ?? '',
     (scoring?.companyResources ?? []).join(', '),
     (scoring?.personResources ?? []).join(', '),
-    assignee,
+    '', // column T retained for sheet shape; lead assignment retired
   ]];
 
   const sheetsRes = await fetch(
@@ -552,69 +521,21 @@ async function appendToSheet(data: LeadData, scoring: ScoringResult | null, assi
   }
 }
 
-// ─── Google Calendar ──────────────────────────────────────────────────────────
-async function patchCalendarEventColor(scheduledAt: string, assignee: 'Efie' | 'Mici'): Promise<void> {
-  const calendarId = process.env.GOOGLE_CALENDAR_ID;
-  if (!calendarId || !scheduledAt) return;
-
-  const token = await getGoogleAccessToken('https://www.googleapis.com/auth/calendar.events');
-  if (!token) return;
-
-  // Search in a 2-minute window around the booking start time
-  const start = new Date(scheduledAt);
-  const timeMin = new Date(start.getTime() - 60_000).toISOString();
-  const timeMax = new Date(start.getTime() + 60_000).toISOString();
-
-  const listRes = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-
-  if (!listRes.ok) {
-    console.error('Calendar list error:', await listRes.text());
-    return;
-  }
-
-  const { items } = await listRes.json();
-  if (!items?.length) {
-    console.warn('No calendar event found at', scheduledAt);
-    return;
-  }
-
-  const eventId = items[0].id;
-  const colorId = ASSIGNEE_COLORS[assignee];
-
-  const patchRes = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
-    {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ colorId }),
-    }
-  );
-
-  if (!patchRes.ok) {
-    console.error('Calendar patch error:', await patchRes.text());
-  } else {
-    console.log(`Calendar event ${eventId} colored for ${assignee} (colorId ${colorId})`);
-  }
-}
-
 // ─── Cancellation: Sheet update + Telegram ────────────────────────────────────
-async function updateSheetCancellation(email: string): Promise<string> {
+async function updateSheetCancellation(email: string): Promise<void> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
-  if (!sheetId) return '';
+  if (!sheetId) return;
 
   const token = await getGoogleAccessToken('https://www.googleapis.com/auth/spreadsheets');
-  if (!token) return '';
+  if (!token) return;
 
-  // Read D:T to find the row by email and grab the assignee (column T = index 16 in D:T)
+  // Read column D to find the row by email
   const readRes = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!D:T`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!D:D`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
 
-  if (!readRes.ok) return '';
+  if (!readRes.ok) return;
   const json = await readRes.json();
   const rows: string[][] = json.values ?? [];
 
@@ -629,24 +550,17 @@ async function updateSheetCancellation(email: string): Promise<string> {
 
   if (rowIndex === -1) {
     console.warn('Sheet row not found for cancellation:', email);
-    return '';
+    return;
   }
 
   const sheetRow = rowIndex + 1; // array is 0-indexed; row 1 is the header
-  const assignee = rows[rowIndex][16] ?? ''; // T is index 16 in D:T range
 
   const updateRes = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchUpdate`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Leads!L${sheetRow}?valueInputOption=RAW`,
     {
-      method: 'POST',
+      method: 'PUT',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        valueInputOption: 'RAW',
-        data: [
-          { range: `Leads!L${sheetRow}`, values: [['cancelled']] },
-          { range: `Leads!T${sheetRow}`, values: [['']] },
-        ],
-      }),
+      body: JSON.stringify({ values: [['cancelled']] }),
     }
   );
 
@@ -654,13 +568,11 @@ async function updateSheetCancellation(email: string): Promise<string> {
     const err = await updateRes.json().catch(() => ({}));
     console.error('Sheet cancellation update error:', JSON.stringify(err));
   } else {
-    console.log(`Sheet row ${sheetRow} marked cancelled, assignee slot freed`);
+    console.log(`Sheet row ${sheetRow} marked cancelled`);
   }
-
-  return assignee;
 }
 
-async function sendTelegramCancellationAlert(data: LeadData, assignee: string) {
+async function sendTelegramCancellationAlert(data: LeadData) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return;
@@ -674,8 +586,7 @@ async function sendTelegramCancellationAlert(data: LeadData, assignee: string) {
     `👤 Name: ${data.firstName} ${data.lastName}\n` +
     `🏢 Company: ${data.companyName}\n` +
     `📧 Email: ${data.email}\n` +
-    `🗓 Was scheduled: ${scheduledDate}\n` +
-    (assignee ? `🎯 Was assigned to: ${assignee}\n` : '');
+    `🗓 Was scheduled: ${scheduledDate}\n`;
 
   const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
@@ -692,7 +603,7 @@ async function sendTelegramCancellationAlert(data: LeadData, assignee: string) {
 }
 
 // ─── Telegram ─────────────────────────────────────────────────────────────────
-async function sendTelegramNotification(data: LeadData, scoring: ScoringResult | null, assignee: string) {
+async function sendTelegramNotification(data: LeadData, scoring: ScoringResult | null) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -713,8 +624,7 @@ async function sendTelegramNotification(data: LeadData, scoring: ScoringResult |
     (data.employeeCount ? `👥 Employees: ${data.employeeCount}\n` : '') +
     (data.currentProcess ? `⚙️ Current process: ${data.currentProcess}\n` : '') +
     `😤 Pain point: ${data.painPoint}\n` +
-    `🗓 Scheduled: ${bookedDate}\n` +
-    `🎯 Assigned to: ${assignee}\n\n` +
+    `🗓 Scheduled: ${bookedDate}\n\n` +
     (scoring
       ? `${tierEmoji} Score: ${scoring.score}/10 — ${scoring.tier.toUpperCase()}\n📝 ${scoring.notes}` +
         (scoring.personIntel ? `\n\n👤 Person Intel:\n${scoring.personIntel}` : '') +
@@ -761,8 +671,8 @@ export async function POST(request: NextRequest) {
   if (payload.event === 'invitee.canceled' || payload.event === 'invitee.cancelled') {
     const data = parsePayload(payload.payload);
     if (!data) return NextResponse.json({ received: true });
-    const assignee = await updateSheetCancellation(data.email);
-    await sendTelegramCancellationAlert(data, assignee);
+    await updateSheetCancellation(data.email);
+    await sendTelegramCancellationAlert(data);
     return NextResponse.json({ success: true, cancelled: true });
   }
 
@@ -783,11 +693,6 @@ export async function POST(request: NextRequest) {
   markProcessed(dedupKey);
 
   try {
-    // Compute assignee before anything else — reads current sheet count
-    const assignedCount = await getAssignedLeadCount();
-    const assignee = computeAssignee(assignedCount);
-    console.log(`Lead assignment: count=${assignedCount}, assignee=${assignee}`);
-
     await createLoopsContact(data);
 
     let scoring: ScoringResult;
@@ -810,13 +715,12 @@ export async function POST(request: NextRequest) {
     ]);
 
     await Promise.allSettled([
-      appendToSheet(data, scoring, assignee),
-      patchCalendarEventColor(data.scheduledAt, assignee),
-      sendTelegramNotification(data, scoring, assignee),
+      appendToSheet(data, scoring),
+      sendTelegramNotification(data, scoring),
       sendMetaLeadEvent(data),
     ]);
 
-    return NextResponse.json({ success: true, assignee });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Calendly webhook error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
