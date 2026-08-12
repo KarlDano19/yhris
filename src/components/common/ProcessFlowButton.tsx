@@ -34,7 +34,7 @@ const ProcessFlowButton = () => {
       <ModalLayout
         isOpen={isOpen}
         handleClose={() => setIsOpen(false)}
-        title='Process Flow Documentation'
+        title='User Guide / Process Flow Documentation'
         maxWidth='max-w-6xl'
       >
         <div className='relative h-[80vh] w-full'>
