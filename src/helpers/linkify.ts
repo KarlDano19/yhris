@@ -35,3 +35,30 @@ export const linkify = (text: string): string => {
       : `<a class="${linkClass}" ${attrs}>`
   );
 };
+
+/**
+ * Prepares Quill-authored HTML for an HTML email.
+ *
+ * Two things the editor does that an email client will not forgive:
+ *
+ * 1. Quill serializes ordinary spaces as non-breaking spaces. A real nbsp never
+ *    offers a line-break opportunity, so a whole sentence becomes one unbreakable
+ *    token and the client chops it mid-word ("Y AHSHUA", "Augu st 17"). Each run
+ *    of spaces keeps its width but gets one real space at the front so the line can
+ *    break there — unlike a plain nbsp-to-space swap, deliberate multi-space runs
+ *    are not collapsed by the HTML renderer.
+ *
+ * 2. getSemanticHTML() saves a deliberate blank line as a truly empty <p></p> (no
+ *    <br>), which has zero height in an email — the blank lines the composer typed
+ *    just disappear. On screen globals.css papers over this with a p:empty
+ *    min-height rule; an email has no such stylesheet, so the <br> is put back into
+ *    the content itself.
+ */
+export const prepareRichTextForEmail = (html: string): string => {
+  if (!html) return html;
+
+  return html
+    .replace(/&nbsp;/gi, '\u00A0')
+    .replace(/[ \u00A0]*\u00A0[ \u00A0]*/g, (run) => ' ' + '&nbsp;'.repeat(run.length - 1))
+    .replace(/<p([^>]*)>(?:\s|&nbsp;)*<\/p>/gi, '<p$1><br></p>');
+};
