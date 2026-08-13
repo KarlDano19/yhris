@@ -109,6 +109,122 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-039
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - Consultant (Christen Daayata, via #team-hris Slack)
+MODULE: Admin > Client Monitoring > Send Advisory (shared SendEmailModal)
+
+ISSUE DESCRIPTION:
+  An advisory composed in the Send Advisory modal arrived in Gmail formatted
+  differently from how it was written. Three symptoms, all originating from Quill's
+  saved HTML but via three different mechanisms:
+
+  1. Words split mid-word. "YAHSHUA HRIS" arrived as "Y" / "AHSHUA HRIS" across two
+     lines, "August 17, 2026" as "Augu" / "st 17, 2026". Cause: ReactQuill
+     (react-quill-new / Quill 2.0) serializes every ordinary space as a NON-BREAKING
+     space (\u00A0 / &nbsp;). A real nbsp never offers a line-break opportunity, so a
+     whole sentence becomes one unbreakable token and the email client is forced to
+     break at an arbitrary character instead of between words. No CSS can fix this -
+     nbsp's non-breaking behavior cannot be overridden by any stylesheet rule.
+
+  2. Blank lines disappeared. Deliberate spacing between sections rendered as a plain
+     next line with no gap ("displays it just next line no spacing"). Cause:
+     getSemanticHTML() saves a deliberate blank line as a truly empty <p></p> with no
+     <br> inside, which has zero height. In-app previews are unaffected because
+     globals.css carries ".ql-editor p:empty { min-height: 1em }" - an email client has
+     no access to that stylesheet.
+
+  3. Extra spaces compressed. The reporter added several spaces while editing and they
+     came out collapsed to one. Cause: once nbsp is normalized to a regular space, the
+     HTML renderer collapses consecutive whitespace as usual.
+
+  Why prior fixes did not cover this: HRIS-2026-034 (normalizeNbsp) targets in-app
+  display only - all 46 of its call sites are dangerouslySetInnerHTML on pages and
+  modals. HRIS-2026-033 targets the WeasyPrint PDF generators. HRIS-2026-032 (backend)
+  was email-related but concerned paragraph MARGINS, not nbsp or empty paragraphs. The
+  email path had therefore never been treated for either issue: no email template has
+  wrap CSS and no email-sending view normalizes nbsp.
+
+DESIRED OUTCOME:
+  An email composed in the Send Email modal should arrive reading the way it was
+  written - wrapping at real word boundaries, keeping the blank lines the composer
+  typed, and keeping deliberate multi-space runs - without a backend or template change.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/linkify.ts
+    (added and exported prepareRichTextForEmail() - normalizes Quill's nbsp runs and
+     restores blank lines; placed alongside the existing normalizeNbsp so all nbsp
+     logic stays in one file, per the developer feedback recorded in HRIS-2026-034)
+- src/components/SendEmailModal.tsx
+    (one call at the point the payload is built:
+     message: prepareRichTextForEmail(data.message), so every module using the modal is
+     covered by a single change)
+
+Backend:
+- N/A - deliberately none. Editing without_attachment_email.tpl was considered and
+  rejected: it is shared by 10 backend views (advisory, applicant, employee_issue,
+  screen_applicant x2, separation x3, and 4 DOLE reports), so a template edit silently
+  changes every module. Same reasoning as HRIS-2026-034's rejection of the backend
+  normalization + data migration approach.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+[x] Helper verified against the real failing cases: <p></p> and <p>&nbsp;</p> both
+    become <p><br></p>; nbsp-joined text gains real break points;
+    "Note:&nbsp;&nbsp;&nbsp;" keeps its width; plain paragraphs and class attributes on
+    an empty <p> are left untouched; empty input returns unchanged
+[ ] Jest/RTL tests (N/A - no frontend test harness in this repo)
+[x] Manual verification completed: advisory re-sent and confirmed in Gmail - blank
+    lines between sections restored, "YAHSHUA HRIS" no longer split mid-word
+
+Integration & E2E:
+[x] Manual regression testing completed (advisory flow, Gmail web)
+[ ] Regression pass still needed on the other 9 modules that use SendEmailModal:
+    offboarding, orientation, screen-applicants, address-employee-issue, and the 5 DOLE
+    pages. All shared the same defect, so this is a fix rather than a behavior change,
+    but the call site is shared code
+[x] Edge cases considered (nbsp-only blank paragraphs; empty <p> carrying Quill class
+    attributes such as ql-align-center; multi-space runs; content with no nbsp at all)
+[ ] Cross-browser/client testing completed (verified in Gmail web only)
+
+KNOWN REMAINING ISSUE:
+  A long URL still splits mid-address in the sent email (e.g. "https://canva.link/" /
+  "qu3nl2z7jjqr9fn") instead of moving to the next line whole. This is NOT the nbsp bug
+  - the URL genuinely has no internal break opportunity to restore - and cannot be fixed
+  from the content side. It needs overflow-wrap plus an atomic-link rule
+  (display:inline-block; max-width:100%) in the email template, which is shared by the
+  10 views listed above. Deliberately left unfixed to keep this change frontend-only.
+
+FIX EXPLANATION:
+  The defect is content, not layout: what Quill saves is not what an email client can
+  render faithfully, and the app's own stylesheet (which papers over both problems on
+  screen) does not travel with the email. prepareRichTextForEmail() therefore repairs
+  the HTML before it leaves the app:
+
+    .replace(/&nbsp;/gi, '\u00A0')
+    .replace(/[ \u00A0]*\u00A0[ \u00A0]*/g, (run) => ' ' + '&nbsp;'.repeat(run.length - 1))
+    .replace(/<p([^>]*)>(?:\s|&nbsp;)*<\/p>/gi, '<p$1><br></p>');
+
+  The middle line is the part that resolves symptoms 1 and 3 together: rather than
+  swapping every nbsp for a plain space (which restores wrapping but lets the renderer
+  collapse deliberate multi-space runs), each run keeps its full width while its FIRST
+  space becomes a real, breakable space. One legal break point per run is all the client
+  needs to wrap between words. The third line puts back the <br> that getSemanticHTML()
+  strips, giving blank paragraphs height in any client without relying on a stylesheet
+  the recipient will never load.
+
+  The call sits in SendEmailModal where the payload is assembled rather than in the
+  advisory hook, so all 10 modules that send Quill content through this modal are fixed
+  by one change instead of the advisory alone.
+
+================================================================================
+
 BUG ID: HRIS-2026-038
 DATE FILED: 2026-08-12
 DATE FIXED: 2026-08-13

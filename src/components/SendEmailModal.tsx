@@ -21,6 +21,7 @@ import EyePassword from "@/svg/EyePassword";
 import InfoIcon from "@/svg/InfoIcon";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
+import { prepareRichTextForEmail } from "@/helpers/linkify";
 
 interface Field {
   onChange: (value: any) => void;
@@ -621,7 +622,10 @@ export default function SendEmailModal({
       bcc: tagsBcc,
       subject: showSubject ? (customSubject || (template?.subject || '')) : '',
       template: template?.subject || '',
-      message: data.message,
+      // Quill's saved HTML doesn't survive an email client as-is: spaces are
+      // non-breaking (text breaks mid-word) and blank lines are empty <p></p>
+      // with no height (spacing disappears). Fix the content, not the template.
+      message: prepareRichTextForEmail(data.message),
       ...((showAttachment || showDragDropAttachment) && allAttachments.length > 0 && {
         ...(effectiveAllowMultiple
           ? { attachments: allAttachments }
