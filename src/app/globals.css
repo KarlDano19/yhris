@@ -295,25 +295,26 @@ div.remove-height {
   padding-left: unset !important;
 }
 
-/* The memo body box (.memo-quill-resize-clip) is a plain textarea-style resizable
-   box (Tailwind resize-y + overflow-hidden on the outer div). react-quill-new's own
-   wrapper (.quill) just stacks the toolbar and .ql-container as normal block siblings
-   with .ql-container{height:100%} (quill.snow.css) — that 100% is measured against
-   the .quill wrapper's own height, so .ql-container ends up as tall as the *whole*
-   box while the toolbar sits above it, pushing the pair taller than the box and
-   silently overflowing it. That was harmless before (overflow was visible), but it
-   means .ql-container can't be trusted to leave room for the toolbar on its own —
-   force a real flex layout instead so the toolbar keeps its natural height and the
-   editor exactly fills whatever's left, whether the box is at its default height or
-   has been dragged via the resize handle. */
-.memo-quill-resize-clip .quill {
+/* Shared by every editor that lives in a textarea-style resizable box (Tailwind
+   resize-y + overflow-hidden on the outer div): the memo body, and the policy
+   content/provision fields. react-quill-new's own wrapper (.quill) just stacks the
+   toolbar and .ql-container as normal block siblings with .ql-container{height:100%}
+   (quill.snow.css) — that 100% is measured against the .quill wrapper's own height,
+   so .ql-container ends up as tall as the *whole* box while the toolbar sits above
+   it, pushing the pair taller than the box and silently overflowing it. That was
+   harmless before (overflow was visible), but it means .ql-container can't be trusted
+   to leave room for the toolbar on its own — force a real flex layout instead so the
+   toolbar keeps its natural height and the editor exactly fills whatever's left,
+   whether the box is at its default height or has been dragged via the resize handle.
+   (Scrolling past the visible area still works: quill's own CSS scrolls .ql-editor.) */
+.quill-resize-clip .quill {
   display: flex;
   flex-direction: column;
 }
-.memo-quill-resize-clip .ql-toolbar {
+.quill-resize-clip .ql-toolbar {
   flex: 0 0 auto;
 }
-.memo-quill-resize-clip .ql-container {
+.quill-resize-clip .ql-container {
   flex: 1 1 auto;
   height: auto;
   min-height: 0;
