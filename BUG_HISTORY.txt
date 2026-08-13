@@ -109,6 +109,68 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-040
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - QA (Jam recording) - Module > Onboarding > Orient > Enroll to Payroll
+COMPANION: Backend BUG_HISTORY HRIS-2026-040 (Repair Rate Statuses proxy endpoint)
+
+ISSUE DESCRIPTION:
+Enrolling an onboarded applicant into Yahshua Payroll (YP) failed, and the affected
+employee's YP profile then showed the error: "'NoneType' object has no attribute
+'dayspermonth'".
+
+Root cause: the onboarding "Enroll" action did not send a hire date to YP. The employee
+was created in YP with no hire date, so YP bootstrapped a rate status with a NULL
+effectivity date. YP cannot resolve a "current rate" from a NULL-dated row, so every YP
+read path that touches the rate crashed. Employees who had already crashed were left with
+orphaned NULL-dated rate rows in YP.
+
+DESIRED OUTCOME:
+- Enrollment sends a valid hire date so YP builds a usable rate status and the flow no
+  longer errors.
+- Admins can repair employees already broken (NULL-dated rate rows) from the UI, without a
+  manual DB script.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+    - Enroll-to-Payroll payload now sends `date_hired: new Date().toLocaleDateString('en-CA')`
+      (today, YYYY-MM-DD). Set explicitly at the source so YP persists it, rather than
+      relying on any sync-time default (the 201 side no longer rewrites hire dates to today).
+- src/components/hooks/useRepairRateStatus.ts (NEW)
+    - Mutation hook: POST /api/employees/repair-rate-status/ (triggers YP rate-status cleanup).
+- src/components/FloatingSyncButton.tsx
+    - Added "Repair Rate Statuses (YP)" as the FIRST Master Sync step, NON-BLOCKING (a
+      failure marks only that step and the sync continues). Subsequent step indices bumped.
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: enroll no longer errors; Master Sync shows the Repair step
+  first and a broken employee's YP profile loads afterward
+☑ React Query hooks tested: useRepairRateStatus verified via Master Sync run
+☐ Cross-browser testing completed (Chrome verified)
+☐ Mobile responsiveness verified (N/A - desktop admin flow)
+
+Integration & E2E:
+☑ API integration tests completed (repair step round-trips through HRIS BE to YP)
+☐ Cypress/Playwright e2e tests updated (not added)
+☑ Manual regression testing completed (existing Master Sync steps still run in order)
+
+FIX EXPLANATION:
+Two-part frontend fix. (1) The Enroll-to-Payroll payload now carries today's date as
+`date_hired`, so YP creates newly enrolled employees with a valid hire date and bootstraps a
+usable rate status - preventing any new breakage. (2) A new, non-blocking "Repair Rate
+Statuses (YP)" step was added to the top of the Master Sync (FloatingSyncButton) via the new
+useRepairRateStatus hook; it calls an HRIS proxy that asks YP to backfill the NULL-dated rate
+rows for the current company (see companion BE entry). This heals employees already broken by
+the bug without touching the YP shared model. It runs first and is non-blocking so a repair
+failure never aborts the rest of the sync.
+
+================================================================================
+
 BUG ID: HRIS-2026-039
 DATE FILED: 2026-08-13
 DATE FIXED: 2026-08-13
