@@ -284,35 +284,35 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
             {directive.custom_policy_fields.map((field, index) => (
               <div className="mb-6" key={index}>
                 <h3 className="font-semibold text-lg">{field.inputLabel}</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(field.inputName) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(field.inputName) }} />
               </div>
             ))}
 
             {directive.eligibility && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Eligibility</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
               </div>
             )}
 
             {directive.application && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Application</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
               </div>
             )}
 
             {directive.coverage && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Coverage</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
               </div>
             )}
 
             {directive.termination && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Termination</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
               </div>
             )}
           </div>
@@ -346,35 +346,35 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
               {legacyPolicyFields.map((field, index) => (
                 <div className="mb-6" key={index}>
                   <h3 className="font-semibold text-lg">{field.fieldName.charAt(0).toUpperCase() + field.fieldName.slice(1)}</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(field.fieldValue) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(field.fieldValue) }} />
                 </div>
               ))}
 
               {directive.eligibility && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Eligibility</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
                 </div>
               )}
 
               {directive.application && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Application</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
                 </div>
               )}
 
               {directive.coverage && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Coverage</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
                 </div>
               )}
 
               {directive.termination && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Termination</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
                 </div>
               )}
             </div>

@@ -426,7 +426,7 @@ export default function CreateMemoModal({
                       <label htmlFor='body' className='block text-sm font-medium leading-6 text-gray-900'>
                         Body
                       </label>
-                      <div className='mt-2 h-72 min-h-[18rem] mb-12 resize-y overflow-hidden memo-quill-resize-clip'>
+                      <div className='mt-2 h-72 min-h-[18rem] mb-12 resize-y overflow-hidden quill-resize-clip'>
                         <textarea rows={4} {...register('body')} id='body' hidden />
                         <ReactQuill
                           ref={bodyQuillRef}

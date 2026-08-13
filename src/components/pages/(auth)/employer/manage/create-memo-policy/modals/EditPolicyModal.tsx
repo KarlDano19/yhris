@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useTagTo from '@/components/hooks/useTagTo';
 import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
 import useUpdateDirective from '../hooks/useUpdateDirective';
@@ -17,6 +18,10 @@ import { MinusCircleIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outli
 
 import DeleteIcon from '@/svg/DeleteIcon';
 import EyePassword from '@/svg/EyePassword';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import { linkify } from '@/helpers/linkify';
+import { isRichTextEmpty } from '@/helpers/richText';
 
 const DEFAULT_POLICY_FIELDS = [
   { inputLabel: 'Purpose', inputName: '' },
@@ -198,7 +203,7 @@ export default function EditPolicyModal({
         setError(`custom_policy_fields.${index}.inputLabel` as any, { type: 'manual', message: 'Field title is required.' });
         hasErrors = true;
       }
-      if (!field.inputName?.trim()) {
+      if (isRichTextEmpty(field.inputName)) {
         setError(`custom_policy_fields.${index}.inputName` as any, { type: 'manual', message: 'Field content is required.' });
         hasErrors = true;
       }
@@ -261,26 +266,49 @@ export default function EditPolicyModal({
                             {watchedFields?.[index]?.inputLabel}
                           </label>
                           <div className='mt-2'>
-                            <textarea rows={4} value={watchedFields?.[index]?.inputName || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' />
+                            <div
+                              className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                              dangerouslySetInnerHTML={{ __html: linkify(watchedFields?.[index]?.inputName || '') }}
+                            />
                           </div>
                         </div>
                       ))}
                       <p className='font-bold my-4'>Provisions</p>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Eligibility</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('eligibility') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('eligibility') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Application</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('application') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('application') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Coverage</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('coverage') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('coverage') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Termination</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('termination') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('termination') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Attachments</label>
@@ -376,8 +404,23 @@ export default function EditPolicyModal({
                               </button>
                             </label>
                             {labelError && (<p className='text-xs text-red-600 mt-1'>{(labelError as any)?.message || 'Field title is required.'}</p>)}
-                            <div className='mt-2'>
-                              <textarea rows={4} {...register(`custom_policy_fields.${index}.inputName`, { required: "Field content is required." })} placeholder={`Enter ${item.inputLabel}...`} id={`custom_policy_fields.${index}.inputName`} className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' />
+                            <div className='quill-resize-clip mt-2 h-56 min-h-[14rem] resize-y overflow-hidden' id={`custom_policy_fields.${index}.inputName`}>
+                              <input
+                                type='text'
+                                {...register(`custom_policy_fields.${index}.inputName`, {
+                                  validate: (value: string) =>
+                                    !isRichTextEmpty(value) || "Field content is required."
+                                })}
+                                hidden
+                              />
+                              <ReactQuill
+                                onChange={(value: string) => setValue(`custom_policy_fields.${index}.inputName`, value)}
+                                formats={QUILL_FORMATS}
+                                modules={QUILL_MODULES}
+                                placeholder={`Enter ${watchedFields?.[index]?.inputLabel || item.inputLabel}...`}
+                                style={{ height: '100%' }}
+                                value={watchedFields?.[index]?.inputName || ''}
+                              />
                             </div>
                             {contentError && (<p className='text-xs text-red-600 mt-1'>{(contentError as any)?.message || 'Field content is required.'}</p>)}
                             <RemoveFieldConfirmModal
@@ -410,19 +453,55 @@ export default function EditPolicyModal({
                       <p className='font-bold my-4'>Provisions</p>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='eligibility' className='block text-sm font-medium leading-6 text-gray-900'>Eligibility</label>
-                        <div className='mt-2'><textarea rows={3} {...register('eligibility')} id='eligibility' className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='eligibility'>
+                          <input type='text' {...register('eligibility')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('eligibility', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('eligibility') || ''}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='application' className='block text-sm font-medium leading-6 text-gray-900'>Application</label>
-                        <div className='mt-2'><textarea rows={3} {...register('application')} id='application' className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='application'>
+                          <input type='text' {...register('application')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('application', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('application') || ''}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='coverage' className='block text-sm font-medium leading-6 text-gray-900'>Coverage</label>
-                        <div className='mt-2'><textarea rows={3} id='coverage' {...register('coverage')} className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='coverage'>
+                          <input type='text' {...register('coverage')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('coverage', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('coverage') || ''}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='termination' className='block text-sm font-medium leading-6 text-gray-900'>Termination</label>
-                        <div className='mt-2'><textarea rows={3} id='termination' {...register('termination')} className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='termination'>
+                          <input type='text' {...register('termination')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('termination', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('termination') || ''}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>Attachments</label>

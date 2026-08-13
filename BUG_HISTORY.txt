@@ -109,6 +109,98 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-038
+DATE FILED: 2026-08-12
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: HR (raised in group chat, w/ screenshot) - Module > Manage > Memo/Policy > Policy
+LINEAR: I-635
+COMPANION: Backend BUG_HISTORY HRIS-2026-038 (duplicate memo/policy endpoint)
+
+ISSUE DESCRIPTION:
+  The Policy form's content boxes (Purpose / Policy / Procedure, plus the Provisions:
+  Eligibility, Application, Coverage, Termination) were plain <textarea> fields, so
+  nothing recorded where the writer pressed Enter. The public policy page recipients
+  open from the emailed link renders those values as HTML, so every line break was
+  lost and numbered items ran together into one solid block:
+    "Policy 1. National Holidays ... 2. Local Holidays ... 3. Business Requirements ..."
+  all on one line. HR asked for "the same content array/layout ... like what we did sa
+  email content" - i.e. numbering should reflect the spacing as written.
+
+  Two further requests came in while fixing it:
+  - Start with the Evaluation Template's editor (no toolbar), then ADD the toolbar
+    after seeing it (formatting options were wanted after all).
+  - Make the boxes draggable/taller like the Create Memo body, so long content is
+    readable while typing.
+
+DESIRED OUTCOME:
+  Policy content reads exactly as typed - each numbered item on its own line, spacing
+  between paragraphs preserved - in the form, the View Policy screen, and the public
+  page. Writers get formatting options and can drag each box taller.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/richText.ts (new - isRichTextEmpty(); Quill serializes an empty editor
+  as "<p><br></p>", so the old !value.trim() required-checks passed on blank input)
+- src/components/pages/(auth)/employer/manage/create-memo-policy/modals/
+  CreatePolicyModal.tsx (custom_policy_fields[].inputName + the 4 provisions:
+  <textarea> -> ReactQuillDynamic with QUILL_FORMATS + QUILL_MODULES; required-validation
+  and the clear-error-on-type watcher use isRichTextEmpty; invalid-field focus now
+  targets the .ql-editor surface, not the hidden backing input)
+- .../modals/EditPolicyModal.tsx (same conversions; the view-only pane rendered values
+  in a disabled <textarea>, which would have shown raw HTML tags - now a read-only
+  ql-editor block via linkify)
+- src/components/pages/(un-auth)/directives/Content.tsx (policy fields, provisions and
+  the legacy-field fallback were wrapped in <p dangerouslySetInnerHTML>; block markup
+  inside a <p> is invalid so the browser hoists it out - now <div class="ql-editor !p-0">,
+  matching how the memo body already renders)
+- src/app/globals.css (renamed .memo-quill-resize-clip -> .quill-resize-clip and shared
+  it with the policy editors; rules unchanged)
+- .../modals/CreateMemoModal.tsx, EditMemoModal.tsx (class rename only)
+- .../DirectiveList.tsx (Duplicate action - see backend HRIS-2026-038: DuplicateIcon
+  button with bordered box + tooltip, ConfirmModal, toast, back to page 1 + refetch)
+- .../hooks/useDuplicateDirective.ts (new - POST /api/directives/<id>/duplicate/)
+
+Backend:
+- See backend BUG_HISTORY HRIS-2026-038 (duplicate endpoint only; the formatting fix
+  needed no backend change - Directive.custom_policy_fields is a JSONField and the
+  values now simply carry HTML).
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☑ TypeScript types verified - npx tsc --noEmit clean on all changed files
+☑ Form validation tested (React Hook Form): empty editor still flagged as required via
+  isRichTextEmpty; error clears once real text is typed
+☐ Jest/RTL component tests (N/A - no frontend test harness in this repo)
+☑ Custom hook follows the existing useSendDirectiveEmail fetch/mutation pattern
+
+Integration & E2E:
+☑ Backend regression suite green (tests.views.test_directive - 50 tests OK)
+☐ Manual QA still needed: create a policy with numbered items, send it, open the
+  emailed public link and confirm it renders line by line
+☑ Edge cases considered:
+  - Policies saved before this fix still open normally; they keep showing as one
+    paragraph until re-typed (no data migration performed)
+  - Toolbar + fixed-height box: quill.snow's .ql-container{height:100%} is measured
+    against the .quill wrapper, so toolbar + editor overflow the box and the bottom of
+    the typing area is cut off. Reused the memo's flex-column fix (.quill-resize-clip)
+  - The public page and View Policy render saved HTML, so the ql-editor styles in
+    globals.css (list markers, empty-paragraph height) apply to policies too
+
+FIX EXPLANATION:
+  Replaced the plain textareas in both policy modals with the same React Quill editor
+  the rest of the app uses (ReactQuillDynamic + QUILL_FORMATS + QUILL_MODULES), so the
+  saved value carries real paragraph markup instead of bare text. Display surfaces that
+  already treated the value as HTML were corrected to use a <div class="ql-editor">
+  wrapper - a <p> cannot legally contain <p>/<ol>, and the browser silently hoisted the
+  content out, which is what flattened the layout. Required-field checks moved to
+  isRichTextEmpty because Quill never returns an empty string once focused. Each editor
+  sits in a resize-y box sharing the memo's .quill-resize-clip rule, which lays the
+  wrapper out as a flex column so the toolbar keeps its natural height and the editor
+  fills exactly the remaining space at any dragged height.
+
+================================================================================
+
 BUG ID: HRIS-2026-037
 DATE FILED: 2026-08-05
 DATE FIXED: 2026-08-05
