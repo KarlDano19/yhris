@@ -5,10 +5,14 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useTagTo from '@/components/hooks/useTagTo';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
 import RemoveFieldConfirmModal from './RemoveFieldConfirmModal';
 import EmailField from '@/components/common/EmailField';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import { isRichTextEmpty } from '@/helpers/richText';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MinusCircleIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
@@ -151,7 +155,7 @@ export default function CreatePolicyModal({
         }
         
         // Validate inputName (field content)
-        if (!field.inputName || field.inputName.trim() === "") {
+        if (isRichTextEmpty(field.inputName)) {
           setError(`custom_policy_fields.${index}.inputName` as any, {
             type: "manual",
             message: "Field content is required."
@@ -181,8 +185,11 @@ export default function CreatePolicyModal({
               el.focus();
             }
             break;
-          } else if (!field.inputName || field.inputName.trim() === "") {
-            const el = document.getElementById(`custom_policy_fields.${i}.inputName`);
+          } else if (isRichTextEmpty(field.inputName)) {
+            // Focus the Quill editing surface, not the hidden input backing the field.
+            const el = document.querySelector(
+              `#custom_policy_fields\\.${i}\\.inputName .ql-editor`
+            ) as HTMLElement | null;
             if (el) el.focus();
             break;
           }
@@ -291,7 +298,10 @@ export default function CreatePolicyModal({
           const fieldName = name.split('.').pop();
           if (fieldName === 'inputLabel' || fieldName === 'inputName') {
             const fieldValue = value.custom_policy_fields?.[parseInt(fieldIndex)]?.[fieldName as keyof PolicyField];
-            if (fieldValue && String(fieldValue).trim() !== '') {
+            const isFilled = fieldName === 'inputName'
+              ? !isRichTextEmpty(fieldValue as string)
+              : Boolean(fieldValue && String(fieldValue).trim() !== '');
+            if (isFilled) {
               clearErrors(name as any);
             }
           }
@@ -482,15 +492,24 @@ export default function CreatePolicyModal({
                                 {labelError.message || 'Field title is required.'}
                               </p>
                             )}
-                            <div className='mt-2'>
-                              <textarea
-                                rows={4}
+                            <div className='quill-resize-clip mt-2 h-56 min-h-[14rem] resize-y overflow-hidden' id={`custom_policy_fields.${index}.inputName`}>
+                              <input
+                                type='text'
                                 {...register(`custom_policy_fields.${index}.inputName`, {
-                                  required: "Field content is required."
+                                  validate: (value?: string) =>
+                                    !isRichTextEmpty(value) || "Field content is required."
                                 })}
+                                hidden
+                              />
+                              <ReactQuill
+                                onChange={(value: string) =>
+                                  setValue(`custom_policy_fields.${index}.inputName`, value)
+                                }
+                                formats={QUILL_FORMATS}
+                                modules={QUILL_MODULES}
                                 placeholder={`Enter ${item.inputLabel}...`}
-                                id={`custom_policy_fields.${index}.inputName`}
-                                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                style={{ height: '100%' }}
+                                value={watch(`custom_policy_fields.${index}.inputName`) || ''}
                               />
                             </div>
                             {contentError && (
@@ -550,12 +569,14 @@ export default function CreatePolicyModal({
                         <label htmlFor='eligibility' className='block text-sm font-medium leading-6 text-gray-900'>
                           Eligibility
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            {...register('eligibility')}
-                            id='eligibility'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='eligibility'>
+                          <input type='text' {...register('eligibility')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('eligibility', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('eligibility') || ''}
                           />
                         </div>
                       </div>
@@ -564,12 +585,14 @@ export default function CreatePolicyModal({
                         <label htmlFor='application' className='block text-sm font-medium leading-6 text-gray-900'>
                           Application
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            {...register('application')}
-                            id='application'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='application'>
+                          <input type='text' {...register('application')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('application', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('application') || ''}
                           />
                         </div>
                       </div>
@@ -577,12 +600,14 @@ export default function CreatePolicyModal({
                         <label htmlFor='coverage' className='block text-sm font-medium leading-6 text-gray-900'>
                           Coverage
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            id='coverage'
-                            {...register('coverage')}
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='coverage'>
+                          <input type='text' {...register('coverage')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('coverage', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('coverage') || ''}
                           />
                         </div>
                       </div>
@@ -590,12 +615,14 @@ export default function CreatePolicyModal({
                         <label htmlFor='termination' className='block text-sm font-medium leading-6 text-gray-900'>
                           Termination
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            id='termination'
-                            {...register('termination')}
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='termination'>
+                          <input type='text' {...register('termination')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('termination', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('termination') || ''}
                           />
                         </div>
                       </div>

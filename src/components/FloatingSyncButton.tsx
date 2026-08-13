@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import { useTour } from '@/components/tour/useTour';
 import useSyncEmployees from './hooks/useSyncEmployees';
+import useRepairRateStatus from './hooks/useRepairRateStatus';
 import useSyncYPUsers from './pages/(auth)/employer/settings/users/accounts/hooks/useSyncYPUsers';
 import useSyncDepartment from './pages/(auth)/employer/settings/general-settings/employees/hooks/department/useSyncDepartment';
 import usePullEmployeeIdSettingsFromPayroll from './pages/(auth)/employer/settings/general-settings/employees/hooks/employee-id-settings/useSyncEmployeeIdSettings';
@@ -49,6 +50,7 @@ const FloatingSyncButton = () => {
   
   // Initial sync steps configuration
   const initialSteps: SyncStep[] = [
+    { id: 'repair-rate-status', name: 'Repair Rate Statuses (YP)', status: 'pending' },
     { id: 'users', name: 'Users', status: 'pending' },
     { id: 'employee-id-settings', name: 'Employee ID Settings', status: 'pending' },
     { id: 'locations-from-yp', name: 'Locations (FROM YP)', status: 'pending' },
@@ -66,6 +68,7 @@ const FloatingSyncButton = () => {
 
   // Initialize all hooks
   const { mutate: syncEmployees } = useSyncEmployees();
+  const { mutate: repairRateStatus } = useRepairRateStatus();
   const ypUsersSync = useSyncYPUsers();
   const { mutate: syncDepartment } = useSyncDepartment();
   const { mutate: pullEmployeeIdSettings } = usePullEmployeeIdSettingsFromPayroll();
@@ -96,8 +99,28 @@ const FloatingSyncButton = () => {
     setSyncSteps(initialSteps);
     
     try {
-      // Step 1: Sync Users
+      // Step 0: Repair broken rate statuses in YP (non-blocking one-time cleanup).
+      // HRIS-enrolled employees pushed to YP before a hire date existed ended up
+      // with a null-dated rate status that crashes YP reads ('dayspermonth'). This
+      // backfills them. A failure here must NOT abort the rest of the sync.
       setCurrentStep(0);
+      updateStepStatus('repair-rate-status', 'running');
+      await new Promise<void>((resolve) => {
+        repairRateStatus(undefined, {
+          onSuccess: (data: any) => {
+            updateStepStatus('repair-rate-status', 'success', data.message || 'Rate statuses repaired');
+            resolve();
+          },
+          onError: (error: any) => {
+            // Non-blocking: mark this step failed but let the sync continue.
+            updateStepStatus('repair-rate-status', 'error', error?.message || error || 'Failed to repair rate statuses');
+            resolve();
+          },
+        });
+      });
+
+      // Step 1: Sync Users
+      setCurrentStep(1);
       updateStepStatus('users', 'running');
       await new Promise<void>((resolve, reject) => {
         ypUsersSync.syncUsers(undefined, {
@@ -113,7 +136,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 2: Sync Employee ID Settings
-      setCurrentStep(1);
+      setCurrentStep(2);
       updateStepStatus('employee-id-settings', 'running');
       await new Promise<void>((resolve, reject) => {
         pullEmployeeIdSettings(undefined, {
@@ -129,7 +152,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 3: Pull Locations FROM YP
-      setCurrentStep(2);
+      setCurrentStep(3);
       updateStepStatus('locations-from-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncLocationFromYP({ syncType: 'all' }, {
@@ -145,7 +168,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 4: Push Locations TO YP
-      setCurrentStep(3);
+      setCurrentStep(4);
       updateStepStatus('locations-to-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncLocation({}, {
@@ -161,7 +184,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 5: Pull Positions FROM YP
-      setCurrentStep(4);
+      setCurrentStep(5);
       updateStepStatus('positions-from-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncPositionFromYP({ syncType: 'all' }, {
@@ -177,7 +200,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 6: Push Positions TO YP
-      setCurrentStep(5);
+      setCurrentStep(6);
       updateStepStatus('positions-to-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncPosition({}, {
@@ -193,7 +216,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 7: Pull Departments FROM YP
-      setCurrentStep(6);
+      setCurrentStep(7);
       updateStepStatus('departments-from-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncDepartmentFromYP({ syncType: 'all' }, {
@@ -209,7 +232,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 8: Push Departments TO YP
-      setCurrentStep(7);
+      setCurrentStep(8);
       updateStepStatus('departments-to-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncDepartment({}, {
@@ -225,7 +248,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 9: Pull Employee Status FROM YP
-      setCurrentStep(8);
+      setCurrentStep(9);
       updateStepStatus('employee-status-from-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncEmployeeStatusFromYP({ syncType: 'all' }, {
@@ -241,7 +264,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 10: Push Employee Status TO YP
-      setCurrentStep(9);
+      setCurrentStep(10);
       updateStepStatus('employee-status-to-yp', 'running');
       await new Promise<void>((resolve, reject) => {
         syncEmployeeStatus({}, {
@@ -257,7 +280,7 @@ const FloatingSyncButton = () => {
       });
 
       // Step 11: Sync Employees (Final step)
-      setCurrentStep(10);
+      setCurrentStep(11);
       updateStepStatus('employees', 'running');
       await new Promise<void>((resolve, reject) => {
         syncEmployees({ syncType: selectedOption }, {
@@ -290,7 +313,7 @@ const FloatingSyncButton = () => {
       toast.custom(() => <CustomToast message={`Sync failed: ${error.message || 'Unknown error'}`} type='error' />, { duration: 7000 });
       setIsMasterSyncing(false);
     }
-  }, [syncEmployees, ypUsersSync, syncDepartment, pullEmployeeIdSettings, syncEmployeeStatus, syncLocation, syncPosition, syncDepartmentFromYP, syncLocationFromYP, syncPositionFromYP, syncEmployeeStatusFromYP, selectedOption]);
+  }, [repairRateStatus, syncEmployees, ypUsersSync, syncDepartment, pullEmployeeIdSettings, syncEmployeeStatus, syncLocation, syncPosition, syncDepartmentFromYP, syncLocationFromYP, syncPositionFromYP, syncEmployeeStatusFromYP, selectedOption]);
 
   const handleCancel = () => {
     if (!isMasterSyncing) {
@@ -378,7 +401,7 @@ const FloatingSyncButton = () => {
                       <div>
                         <h3 className="font-medium text-blue-900 mb-1">Master Sync Configuration</h3>
                         <p className="text-sm text-blue-700">
-                          This will perform bidirectional sync for all systems: Users → Employee ID Settings → Locations (FROM/TO YP) → Positions (FROM/TO YP) → Departments (FROM/TO YP) → Employment Status (FROM/TO YP) → Employees.
+                          This will perform bidirectional sync for all systems: Repair Rate Statuses (YP) → Users → Employee ID Settings → Locations (FROM/TO YP) → Positions (FROM/TO YP) → Departments (FROM/TO YP) → Employment Status (FROM/TO YP) → Employees.
                         </p>
                       </div>
                     </div>
