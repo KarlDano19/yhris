@@ -29,7 +29,7 @@ const valueProps = [
   },
   {
     title: "Pricing Built for Philippine SMEs",
-    body: "Flat monthly pricing starting at PHP 4,000 for up to 100 employees. No per-seat fees, no surprise charges, no long-term contracts.",
+    body: "Flat monthly pricing starting at PHP 7,000 for up to 100 employees, with a simple PHP 60/employee fee above that. No per-seat fees, no surprise charges, no long-term contracts.",
     metric: "Up to 60% lower cost than Sprout HR.",
   },
   {

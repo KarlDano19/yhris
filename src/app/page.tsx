@@ -75,18 +75,18 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": "All-in-one HR management system for Philippine businesses. Flat pricing starting at PHP 4,000/month for up to 100 employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.",
+      "description": "All-in-one HR management system for Philippine businesses. Flat pricing starting at PHP 7,000/month for up to 100 employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.",
       "offers": {
         "@type": "Offer",
-        "price": "4000",
+        "price": "7000",
         "priceCurrency": "PHP",
         "priceSpecification": {
           "@type": "UnitPriceSpecification",
-          "price": "4000",
+          "price": "7000",
           "priceCurrency": "PHP",
           "unitText": "month"
         },
-        "description": "PHP 4,000/month for up to 100 employees. No per-seat fees, no long-term contracts.",
+        "description": "PHP 7,000/month for up to 100 employees, plus a one-time PHP 35,000 setup fee. No per-seat fees, no long-term contracts.",
         "url": "https://yahshuahris.com/pricing"
       },
       "publisher": {

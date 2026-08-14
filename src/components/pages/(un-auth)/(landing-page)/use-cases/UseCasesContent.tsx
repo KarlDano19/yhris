@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { UserPlus, BarChart3, ArrowRight } from "lucide-react";
+import { UserPlus, BarChart3, FileText, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 
 const useCases = [
@@ -35,6 +35,21 @@ const useCases = [
     ],
     href: "/use-cases/performance-management",
   },
+  {
+    id: "employee-documentation",
+    label: "Employee Documentation",
+    icon: FileText,
+    description: "Keep every employee record organized, secure, and accessible with digital document management.",
+    benefits: [
+      "Secure cloud-based document storage",
+      "Structured filing by employee journey",
+      "Role-based access controls",
+      "Data Privacy Act compliant retention",
+      "Complete audit trail logging",
+      "Fast search and retrieval",
+    ],
+    href: "/use-cases/employee-documentation",
+  },
 ];
 
 const UseCasesContent = () => {
@@ -63,7 +78,7 @@ const UseCasesContent = () => {
         {/* Use Case Cards */}
         <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
           <div className="lp-section-container">
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {useCases.map((uc, i) => {
                 const Icon = uc.icon;
                 return (

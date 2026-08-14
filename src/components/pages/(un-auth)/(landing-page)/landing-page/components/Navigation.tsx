@@ -66,6 +66,23 @@ const Navigation = () => {
                     <Link href="/use-cases/performance-management" className="block px-4 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setIsResourcesOpen(false)}>
                       Performance Management
                     </Link>
+                    <Link href="/use-cases/employee-documentation" className="block px-4 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setIsResourcesOpen(false)}>
+                      Employee Documentation
+                    </Link>
+                    <div className="my-2 mx-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+                    <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-white/25">Compare</p>
+                    <Link href="/how-we-compare" className="block px-4 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setIsResourcesOpen(false)}>
+                      How We Compare
+                    </Link>
+                    <Link href="/vs-sprout" className="block px-4 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setIsResourcesOpen(false)}>
+                      YAHSHUA vs Sprout
+                    </Link>
+                    <Link href="/vs-greatday" className="block px-4 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setIsResourcesOpen(false)}>
+                      YAHSHUA vs GreatDay HR
+                    </Link>
+                    <Link href="/vs-juanhr" className="block px-4 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setIsResourcesOpen(false)}>
+                      YAHSHUA vs JuanHR
+                    </Link>
                     <div className="my-2 mx-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
                     <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-white/25">Docs</p>
                     <Link href="/docs" className="block px-4 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setIsResourcesOpen(false)}>
@@ -131,6 +148,11 @@ const Navigation = () => {
                 <div className="text-white/30 px-4 py-2 text-xs uppercase tracking-widest font-semibold">Resources</div>
                 <Link href="/use-cases/employee-onboarding" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">Employee Onboarding</Link>
                 <Link href="/use-cases/performance-management" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">Performance Management</Link>
+                <Link href="/use-cases/employee-documentation" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">Employee Documentation</Link>
+                <Link href="/how-we-compare" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">How We Compare</Link>
+                <Link href="/vs-sprout" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">YAHSHUA vs Sprout</Link>
+                <Link href="/vs-greatday" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">YAHSHUA vs GreatDay HR</Link>
+                <Link href="/vs-juanhr" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">YAHSHUA vs JuanHR</Link>
                 <Link href="/docs" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">Get Setup in YAHSHUA HRIS</Link>
                 <Link href="/blog" className="text-white/60 hover:text-white hover:bg-white/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">HR Insights &amp; Guides</Link>
               </div>

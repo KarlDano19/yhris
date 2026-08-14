@@ -45,7 +45,7 @@ const jsonLd = {
           "name": "What makes YAHSHUA HRIS different from other HR software in the Philippines?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is the only HRIS in the Philippines with DOLE compliance automation built in, covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings, with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at PHP 4,000/month for up to 100 employees with no per-seat fees. Most Philippine HR software requires separate modules for compliance and charges per employee."
+            "text": "YAHSHUA HRIS is the only HRIS in the Philippines with DOLE compliance automation built in, covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings, with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at PHP 7,000/month for up to 100 employees with no per-seat fees. Most Philippine HR software requires separate modules for compliance and charges per employee."
           }
         },
         {
@@ -53,7 +53,7 @@ const jsonLd = {
           "name": "Does YAHSHUA HRIS charge per employee?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No. YAHSHUA HRIS uses flat monthly pricing starting at PHP 4,000/month for up to 100 employees. There are no per-seat fees and no hidden charges. Most competing HR platforms in the Philippines charge per employee per month, which makes costs difficult to predict as headcount grows."
+            "text": "No. YAHSHUA HRIS uses flat monthly pricing starting at PHP 7,000/month for up to 100 employees, plus a one-time PHP 35,000 setup fee. There are no per-seat fees and no hidden charges. Most competing HR platforms in the Philippines charge per employee per month, which makes costs difficult to predict as headcount grows."
           }
         },
         {

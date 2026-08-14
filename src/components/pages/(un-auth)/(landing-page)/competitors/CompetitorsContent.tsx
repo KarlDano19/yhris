@@ -176,7 +176,37 @@ const CompetitorsContent = () => {
             </div>
           </section>
 
-          {/* Who We Serve */}
+          {/* Detailed Comparisons */}
+        <section className="py-20 md:py-28" style={{ background: "#ffffff" }}>
+          <div className="lp-section-container">
+            <ScrollFadeIn>
+              <div className="text-center mb-14">
+                <span className="lp-section-label justify-center mb-5">DETAILED COMPARISONS</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                  See how we stack up, one competitor at a time.
+                </h2>
+              </div>
+            </ScrollFadeIn>
+            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {[
+                { name: "Sprout Solutions", href: "/vs-sprout" },
+                { name: "GreatDay HR", href: "/vs-greatday" },
+                { name: "JuanHR", href: "/vs-juanhr" },
+              ].map((c, i) => (
+                <ScrollFadeIn key={c.name} delay={i * 60}>
+                  <Link href={c.href} className="lp-light-card p-6 h-full flex flex-col justify-between group">
+                    <p className="text-sm font-bold text-gray-900 mb-2">YAHSHUA vs {c.name}</p>
+                    <span className="text-xs font-semibold text-primary inline-flex items-center gap-1">
+                      Compare <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
+                  </Link>
+                </ScrollFadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Who We Serve */}
           <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
             <div className="lp-section-container">
               <ScrollFadeIn>
