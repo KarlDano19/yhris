@@ -306,6 +306,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
               birthdate: orientItemCopy[itemIndex].birth_date,
+              // Pass date hired explicitly (today) from enrollment so Payroll
+              // persists it at the source. Payroll no longer defaults the hire
+              // date to "today" during sync (fixed on the 201 side), so it must
+              // be provided here or the enrolled employee lands with no hire date.
+              date_hired: new Date().toLocaleDateString('en-CA'),
               address: orientItemCopy[itemIndex].address,
               gender: orientItemCopy[itemIndex].gender,
               department: orientItemCopy[itemIndex].department_id,
