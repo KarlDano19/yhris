@@ -15,6 +15,7 @@ const PATCHED = Symbol('yahshua_nav_spinner_patched');
 const NAV_START_EVENT = 'yahshua:navigation-start';
 const RECENT_NAV_WINDOW_MS = 2000;
 const HIDE_DELAY_MS = 120;
+const SLOW_LOAD_THRESHOLD_MS = 5000;
 
 type NavHandler = (url: string | URL | null | undefined) => void;
 const navHandlers = new Set<NavHandler>();
@@ -56,6 +57,7 @@ const GlobalLoadingSpinner = () => {
   const isFetching = useIsFetching() > 0;
   const isOnline = useNetworkStatus();
   const [visible, setVisible] = useState(false);
+  const [isSlow, setIsSlow] = useState(false);
 
   const lastNavClickRef = useRef<number | null>(null);
   const prevPathRef = useRef<string | null>(null);
@@ -194,6 +196,18 @@ const GlobalLoadingSpinner = () => {
     return () => clearTimeout(t);
   }, [isFetching, pathname]);
 
+  // Surface feedback once loading drags on, so a slow/throttled connection
+  // doesn't just look frozen behind the overlay.
+  useEffect(() => {
+    if (!visible) {
+      setIsSlow(false);
+      return;
+    }
+
+    const t = setTimeout(() => setIsSlow(true), SLOW_LOAD_THRESHOLD_MS);
+    return () => clearTimeout(t);
+  }, [visible]);
+
   if (!visible || !isOnline) return null;
 
   return (
@@ -203,6 +217,11 @@ const GlobalLoadingSpinner = () => {
         <div className="flex flex-col items-center justify-center">
           <YahshuaLoadingLogo size={96} durationMs={1000} />
           <div className="mt-3 text-xl text-yellow-100 font-semibold">Loading...</div>
+          {isSlow && (
+            <div className="mt-2 text-sm text-yellow-100/80 text-center max-w-xs">
+              This is taking longer than usual. Please check your internet connection.
+            </div>
+          )}
         </div>
       </div>
     </div>
