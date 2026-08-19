@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 // 2. Third-party library imports
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
 
 // 3. Internal component imports
 import ConfirmModal from "../modals/ConfirmModal";
@@ -215,6 +215,7 @@ export default function TrainingDevelopmentForm({
     control,
     watch,
     setValue,
+    getValues,
     formState: { errors },
     trigger,
   } = useForm<{ rows: Row[] }>({
@@ -269,32 +270,38 @@ export default function TrainingDevelopmentForm({
     onDirtyChange?.(false);
   }, [listData, setValue, onDirtyChange]);
 
+  // reactive subscription to row changes (watch() alone doesn't retrigger memos)
+  const watchedRows = useWatch({ control, name: "rows" }) as Row[];
+
   // errors aggregate
   const hasErrors = useMemo(() => {
-    const rowsValue = watch('rows');
-    return rowsValue.some((row: Row) => {
+    return (watchedRows || []).some((row: Row) => {
       const errs = validateRow(row);
       return !!(errs.title || errs.dateCompleted || errs.provider || errs.fileError);
     });
-  }, [watch]);
+  }, [watchedRows]);
 
   useEffect(() => onErrorsChange?.(hasErrors), [hasErrors, onErrorsChange]);
 
   // dirty aggregate
   const dirty = useMemo(() => {
-    const rowsValue = watch('rows');
-    return rowsValue.some((r: Row) => r.isDirty || r.isNew) || deletedServerIds.length > 0;
-  }, [watch, deletedServerIds]);
+    return (
+      (watchedRows || []).some((r: Row) => r.isDirty || r.isNew) ||
+      deletedServerIds.length > 0
+    );
+  }, [watchedRows, deletedServerIds]);
 
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
 
   /* -------------------------- Row operations -------------------------- */
   const updateRow = useCallback(
     (index: number, patch: Partial<Row>) => {
-      const current = fields[index];
+      // `fields` is a snapshot that doesn't reflect values typed via register()
+      // (title/provider), so read the live values or they'd be overwritten/lost.
+      const current = getValues(`rows.${index}`) ?? fields[index];
       update(index, { ...current, ...patch, isDirty: true });
     },
-    [fields, update]
+    [fields, update, getValues]
   );
 
   const addRow = useCallback(() => {
@@ -516,6 +523,7 @@ export default function TrainingDevelopmentForm({
                             inputOnChange={(d: Date | null) =>
                               field.onChange(d ? toISODateInput(d) : "")
                             }
+                            maxDate={new Date()}
                             placeholder="MM/DD/YYYY"
                             className={[
                               "w-full rounded-md bg-white px-3 py-2 text-sm",
