@@ -17,6 +17,7 @@ import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import { formatDateToLocal } from '@/helpers/date';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -35,11 +36,13 @@ import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 import useDeleteEmployee from './hooks/useDeleteEmployee';
+import useEditEmployeeDetails from './hooks/useEditEmployeeDetails';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
+import useBulkMarkResigned from './hooks/useBulkMarkResigned';
 import FloatingProgress from '@/components/FloatingProgress';
 import { useTour } from '@/components/tour/useTour';
 import { MANAGE_STEPS_SYNCED } from '@/components/tour/dashboardTourSteps';
@@ -48,6 +51,7 @@ import useGetTourProgress from '@/components/hooks/useGetTourProgress';
 import { MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import ResignIcon from '@/svg/ResignIcon';
 import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 
@@ -130,6 +134,7 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
   const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
+  const [isMarkResignedModalOpen, setIsMarkResignedModalOpen] = useState<T_ModalData | null>(null);
   
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -215,7 +220,9 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
   const { mutate: deleteEmployee, isLoading: isDeleteEmployeeLoading } = useDeleteEmployee();
+  const { mutate: editEmployeeDetails, isLoading: isMarkResignedLoading } = useEditEmployeeDetails();
   const bulkDeleteMutation = useBulkDeleteEmployees();
+  const bulkMarkResignedMutation = useBulkMarkResigned();
   const [emailInput, setEmailInput] = useState('');
 
   // Combined refetch function to refresh both main list and autocomplete data
@@ -234,6 +241,9 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
   const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false);
   const [bulkDeleteCount, setBulkDeleteCount] = useState<number>(0);
+  const [isBulkResignConfirmModalOpen, setIsBulkResignConfirmModalOpen] = useState<boolean>(false);
+  const [isBulkResignModalOpen, setIsBulkResignModalOpen] = useState<boolean>(false);
+  const [bulkResignCount, setBulkResignCount] = useState<number>(0);
 
   // Define filter groups for the Filter component
   const filterGroups: FilterGroup[] = [
@@ -516,6 +526,43 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
     toast.custom(() => <CustomToast message={`${bulkDeleteCount} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
   };
 
+  // Handle bulk mark as resigned
+  const handleBulkMarkResigned = () => {
+    if (selectedEmployees.size === 0) return;
+    setBulkResignCount(selectedEmployees.size);
+    setIsBulkResignConfirmModalOpen(true);
+  };
+
+  const confirmBulkResignWarning = () => {
+    setIsBulkResignConfirmModalOpen(false);
+    setIsBulkResignModalOpen(true);
+  };
+
+  const confirmBulkResign = async () => {
+    try {
+      const employeeIds = Array.from(selectedEmployees);
+      await bulkMarkResignedMutation.mutateAsync(employeeIds);
+
+      // Invalidate employee paginated select cache to ensure separation page gets updated data
+      queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+
+      // Don't show toast here - let the progress modal handle the success state
+      setSelectedEmployees(new Set());
+      setSelectAll(false);
+
+      // Refetch data after successful update
+      refetchAllEmployeeData();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mark employees as resigned';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkResignModalOpen(false);
+    }
+  };
+
+  const handleBulkResignSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkResignCount} employee(s) marked as resigned.`} type="success" />, { duration: 3000 });
+  };
+
   // Update select all state when employees change
   useEffect(() => {
     if (employeeItems) {
@@ -625,6 +672,22 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
               >
                 <DeleteIcon />
               </SmartButton>
+              {!item.is_resigned && (
+                <SmartButton
+                  id="mark-resigned-employee-btn"
+                  onClick={() => setIsMarkResignedModalOpen({ id: item.id, open: true })}
+                  disabled={selectedEmployees.size > 1}
+                  className={selectedEmployees.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+                >
+                  <span
+                    data-tooltip-id='mark-resigned-tooltip'
+                    data-tooltip-content='Mark as Resigned'
+                    data-tooltip-place='bottom'
+                  >
+                    <ResignIcon />
+                  </span>
+                </SmartButton>
+              )}
             </div>
           </td>
         </tr>
@@ -1232,6 +1295,21 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
                     'Delete Selected'
                   )}
                 </SmartButton>
+                <SmartButton
+                  id="mark-resigned-employee-btn"
+                  onClick={handleBulkMarkResigned}
+                  disabled={bulkMarkResignedMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-md hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkMarkResignedMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Marking as Resigned...
+                    </div>
+                  ) : (
+                    'Mark as Resigned'
+                  )}
+                </SmartButton>
                 <span className="text-sm text-gray-700 font-medium">
                   {selectedEmployees.size} selected
                 </span>
@@ -1398,6 +1476,36 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
           isLoading={isDeleteEmployeeLoading}
         />
       )}
+      {isMarkResignedModalOpen?.open && (
+        <ConfirmModal
+          isOpen={isMarkResignedModalOpen.open}
+          setIsOpen={() => setIsMarkResignedModalOpen(null)}
+          message={
+            <>
+              Are you sure you want to mark this employee as resigned?
+              <br />
+              This skips the full offboarding process.
+            </>
+          }
+          isLoading={isMarkResignedLoading}
+          confirmAction={() => {
+            editEmployeeDetails(
+              { employee_id: isMarkResignedModalOpen.id, data: { is_resigned: true } },
+              {
+                onSuccess: (data: any) => {
+                  toast.custom(() => <CustomToast message={data.message || 'Employee marked as resigned.'} type='success' />, { duration: 4000 });
+                  queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+                  setIsMarkResignedModalOpen(null);
+                  refetchAllEmployeeData();
+                },
+                onError: (err: any) => {
+                  toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+                },
+              }
+            );
+          }}
+        />
+      )}
       {isEmployeesEditModalOpen && (
         <EditEmployeeDetailsModal
           isOpen={isEmployeesEditModalOpen}
@@ -1445,8 +1553,39 @@ const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { login
         />
       )}
 
+      {/* Bulk Mark as Resigned Confirmation Modal */}
+      {isBulkResignConfirmModalOpen && (
+        <ConfirmModal
+          isOpen={isBulkResignConfirmModalOpen}
+          setIsOpen={setIsBulkResignConfirmModalOpen}
+          confirmAction={confirmBulkResignWarning}
+          message={
+            <>
+              Are you sure you want to mark {bulkResignCount} selected employee{bulkResignCount > 1 ? 's' : ''} as resigned?
+              <br />
+              This skips the full offboarding process.
+            </>
+          }
+          isLoading={false}
+        />
+      )}
+
+      {/* Bulk Mark as Resigned Progress Modal */}
+      {isBulkResignModalOpen && (
+        <ProgressModal
+          isOpen={isBulkResignModalOpen}
+          setIsOpen={setIsBulkResignModalOpen}
+          onConfirm={confirmBulkResign}
+          title={`Marking ${bulkResignCount} employee${bulkResignCount > 1 ? 's' : ''} as resigned...`}
+          isProcessing={bulkMarkResignedMutation.isLoading}
+          onSuccess={handleBulkResignSuccess}
+          progressColor="#D97706"
+        />
+      )}
+
       <Tooltip id='search-tooltip' />
       <Tooltip id='column-filter-tooltip' />
+      <Tooltip id='mark-resigned-tooltip' />
     </>
   );
 };
