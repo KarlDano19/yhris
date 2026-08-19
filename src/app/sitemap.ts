@@ -71,6 +71,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/sprout-alternative`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/greatday-hr-alternative`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/juanhr-alternative`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/how-we-compare`,
       lastModified: new Date(DATES.redesign),
       changeFrequency: 'monthly',

@@ -19,7 +19,7 @@ const valueProps = [
   },
   {
     title: "Guided DOLE Compliance Module",
-    body: "A dedicated DOLE Module covering company registration through annual reports: OSH reports, AERW filing, and mandatory DOLE filings, all included in every plan.",
+    body: "GreatDay HR automates BIR 2316, Alphalist, and payroll-side compliance well, but stops there. YAHSHUA's DOLE Module goes further, guiding you through company registration, OSH reports, and AERW filing, all in every plan.",
     metric: "100% compliance rate. Zero penalties.",
   },
   {
@@ -34,7 +34,7 @@ const valueProps = [
   },
   {
     title: "Complete Hiring-to-Offboarding",
-    body: "Comprehensive suite: Screen, Orient, Manage, Train, Evaluate, and Separate. Fully automated workflow from recruitment to departure.",
+    body: "Screen, Orient, Manage, Train, Evaluate, and Separate all run on one flat-rate plan. GreatDay HR unbundles recruitment and performance into paid add-ons, so a full hiring-to-offboarding workflow costs more the more of it you use.",
     metric: "70% time savings. 95% process efficiency.",
   },
 ];
@@ -187,7 +187,7 @@ const VsGreatdayContent = () => {
               <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
                 Start free or book a demo. No credit card required. No long-term contracts.
               </p>
-              <div className="flex flex-wrap gap-3 justify-center">
+              <div className="flex flex-wrap gap-3 justify-center mb-6">
                 <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
                   Start for Free <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -200,6 +200,9 @@ const VsGreatdayContent = () => {
                   Schedule a Demo <ArrowUpRight className="w-4 h-4" />
                 </Link>
               </div>
+              <Link href="/greatday-hr-alternative" className="text-sm text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1">
+                Weighing your options? See why teams look for a GreatDay HR alternative <ArrowRight className="w-3 h-3" />
+              </Link>
             </ScrollFadeIn>
           </div>
         </section>

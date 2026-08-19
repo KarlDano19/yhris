@@ -9,7 +9,7 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 const valueProps = [
   {
     title: "Multi-Channel Job Posting",
-    body: "Launch hiring campaigns across LinkedIn, Facebook, and YAHSHUA Jobs in 1 to 3 steps. Centralized application management with no platform switching.",
+    body: "Post openings to LinkedIn, Facebook, and YAHSHUA Jobs from a single dashboard, then manage every application in one place. Most Philippine HR platforms leave recruitment to a separate tool.",
     metric: "80% faster job posting. 3x wider reach.",
   },
   {
@@ -19,12 +19,12 @@ const valueProps = [
   },
   {
     title: "Complete Hiring-to-Offboarding Automation",
-    body: "Comprehensive suite: Screen, Orient, Manage, Train, Evaluate, and Separate. Fully automated workflow from recruitment to departure.",
+    body: "Every stage of the employee lifecycle, Screen, Orient, Manage, Train, Evaluate, Separate, lives in one platform instead of the three or four point solutions most HR software in the Philippines requires you to stitch together.",
     metric: "70% time savings. 95% process efficiency.",
   },
   {
     title: "DOLE Compliance Built In",
-    body: "Guided DOLE Module covering company registration to annual reports. Automated compliance for your specific business type.",
+    body: "From company registration to OSH reports and AERW filing, the DOLE Module walks you through every mandatory filing for your specific business type. No separate compliance vendor needed.",
     metric: "100% compliance rate. Zero penalties.",
   },
   {
@@ -34,7 +34,7 @@ const valueProps = [
   },
   {
     title: "Performance Evaluations Included",
-    body: "Built-in evaluation module with standard templates, custom forms, and scheduling. No add-ons, no extra cost.",
+    body: "Custom evaluation forms, scheduled review cycles, and full performance history tracking, all included in the standard plan with no upsell required.",
     metric: "100% evaluation accuracy. Full flexibility.",
   },
 ];
@@ -189,17 +189,22 @@ const CompetitorsContent = () => {
             </ScrollFadeIn>
             <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {[
-                { name: "Sprout Solutions", href: "/vs-sprout" },
-                { name: "GreatDay HR", href: "/vs-greatday" },
-                { name: "JuanHR", href: "/vs-juanhr" },
+                { name: "Sprout Solutions", vsHref: "/vs-sprout", altHref: "/sprout-alternative" },
+                { name: "GreatDay HR", vsHref: "/vs-greatday", altHref: "/greatday-hr-alternative" },
+                { name: "JuanHR", vsHref: "/vs-juanhr", altHref: "/juanhr-alternative" },
               ].map((c, i) => (
                 <ScrollFadeIn key={c.name} delay={i * 60}>
-                  <Link href={c.href} className="lp-light-card p-6 h-full flex flex-col justify-between group">
-                    <p className="text-sm font-bold text-gray-900 mb-2">YAHSHUA vs {c.name}</p>
-                    <span className="text-xs font-semibold text-primary inline-flex items-center gap-1">
-                      Compare <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                    </span>
-                  </Link>
+                  <div className="lp-light-card p-6 h-full flex flex-col justify-between gap-4">
+                    <p className="text-sm font-bold text-gray-900">YAHSHUA vs {c.name}</p>
+                    <div className="flex flex-col gap-2">
+                      <Link href={c.vsHref} className="text-xs font-semibold text-primary inline-flex items-center gap-1 group">
+                        Full Comparison <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
+                      <Link href={c.altHref} className="text-xs font-semibold text-gray-400 hover:text-primary inline-flex items-center gap-1 group transition-colors">
+                        Why Switch <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
+                    </div>
+                  </div>
                 </ScrollFadeIn>
               ))}
             </div>

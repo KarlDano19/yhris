@@ -24,12 +24,12 @@ const valueProps = [
   },
   {
     title: "Guided DOLE Compliance Module",
-    body: "A dedicated DOLE Module covering company registration through annual reports: OSH reports, AERW filing, and mandatory DOLE filings, all included in every plan.",
+    body: "JuanHR markets itself as DOLE and BIR compliant, but doesn't publish a reporting module for company registration, OSH reports, or AERW filing. YAHSHUA's DOLE Module covers all three, included in every plan.",
     metric: "100% compliance rate. Zero penalties.",
   },
   {
     title: "Complete Hiring-to-Offboarding",
-    body: "Comprehensive suite: Screen, Orient, Manage, Train, Evaluate, and Separate. Fully automated workflow from recruitment to departure.",
+    body: "Screen, Orient, Manage, Train, Evaluate, and Separate all run through YAHSHUA HRIS. JuanHR's 24 modules cover attendance and payroll well, but recruitment and performance evaluation aren't part of the platform.",
     metric: "70% time savings. 95% process efficiency.",
   },
   {
@@ -186,7 +186,7 @@ const VsJuanhrContent = () => {
               <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
                 Start free or book a demo. No credit card required. No long-term contracts.
               </p>
-              <div className="flex flex-wrap gap-3 justify-center">
+              <div className="flex flex-wrap gap-3 justify-center mb-6">
                 <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
                   Start for Free <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -199,6 +199,9 @@ const VsJuanhrContent = () => {
                   Schedule a Demo <ArrowUpRight className="w-4 h-4" />
                 </Link>
               </div>
+              <Link href="/juanhr-alternative" className="text-sm text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1">
+                Weighing your options? See why teams look for a JuanHR alternative <ArrowRight className="w-3 h-3" />
+              </Link>
             </ScrollFadeIn>
           </div>
         </section>

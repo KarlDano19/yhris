@@ -9,7 +9,7 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 const valueProps = [
   {
     title: "Multi-Channel Job Posting",
-    body: "Launch hiring campaigns across LinkedIn, Facebook, and YAHSHUA Jobs in 1 to 3 steps. Centralized application management with no platform switching.",
+    body: "Post to LinkedIn, Facebook, and YAHSHUA Jobs from one dashboard, something Sprout HR's standard offering doesn't include. No separate job boards, no manual reposting.",
     metric: "80% faster job posting. 3x wider reach.",
   },
   {
@@ -19,7 +19,7 @@ const valueProps = [
   },
   {
     title: "Complete Hiring-to-Offboarding",
-    body: "Comprehensive suite: Screen, Orient, Manage, Train, Evaluate, and Separate. Fully automated workflow from recruitment to departure.",
+    body: "One connected workflow: Screen, Orient, Manage, Train, Evaluate, Separate, instead of pairing Sprout's HR modules with a separate recruitment tool to cover the full employee lifecycle.",
     metric: "70% time savings. 95% process efficiency.",
   },
   {
@@ -34,7 +34,7 @@ const valueProps = [
   },
   {
     title: "Performance Evaluations Included",
-    body: "Built-in evaluation module with templates, custom forms, and scheduling. No add-ons, no extra cost, included in every plan.",
+    body: "Custom evaluation forms, scheduled review cycles, and full history tracking ship with every plan at no extra module fee.",
     metric: "100% evaluation accuracy. Full flexibility.",
   },
 ];
@@ -186,7 +186,7 @@ const VsSproutContent = () => {
                 <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
                   Start free or book a demo. No credit card required. No long-term contracts.
                 </p>
-                <div className="flex flex-wrap gap-3 justify-center">
+                <div className="flex flex-wrap gap-3 justify-center mb-6">
                   <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
                     Start for Free <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -199,6 +199,9 @@ const VsSproutContent = () => {
                     Schedule a Demo <ArrowUpRight className="w-4 h-4" />
                   </Link>
                 </div>
+                <Link href="/sprout-alternative" className="text-sm text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1">
+                  Weighing your options? See why teams look for a Sprout HR alternative <ArrowRight className="w-3 h-3" />
+                </Link>
               </ScrollFadeIn>
             </div>
           </section>
