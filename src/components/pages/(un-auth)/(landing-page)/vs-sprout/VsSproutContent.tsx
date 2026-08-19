@@ -176,6 +176,88 @@ const VsSproutContent = () => {
             </div>
           </section>
 
+          {/* Who It's For */}
+          <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
+            <div className="lp-section-container">
+              <ScrollFadeIn>
+                <div className="text-center mb-14">
+                  <span className="lp-section-label justify-center mb-5">FIT CHECK</span>
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                    Who each platform actually fits.
+                  </h2>
+                </div>
+              </ScrollFadeIn>
+              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <ScrollFadeIn>
+                  <div className="lp-light-card p-7 h-full">
+                    <h3 className="text-base font-bold text-gray-900 mb-4">YAHSHUA HRIS fits best when:</h3>
+                    <ul className="space-y-3">
+                      {[
+                        "Your team is an SME, not an enterprise with a dedicated Sprout admin",
+                        "You want recruitment and HR under one roof instead of a second hiring tool",
+                        "Predictable, flat costs matter more than a per-seat model that scales with headcount",
+                        "DOLE reporting needs to be guided, not something your HR team figures out alone",
+                      ].map((s) => (
+                        <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
+                          <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(255,193,7,0.1)", border: "1px solid rgba(255,193,7,0.2)" }}>
+                            <svg className="w-2 h-2 text-primary" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6l3 3 5-5" /></svg>
+                          </span>
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </ScrollFadeIn>
+                <ScrollFadeIn delay={60}>
+                  <div className="lp-light-card p-7 h-full">
+                    <h3 className="text-base font-bold text-gray-900 mb-4">Sprout HR fits best when:</h3>
+                    <ul className="space-y-3">
+                      {[
+                        "You're already running on Sprout's broader module suite",
+                        "Earned wage access through ReadyCash or ReadyWage is a must-have for your workforce",
+                        "Your headcount and plan tier make per-seat pricing the cheaper option in practice",
+                      ].map((s) => (
+                        <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
+                          <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gray-100 border border-gray-200" />
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </ScrollFadeIn>
+              </div>
+            </div>
+          </section>
+
+          {/* Migration */}
+          <section className="py-20 md:py-28" style={{ background: "#ffffff" }}>
+            <div className="lp-section-container">
+              <ScrollFadeIn>
+                <div className="text-center mb-14">
+                  <span className="lp-section-label justify-center mb-5">SWITCHING</span>
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                    Switching off Sprout, step by step.
+                  </h2>
+                </div>
+              </ScrollFadeIn>
+              <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {[
+                  { step: "01", title: "Data comes with you", body: "Employee records, 201 files, and payroll history are migrated during setup, covered by the one-time PHP 35,000 fee." },
+                  { step: "02", title: "Guided onboarding", body: "Your team is trained hands-on as part of setup, not left to a help center article." },
+                  { step: "03", title: "No lock-in after that", body: "Flat monthly billing, cancel anytime, no long-term contract." },
+                ].map((m, i) => (
+                  <ScrollFadeIn key={m.step} delay={i * 60}>
+                    <div className="lp-light-card p-6 h-full">
+                      <span className="text-xs font-semibold text-primary tracking-widest">{m.step}</span>
+                      <h3 className="text-base font-bold text-gray-900 mt-2 mb-2">{m.title}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed">{m.body}</p>
+                    </div>
+                  </ScrollFadeIn>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* Bottom CTA */}
           <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
             <div className="lp-section-container text-center">

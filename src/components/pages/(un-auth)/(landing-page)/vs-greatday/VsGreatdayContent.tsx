@@ -177,6 +177,88 @@ const VsGreatdayContent = () => {
           </div>
         </section>
 
+        {/* Who It's For */}
+        <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
+          <div className="lp-section-container">
+            <ScrollFadeIn>
+              <div className="text-center mb-14">
+                <span className="lp-section-label justify-center mb-5">FIT CHECK</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                  Who each platform actually fits.
+                </h2>
+              </div>
+            </ScrollFadeIn>
+            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <ScrollFadeIn>
+                <div className="lp-light-card p-7 h-full">
+                  <h3 className="text-base font-bold text-gray-900 mb-4">YAHSHUA HRIS fits best when:</h3>
+                  <ul className="space-y-3">
+                    {[
+                      "You want recruitment and performance management included, not sold as add-ons",
+                      "Your team is under 50 people and a license minimum doesn't make sense yet",
+                      "You want DOLE reporting guided beyond just payroll-side BIR compliance",
+                      "Flat pricing matters more than a per-employee rate that climbs from day one",
+                    ].map((s) => (
+                      <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
+                        <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(255,193,7,0.1)", border: "1px solid rgba(255,193,7,0.2)" }}>
+                          <svg className="w-2 h-2 text-primary" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6l3 3 5-5" /></svg>
+                        </span>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </ScrollFadeIn>
+              <ScrollFadeIn delay={60}>
+                <div className="lp-light-card p-7 h-full">
+                  <h3 className="text-base font-bold text-gray-900 mb-4">GreatDay HR fits best when:</h3>
+                  <ul className="space-y-3">
+                    {[
+                      "Your workforce is field-based and needs GPS or selfie attendance verification",
+                      "Facial recognition biometric attendance is a requirement, not a nice-to-have",
+                      "You're already past the 50-license minimum and using the add-ons you're paying for",
+                    ].map((s) => (
+                      <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
+                        <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gray-100 border border-gray-200" />
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </ScrollFadeIn>
+            </div>
+          </div>
+        </section>
+
+        {/* Migration */}
+        <section className="py-20 md:py-28" style={{ background: "#ffffff" }}>
+          <div className="lp-section-container">
+            <ScrollFadeIn>
+              <div className="text-center mb-14">
+                <span className="lp-section-label justify-center mb-5">SWITCHING</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                  Switching off GreatDay HR, step by step.
+                </h2>
+              </div>
+            </ScrollFadeIn>
+            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {[
+                { step: "01", title: "Attendance and payroll history transfer", body: "Employee records and attendance history migrate during setup, covered by the one-time PHP 35,000 fee." },
+                { step: "02", title: "Hands-on onboarding", body: "Your team gets dedicated training during setup, not a self-serve help center." },
+                { step: "03", title: "Flat rate, no lock-in", body: "One monthly rate regardless of add-ons used, cancel anytime, no long-term contract." },
+              ].map((m, i) => (
+                <ScrollFadeIn key={m.step} delay={i * 60}>
+                  <div className="lp-light-card p-6 h-full">
+                    <span className="text-xs font-semibold text-primary tracking-widest">{m.step}</span>
+                    <h3 className="text-base font-bold text-gray-900 mt-2 mb-2">{m.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{m.body}</p>
+                  </div>
+                </ScrollFadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Bottom CTA */}
         <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
           <div className="lp-section-container text-center">
