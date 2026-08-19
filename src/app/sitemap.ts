@@ -13,6 +13,7 @@ const DATES = {
   stable:      '2026-01-01', // Stable pages with infrequent content changes
   blog:        '2026-07-21', // Updated when new posts are published — keep current
   calculator:  '2026-06-20', // HR cost calculator launched
+  competitors: '2026-08-14', // vs-greatday, vs-juanhr, and *-alternative pages added
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -56,6 +57,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(DATES.redesign),
       changeFrequency: 'monthly',
       priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/vs-greatday`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/vs-juanhr`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/sprout-alternative`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/greatday-hr-alternative`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/juanhr-alternative`,
+      lastModified: new Date(DATES.competitors),
+      changeFrequency: 'monthly',
+      priority: 0.85,
     },
     {
       url: `${BASE_URL}/how-we-compare`,
