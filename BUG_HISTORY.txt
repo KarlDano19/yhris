@@ -109,6 +109,131 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-041
+DATE FILED: 2026-08-19
+DATE FIXED: 2026-08-19
+CLIENT/REPORTER: Internal (User), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Three compounding bugs made it impossible to save Completed Trainings on the
+  Employee 201 Records > Training & Development tab:
+
+  1. Save button never became enabled after adding/editing a training row.
+     Root cause: TrainingDevelopmentForm's `hasErrors`/`dirty` were computed in
+     `useMemo(() => {...watch('rows')...}, [watch])`. `watch` is a stable
+     function reference from useForm, so the memo never recomputed when rows
+     were added, edited, or deleted - `onDirtyChange`/`onErrorsChange` kept
+     firing their initial (empty-array) values forever, so the parent's
+     `sections.training.dirty` never became true and the Save button's
+     `canSave` check stayed false permanently.
+
+  2. Attaching a Proof of Completion file silently cleared the Training Title
+     and Training Provider fields already typed into that row.
+     Root cause: `updateRow()` built its patch from `fields[index]` -
+     `useFieldArray`'s structural snapshot, which does NOT reflect values
+     typed into `register()`-bound inputs (title/provider). Calling
+     `update(index, { ...fields[index], ...filePatch })` on file select
+     overwrote the row with the stale snapshot's original (empty) title/
+     provider, discarding what the user had typed.
+
+  3. Even with 1 and 2 fixed, clicking Save/Confirm threw a runtime error
+     "createTraining is not a function" and the save never happened.
+     Root cause: `useCreateTrainingRecord`, `usePatchTrainingRecord`, and
+     `useDeleteTrainingRecord` each return a standard TanStack Query
+     `useMutation` object (`mutate`/`mutateAsync`/etc.), but Content.tsx
+     destructured them as `{ create }`, `{ update }`, `{ remove }` -
+     properties that don't exist on a mutation object - and called them with
+     positional args (`createTraining(id, input)`) instead of the single
+     params object each mutation function actually expects.
+
+  A fourth, smaller issue was found in the same investigation: the Date
+  Completed picker allowed choosing a future date in the calendar UI itself
+  (only caught after the fact by a "cannot be in the future" validation
+  message), instead of disabling future dates up front.
+
+DESIRED OUTCOME:
+  A user can add a training row, fill in all fields, attach a file, and Save
+  successfully - with the Save button enabling as soon as the form has valid,
+  unsaved changes, typed fields surviving a file attach, and the future-dated
+  Date Completed being unselectable in the calendar rather than only rejected
+  after submit.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - Imported `useWatch` from react-hook-form; replaced the `[watch]`-keyed
+      `hasErrors`/`dirty` useMemo blocks with a `useWatch({ control, name:
+      "rows" })` subscription (`watchedRows`) so both recompute reactively on
+      every row change.
+    - `updateRow()` now reads the row's live values via `getValues(\`rows.${index}\`)`
+      (falling back to `fields[index]`) before merging in the patch, so a file
+      attach no longer clobbers already-typed Title/Provider values.
+    - Added `maxDate={new Date()}` to the Date Completed `CustomDatePicker` so
+      future dates are disabled in the calendar itself.
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+    - Changed `const { create: createTraining } = useCreateTrainingRecord()`
+      (and the matching update/remove destructures) to
+      `const { mutateAsync: createTraining } = useCreateTrainingRecord()` etc.
+    - Updated the three call sites in `saveTrainingTab()` to pass a single
+      `{ employeeId, input }` / `{ employeeId, recordId, input }` /
+      `{ employeeId, recordId }` object, matching each mutation function's
+      actual signature, instead of positional arguments.
+
+Backend:
+- N/A - frontend-only fix; no backend endpoint or contract changes required.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: added a training row, typed Title/Provider,
+  attached a file, confirmed values persisted; Save button enabled once the
+  row was valid and dirty; Save/Confirm completed without the
+  "createTraining is not a function" error
+☑ TypeScript types verified for the changed call sites (CreateTrainingInput /
+  UpdateTrainingInput shapes match what's now passed)
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (create -> update -> delete flow via
+  Save exercised against the real training-records endpoints)
+☑ Edge cases considered (attaching a file after typing other fields; future
+  date selection blocked in the picker in addition to the existing
+  post-submit validation message)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Bug 1 was a stale-dependency problem: `useMemo` only recomputes when an
+  item in its dependency array changes by reference, and `watch` (the
+  function) never changes - only its *return value* does, and only if you
+  subscribe to it via `useWatch`. Switching to `useWatch({ control, name:
+  "rows" })` gives a value that actually changes reference on every row
+  edit, so the `hasErrors`/`dirty` memos - and therefore the parent's Save
+  button - now update live.
+
+  Bug 2 was a data-source mismatch: `useFieldArray`'s `fields` array is a
+  structural snapshot (correct for add/remove/reorder) but is NOT kept in
+  sync with values from `register()`-bound inputs on every keystroke. Basing
+  the file-attach patch on `getValues()` instead reads the form's actual
+  current values, so title/provider survive.
+
+  Bug 3 was an API-shape mismatch introduced when the hooks were written
+  against the standard `useMutation` return shape but the call site was
+  written as if they returned custom `{ create/update/remove }` helpers.
+  Destructuring `mutateAsync` under the same aliases and passing the single
+  params object each hook's mutation function expects resolves the runtime
+  error with no changes to the hooks themselves.
+
+  The date picker fix simply passes `maxDate={new Date()}` through to
+  `CustomDatePicker`, which already supported the prop - disabling future
+  dates in the calendar UI is a strict improvement over relying solely on
+  the post-submit "cannot be in the future" error message.
+
+================================================================================
+
 BUG ID: HRIS-2026-040
 DATE FILED: 2026-08-13
 DATE FIXED: 2026-08-13
