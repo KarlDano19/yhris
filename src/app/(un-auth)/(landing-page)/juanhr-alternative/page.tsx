@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import JuanhrAlternativeContent from "@/components/pages/(un-auth)/(landing-page)/juanhr-alternative/JuanhrAlternativeContent";
 import PixelEvents from '@/components/PixelEvents';
 
@@ -29,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/juanhr-alternative#webpage",
       "name": "JuanHR Alternative: YAHSHUA HRIS for Philippine SMEs",
-      "description": "YAHSHUA HRIS as a JuanHR alternative for Philippine SMEs: published flat pricing at PHP 7,000/month for up to 100 employees, with recruitment, applicant tracking, performance management, and DOLE compliance included.",
+      "description": `YAHSHUA HRIS as a JuanHR alternative for Philippine SMEs: published flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, with recruitment, applicant tracking, performance management, and DOLE compliance included.`,
       "url": "https://yahshuahris.com/juanhr-alternative",
       "dateModified": "2026-08-14T00:00:00.000Z",
       "publisher": {
@@ -45,7 +46,7 @@ const jsonLd = {
           "name": "What is a good alternative to JuanHR for Philippine SMEs?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is a JuanHR alternative for Philippine SMEs that publishes its pricing upfront at PHP 7,000/month for up to 100 employees. It includes recruitment, applicant tracking, and performance evaluation, none of which are part of JuanHR's published module list."
+            "text": `YAHSHUA HRIS is a JuanHR alternative for Philippine SMEs that publishes its pricing upfront at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. It includes recruitment, applicant tracking, and performance evaluation, none of which are part of JuanHR's published module list.`
           }
         },
         {
@@ -53,7 +54,7 @@ const jsonLd = {
           "name": "How do I switch from JuanHR to YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS charges a one-time PHP 35,000 setup fee covering full data migration, implementation, and dedicated onboarding training. There is no long-term contract after setup, and pricing is published on the site so you know the cost before booking a demo."
+            "text": `YAHSHUA HRIS charges a one-time ${PRICING_LABELS.setup} setup fee covering full data migration, implementation, and dedicated onboarding training. There is no long-term contract after setup, and pricing is published on the site so you know the cost before booking a demo.`
           }
         },
         {

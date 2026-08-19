@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, TrendingUp, PuzzleIcon, ShieldAlert } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
 
 const painPoints = [
   {
@@ -109,7 +110,7 @@ const SproutAlternativeContent = () => {
                   YAHSHUA HRIS: built for Philippine SMEs, not enterprise procurement.
                 </h2>
                 <p className="text-base text-gray-500 leading-relaxed">
-                  Flat pricing at PHP 7,000/month for up to 100 employees, with a simple PHP 60/employee fee above that. Multi-platform job posting, a pre-screened talent pool, and a guided DOLE Module covering company registration through OSH reports and AERW filing all ship in the same plan, no add-ons required.
+                  Flat pricing at {PRICING_LABELS.base}/month for up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that. Multi-platform job posting, a pre-screened talent pool, and a guided DOLE Module covering company registration through OSH reports and AERW filing all ship in the same plan, no add-ons required.
                 </p>
               </div>
             </ScrollFadeIn>
@@ -169,7 +170,7 @@ const SproutAlternativeContent = () => {
                 Moving off Sprout doesn't mean starting from zero.
               </h2>
               <p className="text-base text-gray-500 leading-relaxed">
-                The one-time PHP 35,000 setup fee covers full data migration, implementation, and dedicated onboarding training, so your employee records, 201 files, and payroll history come with you. No long-term contract locks you in after that.
+                The one-time {PRICING_LABELS.setup} setup fee covers full data migration, implementation, and dedicated onboarding training, so your employee records, 201 files, and payroll history come with you. No long-term contract locks you in after that.
               </p>
             </ScrollFadeIn>
           </div>

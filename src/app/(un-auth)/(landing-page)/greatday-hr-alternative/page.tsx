@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import GreatdayAlternativeContent from "@/components/pages/(un-auth)/(landing-page)/greatday-hr-alternative/GreatdayAlternativeContent";
 import PixelEvents from '@/components/PixelEvents';
 
@@ -29,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/greatday-hr-alternative#webpage",
       "name": "GreatDay HR Alternative: YAHSHUA HRIS for Philippine SMEs",
-      "description": "YAHSHUA HRIS as a GreatDay HR alternative for Philippine SMEs: flat pricing at PHP 7,000/month for up to 100 employees with no license minimum, and recruitment, performance management, and DOLE compliance included at no extra cost.",
+      "description": `YAHSHUA HRIS as a GreatDay HR alternative for Philippine SMEs: flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with no license minimum, and recruitment, performance management, and DOLE compliance included at no extra cost.`,
       "url": "https://yahshuahris.com/greatday-hr-alternative",
       "dateModified": "2026-08-14T00:00:00.000Z",
       "publisher": {
@@ -45,7 +46,7 @@ const jsonLd = {
           "name": "What is a good alternative to GreatDay HR for Philippine SMEs?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is a GreatDay HR alternative built for Philippine SMEs. It uses flat pricing at PHP 7,000/month for up to 100 employees with no license minimum, and includes recruitment, performance management, and a guided DOLE compliance module in every plan at no extra cost."
+            "text": `YAHSHUA HRIS is a GreatDay HR alternative built for Philippine SMEs. It uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with no license minimum, and includes recruitment, performance management, and a guided DOLE compliance module in every plan at no extra cost.`
           }
         },
         {
@@ -53,7 +54,7 @@ const jsonLd = {
           "name": "How do I switch from GreatDay HR to YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS charges a one-time PHP 35,000 setup fee that covers data migration, implementation, and dedicated onboarding training, bringing employee records and attendance history over during setup. There is no long-term contract after that."
+            "text": `YAHSHUA HRIS charges a one-time ${PRICING_LABELS.setup} setup fee that covers data migration, implementation, and dedicated onboarding training, bringing employee records and attendance history over during setup. There is no long-term contract after that.`
           }
         },
         {

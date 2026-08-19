@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import VsGreatdayContent from "@/components/pages/(un-auth)/(landing-page)/vs-greatday/VsGreatdayContent";
 import PixelEvents from '@/components/PixelEvents';
 
@@ -29,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/vs-greatday#webpage",
       "name": "YAHSHUA HRIS vs GreatDay HR: Side-by-Side Comparison",
-      "description": "Feature and pricing comparison between YAHSHUA HRIS and GreatDay HR for Philippine businesses. YAHSHUA includes multi-platform job posting, performance management, and DOLE compliance automation in every plan, with flat pricing at PHP 7,000/month for up to 100 employees.",
+      "description": `Feature and pricing comparison between YAHSHUA HRIS and GreatDay HR for Philippine businesses. YAHSHUA includes multi-platform job posting, performance management, and DOLE compliance automation in every plan, with flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees.`,
       "url": "https://yahshuahris.com/vs-greatday",
       "dateModified": "2026-08-14T00:00:00.000Z",
       "publisher": {
@@ -56,7 +57,7 @@ const jsonLd = {
           "name": "What is the main difference between YAHSHUA HRIS and GreatDay HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS includes multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), performance management, and DOLE compliance automation in every plan at no extra cost. GreatDay HR lists recruitment and performance management as paid add-ons on top of its base package. YAHSHUA also uses flat pricing at PHP 7,000/month for up to 100 employees (plus a PHP 35,000 one-time setup fee), while GreatDay HR charges PHP 77 per employee per month starting from its first employee, with a minimum purchase of 50 licenses."
+            "text": `YAHSHUA HRIS includes multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), performance management, and DOLE compliance automation in every plan at no extra cost. GreatDay HR lists recruitment and performance management as paid add-ons on top of its base package. YAHSHUA also uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees (plus a ${PRICING_LABELS.setup} one-time setup fee), while GreatDay HR charges PHP 77 per employee per month starting from its first employee, with a minimum purchase of 50 licenses.`
           }
         },
         {
@@ -72,7 +73,7 @@ const jsonLd = {
           "name": "How does YAHSHUA HRIS pricing compare to GreatDay HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS starts at PHP 7,000/month flat for up to 100 employees, plus a one-time PHP 35,000 setup fee, with no minimum employee count required to start. GreatDay HR's Basic Starter Package costs PHP 77 per employee per month and requires a minimum purchase of 50 licenses, meaning costs rise with every employee added from day one with no flat cap."
+            "text": `YAHSHUA HRIS starts at ${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, plus a one-time ${PRICING_LABELS.setup} setup fee, with no minimum employee count required to start. GreatDay HR's Basic Starter Package costs PHP 77 per employee per month and requires a minimum purchase of 50 licenses, meaning costs rise with every employee added from day one with no flat cap.`
           }
         },
         {

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import VsSproutContent from "@/components/pages/(un-auth)/(landing-page)/vs-sprout/VsSproutContent";
 import PixelEvents from '@/components/PixelEvents';
 
@@ -29,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/vs-sprout#webpage",
       "name": "YAHSHUA HRIS vs Sprout Solutions: Side-by-Side Comparison",
-      "description": "Feature and pricing comparison between YAHSHUA HRIS and Sprout HR for Philippine businesses. YAHSHUA includes DOLE compliance automation, multi-platform job posting, and flat pricing at PHP 7,000/month for up to 100 employees.",
+      "description": `Feature and pricing comparison between YAHSHUA HRIS and Sprout HR for Philippine businesses. YAHSHUA includes DOLE compliance automation, multi-platform job posting, and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees.`,
       "url": "https://yahshuahris.com/vs-sprout",
       "dateModified": "2026-06-02T00:00:00.000Z",
       "publisher": {
@@ -56,7 +57,7 @@ const jsonLd = {
           "name": "What is the main difference between YAHSHUA HRIS and Sprout HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS includes DOLE compliance automation, multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), and a pre-screened talent pool, all built in at no extra cost. Sprout HR does not include DOLE compliance automation or multi-platform job posting in its standard offering. YAHSHUA also uses flat pricing at PHP 7,000/month for up to 100 employees with no per-seat fees, while Sprout HR uses per-seat pricing."
+            "text": `YAHSHUA HRIS includes DOLE compliance automation, multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), and a pre-screened talent pool, all built in at no extra cost. Sprout HR does not include DOLE compliance automation or multi-platform job posting in its standard offering. YAHSHUA also uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with no per-seat fees, while Sprout HR uses per-seat pricing.`
           }
         },
         {
@@ -72,7 +73,7 @@ const jsonLd = {
           "name": "How does YAHSHUA HRIS pricing compare to Sprout HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS starts at PHP 7,000/month for up to 100 employees with flat pricing (plus a one-time PHP 35,000 setup fee): no per-seat fees, no long-term contracts. Sprout HR uses per-seat pricing, which makes costs harder to predict as headcount grows. For most Philippine SMEs, YAHSHUA HRIS costs up to 60% less than a comparable Sprout HR configuration."
+            "text": `YAHSHUA HRIS starts at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with flat pricing (plus a one-time ${PRICING_LABELS.setup} setup fee): no per-seat fees, no long-term contracts. Sprout HR uses per-seat pricing, which makes costs harder to predict as headcount grows. For most Philippine SMEs, YAHSHUA HRIS costs up to 60% less than a comparable Sprout HR configuration.`
           }
         },
         {

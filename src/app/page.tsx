@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import Content from "@/components/pages/(un-auth)/(landing-page)/landing-page/Content";
 import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
 import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
@@ -75,18 +76,18 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": "All-in-one HR management system for Philippine businesses. Flat pricing starting at PHP 7,000/month for up to 100 employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.",
+      "description": `All-in-one HR management system for Philippine businesses. Flat pricing starting at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.`,
       "offers": {
         "@type": "Offer",
-        "price": "7000",
-        "priceCurrency": "PHP",
+        "price": String(YAHSHUA_PRICING.basePrice),
+        "priceCurrency": YAHSHUA_PRICING.currency,
         "priceSpecification": {
           "@type": "UnitPriceSpecification",
-          "price": "7000",
-          "priceCurrency": "PHP",
+          "price": String(YAHSHUA_PRICING.basePrice),
+          "priceCurrency": YAHSHUA_PRICING.currency,
           "unitText": "month"
         },
-        "description": "PHP 7,000/month for up to 100 employees, plus a one-time PHP 35,000 setup fee. No per-seat fees, no long-term contracts.",
+        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus a one-time ${PRICING_LABELS.setup} setup fee. No per-seat fees, no long-term contracts.`,
         "url": "https://yahshuahris.com/pricing"
       },
       "publisher": {

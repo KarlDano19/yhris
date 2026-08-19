@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import SproutAlternativeContent from "@/components/pages/(un-auth)/(landing-page)/sprout-alternative/SproutAlternativeContent";
 import PixelEvents from '@/components/PixelEvents';
 
@@ -29,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/sprout-alternative#webpage",
       "name": "Sprout HR Alternative: YAHSHUA HRIS for Philippine SMEs",
-      "description": "YAHSHUA HRIS as a Sprout HR alternative for Philippine SMEs: flat pricing at PHP 7,000/month for up to 100 employees, built-in multi-platform job posting, and a guided DOLE compliance module.",
+      "description": `YAHSHUA HRIS as a Sprout HR alternative for Philippine SMEs: flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, built-in multi-platform job posting, and a guided DOLE compliance module.`,
       "url": "https://yahshuahris.com/sprout-alternative",
       "dateModified": "2026-08-14T00:00:00.000Z",
       "publisher": {
@@ -45,7 +46,7 @@ const jsonLd = {
           "name": "What is a good alternative to Sprout HR for Philippine SMEs?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is a Sprout HR alternative built specifically for Philippine SMEs. It uses flat pricing at PHP 7,000/month for up to 100 employees instead of per-seat billing, and includes multi-platform job posting, a pre-screened talent pool, and a guided DOLE compliance module in every plan."
+            "text": `YAHSHUA HRIS is a Sprout HR alternative built specifically for Philippine SMEs. It uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees instead of per-seat billing, and includes multi-platform job posting, a pre-screened talent pool, and a guided DOLE compliance module in every plan.`
           }
         },
         {
@@ -53,7 +54,7 @@ const jsonLd = {
           "name": "How do I switch from Sprout HR to YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS charges a one-time PHP 35,000 setup fee that covers full data migration, implementation, and dedicated onboarding training. Employee records, 201 files, and payroll history are migrated as part of onboarding, and there is no long-term contract after setup."
+            "text": `YAHSHUA HRIS charges a one-time ${PRICING_LABELS.setup} setup fee that covers full data migration, implementation, and dedicated onboarding training. Employee records, 201 files, and payroll history are migrated as part of onboarding, and there is no long-term contract after setup.`
           }
         },
         {

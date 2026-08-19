@@ -7,31 +7,24 @@ import { Check, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { YAHSHUA_PRICING, PRICING_LABELS, calculateMonthly, calculateVAT, calculateWithVAT } from "@/lib/yahshuaPricing";
 
 interface LpPricingContentProps {
   isLoggedIn: boolean;
 }
 
-const BASE_PRICE = 7000;
-const EXCESS_RATE = 60;
-const SETUP_FEE = 35000;
-const VAT_RATE = 0.12;
-
-const calculateMonthly = (employees: number) => {
-  if (employees <= 100) return BASE_PRICE;
-  return BASE_PRICE + (employees - 100) * EXCESS_RATE;
-};
-
-const calculateVAT = (price: number) => Math.round(price * VAT_RATE);
-const calculateWithVAT = (price: number) => price + calculateVAT(price);
+const BASE_PRICE = YAHSHUA_PRICING.basePrice;
+const EXCESS_RATE = YAHSHUA_PRICING.excessRatePerEmployee;
+const SETUP_FEE = YAHSHUA_PRICING.setupFee;
+const EMPLOYEE_CAP = YAHSHUA_PRICING.employeeCap;
 
 const formatPHP = (price: number) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
 
 const faqs = [
   { q: "Is there really no credit card required for the free plan?", a: "Correct. The Freemium plan is free forever with no payment information needed. You can post jobs and screen applicants without spending anything." },
-  { q: "What happens when I go over 100 employees?", a: "An additional ₱60 per employee per month is added on top of the ₱7,000 base rate. The calculator above shows your exact monthly cost as you type." },
-  { q: "Is there a setup fee?", a: "Yes. There is a one-time setup fee of ₱35,000 which covers full implementation, data migration, and dedicated onboarding training. There are no other upfront costs after that." },
+  { q: `What happens when I go over ${EMPLOYEE_CAP} employees?`, a: `An additional ${PRICING_LABELS.excess} per employee per month is added on top of the ${PRICING_LABELS.base} base rate. The calculator above shows your exact monthly cost as you type.` },
+  { q: "Is there a setup fee?", a: `Yes. There is a one-time setup fee of ${PRICING_LABELS.setup} which covers full implementation, data migration, and dedicated onboarding training. There are no other upfront costs after that.` },
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
   { q: "Is VAT included in the pricing shown?", a: "No. All prices shown are VAT excluded. The applicable VAT will be reflected in your invoice." },
   { q: "Does YAHSHUA HRIS come with YAHSHUA Payroll?", a: "Yes. Every YAHSHUA HRIS plan comes with YAHSHUA Payroll at no extra charge. Automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, and bank disbursement are all included in your subscription." },
@@ -44,7 +37,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const monthly = calculateMonthly(employeeCount);
-  const isOverBase = employeeCount > 100;
+  const isOverBase = employeeCount > EMPLOYEE_CAP;
 
   const handlePaidCTA = () => {
     if (isLoggedIn) {
@@ -180,12 +173,12 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                       <div className="rounded-lg p-4 mb-4 text-xs space-y-1" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
                         <p className="font-semibold text-gray-700 mb-2">Monthly breakdown</p>
                         <div className="flex justify-between text-gray-500">
-                          <span>Base (up to 100 employees)</span><span>{formatPHP(BASE_PRICE)}</span>
+                          <span>Base (up to {EMPLOYEE_CAP} employees)</span><span>{formatPHP(BASE_PRICE)}</span>
                         </div>
                         {isOverBase && (
                           <div className="flex justify-between text-gray-500">
-                            <span>{employeeCount - 100} employees x ₱{EXCESS_RATE}</span>
-                            <span>{formatPHP((employeeCount - 100) * EXCESS_RATE)}</span>
+                            <span>{employeeCount - EMPLOYEE_CAP} employees x ₱{EXCESS_RATE}</span>
+                            <span>{formatPHP((employeeCount - EMPLOYEE_CAP) * EXCESS_RATE)}</span>
                           </div>
                         )}
                         <div className="flex justify-between text-gray-600 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>

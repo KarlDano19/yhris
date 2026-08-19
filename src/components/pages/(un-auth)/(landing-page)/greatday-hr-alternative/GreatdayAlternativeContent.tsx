@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Layers, Users, FileWarning } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
 
 const painPoints = [
   {
@@ -109,7 +110,7 @@ const GreatdayAlternativeContent = () => {
                   YAHSHUA HRIS: one flat rate, nothing unbundled.
                 </h2>
                 <p className="text-base text-gray-500 leading-relaxed">
-                  PHP 7,000/month covers up to 100 employees, with a simple PHP 60/employee fee above that, no license minimum, no separate charge for recruitment or performance management. The DOLE Module guides you through company registration, OSH reports, and AERW filing at no extra cost.
+                  {PRICING_LABELS.base}/month covers up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that, no license minimum, no separate charge for recruitment or performance management. The DOLE Module guides you through company registration, OSH reports, and AERW filing at no extra cost.
                 </p>
               </div>
             </ScrollFadeIn>
@@ -169,7 +170,7 @@ const GreatdayAlternativeContent = () => {
                 Switching off a per-license plan is a one-time step, not a project.
               </h2>
               <p className="text-base text-gray-500 leading-relaxed">
-                A one-time PHP 35,000 setup fee covers data migration, implementation, and dedicated onboarding training, bringing your employee records and attendance history over in one pass. After that, it's a flat monthly rate with no long-term contract.
+                A one-time {PRICING_LABELS.setup} setup fee covers data migration, implementation, and dedicated onboarding training, bringing your employee records and attendance history over in one pass. After that, it's a flat monthly rate with no long-term contract.
               </p>
             </ScrollFadeIn>
           </div>

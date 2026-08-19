@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, HelpCircle, UserX, ClipboardX } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
 
 const painPoints = [
   {
@@ -109,7 +110,7 @@ const JuanhrAlternativeContent = () => {
                   YAHSHUA HRIS: see the price, get the full lifecycle.
                 </h2>
                 <p className="text-base text-gray-500 leading-relaxed">
-                  PHP 7,000/month for up to 100 employees is published on the pricing page, no sales call required to find out. Multi-platform job posting, applicant tracking, and performance evaluation ship alongside a guided DOLE Module in the same plan.
+                  {PRICING_LABELS.base}/month for up to {YAHSHUA_PRICING.employeeCap} employees is published on the pricing page, no sales call required to find out. Multi-platform job posting, applicant tracking, and performance evaluation ship alongside a guided DOLE Module in the same plan.
                 </p>
               </div>
             </ScrollFadeIn>
@@ -169,7 +170,7 @@ const JuanhrAlternativeContent = () => {
                 Get a real number first, then a real migration plan.
               </h2>
               <p className="text-base text-gray-500 leading-relaxed">
-                Check YAHSHUA's published pricing before you even book a call. When you're ready, a one-time PHP 35,000 setup fee covers full data migration, implementation, and dedicated onboarding training, with no long-term contract after that.
+                Check YAHSHUA's published pricing before you even book a call. When you're ready, a one-time {PRICING_LABELS.setup} setup fee covers full data migration, implementation, and dedicated onboarding training, with no long-term contract after that.
               </p>
             </ScrollFadeIn>
           </div>

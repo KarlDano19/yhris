@@ -5,6 +5,10 @@ import Link from "next/link";
 import { Check, X, ArrowRight, ArrowUpRight } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
+import { COMPETITORS } from "@/lib/competitorData";
+
+const competitor = COMPETITORS.greatday;
 
 const valueProps = [
   {
@@ -24,7 +28,7 @@ const valueProps = [
   },
   {
     title: "Flat Pricing With a Real Cap",
-    body: "PHP 7,000/month flat for up to 100 employees, with a simple PHP 60/employee fee above that. GreatDay HR charges PHP 77 per employee per month starting from employee one, with no ceiling.",
+    body: `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. GreatDay HR charges PHP 77 per employee per month starting from employee one, with no ceiling.`,
     metric: "Predictable cost as you scale past 50 or 100 staff.",
   },
   {
@@ -39,18 +43,7 @@ const valueProps = [
   },
 ];
 
-const comparisonRows = [
-  { feature: "Multi-platform job posting included", yahshua: true, competitor: false },
-  { feature: "Performance evaluation module included", yahshua: true, competitor: false },
-  { feature: "Guided DOLE reporting (OSH, AERW, registration)", yahshua: true, competitor: false },
-  { feature: "Flat pricing with an employee-count cap", yahshua: true, competitor: false },
-  { feature: "No minimum license purchase", yahshua: true, competitor: false },
-  { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, competitor: true },
-  { feature: "Employee self-service portal", yahshua: true, competitor: true },
-  { feature: "Philippine-localized platform", yahshua: true, competitor: true },
-  { feature: "Mobile GPS and selfie attendance", yahshua: false, competitor: true },
-  { feature: "Facial recognition biometric attendance", yahshua: false, competitor: true },
-];
+const comparisonRows = competitor.comparisonRows;
 
 const VsGreatdayContent = () => {
   return (
@@ -243,7 +236,7 @@ const VsGreatdayContent = () => {
             </ScrollFadeIn>
             <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {[
-                { step: "01", title: "Attendance and payroll history transfer", body: "Employee records and attendance history migrate during setup, covered by the one-time PHP 35,000 fee." },
+                { step: "01", title: "Attendance and payroll history transfer", body: `Employee records and attendance history migrate during setup, covered by the one-time ${PRICING_LABELS.setup} fee.` },
                 { step: "02", title: "Hands-on onboarding", body: "Your team gets dedicated training during setup, not a self-serve help center." },
                 { step: "03", title: "Flat rate, no lock-in", body: "One monthly rate regardless of add-ons used, cancel anytime, no long-term contract." },
               ].map((m, i) => (

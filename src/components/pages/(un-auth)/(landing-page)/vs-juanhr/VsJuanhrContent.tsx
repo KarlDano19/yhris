@@ -5,6 +5,10 @@ import Link from "next/link";
 import { Check, X, ArrowRight, ArrowUpRight } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
+import { COMPETITORS } from "@/lib/competitorData";
+
+const competitor = COMPETITORS.juanhr;
 
 const valueProps = [
   {
@@ -20,7 +24,7 @@ const valueProps = [
   {
     title: "Transparent, Published Pricing",
     body: "See your exact monthly cost before you book a demo. JuanHR uses custom, quote-based pricing that requires contacting sales to find out what you'll pay.",
-    metric: "PHP 7,000/month flat, published upfront.",
+    metric: `${PRICING_LABELS.base}/month flat, published upfront.`,
   },
   {
     title: "Guided DOLE Compliance Module",
@@ -34,22 +38,12 @@ const valueProps = [
   },
   {
     title: "Flat Pricing for Growing SMEs",
-    body: "Flat monthly pricing starting at PHP 7,000 for up to 100 employees, with a simple PHP 60/employee fee above that. No per-seat fees, no surprise charges, no long-term contracts.",
+    body: `Flat monthly pricing starting at ${PRICING_LABELS.base} for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. No per-seat fees, no surprise charges, no long-term contracts.`,
     metric: "Predictable cost as your team grows.",
   },
 ];
 
-const comparisonRows = [
-  { feature: "Multi-platform job posting and ATS", yahshua: true, competitor: false },
-  { feature: "Performance evaluation module", yahshua: true, competitor: false },
-  { feature: "Published, flat monthly pricing", yahshua: true, competitor: false },
-  { feature: "Guided DOLE reporting (OSH, AERW, registration)", yahshua: true, competitor: false },
-  { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, competitor: true },
-  { feature: "Philippine-built and supported", yahshua: true, competitor: true },
-  { feature: "Biometric device integration (fingerprint, facial, palm)", yahshua: false, competitor: true },
-  { feature: "Geo-fenced field work attendance tracking", yahshua: false, competitor: true },
-  { feature: "Government agency HRMIS edition", yahshua: false, competitor: true },
-];
+const comparisonRows = competitor.comparisonRows;
 
 const VsJuanhrContent = () => {
   return (
@@ -242,7 +236,7 @@ const VsJuanhrContent = () => {
             </ScrollFadeIn>
             <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {[
-                { step: "01", title: "Records transfer during setup", body: "Employee and payroll records migrate as part of the one-time PHP 35,000 setup fee." },
+                { step: "01", title: "Records transfer during setup", body: `Employee and payroll records migrate as part of the one-time ${PRICING_LABELS.setup} setup fee.` },
                 { step: "02", title: "Dedicated onboarding training", body: "Hands-on training during setup, not a self-serve help center." },
                 { step: "03", title: "Transparent going forward", body: "Published flat pricing, cancel anytime, no custom quote needed to know your cost." },
               ].map((m, i) => (

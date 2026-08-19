@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import VsJuanhrContent from "@/components/pages/(un-auth)/(landing-page)/vs-juanhr/VsJuanhrContent";
 import PixelEvents from '@/components/PixelEvents';
 
@@ -29,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/vs-juanhr#webpage",
       "name": "YAHSHUA HRIS vs JuanHR: Side-by-Side Comparison",
-      "description": "Feature and pricing comparison between YAHSHUA HRIS and JuanHR for Philippine businesses. YAHSHUA includes multi-platform job posting, performance management, and DOLE compliance automation in every plan, with published flat pricing at PHP 7,000/month for up to 100 employees.",
+      "description": `Feature and pricing comparison between YAHSHUA HRIS and JuanHR for Philippine businesses. YAHSHUA includes multi-platform job posting, performance management, and DOLE compliance automation in every plan, with published flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees.`,
       "url": "https://yahshuahris.com/vs-juanhr",
       "dateModified": "2026-08-14T00:00:00.000Z",
       "publisher": {
@@ -56,7 +57,7 @@ const jsonLd = {
           "name": "What is the main difference between YAHSHUA HRIS and JuanHR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS includes multi-platform job posting, applicant tracking, and performance management in every plan. JuanHR's published module list covers employee records, attendance, and payroll, but does not include recruitment, applicant tracking, or performance evaluation. YAHSHUA also publishes flat pricing at PHP 7,000/month for up to 100 employees (plus a PHP 35,000 one-time setup fee), while JuanHR uses custom, quote-based pricing that isn't published."
+            "text": `YAHSHUA HRIS includes multi-platform job posting, applicant tracking, and performance management in every plan. JuanHR's published module list covers employee records, attendance, and payroll, but does not include recruitment, applicant tracking, or performance evaluation. YAHSHUA also publishes flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees (plus a ${PRICING_LABELS.setup} one-time setup fee), while JuanHR uses custom, quote-based pricing that isn't published.`
           }
         },
         {
@@ -72,7 +73,7 @@ const jsonLd = {
           "name": "How does YAHSHUA HRIS pricing compare to JuanHR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS publishes flat pricing at PHP 7,000/month for up to 100 employees, plus a one-time PHP 35,000 setup fee, so businesses know their exact cost before booking a demo. JuanHR uses custom, quote-based pricing, which requires contacting sales to get a price for your specific employee count and modules."
+            "text": `YAHSHUA HRIS publishes flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus a one-time ${PRICING_LABELS.setup} setup fee, so businesses know their exact cost before booking a demo. JuanHR uses custom, quote-based pricing, which requires contacting sales to get a price for your specific employee count and modules.`
           }
         },
         {

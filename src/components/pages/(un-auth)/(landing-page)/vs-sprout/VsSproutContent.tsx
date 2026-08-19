@@ -5,6 +5,10 @@ import Link from "next/link";
 import { Check, X, ArrowRight, ArrowUpRight } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
+import { COMPETITORS } from "@/lib/competitorData";
+
+const competitor = COMPETITORS.sprout;
 
 const valueProps = [
   {
@@ -29,7 +33,7 @@ const valueProps = [
   },
   {
     title: "Pricing Built for Philippine SMEs",
-    body: "Flat monthly pricing starting at PHP 7,000 for up to 100 employees, with a simple PHP 60/employee fee above that. No per-seat fees, no surprise charges, no long-term contracts.",
+    body: `Flat monthly pricing starting at ${PRICING_LABELS.base} for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. No per-seat fees, no surprise charges, no long-term contracts.`,
     metric: "Up to 60% lower cost than Sprout HR.",
   },
   {
@@ -39,20 +43,7 @@ const valueProps = [
   },
 ];
 
-const comparisonRows = [
-  { feature: "Multi-platform job posting", yahshua: true, sprout: false },
-  { feature: "Pre-screened talent pool", yahshua: true, sprout: false },
-  { feature: "DOLE compliance automation", yahshua: true, sprout: false },
-  { feature: "Philippine labor law compliance", yahshua: true, sprout: true },
-  { feature: "Complete hiring-to-offboarding", yahshua: true, sprout: false },
-  { feature: "Custom performance evaluation forms", yahshua: true, sprout: true },
-  { feature: "Employee self-service portal", yahshua: true, sprout: true },
-  { feature: "Payroll integration", yahshua: true, sprout: true },
-  { feature: "Flat pricing for up to 100 employees", yahshua: true, sprout: false },
-  { feature: "SME-focused pricing", yahshua: true, sprout: false },
-  { feature: "Philippine-specific features", yahshua: true, sprout: false },
-  { feature: "No per-seat pricing", yahshua: true, sprout: false },
-];
+const comparisonRows = competitor.comparisonRows;
 
 const VsSproutContent = () => {
   return (
@@ -159,7 +150,7 @@ const VsSproutContent = () => {
                         )}
                       </div>
                       <div className="flex justify-center">
-                        {row.sprout ? (
+                        {row.competitor ? (
                           <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.1)" }}>
                             <Check className="w-3 h-3 text-gray-400" strokeWidth={2.5} />
                           </div>
@@ -242,7 +233,7 @@ const VsSproutContent = () => {
               </ScrollFadeIn>
               <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 {[
-                  { step: "01", title: "Data comes with you", body: "Employee records, 201 files, and payroll history are migrated during setup, covered by the one-time PHP 35,000 fee." },
+                  { step: "01", title: "Data comes with you", body: `Employee records, 201 files, and payroll history are migrated during setup, covered by the one-time ${PRICING_LABELS.setup} fee.` },
                   { step: "02", title: "Guided onboarding", body: "Your team is trained hands-on as part of setup, not left to a help center article." },
                   { step: "03", title: "No lock-in after that", body: "Flat monthly billing, cancel anytime, no long-term contract." },
                 ].map((m, i) => (
