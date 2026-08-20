@@ -136,7 +136,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/blog/philippine-holiday-pay-computation-guide`,
-      lastModified: new Date('2026-06-10'),
+      lastModified: new Date('2026-08-20'),
       changeFrequency: 'monthly',
       priority: 0.85,
     },
@@ -185,6 +185,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${BASE_URL}/blog/ncr-minimum-wage-2026`,
       lastModified: new Date('2026-07-21'),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/blog/night-differential-holiday-pay-philippines`,
+      lastModified: new Date('2026-08-20'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
