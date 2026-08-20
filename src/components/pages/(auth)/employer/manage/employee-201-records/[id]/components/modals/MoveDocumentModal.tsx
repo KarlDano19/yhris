@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 import { useUpdateDocument } from '../../hooks/useUpdateDocument';
 import CustomToast from '@/components/CustomToast';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 
 import type { T_EmployeeDocument, T_EmployeeDocumentFolder } from '@/types/employee-201-records/document-repository';
 
@@ -110,18 +111,23 @@ export default function MoveDocumentModal({
               <label htmlFor="folder_id" className="block text-sm font-medium text-gray-700 mb-1">
                 Destination Folder
               </label>
-              <select
-                id="folder_id"
-                {...register('folder_id')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Root (No Folder)</option>
-                {folders.map((folder) => (
-                  <option key={folder.id} value={folder.id}>
-                    {folder.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  id="folder_id"
+                  {...register('folder_id')}
+                  className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Root (No Folder)</option>
+                  {folders.map((folder) => (
+                    <option key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <SelectChevronDown />
+                </div>
+              </div>
             </div>
           </div>
 
