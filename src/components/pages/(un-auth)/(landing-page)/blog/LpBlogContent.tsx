@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "night-differential-holiday-pay-philippines",
+    category: "DOLE Compliance",
+    title: "Night Differential and Holiday Pay: How the Rates Actually Stack",
+    excerpt: "A night-shift employee working a regular holiday rest day earns 286%, not 200% or 260%. Full stacking tables for night differential, holiday pay, rest days, overtime, and double holidays, plus a worked example.",
+    date: "August 2026",
+    readTime: "7 min read",
+    image: "/blog/night-differential-holiday-stacking.png",
+  },
+  {
     slug: "ncr-minimum-wage-2026",
     category: "Statutory Compliance",
     title: "NCR Minimum Wage 2026: New Rates Under Wage Order No. 27 Are Now in Effect",

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-06-10T00:00:00.000Z',
-    modifiedTime: '2026-06-10T00:00:00.000Z',
+    modifiedTime: '2026-08-20T00:00:00.000Z',
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -35,7 +35,7 @@ const jsonLd = {
       "description": "Correct holiday pay rates for regular and special non-working holidays in the Philippines. Includes computation table, common employer mistakes, and DOLE compliance requirements.",
       "image": "https://yahshuahris.com/blog/philippine-holiday-pay.png",
       "datePublished": "2026-06-10T00:00:00.000Z",
-      "dateModified": "2026-06-10T00:00:00.000Z",
+      "dateModified": "2026-08-20T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
