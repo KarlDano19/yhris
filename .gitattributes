@@ -1,0 +1,15 @@
+# Prevent line-ending conversion from corrupting binary assets on checkout.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.xlsx binary
+*.docx binary

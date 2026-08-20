@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 
 const NightDifferentialHolidayStackingArticle = () => {
@@ -67,9 +67,49 @@ const NightDifferentialHolidayStackingArticle = () => {
               <p style={{ fontSize: "1.125rem", color: "#374151", marginBottom: "2rem" }}>
                 Our <Link href="/blog/philippine-holiday-pay-computation-guide" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>holiday pay computation guide</Link> covers the base rates: 100% unworked, 200% worked, 260% on a rest day. Those numbers are correct for a single-shift, daytime workforce. They are incomplete for any multi-branch operation running night shifts, 24/7 retail, or BPO seats, where holidays, rest days, night hours, and overtime routinely collide on the same shift.
               </p>
-              <p style={{ marginBottom: "2.5rem" }}>
+              <p style={{ marginBottom: "1.5rem" }}>
                 This guide covers only that overlap: what happens when night differential meets a holiday, a rest day, overtime, or more than one of these at once.
               </p>
+
+              {/* PDF download CTA */}
+              <a
+                href="/downloads/night-differential-holiday-pay-cheat-sheet.pdf"
+                download
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  background: "#FFFBF0",
+                  border: "1px solid rgba(255,193,7,0.3)",
+                  borderRadius: "12px",
+                  padding: "1rem 1.25rem",
+                  marginBottom: "2.5rem",
+                  textDecoration: "none",
+                }}
+              >
+                <span
+                  style={{
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    borderRadius: "8px",
+                    background: "rgba(255,193,7,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Download className="w-5 h-5" style={{ color: "hsl(38, 92%, 38%)" }} />
+                </span>
+                <span style={{ flex: 1 }}>
+                  <span style={{ display: "block", fontWeight: 700, color: "#111827", fontSize: "0.95rem" }}>
+                    Download the free cheat sheet (PDF)
+                  </span>
+                  <span style={{ display: "block", color: "#6b7280", fontSize: "0.85rem" }}>
+                    Every stacking table on this page, formatted for printing. No email required.
+                  </span>
+                </span>
+              </a>
 
               {/* H2 */}
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
