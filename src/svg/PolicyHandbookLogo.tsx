@@ -1,0 +1,13 @@
+import React from 'react'
+
+const PolicyHandbookLogo = () => {
+  return (
+    <svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14.1667 8.5C11.7355 8.5 9.40391 9.46161 7.68420 11.1813C5.96448 12.9010 5 15.2326 5 17.6667V50.3333C5 52.7674 5.96448 55.099 7.68420 56.8187C9.40391 58.5384 11.7355 59.5 14.1667 59.5H53.8333C54.6111 59.5 55.3567 59.1927 55.9068 58.6426C56.4569 58.0925 56.7642 57.3467 56.7642 56.5689V14.3311C56.7642 13.5533 56.4569 12.8075 55.9068 12.2574C55.3567 11.7073 54.6111 11.4 53.8333 11.4H14.1667C13.3889 11.4 12.6431 11.7073 12.0930 12.2574C11.5429 12.8075 11.2358 13.5533 11.2358 14.3311V50.3333" stroke="#355FD0" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M14.1667 59.5C11.7355 59.5 9.40391 58.5384 7.68420 56.8187C5.96448 55.099 5 52.7674 5 50.3333C5 47.8993 5.96448 45.5677 7.68420 43.8480C9.40391 42.1283 11.7355 41.1667 14.1667 41.1667H56.7642" stroke="#355FD0" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22.6667 22.6667H45.3333M22.6667 30.6667H39.6667" stroke="#355FD0" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export default PolicyHandbookLogo

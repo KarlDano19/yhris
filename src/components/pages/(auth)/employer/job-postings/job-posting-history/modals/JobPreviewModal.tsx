@@ -1,8 +1,11 @@
 import { Dispatch, Fragment, useRef } from "react";
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import toast from 'react-hot-toast';
 
 import { XCircleIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, LinkIcon } from "@heroicons/react/24/outline";
+
+import CustomToast from '@/components/CustomToast';
 
 import { T_JobPreviewModal } from "@/types/globals";
 import { T_JobPostingTable } from "@/types/job_posting";
@@ -12,6 +15,38 @@ import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
 
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const buildJobPostingLLMExport = (item: T_JobPostingTable): string => {
+  const lines: string[] = [`# ${item.job_title}`, ''];
+
+  if (item.is_show_roles && item.job_description) {
+    lines.push('## Role', stripHtml(item.job_description), '');
+  }
+  lines.push('## Location', item.advertise_to || 'Not specified', '');
+  lines.push('## Qualifications', item.qualifications ? stripHtml(item.qualifications) : 'Not specified', '');
+  lines.push('## Job Type', item.job_type || 'Not specified', '');
+  if (item.work_setup) lines.push('## Work Setup', item.work_setup, '');
+  lines.push('## Schedule', item.job_schedule || 'Not specified', '');
+
+  if (item.is_show_salary && item.salary_range_type && item.rate) {
+    const salaryText =
+      item.salary_range_type === 'Range'
+        ? `PHP ${formatPrice(Number(item.minimum_amount) || 0)} - ${formatPrice(Number(item.maximum_amount) || 0)}`
+        : `PHP ${formatPrice(Number(item.exact_amount) || 0)}`;
+    lines.push('## Salary Range', `${salaryText} / ${item.rate}`, '');
+  }
+
+  if (item.is_show_benefits && item.offered_benefits) {
+    lines.push('## Benefits', item.offered_benefits, '');
+  }
+
+  if (item.is_show_remarks && item.job_remark) {
+    lines.push('## Notes / Remarks', stripHtml(item.job_remark), '');
+  }
+
+  return lines.join('\n').trim();
+};
 
 export default function JobPreviewModal({
   isOpen,
@@ -25,6 +60,18 @@ export default function JobPreviewModal({
   jobPostHistoryItems: T_JobPostingTable[];
 }) {
   const cancelButtonRef = useRef(null);
+
+  const currentItem = jobPostHistoryItems?.find((item) => item.id === id) ?? null;
+
+  const handleCopyForLLM = async () => {
+    if (!currentItem) return;
+    try {
+      await navigator.clipboard.writeText(buildJobPostingLLMExport(currentItem));
+      toast.custom(() => <CustomToast message='Job posting copied — paste it into Claude, ChatGPT, or Gemini.' type='success' />);
+    } catch {
+      toast.custom(() => <CustomToast message='Could not access the clipboard in this browser.' type='error' />);
+    }
+  };
 
   const renderRoleDescription = (jobDescription: any) => {
     const markup = { __html: normalizeNbsp(jobDescription || '') };
@@ -77,6 +124,16 @@ export default function JobPreviewModal({
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Job {id} - Preview
                   </h3>
+                  {currentItem && (
+                    <button
+                      type="button"
+                      onClick={handleCopyForLLM}
+                      className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-md mr-2"
+                    >
+                      <ClipboardDocumentIcon className="w-4 h-4" />
+                      Copy for LLM
+                    </button>
+                  )}
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
                     onClick={() => setIsOpen({ id: isOpen?.id ? isOpen?.id : null, isOpen: false })}
