@@ -66,6 +66,10 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const bulkDeleteFailedCountRef = useRef(0);
 
+  // Single document delete confirmation
+  const [isDeleteDocumentModalOpen, setIsDeleteDocumentModalOpen] = useState<DeleteModalData | null>(null);
+  const [isDeletingDocument, setIsDeletingDocument] = useState(false);
+
   // Fetch folders
   const { data: folders, isLoading: foldersLoading, refetch: refetchFolders } = useGetFolders(employeeId);
 
@@ -315,25 +319,34 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
   };
 
   const handleDeleteDocument = (documentId: number) => {
-    if (confirm('Are you sure you want to delete this document?')) {
-      deleteDocument(documentId, {
-        onSuccess: () => {
-          toast.custom((t) => (
-            <CustomToast message="Document deleted successfully" type="success" />
-          ));
-          refetchDocuments();
-          refetchFolders();
-        },
-        onError: (error) => {
-          toast.custom((t) => (
-            <CustomToast
-              message={error.message || 'Failed to delete document'}
-              type="error"
-            />
-          ));
-        },
-      });
-    }
+    setIsDeleteDocumentModalOpen({ open: true, documentId });
+  };
+
+  const confirmDeleteDocument = (data?: DeleteModalData) => {
+    const documentId = data?.documentId;
+    if (!documentId) return;
+
+    setIsDeletingDocument(true);
+    deleteDocument(documentId, {
+      onSuccess: () => {
+        toast.custom((t) => (
+          <CustomToast message="Document deleted successfully" type="success" />
+        ));
+        setIsDeletingDocument(false);
+        setIsDeleteDocumentModalOpen(null);
+        refetchDocuments();
+        refetchFolders();
+      },
+      onError: (error) => {
+        toast.custom((t) => (
+          <CustomToast
+            message={error.message || 'Failed to delete document'}
+            type="error"
+          />
+        ));
+        setIsDeletingDocument(false);
+      },
+    });
   };
 
   return (
@@ -453,6 +466,17 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
         }
         folders={folders || []}
       />
+
+      {/* Single Document Delete Confirmation Modal */}
+      {isDeleteDocumentModalOpen?.open && (
+        <DeleteModal
+          isOpen={isDeleteDocumentModalOpen}
+          setIsOpen={setIsDeleteDocumentModalOpen}
+          onConfirm={confirmDeleteDocument}
+          isLoading={isDeletingDocument}
+          customText="this document"
+        />
+      )}
 
       {/* Bulk Delete Confirmation Modal */}
       {isBulkDeleteConfirmModalOpen?.open && (

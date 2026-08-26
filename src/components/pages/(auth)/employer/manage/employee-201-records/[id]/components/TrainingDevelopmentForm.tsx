@@ -11,9 +11,11 @@ import ConfirmModal from "../modals/ConfirmModal";
 import Section from "../common/Section";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import Pagination from "@/components/Pagination";
+import FilePreviewModal from "@/components/FilePreviewModal";
 
 // 4. Internal hook imports
 import { useGetTrainingRecordsList } from "../hooks/useGetTrainingRecordsList";
+import useGetFilePreviewUrl from "../hooks/useGetFilePreviewUrl";
 
 // 5. Type imports
 import { TrainingRecord } from "../types/trainingRecords";
@@ -238,6 +240,12 @@ export default function TrainingDevelopmentForm({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmRowId, setConfirmRowId] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
+
+  /** Proof of completion preview modal */
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewFileUrl, setPreviewFileUrl] = useState<string | null>(null);
+  const { data: resolvedPreviewUrl = "", isFetching: isPreviewLoading } =
+    useGetFilePreviewUrl(previewFileUrl ?? "");
 
   // seed from backend
   useEffect(() => {
@@ -580,28 +588,17 @@ export default function TrainingDevelopmentForm({
 
                     {hasServerFile && (
                       <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-                        <a
-                          href={row.existingFileUrl!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="truncate underline"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPreviewFileUrl(row.existingFileUrl!);
+                            setIsPreviewOpen(true);
+                          }}
+                          className="truncate text-left underline"
                         >
                           View current file
-                        </a>
+                        </button>
                         <div className="flex items-center gap-2">
-                          <button
-                            data-testid="remove-file-btn"
-                            type="button"
-                            onClick={() => {
-                              updateRow(index, {
-                                fileAction: "clear",
-                                file: null,
-                              });
-                            }}
-                            className="text-xs text-red-600 hover:underline"
-                          >
-                            Remove
-                          </button>
                           <label
                             data-testid="replace-file-btn"
                             className="text-xs text-blue-600 hover:underline cursor-pointer"
@@ -706,6 +703,18 @@ export default function TrainingDevelopmentForm({
         onPageSizeChange={(size: number) => setPageSize(size)}
         onPageChange={({ selected }) => setCurrentPage(selected + 1)}
         pageType="standard"
+      />
+
+      {/* Proof of completion preview */}
+      <FilePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setTimeout(() => setPreviewFileUrl(null), 300);
+        }}
+        fileUrl={resolvedPreviewUrl}
+        fileName={previewFileUrl?.split("/").pop() ?? ""}
+        isLoadingUrl={isPreviewLoading}
       />
 
       {/* Confirm modal */}

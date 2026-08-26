@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
+import ModalLayout from '@/components/ModalLayout';
 import { useUpdateDocument } from '../../hooks/useUpdateDocument';
 import CustomToast from '@/components/CustomToast';
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -51,6 +52,11 @@ export default function MoveDocumentModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, setValue]);
 
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   const onSubmit = async (data: T_MoveDocumentFormData) => {
     if (documents.length === 0) return;
 
@@ -89,70 +95,64 @@ export default function MoveDocumentModal({
     }
   };
 
-  if (!isOpen || documents.length === 0) return null;
+  if (documents.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {isBulk ? `Move ${documents.length} Documents` : 'Move Document'}
-          </h2>
+    <ModalLayout
+      isOpen={isOpen}
+      handleClose={handleClose}
+      title={isBulk ? `Move ${documents.length} Documents` : 'Move Document'}
+      maxWidth="max-w-md"
+    >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="px-6 py-4 space-y-4">
           {!isBulk && (
-            <p className="text-sm text-gray-500 mt-1 truncate" title={documents[0].file_name}>
+            <p className="text-sm text-gray-500 truncate" title={documents[0].file_name}>
               {documents[0].file_name}
             </p>
           )}
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="px-6 py-4 space-y-4">
-            <div>
-              <label htmlFor="folder_id" className="block text-sm font-medium text-gray-700 mb-1">
-                Destination Folder
-              </label>
-              <div className="relative">
-                <select
-                  id="folder_id"
-                  {...register('folder_id')}
-                  className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Root (No Folder)</option>
-                  {folders.map((folder) => (
-                    <option key={folder.id} value={folder.id}>
-                      {folder.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <SelectChevronDown />
-                </div>
+          <div>
+            <label htmlFor="folder_id" className="block text-sm font-medium text-gray-700 mb-1">
+              Destination Folder
+            </label>
+            <div className="relative">
+              <select
+                id="folder_id"
+                {...register('folder_id')}
+                className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Root (No Folder)</option>
+                {folders.map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {folder.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <SelectChevronDown />
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                reset();
-                onClose();
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Moving...' : 'Move'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            disabled={isSubmitting}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Moving...' : 'Move'}
+          </button>
+        </div>
+      </form>
+    </ModalLayout>
   );
 }
