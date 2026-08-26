@@ -36,7 +36,7 @@ export default function DownloadDocumentModal({
       <div className="px-6 py-4">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <ArrowDownTrayIcon className="h-6 w-6 text-blue-600" />
+            <ArrowDownTrayIcon className="h-6 w-6 text-savoy-blue" />
           </div>
           <div className="flex-1">
             <p className="text-sm text-gray-600">
@@ -56,7 +56,7 @@ export default function DownloadDocumentModal({
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          className="px-4 py-2 text-sm font-semibold text-savoy-blue bg-white border border-savoy-blue rounded-md hover:bg-gray-50"
           disabled={isDownloading}
         >
           Cancel
@@ -64,7 +64,7 @@ export default function DownloadDocumentModal({
         <button
           type="button"
           onClick={onConfirm}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+          className="px-4 py-2 text-sm font-semibold text-white bg-savoy-blue rounded-md hover:opacity-90 disabled:opacity-50"
           disabled={isDownloading}
         >
           {isDownloading ? 'Downloading...' : 'Download'}

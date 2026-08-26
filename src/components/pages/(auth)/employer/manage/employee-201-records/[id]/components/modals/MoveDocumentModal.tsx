@@ -119,7 +119,7 @@ export default function MoveDocumentModal({
               <select
                 id="folder_id"
                 {...register('folder_id')}
-                className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-savoy-blue"
               >
                 <option value="">Root (No Folder)</option>
                 {folders.map((folder) => (
@@ -139,14 +139,14 @@ export default function MoveDocumentModal({
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-semibold text-savoy-blue bg-white border border-savoy-blue rounded-md hover:bg-gray-50"
             disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-semibold text-white bg-savoy-blue rounded-md hover:opacity-90 disabled:opacity-50"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Moving...' : 'Move'}

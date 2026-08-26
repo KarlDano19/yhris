@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -24,6 +24,23 @@ export default function CreateFolderModal({
 }: CreateFolderModalProps) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<T_CreateFolderData>();
   const { mutate: createFolder, isLoading } = useCreateFolder(employeeId);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const { ref: nameFieldRef, ...nameField } = register('name', {
+    required: 'Folder name is required',
+    maxLength: {
+      value: 100,
+      message: 'Folder name must be at most 100 characters',
+    },
+  });
+
+  useEffect(() => {
+    // headlessui's focus trap runs its own initial-focus pass on mount, so
+    // deferring to a macrotask lets our focus win the race against it.
+    if (isOpen) {
+      const timeout = setTimeout(() => nameInputRef.current?.focus(), 0);
+      return () => clearTimeout(timeout);
+    }
+  }, [isOpen]);
 
   const handleClose = () => {
     reset();
@@ -69,14 +86,12 @@ export default function CreateFolderModal({
             <input
               type="text"
               id="name"
-              {...register('name', {
-                required: 'Folder name is required',
-                maxLength: {
-                  value: 100,
-                  message: 'Folder name must be at most 100 characters',
-                },
-              })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              {...nameField}
+              ref={(e) => {
+                nameFieldRef(e);
+                nameInputRef.current = e;
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-savoy-blue focus:border-transparent"
               placeholder="e.g., Requirements"
             />
             {errors.name && (
@@ -93,7 +108,7 @@ export default function CreateFolderModal({
               id="description"
               {...register('description')}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-savoy-blue focus:border-transparent"
               placeholder="Brief description of what this folder contains"
             />
           </div>
@@ -103,17 +118,17 @@ export default function CreateFolderModal({
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-semibold text-savoy-blue bg-white border border-savoy-blue rounded-md hover:bg-gray-50"
             disabled={isLoading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-semibold text-white bg-savoy-blue rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isLoading}
           >
-            {isLoading ? 'Creating...' : 'Create Folder'}
+            {isLoading ? 'Saving...' : 'Save'}
           </button>
         </div>
       </form>
