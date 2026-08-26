@@ -109,6 +109,7 @@ const HolidayPayComputationArticle = () => {
                       { scenario: "Employee WORKS on the holiday", rate: "200% of daily rate (basic pay + 100% premium)" },
                       { scenario: "Employee works on rest day that falls on a regular holiday", rate: "260% of daily rate" },
                       { scenario: "Employee works overtime on a regular holiday", rate: "200% + 30% of hourly rate per overtime hour" },
+                      { scenario: "Two regular holidays fall on the same date (double holiday)", rate: "300% of daily rate" },
                     ].map((row, i) => (
                       <tr key={i} style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", background: i % 2 === 0 ? "rgba(255,193,7,0.03)" : "transparent" }}>
                         <td style={{ padding: "0.75rem 1rem", color: "#374151" }}>{row.scenario}</td>
@@ -201,6 +202,14 @@ const HolidayPayComputationArticle = () => {
                 Employees can file money claims directly with DOLE or the National Labor Relations Commission (NLRC). DOLE labor inspections actively pull payroll records to verify holiday pay computations. With YAKAP advocacy now integrated into inspection visits, employers should expect more frequent touchpoints with regional labor offices in 2026.
               </p>
 
+              <p style={{ marginBottom: "2rem", padding: "1rem 1.25rem", background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", fontSize: "0.95rem" }}>
+                Running night shifts, multiple branches, or 24/7 operations? The rates above assume a single daytime shift. See our companion guide on{" "}
+                <Link href="/blog/night-differential-holiday-pay-philippines" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>
+                  night differential and holiday pay stacking
+                </Link>{" "}
+                for the exact math when night shifts, rest days, and overtime overlap with a holiday.
+              </p>
+
               {/* YAHSHUA CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
@@ -276,7 +285,7 @@ const HolidayPayComputationArticle = () => {
               {/* Author / Last updated */}
               <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "2rem", marginTop: "2rem" }}>
                 <p style={{ color: "#9ca3af", fontSize: "0.85rem" }}>
-                  Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Last updated June 2026
+                  Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Last updated August 2026
                 </p>
                 <p style={{ color: "#d1d5db", fontSize: "0.8rem", marginTop: "0.5rem" }}>
                   This article reflects the Philippine Labor Code and current DOLE advisories. For legal advice specific to your workplace, consult a licensed labor law practitioner or your DOLE regional office.
