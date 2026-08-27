@@ -153,7 +153,9 @@ const Content = () => {
         toast.custom(() => <CustomToast message={message} type={data.synced_count > 0 ? 'success' : 'info'} />);
       },
       onError: (error: Error) => {
-        toast.custom(() => <CustomToast message={error.message} type='error' />);
+        toast.custom(() => (
+          <CustomToast message={`${error.message} Try Copy for LLM to keep working in another AI instead.`} type='error' />
+        ));
       },
     });
   };
@@ -244,7 +246,7 @@ const Content = () => {
                 disabled={isCopying}
                 className='flex items-center gap-1.5 bg-savoy-blue text-white text-sm font-medium px-4 py-2 rounded-md hover:opacity-90 disabled:opacity-50'
                 data-tooltip-id='copy-for-llm-tooltip'
-                data-tooltip-content='Copy the whole handbook to paste into an AI assistant'
+                data-tooltip-content="If Gemini or Sync from HRIS isn't available, use this to keep going in another AI"
                 data-tooltip-place='top'
               >
                 <ClipboardDocumentIcon className='w-4 h-4' />
@@ -268,10 +270,11 @@ const Content = () => {
             <div className='flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6'>
               <SparklesIcon className='w-5 h-5 text-savoy-blue flex-none mt-0.5' />
               <div>
-                <p className='font-semibold text-indigo-dye text-sm'>Want help with a payroll question?</p>
+                <p className='font-semibold text-indigo-dye text-sm'>Gemini having trouble, or want a second opinion?</p>
                 <p className='text-sm text-gray-600 mt-0.5'>
-                  Click <span className='font-semibold'>Copy for LLM</span> above, paste the copied handbook into ChatGPT, Claude, or
-                  Gemini, then ask your question there. Include the whole copied handbook so the AI has the right context.
+                  Click <span className='font-semibold'>Copy for LLM</span> above and paste the copied handbook into ChatGPT, Claude, or
+                  Gemini directly in your browser. It's a fallback for whenever AI generation here isn't available &mdash; the whole
+                  handbook comes with it, so the AI you paste it into has the full context.
                 </p>
               </div>
             </div>
