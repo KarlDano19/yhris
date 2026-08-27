@@ -109,6 +109,87 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-042
+DATE FILED: 2026-08-27
+DATE FIXED: 2026-08-27
+CLIENT/REPORTER: Internal (Linear I-643), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Opening the "View current file" preview for a Completed Training's Proof of
+  Completion showed the full signed AWS S3 URL - including
+  AWSAccessKeyId=..., Signature=..., and Expires=... query parameters - in the
+  File Preview modal's title bar. The Document Repository tab's file preview
+  (same underlying upload mechanism) was unaffected.
+
+  Root cause: TrainingDevelopmentForm.tsx derived the modal's `fileName` prop
+  directly from the raw file URL via `previewFileUrl.split("/").pop()`.
+  `previewFileUrl` is `row.existingFileUrl`, which is the pre-signed S3 URL
+  itself (useGetFilePreviewUrl returns non-relative URLs unchanged rather than
+  proxying them), so `.split("/").pop()` returned everything after the last
+  "/" - including the un-stripped query string - and FilePreviewModal's title
+  renders as `${base} - ${fileName}`. DocumentRepositoryForm.tsx does not have
+  this bug because it passes a real stored `file_name` field from the document
+  record instead of deriving a name from the URL.
+
+DESIRED OUTCOME:
+  The Training & Development file preview title should show only the file's
+  name (e.g. "KHP__EI_-_08262026_1787812050.pdf"), with no AWS query
+  parameters, matching the Document Repository preview.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - `fileName` passed to `<FilePreviewModal>` now strips the query string
+      before extracting the filename: changed
+      `previewFileUrl?.split("/").pop() ?? ""` to
+      `previewFileUrl?.split("?")[0].split("/").pop() ?? ""`.
+
+Backend:
+- N/A - frontend-only fix; the signed URL itself is unchanged, only how its
+  filename is displayed.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual reasoning verified against the reported repro URL
+  ("KHP__EI_-_08262026_1787812050.pdf?AWSAccessKeyId=...&Signature=...&Expires=...")
+  - fix yields "KHP__EI_-_08262026_1787812050.pdf" as the displayed name
+☐ Manual browser verification completed (recommended before shipping): open
+  a Completed Training's "View current file" and confirm the modal title
+  shows only the filename
+
+Integration & E2E:
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (blob: URLs from a freshly-attached, not-yet-saved
+  file never reach this code path - `hasServerFile`/`existingFileUrl` gate
+  this button to server-stored files only, which are the ones with signed
+  query strings)
+☐ Cross-browser testing completed (not performed)
+
+KNOWN REMAINING ISSUE:
+  The same `url.split('/').pop()` pattern (without stripping a query string)
+  exists in several unrelated components - SendEmailModal.tsx,
+  ViewAuditLogDetails.tsx, AddCertificationModal.tsx (both yahshua-connect
+  variants), AddProjectModal.tsx, FloatingMenuBar.tsx, DocumentPageFourteen.tsx,
+  DocumentPageFifteen.tsx, and offboarding/[id]/Content.tsx. None were changed
+  here - out of scope for this Linear issue - but any of them could leak
+  query-string credentials the same way if they ever render a signed URL.
+
+FIX EXPLANATION:
+  FilePreviewModal already strips the query string internally when detecting
+  file type (`source.split('?')[0]`), but it trusts whatever `fileName` its
+  caller passes for the title. TrainingDevelopmentForm was the one caller
+  building that name from the raw pre-signed URL instead of a clean stored
+  filename, so the fix mirrors FilePreviewModal's own `split('?')[0]` pattern
+  at the point the prop is built, before falling back to `split('/').pop()`
+  to isolate the last path segment.
+
+================================================================================
+
 BUG ID: HRIS-2026-041
 DATE FILED: 2026-08-19
 DATE FIXED: 2026-08-19

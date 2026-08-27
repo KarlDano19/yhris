@@ -713,7 +713,7 @@ export default function TrainingDevelopmentForm({
           setTimeout(() => setPreviewFileUrl(null), 300);
         }}
         fileUrl={resolvedPreviewUrl}
-        fileName={previewFileUrl?.split("/").pop() ?? ""}
+        fileName={previewFileUrl?.split("?")[0].split("/").pop() ?? ""}
         isLoadingUrl={isPreviewLoading}
       />
 
