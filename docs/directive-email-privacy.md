@@ -38,7 +38,7 @@ flowchart TD
     H --> I[Next.js Route Handler\nemails/route.ts]
     I -->|Server-to-server| D
     D -->|Full email list| I
-    I -->|Last 4 chars masked\npalerkh****@gmail.com| H
+    I -->|Light middle mask\nyahshu***cpteit@gmail.com| H
     H --> J[EmailSelectionModal\nshows partially masked emails]
 
     J --> K[User picks email by index]
@@ -84,9 +84,9 @@ sequenceDiagram
     User->>Browser: Click "I have read & understood"
     Browser->>NextAPI: GET /api/directives/23/emails
     NextAPI->>Django: GET /api/directives/23/ (server-to-server)
-    Django-->>NextAPI: { to: ["palerkhen40@gmail.com", ...] }
-    NextAPI->>NextAPI: Mask last 4 chars of local part
-    NextAPI-->>Browser: [{ index:0, masked:"palerkh****@gmail.com" }, ...]
+    Django-->>NextAPI: { to: ["yahshua.ecpteit@gmail.com", ...] }
+    NextAPI->>NextAPI: Mask middle of local part,\nreveal more on collision
+    NextAPI-->>Browser: [{ index:0, masked:"yahshu***cpteit@gmail.com" }, ...]
     Browser->>User: Show dropdown with partially masked emails
 
     Note over Browser,Django: Phase 3 — Send Verification (real email stays server-side)
@@ -166,47 +166,59 @@ flowchart LR
 
 ## Email Masking Logic
 
-The last 4 characters of the local part (before `@`) are always replaced with `****`. The rest of the email remains visible so users can clearly identify their own email.
+A small run of characters in the **middle** of the local part (before `@`) is replaced with `*`. Both the beginning and the end of the local part stay visible, so a respondent can recognize their own address at a glance.
+
+The mask is deliberately light — roughly a quarter of the local part, capped at 4 characters, and never so long that fewer than 2 real characters remain.
 
 ```mermaid
 flowchart LR
-    A["palerkhen40@gmail.com"]
+    A["yahshua.ecpteit@gmail.com"]
     A --> B{Split at @}
-    B --> C["local: palerkhen40\n11 chars"]
+    B --> C["local: yahshua.ecpteit\n15 chars"]
     B --> D["domain: @gmail.com"]
-    C --> E["visible = local slice 0 to length-4\n= 'palerkh'"]
-    C --> F["last 4 replaced\n= '****'"]
-    E & F & D --> G["palerkh****@gmail.com ✅"]
+    C --> E["mask length = min(4, max(1, floor(15/4)))\n= 3"]
+    E --> F["mask starts at floor((15-3)/2)\n= index 6"]
+    C & F & D --> G["yahshu***cpteit@gmail.com ✅"]
 ```
 
 ### Examples
 
 | Original | Masked |
 |---|---|
-| `palerkhen40@gmail.com` | `palerkh****@gmail.com` |
-| `yahshua.palerkh@gmail.com` | `yahshua.pa****@gmail.com` |
-| `bob123@company.com` | `bob1****@company.com` |
+| `yahshua.ecpteit@gmail.com` | `yahshu***cpteit@gmail.com` |
+| `yahshua.ecphris@gmail.com` | `yahshu***cphris@gmail.com` |
+| `palerkhen40@gmail.com` | `pale**hen40@gmail.com` |
+| `bob123@company.com` | `bo*123@company.com` |
+
+### Collision Handling
+
+Companies that use a standardized naming convention (`yahshua.<team>@…`) share both a prefix *and* a suffix, so a fixed mask can still collapse two different people to the same string. Two safeguards run after the initial mask:
+
+1. **Reveal-until-unique** — any entries that mask to the same string have their mask shortened by one character at a time (down to a single `*`) until they differ.
+2. **Numbering** — if entries still tie after that, the addresses are genuinely identical (a duplicate in the recipient list), so each option is suffixed with `(1)`, `(2)`, … Two options in the dropdown are never allowed to render the same text.
 
 ### Why This Masking Strategy
 
-The target users of the Memo/Policy directive feature are **non-technical employees (boomers)**. The masking is designed with their UX in mind:
+The target users of the Memo/Policy directive feature are **non-technical employees**. The masking is designed with their UX in mind:
 
 ```mermaid
 flowchart TD
-    A{Masking Strategy} --> B["Full mask\npale****@gmail.com"]
-    A --> C["Last 4 masked\npalerkh****@gmail.com ✅"]
-    A --> D["No mask\npalerkhen40@gmail.com"]
+    A{Masking Strategy} --> B["Mask the tail\nyahshua.ecp****@gmail.com"]
+    A --> C["Light middle mask\nyahshu***cpteit@gmail.com ✅"]
+    A --> D["No mask\nyahshua.ecpteit@gmail.com"]
 
-    B --> B1["❌ Too confusing\nEmails look identical\nwhen multiple recipients\nshare a similar prefix"]
-    C --> C1["✅ Clearly identifiable\nUser sees enough to\nrecognize their own email\nwhile hiding the tail"]
+    B --> B1["❌ Ambiguous\nStandardized addresses share\na prefix — masking the tail\nremoves the only\ndistinguishing part"]
+    C --> C1["✅ Clearly identifiable\nHead and tail both visible,\nso same-convention addresses\nstay distinguishable"]
     D --> D1["❌ Privacy risk\nFull emails visible\nin Network tab"]
 ```
 
 | Strategy | Identifiable | Private | UX for non-tech users |
 |---|---|---|---|
-| Full mask `pale****@gmail.com` | ❌ Ambiguous | ✅ | ❌ Confusing |
-| Last 4 masked `palerkh****@gmail.com` | ✅ Clear | ✅ | ✅ Easy |
-| No mask `palerkhen40@gmail.com` | ✅ Clear | ❌ | ✅ Easy |
+| Mask the tail `yahshua.ecp****@gmail.com` | ❌ Ambiguous | ✅ | ❌ Confusing |
+| Light middle mask `yahshu***cpteit@gmail.com` | ✅ Clear | ✅ | ✅ Easy |
+| No mask `yahshua.ecpteit@gmail.com` | ✅ Clear | ❌ | ✅ Easy |
+
+> **Known limit:** local parts of 2 characters or fewer (`jo@…`) are left unmasked — there is nothing meaningful left to hide once a character is starred out.
 
 ---
 
@@ -239,7 +251,7 @@ stateDiagram-v2
 
     PageLoaded --> FetchingEmails : User clicks confirm button
 
-    FetchingEmails --> EmailModal : Partially masked emails loaded\nfrom /api/directives/[id]/emails
+    FetchingEmails --> EmailModal : Masked emails loaded\nfrom /api/directives/[id]/emails
 
     EmailModal --> SendingCode : User selects email\n(stores emailIndex + masked display)
 
@@ -263,7 +275,7 @@ stateDiagram-v2
 
 interface MaskedEmail {
   index: number;  // Position in the real email array (server-side only)
-  masked: string; // e.g. "palerkh****@gmail.com" — last 4 chars of local part hidden
+  masked: string; // e.g. "yahshu***cpteit@gmail.com" — middle of local part hidden
 }
 
 interface SendVerificationRequest {
@@ -320,7 +332,7 @@ Generate a secret: `openssl rand -hex 32`
 | `app/api/directives/[id]/send-verification/route.ts` | API Route | Proxy — resolves index, sends OTP |
 | `app/api/directives/[id]/verify-code/route.ts` | API Route | Proxy — resolves index, verifies OTP |
 | `components/pages/(un-auth)/directives/Content.tsx` | Client Component | Main UI, index-based flow |
-| `components/pages/(un-auth)/directives/modals/EmailSelectionModal.tsx` | Client Component | Partially masked email dropdown |
+| `components/pages/(un-auth)/directives/modals/EmailSelectionModal.tsx` | Client Component | Masked email dropdown |
 | `components/pages/(un-auth)/directives/hooks/useSendVerification.ts` | Hook | Sends `emailIndex` to proxy |
 | `components/pages/(un-auth)/directives/hooks/useVerifyDirective.ts` | Hook | Sends `emailIndex + code` to proxy |
 | `types/directives.ts` | Types | `MaskedEmail`, updated request types |
