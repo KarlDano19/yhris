@@ -17,7 +17,13 @@ export type PolicyHandbookSectionCategory =
   | 'custom'
   | 'approval_workflow'
   | 'roles_permissions'
-  | 'employee_id_format';
+  | 'employee_id_format'
+  | 'onboarding_checklist'
+  | 'company_directives'
+  | 'designed_benefits'
+  | 'safety_health_policy'
+  | 'evaluation_templates'
+  | 'company_surveys';
 
 export type PolicyHandbookSectionType = 'dynamic_summary' | 'uploaded' | 'ai_drafted' | 'manual';
 

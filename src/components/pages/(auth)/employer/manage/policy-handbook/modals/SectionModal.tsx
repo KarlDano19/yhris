@@ -37,6 +37,12 @@ const CATEGORY_OPTIONS: { value: PolicyHandbookSectionCategory; label: string }[
   { value: 'approval_workflow', label: 'Approval Workflows' },
   { value: 'roles_permissions', label: 'Roles & Permissions' },
   { value: 'employee_id_format', label: 'Employee ID Format' },
+  { value: 'onboarding_checklist', label: 'Onboarding Checklist' },
+  { value: 'company_directives', label: 'Create Memo/Policy' },
+  { value: 'designed_benefits', label: 'Designed Benefits' },
+  { value: 'safety_health_policy', label: 'Safety & Health Policy' },
+  { value: 'evaluation_templates', label: 'Evaluation Templates' },
+  { value: 'company_surveys', label: 'Surveys & Forms' },
 ];
 
 interface Props {

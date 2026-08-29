@@ -47,6 +47,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   approval_workflow: 'Approval Workflows',
   roles_permissions: 'Roles & Permissions',
   employee_id_format: 'Employee ID Format',
+  onboarding_checklist: 'Onboarding Checklist',
+  company_directives: 'Create Memo/Policy',
+  designed_benefits: 'Designed Benefits',
+  safety_health_policy: 'Safety & Health Policy',
+  evaluation_templates: 'Evaluation Templates',
+  company_surveys: 'Surveys & Forms',
 };
 
 const Content = () => {
