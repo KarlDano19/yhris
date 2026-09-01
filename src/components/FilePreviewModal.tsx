@@ -173,7 +173,7 @@ const FilePreviewModal = ({
           <button
             type="button"
             onClick={onDownload}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-savoy-blue rounded-md hover:opacity-90"
           >
             <ArrowDownTrayIcon className="h-4 w-4" />
             Download
