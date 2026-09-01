@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 import { DirectiveData } from '@/types/directives';
+import { appendLetterhead } from '@/helpers/letterhead';
 import { extractInlineImageFiles } from './extractInlineImageFiles';
 
 async function updateDirective(directive: DirectiveData) {
@@ -21,6 +22,16 @@ async function updateDirective(directive: DirectiveData) {
       } else if (directive.attachments instanceof File) {
         formData.append('attachments', directive.attachments);
       }
+    }
+
+    // Upload mode — a freshly picked PDF replaces whatever document the memo had. Sending
+    // document_source on every save is what lets the user switch back to form mode: the
+    // backend re-renders the document as soon as it stops being "uploaded".
+    if (directive.document instanceof File) {
+      formData.append('document', directive.document);
+    }
+    if (directive.document_source !== undefined) {
+      formData.append('document_source', directive.document_source || '');
     }
 
     if (directive.directive_type === 'memo') {
@@ -48,6 +59,11 @@ async function updateDirective(directive: DirectiveData) {
       if (directive.qr_code instanceof File) {
         formData.append('qr_code', directive.qr_code);
       }
+      // Always sent, empty string included, so resetting the signature back to the flow
+      // layout actually persists instead of leaving the old coordinates in place.
+      if (directive.signature_placement !== undefined) {
+        formData.append('signature_placement', directive.signature_placement || '');
+      }
     } else {
       if (directive.eligibility !== undefined) formData.append('eligibility', directive.eligibility);
       if (directive.application !== undefined) formData.append('application', directive.application);
@@ -57,6 +73,10 @@ async function updateDirective(directive: DirectiveData) {
         formData.append('custom_policy_fields', JSON.stringify(directive.custom_policy_fields));
       }
     }
+
+    // Only a newly picked file is sent — a letterhead already on the memo arrives as a URL
+    // and appendLetterhead skips it, so re-saving does not re-upload the same image.
+    appendLetterhead(formData, directive.letterhead);
 
     const config = {
       method: 'PATCH',
