@@ -8,7 +8,6 @@ import LpCalculatorTeaser from "./components/LpCalculatorTeaser";
 import LpComparisonTable from "./components/LpComparisonTable";
 import LpFAQ from "./components/LpFAQ";
 import LpFinalCTA from "./components/LpFinalCTA";
-import LpAboutBlock from "./components/LpAboutBlock";
 
 const Content = () => {
   return (
@@ -25,7 +24,6 @@ const Content = () => {
         <LpComparisonTable />
         <LpFAQ />
         <LpFinalCTA />
-        <LpAboutBlock />
       </div>
     </>
   );
