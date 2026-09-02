@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 import { Tooltip } from 'react-tooltip';
@@ -10,7 +11,7 @@ import { Tooltip } from 'react-tooltip';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
-import { ArrowLeftIcon, MagnifyingGlassIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { ArrowDownTrayIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import DeleteIcon from '@/svg/DeleteIcon';
 
@@ -147,12 +148,19 @@ const Content = () => {
             <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
               <div className="flex justify-center items-center space-x-2">
                 <button
-                  title="Resend kick-off invitation"
+                  data-tooltip-id="kickoff-action-tooltip"
+                  data-tooltip-content="Resend kick-off invitation"
                   disabled={resendingId === item.id}
                   onClick={() => handleResend(item.id)}
-                  className="text-blue-500 hover:opacity-70 disabled:opacity-40"
+                  className="flex h-[39px] w-[40px] items-center justify-center rounded border border-[#3d6cee9f] hover:bg-blue-50 disabled:opacity-40"
                 >
-                  <PaperAirplaneIcon className="h-4 w-4" />
+                  <Image
+                    src="/assets/send-icon.png"
+                    width={20}
+                    height={20}
+                    alt="send-icon"
+                    className="max-w-[20px] max-h-[20px]"
+                  />
                 </button>
                 {isCompleted && (
                   <>
@@ -161,18 +169,18 @@ const Content = () => {
                       data-tooltip-content="Download signed form"
                       disabled={downloadingId === item.id}
                       onClick={() => handleDownloadForm(item.id)}
-                      className="text-green-600 hover:opacity-70 disabled:opacity-40"
+                      className="flex h-[39px] w-[40px] items-center justify-center rounded border border-[#22c55e9f] text-green-600 hover:bg-green-50 disabled:opacity-40"
                     >
-                      <ArrowDownTrayIcon className="h-4 w-4" />
+                      <ArrowDownTrayIcon className="h-5 w-5" />
                     </button>
                     <button
                       data-tooltip-id="kickoff-action-tooltip"
                       data-tooltip-content="Resend acknowledgement email"
                       disabled={resendingAckId === item.id}
                       onClick={() => handleResendAck(item.id)}
-                      className="text-indigo-500 hover:opacity-70 disabled:opacity-40"
+                      className="flex h-[39px] w-[40px] items-center justify-center rounded border border-[#6366f19f] text-indigo-500 hover:bg-indigo-50 disabled:opacity-40"
                     >
-                      <EnvelopeIcon className="h-4 w-4" />
+                      <EnvelopeIcon className="h-5 w-5" />
                     </button>
                   </>
                 )}
@@ -206,7 +214,7 @@ const Content = () => {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mt-6">
         <div className="flex p-4">
           <Link href="/admin/kickoff-management" className="flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded">
             <ArrowLeftIcon className="h-5 w-5" />
