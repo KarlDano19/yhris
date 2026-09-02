@@ -69,15 +69,21 @@ export default function Content({ token }: ContentProps) {
   if (data.already_completed || submissionResult) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="max-w-md w-full text-center">
-          <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-gray-800 mb-2">Acknowledgement Submitted</h1>
-          <p className="text-gray-500 text-sm mb-2">
-            Thank you, <span className="font-semibold text-gray-700">{data.company_name}</span>!
-            Your kick-off acknowledgement has been received.
+        <div className="max-w-xl w-full text-center">
+          <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-5" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-3">Acknowledgement Submitted</h1>
+          <p className="text-gray-600 text-base mb-3">
+            Thank you! Your Kick-off acknowledgement has been received.
           </p>
-          <p className="text-gray-500 text-sm">
-            Our team has been notified and will reach out shortly to proceed with your account setup.
+          <p className="text-gray-600 text-base mb-3">
+            Please check your Gmail inbox for{' '}
+            <span className="font-semibold text-gray-800">
+              &ldquo;Kick-off Acknowledgement Received &ndash; YAHSHUA HRIS&rdquo;
+            </span>{' '}
+            to proceed with your onboarding and training journey.
+          </p>
+          <p className="text-gray-600 text-base">
+            If you did not receive the email, please contact our team. GOD Bless you!
           </p>
         </div>
       </div>
