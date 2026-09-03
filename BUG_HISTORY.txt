@@ -109,6 +109,136 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-045
+DATE FILED: 2026-09-03
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Internal request - Module > Onboarding > Orient (position applicants list)
+
+ISSUE DESCRIPTION:
+  The Onboarding list (Onboarding > open a position) had no way to remove an
+  applicant entry. Mistaken, seeded, or no-longer-needed onboarding records
+  could not be cleaned up because the list only supported Send Contract,
+  Orient, assign Location/Department, Introduce, and Enroll - never delete.
+
+DESIRED OUTCOME:
+  Users should be able to remove an onboarding entry from the list, with a
+  confirmation prompt before it is deleted.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+- src/components/pages/(auth)/employer/onboarding/orient/hooks/useDeleteApplicantOrient.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - delete button, confirmation modal, list refresh)
+☑ Custom hooks tested (useDeleteApplicantOrient manual verification)
+☑ React Query hooks tested (list refetch + employee-select cache invalidation)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (delete removes row, persists on reload)
+☑ Edge cases tested (delete of enrolled applicant removes only the onboarding row)
+
+FIX EXPLANATION:
+  Added an Action column to the onboarding table with a red trash button per
+  row. Clicking it opens the shared DeleteModal (showing the applicant name)
+  for confirmation. On confirm, a new useDeleteApplicantOrient hook calls
+  DELETE /api/applicant-orientations/{id}/ (see backend companion). On success
+  the list refetches, the employee-select cache is invalidated, and a success
+  toast is shown. COMPANION: Backend BUG_HISTORY HRIS-2026-041.
+
+================================================================================
+
+BUG ID: HRIS-2026-044
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-645) - Employee 201 Records > Disciplinary Records
+
+ISSUE DESCRIPTION:
+  Under an employee's 201 file > Disciplinary Records tab, users could see that
+  an incident exists (Type, Place, Status) but could not open the record to
+  view its full details. The rows were not clickable and there was no detail
+  view, so description, NTE/decision progress, and attachments were unreachable
+  from the 201 file.
+
+DESIRED OUTCOME:
+  Users should be able to open an incident from the 201 file and view its full
+  details (brief background, status, dates, response, attachments, etc.).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/DisciplinaryRecordsForm.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/modals/ViewIncidentModal.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useGetDisciplinaryRecordDetail.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - clickable rows, View button, detail modal)
+☑ Custom hooks tested (useGetDisciplinaryRecordDetail manual verification)
+☑ React Query hooks tested (detail fetch on open, loading/error states)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (open record shows full details + attachments)
+☑ Edge cases tested (loading state, fetch error state, missing attachments)
+
+FIX EXPLANATION:
+  Added a read-only ViewIncidentModal that fetches the full incident via a new
+  useGetDisciplinaryRecordDetail hook (GET /api/employee-issues/attachments/{id}/,
+  an existing endpoint - no backend change). DisciplinaryRecordsForm now has an
+  Actions column with a View (eye) button and clickable rows that open the modal.
+  The modal shows employee/position/department, incident date and place, issue
+  type, status, full brief background, NTE/decision progress and dates, prepared
+  by, investigation decision, employee response, and NTE/Decision attachments.
+
+================================================================================
+
+BUG ID: HRIS-2026-043
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-644) - Employee 201 Records > Employment Details
+
+ISSUE DESCRIPTION:
+  The "Date Hired" field in Employment Details rejected future dates. Entering a
+  future start date (e.g. next week) and saving showed "Date Hired cannot be in
+  the future" and blocked the save, so HR could not onboard an employee ahead of
+  their actual start date.
+
+DESIRED OUTCOME:
+  The system should accept a future Date Hired so HR can complete onboarding in
+  advance.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - future Date Hired saves without error)
+☑ Form validation tested (presence/validity still enforced; future no longer blocked)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (future date saves; empty/invalid still flagged)
+☑ Edge cases tested (date picker had no maxDate; validator was the only block)
+
+FIX EXPLANATION:
+  Removed the future-date guard in the date_hired validator in
+  EmploymentDetailsForm.tsx. The validator still flags a missing or invalid
+  date, but no longer returns "Date Hired cannot be in the future," so future
+  hire dates save normally. Note: the same "cannot be in the future" pattern in
+  Training & Development and the DOLE accident report is intentional and was left
+  unchanged.
+
+================================================================================
+
 BUG ID: HRIS-2026-042
 DATE FILED: 2026-08-27
 DATE FIXED: 2026-08-27
