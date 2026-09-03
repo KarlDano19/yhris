@@ -26,8 +26,10 @@ import { useUpdatePolicyHandbook } from './hooks/useUpdatePolicyHandbook';
 import { useDeletePolicySection } from './hooks/useDeletePolicySection';
 import { useCopyPolicyHandbookForLLM } from './hooks/useCopyPolicyHandbookForLLM';
 import { useSyncPolicyHandbookFromHris } from './hooks/useSyncPolicyHandbookFromHris';
+import useGetOrgStructureForHandbook from './hooks/useGetOrgStructureForHandbook';
 import SectionModal from './modals/SectionModal';
 import VersionHistoryModal from './modals/VersionHistoryModal';
+import OrgStructureDiagram from './components/OrgStructureDiagram';
 
 import { PolicyHandbookSectionData } from '@/types/policyHandbook';
 
@@ -101,6 +103,9 @@ const Content = () => {
   }, [handbook?.id, searchQuery, sections.length]);
 
   const selectedSection = filteredSections.find((section) => section.id === selectedSectionId) ?? null;
+
+  // Org Structure is the one section shown as a visual diagram - only fetched while it's selected
+  const { data: orgStructureRoots } = useGetOrgStructureForHandbook(selectedSection?.category === 'org_structure');
 
   const handleStartEditTitle = () => {
     setTitleInput(handbook?.title ?? '');
@@ -392,6 +397,12 @@ const Content = () => {
                           </button>
                         </div>
                       </div>
+
+                      {selectedSection.category === 'org_structure' && orgStructureRoots && orgStructureRoots.length > 0 && (
+                        <div className='mt-4'>
+                          <OrgStructureDiagram roots={orgStructureRoots} />
+                        </div>
+                      )}
 
                       <div
                         className='text-sm text-gray-700 leading-relaxed mt-4 [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-savoy-blue [&_a]:font-medium [&_a]:no-underline [&_a]:hover:underline'
