@@ -233,10 +233,11 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
     );
   };
 
-  // Check if directive has viewable files
+  // Check if directive has files that actually appear in the dropdown.
+  // The signature is rendered inline with the document, so it must not be counted here —
+  // otherwise a directive with a signature but no attachments shows an empty dropdown.
   const hasViewableFiles = directive && (
     directive.qr_code ||
-    directive.signature ||
     (Array.isArray(directive.attachments) && directive.attachments.length > 0) ||
     (directive.attachments && typeof directive.attachments === 'string') ||
     (directive as any)?.attachment
