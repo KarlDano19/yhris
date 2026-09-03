@@ -47,7 +47,7 @@ const OrgStructureDiagram = ({ roots }: { roots: T_OrgStructureNode[] }) => {
 
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-100 bg-gray-50 p-6 mb-4">
-      <div className="flex flex-wrap items-start gap-10">
+      <div className="flex flex-wrap items-start justify-center gap-10">
         {roots.map((root) => (
           <Tree key={root.id} lineWidth="2px" lineColor="#355FD0" lineBorderRadius="8px" label={nodeLabel(root, true)}>
             {renderChildren(root.children)}

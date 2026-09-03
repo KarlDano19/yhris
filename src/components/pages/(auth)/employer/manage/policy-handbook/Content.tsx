@@ -56,6 +56,18 @@ const CATEGORY_LABELS: Record<string, string> = {
   evaluation_templates: 'Evaluation Templates',
   company_surveys: 'Surveys & Forms',
   org_structure: 'Org Structure',
+  job_posting: 'Post a Job',
+  screen_applicant: 'Screen Applicants',
+  offboarding: 'Offboarding',
+  employee_201: 'Employee 201',
+  employee_list: 'Employee List',
+  dole_ec_logbook: 'Employee Compensation Logbook',
+  dole_work_accident_illness: 'Work Accident/Illness Report',
+  dole_work_environment: 'Work Environment Measurement',
+  dole_awair: 'Annual WAIR Data Report',
+  dole_health_safety_org: 'Health & Safety Org Report',
+  dole_shc_minutes: 'SHC Minutes of Meetings',
+  dole_annual_medical: 'Annual Medical Report',
 };
 
 const Content = () => {
@@ -298,7 +310,7 @@ const Content = () => {
                 disabled={isSyncing}
                 className='flex items-center gap-1 border border-savoy-blue text-savoy-blue text-sm font-medium px-4 py-2 rounded-md hover:bg-blue-50 disabled:opacity-50'
                 data-tooltip-id='sync-tooltip'
-                data-tooltip-content='Generate sections from Approval Workflows, Roles, and Employee ID Settings already configured in HRIS'
+                data-tooltip-content='Generate sections from settings already configured in HRIS - approval workflows, roles, org structure, and more'
                 data-tooltip-place='top'
               >
                 <ArrowPathIcon className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -309,7 +321,7 @@ const Content = () => {
             {sections.length === 0 && (
               <div className='bg-white shadow rounded-lg p-10 text-center text-gray-500'>
                 No policies yet. Click <span className='font-semibold'>Sync from HRIS</span> to pull in whatever&rsquo;s already
-                configured (approval workflows, roles, employee ID format).
+                configured.
               </div>
             )}
 

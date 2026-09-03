@@ -24,7 +24,19 @@ export type PolicyHandbookSectionCategory =
   | 'safety_health_policy'
   | 'evaluation_templates'
   | 'company_surveys'
-  | 'org_structure';
+  | 'org_structure'
+  | 'job_posting'
+  | 'screen_applicant'
+  | 'offboarding'
+  | 'employee_201'
+  | 'employee_list'
+  | 'dole_ec_logbook'
+  | 'dole_work_accident_illness'
+  | 'dole_work_environment'
+  | 'dole_awair'
+  | 'dole_health_safety_org'
+  | 'dole_shc_minutes'
+  | 'dole_annual_medical';
 
 export type PolicyHandbookSectionType = 'dynamic_summary' | 'uploaded' | 'ai_drafted' | 'manual';
 

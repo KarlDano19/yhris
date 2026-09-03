@@ -44,6 +44,18 @@ const CATEGORY_OPTIONS: { value: PolicyHandbookSectionCategory; label: string }[
   { value: 'evaluation_templates', label: 'Evaluation Templates' },
   { value: 'company_surveys', label: 'Surveys & Forms' },
   { value: 'org_structure', label: 'Org Structure' },
+  { value: 'job_posting', label: 'Post a Job' },
+  { value: 'screen_applicant', label: 'Screen Applicants' },
+  { value: 'offboarding', label: 'Offboarding' },
+  { value: 'employee_201', label: 'Employee 201' },
+  { value: 'employee_list', label: 'Employee List' },
+  { value: 'dole_ec_logbook', label: 'Employee Compensation Logbook' },
+  { value: 'dole_work_accident_illness', label: 'Work Accident/Illness Report' },
+  { value: 'dole_work_environment', label: 'Work Environment Measurement' },
+  { value: 'dole_awair', label: 'Annual WAIR Data Report' },
+  { value: 'dole_health_safety_org', label: 'Health & Safety Org Report' },
+  { value: 'dole_shc_minutes', label: 'SHC Minutes of Meetings' },
+  { value: 'dole_annual_medical', label: 'Annual Medical Report' },
 ];
 
 interface Props {
