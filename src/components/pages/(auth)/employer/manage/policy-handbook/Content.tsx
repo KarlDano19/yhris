@@ -53,6 +53,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   safety_health_policy: 'Safety & Health Policy',
   evaluation_templates: 'Evaluation Templates',
   company_surveys: 'Surveys & Forms',
+  org_structure: 'Org Structure',
 };
 
 const Content = () => {

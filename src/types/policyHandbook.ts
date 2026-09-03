@@ -23,7 +23,8 @@ export type PolicyHandbookSectionCategory =
   | 'designed_benefits'
   | 'safety_health_policy'
   | 'evaluation_templates'
-  | 'company_surveys';
+  | 'company_surveys'
+  | 'org_structure';
 
 export type PolicyHandbookSectionType = 'dynamic_summary' | 'uploaded' | 'ai_drafted' | 'manual';
 

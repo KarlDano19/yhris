@@ -43,6 +43,7 @@ const CATEGORY_OPTIONS: { value: PolicyHandbookSectionCategory; label: string }[
   { value: 'safety_health_policy', label: 'Safety & Health Policy' },
   { value: 'evaluation_templates', label: 'Evaluation Templates' },
   { value: 'company_surveys', label: 'Surveys & Forms' },
+  { value: 'org_structure', label: 'Org Structure' },
 ];
 
 interface Props {
