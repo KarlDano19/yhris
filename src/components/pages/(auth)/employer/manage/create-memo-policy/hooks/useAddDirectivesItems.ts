@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 import { DirectiveData, DirectiveAttachment } from '@/types/directives';
+import { appendLetterhead } from '@/helpers/letterhead';
 import { extractInlineImageFiles } from './extractInlineImageFiles';
 
 async function addDirective(directive: DirectiveData) {
@@ -30,7 +31,14 @@ async function addDirective(directive: DirectiveData) {
       }
       // Skip string attachments (they are URLs from backend)
     }
-    
+
+    // Upload mode — the user's own PDF *is* the memo, so the backend stores it as-is and
+    // skips rendering one from the fields below.
+    if (directive.document instanceof File) {
+      data.append('document', directive.document);
+      data.append('document_source', 'uploaded');
+    }
+
     if (directive.directive_type === 'memo') {
       data.append('body', directive.body || '');
       data.append('name', directive.name || '');
@@ -69,6 +77,9 @@ async function addDirective(directive: DirectiveData) {
       if (directive.qr_code) {
         data.append('qr_code', directive.qr_code as File);
       }
+      if (directive.signature_placement) {
+        data.append('signature_placement', directive.signature_placement);
+      }
     } else {
       // Add custom policy fields as JSON
       if (directive.custom_policy_fields && directive.custom_policy_fields.length > 0) {
@@ -81,6 +92,10 @@ async function addDirective(directive: DirectiveData) {
       data.append('coverage', directive.coverage || '');
       data.append('termination', directive.termination || '');
     }
+
+    // Both memos and policies print on the letterhead, so this sits outside the branch above.
+    appendLetterhead(data, directive.letterhead);
+
     const config = {
       method: 'POST',
       headers: {
