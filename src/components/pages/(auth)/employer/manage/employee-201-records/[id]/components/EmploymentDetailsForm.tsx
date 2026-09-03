@@ -233,15 +233,9 @@ export default function EmploymentDetailsForm({
 
   const validate = {
     date_hired: (d?: Date) => {
+      // Future dates are allowed: HR often onboards employees ahead of their
+      // actual start date (see Linear I-644).
       if (!d || isNaN(d.getTime())) return "Date Hired is missing.";
-      const today = new Date();
-      const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const tOnly = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-      if (dOnly > tOnly) return "Date Hired cannot be in the future.";
       return null;
     },
     employment_status: (v: string) =>
