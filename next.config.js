@@ -76,6 +76,22 @@ const nextConfig = {
     ];
 
     return [
+      // Canonical host redirect: www and non-www were both serving 200 with
+      // no redirect, so Google indexed and ranked both separately (confirmed
+      // via GSC: split traffic on the homepage, /yahshua-payroll, /pricing,
+      // /faqs, /terms-of-service, plus 16 warnings on the www sitemap
+      // submission). The canonical tag alone wasn't enough to stop this.
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.yahshuahris.com',
+          },
+        ],
+        destination: 'https://yahshuahris.com/:path*',
+        permanent: true,
+      },
       {
         source: '/landing-page/:path*',
         destination: '/:path*',
