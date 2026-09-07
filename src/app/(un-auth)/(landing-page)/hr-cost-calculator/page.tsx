@@ -20,6 +20,37 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://yahshuahris.com/hr-cost-calculator#webapp",
+      "name": "HR & Payroll Cost Calculator",
+      "url": "https://yahshuahris.com/hr-cost-calculator",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Free calculator for Philippine businesses to find out how much manual HR and payroll processes are costing them every year.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "PHP"
+      },
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 export default function HrCostCalculatorPage() {
-  return <HrCostCalculatorContent />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <HrCostCalculatorContent />
+    </>
+  );
 }

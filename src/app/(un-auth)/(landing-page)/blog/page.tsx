@@ -22,9 +22,32 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": "https://yahshuahris.com/blog#webpage",
+      "name": "HR Insights for Philippine Business Leaders",
+      "description": "Practical guides on DOLE compliance, payroll, recruitment, and HR management for Philippine businesses.",
+      "url": "https://yahshuahris.com/blog",
+      "isPartOf": {
+        "@id": "https://yahshuahris.com/#website"
+      },
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 const BlogPage = () => {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PixelEvents viewContent={{ content_name: 'Blog', content_category: 'blog' }} />
       <LpBlogContent />
     </>

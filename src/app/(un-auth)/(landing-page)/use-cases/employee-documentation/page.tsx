@@ -21,9 +21,32 @@ export const metadata: Metadata = {
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://yahshuahris.com/use-cases/employee-documentation#webpage",
+      "name": "Employee Documentation Software | YAHSHUA HRIS",
+      "description": "Store and organize 201 files and employee records digitally with secure access and compliance-ready documentation.",
+      "url": "https://yahshuahris.com/use-cases/employee-documentation",
+      "isPartOf": {
+        "@id": "https://yahshuahris.com/use-cases#webpage"
+      },
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 export default function EmployeeDocumentation() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PixelEvents viewContent={{ content_name: 'Employee Documentation', content_category: 'use-cases' }} />
       <EmployeeDocumentationContent />
     </>
