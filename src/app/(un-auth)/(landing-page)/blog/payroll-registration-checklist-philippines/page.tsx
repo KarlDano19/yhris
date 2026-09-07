@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import PayrollRegistrationChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollRegistrationChecklistArticle";
 
 export const metadata: Metadata = {
-  title: 'Philippine Business Payroll Setup Checklist: BIR, SSS, PhilHealth, Pag-IBIG Registration | YAHSHUA HRIS',
-  description: 'Step-by-step checklist for registering a Philippine business with BIR, SSS, PhilHealth, and Pag-IBIG. Includes required forms, fees, correct registration sequence, and monthly remittance deadlines.',
+  title: 'Philippine Payroll Registration Checklist | YAHSHUA HRIS',
+  description: 'Step-by-step checklist for registering a Philippine business with BIR, SSS, PhilHealth, and Pag-IBIG, including forms, fees, and remittance deadlines.',
   keywords: 'payroll registration checklist Philippines, BIR employer registration Philippines, SSS employer registration, PhilHealth employer registration, Pag-IBIG employer registration',
   openGraph: {
     title: 'Philippine Business Payroll Setup Checklist: BIR, SSS, PhilHealth, Pag-IBIG',

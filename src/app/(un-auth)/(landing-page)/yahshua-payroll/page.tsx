@@ -4,7 +4,7 @@ import PixelEvents from '@/components/PixelEvents';
 import { YAHSHUA_PRICING, PRICING_LABELS } from '@/lib/yahshuaPricing';
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA Payroll Integration — Sync HR Data with Your Payroll System',
+  title: 'YAHSHUA Payroll Integration: Sync Your HR Data',
   description: 'Connect YAHSHUA HRIS with YAHSHUA Payroll for seamless employee data sync. Eliminate double entry, automate payroll computation, and stay DOLE compliant.',
   keywords: 'yahshua payroll, payroll integration philippines, hris payroll sync, payroll automation philippines',
   openGraph: {

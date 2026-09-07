@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import AiGuidanceVsAutomationArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/AiGuidanceVsAutomationArticle";
 
 export const metadata: Metadata = {
-  title: 'AI Guidance vs AI Automation in HR Software: Why Knowing the Rule Is Not Compliance | YAHSHUA HRIS',
-  description: 'An AI assistant that quotes the SSS rate is not the same as a payroll system that applies it correctly. This is the real difference between AI guidance and AI automation, and why it determines your compliance exposure as a Philippine employer.',
+  title: 'AI Guidance vs AI Automation in HR Software | YAHSHUA HRIS',
+  description: "An AI assistant that quotes the SSS rate isn't the same as a payroll system that applies it correctly. The compliance gap between guidance and automation.",
   keywords: 'AI payroll automation vs AI guidance, AI HR software Philippines, payroll automation Philippines, compliance automation HR, AI guidance HR software',
   openGraph: {
     title: 'Why "Telling You the Rule" Is Not Compliance: AI Guidance vs AI Automation in HR Software',
@@ -63,7 +63,7 @@ const jsonLd = {
           "name": "What is the difference between AI guidance and AI automation in HR software?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "AI guidance refers to systems that answer HR and payroll questions using knowledge bases or language models — they tell you the correct rule, rate, or formula. AI automation refers to systems that apply those rules directly to payroll computations without requiring a human intermediary at each step. The practical difference is that guidance requires a correct human action after the answer is given, while automation reduces or eliminates that dependency."
+            "text": "AI guidance refers to systems that answer HR and payroll questions using knowledge bases or language models: they tell you the correct rule, rate, or formula. AI automation refers to systems that apply those rules directly to payroll computations without requiring a human intermediary at each step. The practical difference is that guidance requires a correct human action after the answer is given, while automation reduces or eliminates that dependency."
           }
         },
         {

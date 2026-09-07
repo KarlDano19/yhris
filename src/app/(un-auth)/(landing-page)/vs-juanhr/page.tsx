@@ -4,8 +4,8 @@ import VsJuanhrContent from "@/components/pages/(un-auth)/(landing-page)/vs-juan
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA HRIS vs JuanHR — Which is Right for Your Business?',
-  description: 'Compare YAHSHUA HRIS and JuanHR side by side. See how recruitment, performance management, DOLE compliance, and pricing transparency stack up for Philippine SMEs.',
+  title: 'YAHSHUA HRIS vs JuanHR: Which is Right for Your Business?',
+  description: 'Compare YAHSHUA HRIS and JuanHR side by side on recruitment, performance management, DOLE compliance, and pricing transparency.',
   keywords: 'yahshua hris vs juanhr, juanhr alternative, hris comparison philippines, hr software philippines',
   openGraph: {
     title: 'YAHSHUA HRIS vs JuanHR',

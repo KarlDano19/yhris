@@ -5,7 +5,7 @@ import { YAHSHUA_PRICING, PRICING_LABELS } from '@/lib/yahshuaPricing';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS Features: Payroll, 201 Files & DOLE Compliance',
-  description: 'See everything YAHSHUA HRIS can do: automated payroll, 201 file management, DOLE compliance reports, performance evaluations, job posting, and payroll integration. Built for Philippine businesses.',
+  description: 'See everything YAHSHUA HRIS can do: automated payroll, 201 file management, DOLE compliance, performance evaluations, and payroll integration.',
   keywords: 'yahshua hris features, employee management, job posting, DOLE compliance, performance evaluation, payroll integration, HR automation',
   openGraph: {
     title: 'YAHSHUA HRIS Features: Payroll, 201 Files & DOLE Compliance',
