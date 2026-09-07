@@ -4,18 +4,18 @@ import SproutAlternativeContent from "@/components/pages/(un-auth)/(landing-page
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'Sprout HR Alternative — YAHSHUA HRIS for Philippine SMEs',
-  description: 'Looking for a Sprout HR alternative? YAHSHUA HRIS offers flat pricing, built-in recruitment, and guided DOLE compliance for Philippine SMEs, with no per-seat fees.',
+  title: 'Sprout HR Alternative: YAHSHUA HRIS for Philippine SMEs',
+  description: 'Looking for a Sprout HR alternative? YAHSHUA HRIS offers flat pricing, built-in recruitment, and guided DOLE compliance, with no per-seat fees.',
   keywords: 'sprout hr alternative, sprout solutions alternative, switch from sprout, hris alternative philippines',
   openGraph: {
-    title: 'Sprout HR Alternative — YAHSHUA HRIS',
+    title: 'Sprout HR Alternative: YAHSHUA HRIS',
     description: 'Flat pricing, built-in recruitment, and guided DOLE compliance. See why Philippine SMEs choose YAHSHUA HRIS as their Sprout HR alternative.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sprout HR Alternative — YAHSHUA HRIS',
+    title: 'Sprout HR Alternative: YAHSHUA HRIS',
     description: 'A Sprout HR alternative built for Philippine SMEs: flat pricing, built-in hiring, guided DOLE compliance.',
   },
   alternates: {

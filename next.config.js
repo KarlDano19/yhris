@@ -55,18 +55,35 @@ const nextConfig = {
   },
   async redirects() {
     const trailingSlashPages = [
+      '/about',
       '/features',
       '/pricing',
       '/yahshua-payroll',
       '/payroll-integration',
       '/vs-sprout',
+      '/vs-greatday',
+      '/vs-juanhr',
+      '/sprout-alternative',
+      '/greatday-hr-alternative',
+      '/juanhr-alternative',
       '/how-we-compare',
       '/use-cases',
       '/use-cases/employee-onboarding',
       '/use-cases/performance-management',
       '/use-cases/employee-documentation',
+      '/hr-cost-calculator',
       '/blog',
       '/blog/dole-compliance-requirements-philippines',
+      '/blog/philippine-holiday-pay-computation-guide',
+      '/blog/thirteenth-month-pay-tracking-philippines',
+      '/blog/payroll-automation-philippines',
+      '/blog/philippine-compliance-hris-2026',
+      '/blog/philippine-payroll-errors-msme',
+      '/blog/sss-contribution-table-2026-philippines',
+      '/blog/payroll-registration-checklist-philippines',
+      '/blog/ai-guidance-vs-automation-hr-software',
+      '/blog/ncr-minimum-wage-2026',
+      '/blog/night-differential-holiday-pay-philippines',
       '/faqs',
       '/docs',
       '/jobs',
@@ -76,6 +93,22 @@ const nextConfig = {
     ];
 
     return [
+      // Canonical host redirect: www and non-www were both serving 200 with
+      // no redirect, so Google indexed and ranked both separately (confirmed
+      // via GSC: split traffic on the homepage, /yahshua-payroll, /pricing,
+      // /faqs, /terms-of-service, plus 16 warnings on the www sitemap
+      // submission). The canonical tag alone wasn't enough to stop this.
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.yahshuahris.com',
+          },
+        ],
+        destination: 'https://yahshuahris.com/:path*',
+        permanent: true,
+      },
       {
         source: '/landing-page/:path*',
         destination: '/:path*',
@@ -89,6 +122,12 @@ const nextConfig = {
       {
         source: '/book-demo',
         destination: 'https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026',
+        permanent: true,
+      },
+      // Old slug from before the post was renamed to use "-table-"
+      {
+        source: '/blog/sss-contribution-rate-2026-philippines',
+        destination: '/blog/sss-contribution-table-2026-philippines',
         permanent: true,
       },
       // Strip trailing slashes on all landing pages (skipTrailingSlashRedirect

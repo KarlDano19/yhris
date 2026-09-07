@@ -3,8 +3,8 @@ import ThirteenthMonthPayArticle from "@/components/pages/(un-auth)/(landing-pag
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'How to Track 13th Month Pay in the Philippines | YAHSHUA HRIS',
-  description: 'Philippine employers must pay 13th month pay by December 24. Learn the correct computation formula, who qualifies, common mistakes, and how to track it automatically every payroll run.',
+  title: 'How to Track 13th Month Pay in the Philippines',
+  description: 'Philippine employers must pay 13th month pay by December 24. Learn the computation formula, who qualifies, and how to track it automatically.',
   keywords: '13th month pay Philippines, how to compute 13th month pay, 13th month pay tracking, PD 851 Philippines, 13th month pay MSME',
   openGraph: {
     title: 'Start Tracking 13th Month Pay Now. Or Pay For It in November.',
