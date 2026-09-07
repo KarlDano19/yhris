@@ -22,9 +22,29 @@ export const metadata: Metadata = {
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://yahshuahris.com/privacy-policy#webpage",
+      "name": "Privacy Policy | YAHSHUA HRIS",
+      "description": "How YAHSHUA HRIS collects, uses, and protects personal information across our web and mobile HR platform.",
+      "url": "https://yahshuahris.com/privacy-policy",
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 export default function PrivacyPolicy() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navigation />
       <div style={{ background: "hsl(var(--lp-page))" }}>
         <main className="min-h-screen pt-16">

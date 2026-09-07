@@ -22,9 +22,32 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://yahshuahris.com/payroll-integration#webpage",
+      "name": "Payroll Integration: YAHSHUA HRIS and YAHSHUA Payroll",
+      "description": "YAHSHUA HRIS and YAHSHUA Payroll share the same data in real time. No exports, no duplicate entry, no payroll errors from stale records.",
+      "url": "https://yahshuahris.com/payroll-integration",
+      "about": {
+        "@id": "https://yahshuahris.com/#software"
+      },
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 const PayrollIntegrationPage = () => {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PixelEvents viewContent={{ content_name: 'Payroll Integration', content_category: 'integration' }} />
       <LpPayrollIntegrationContent />
     </>

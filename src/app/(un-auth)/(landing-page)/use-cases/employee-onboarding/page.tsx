@@ -21,9 +21,32 @@ export const metadata: Metadata = {
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://yahshuahris.com/use-cases/employee-onboarding#webpage",
+      "name": "Employee Onboarding Software | YAHSHUA HRIS",
+      "description": "Automate new hire onboarding with digital documents, compliance tracking, and streamlined workflows for Philippine businesses.",
+      "url": "https://yahshuahris.com/use-cases/employee-onboarding",
+      "isPartOf": {
+        "@id": "https://yahshuahris.com/use-cases#webpage"
+      },
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 export default function EmployeeOnboarding() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PixelEvents viewContent={{ content_name: 'Employee Onboarding', content_category: 'use-cases' }} />
       <EmployeeOnboardingContent />
     </>

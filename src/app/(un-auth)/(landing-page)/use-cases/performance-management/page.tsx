@@ -21,9 +21,32 @@ export const metadata: Metadata = {
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://yahshuahris.com/use-cases/performance-management#webpage",
+      "name": "Performance Management Software | YAHSHUA HRIS",
+      "description": "Run performance reviews with customizable templates, continuous feedback, and tracked completion for Philippine teams.",
+      "url": "https://yahshuahris.com/use-cases/performance-management",
+      "isPartOf": {
+        "@id": "https://yahshuahris.com/use-cases#webpage"
+      },
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 export default function PerformanceManagement() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PixelEvents viewContent={{ content_name: 'Performance Management', content_category: 'use-cases' }} />
       <PerformanceManagementContent />
     </>

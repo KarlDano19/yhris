@@ -20,8 +20,32 @@ export const metadata: Metadata = {
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://yahshuahris.com/docs#webpage",
+      "name": "YAHSHUA HRIS Documentation and Setup Guide",
+      "description": "Step-by-step guide to setting up YAHSHUA HRIS, from signup to full implementation, for Philippine businesses.",
+      "url": "https://yahshuahris.com/docs",
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    }
+  ]
+};
+
 const DocsPage = () => {
-  return <DocsContent />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <DocsContent />
+    </>
+  );
 };
 
 export default DocsPage;
