@@ -124,6 +124,12 @@ const nextConfig = {
         destination: 'https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026',
         permanent: true,
       },
+      // Old slug from before the post was renamed to use "-table-"
+      {
+        source: '/blog/sss-contribution-rate-2026-philippines',
+        destination: '/blog/sss-contribution-table-2026-philippines',
+        permanent: true,
+      },
       // Strip trailing slashes on all landing pages (skipTrailingSlashRedirect
       // is enabled for PostHog, so we handle this manually per-page)
       ...trailingSlashPages.map((path) => ({
