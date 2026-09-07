@@ -4,8 +4,8 @@ import VsSproutContent from "@/components/pages/(un-auth)/(landing-page)/vs-spro
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA HRIS vs Sprout Solutions — Which is Right for Your Business?',
-  description: 'Compare YAHSHUA HRIS and Sprout Solutions side by side. See how features, pricing, DOLE compliance, and payroll integration stack up for Philippine businesses.',
+  title: 'YAHSHUA HRIS vs Sprout Solutions: Which Is Right?',
+  description: 'Compare YAHSHUA HRIS and Sprout Solutions side by side on features, pricing, DOLE compliance, and payroll integration.',
   keywords: 'yahshua hris vs sprout solutions, sprout solutions alternative, hris comparison philippines, hr software philippines',
   openGraph: {
     title: 'YAHSHUA HRIS vs Sprout Solutions',

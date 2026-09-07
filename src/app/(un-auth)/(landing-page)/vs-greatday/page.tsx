@@ -4,7 +4,7 @@ import VsGreatdayContent from "@/components/pages/(un-auth)/(landing-page)/vs-gr
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA HRIS vs GreatDay HR — Which is Right for Your Business?',
+  title: 'YAHSHUA HRIS vs GreatDay HR: Which Is Right for You?',
   description: 'Compare YAHSHUA HRIS and GreatDay HR side by side. See how recruitment, performance management, DOLE compliance, and pricing stack up for Philippine SMEs.',
   keywords: 'yahshua hris vs greatday hr, greatday hr alternative, hris comparison philippines, hr software philippines',
   openGraph: {

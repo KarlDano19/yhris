@@ -3,8 +3,8 @@ import NightDifferentialHolidayStackingArticle from "@/components/pages/(un-auth
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'Night Differential and Holiday Pay Stacking Philippines | YAHSHUA HRIS',
-  description: 'How night differential stacks with regular holiday, special non-working day, rest day, and overtime pay in the Philippines. Full rate tables and a worked example.',
+  title: 'Night Differential and Holiday Pay Stacking | YAHSHUA HRIS',
+  description: 'How night differential stacks with regular holiday, special non-working day, rest day, and overtime pay in the Philippines. Full rate tables included.',
   keywords: 'night differential holiday pay Philippines, night shift holiday pay computation, double holiday pay Philippines, night differential rest day overlap, Article 86 Labor Code night differential',
   openGraph: {
     title: 'Night Differential and Holiday Pay: How the Rates Actually Stack',

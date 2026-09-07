@@ -4,18 +4,18 @@ import JuanhrAlternativeContent from "@/components/pages/(un-auth)/(landing-page
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'JuanHR Alternative — YAHSHUA HRIS for Philippine SMEs',
-  description: 'Looking for a JuanHR alternative? YAHSHUA HRIS publishes its pricing upfront and bundles recruitment, performance management, and DOLE compliance in every plan.',
+  title: 'JuanHR Alternative: YAHSHUA HRIS for Philippine SMEs',
+  description: 'Looking for a JuanHR alternative? YAHSHUA HRIS publishes pricing upfront and bundles recruitment, performance management, and DOLE compliance.',
   keywords: 'juanhr alternative, switch from juanhr, hris alternative philippines, juanhr competitor',
   openGraph: {
-    title: 'JuanHR Alternative — YAHSHUA HRIS',
+    title: 'JuanHR Alternative: YAHSHUA HRIS',
     description: 'Published pricing, built-in recruitment, and guided DOLE compliance. See why Philippine SMEs choose YAHSHUA HRIS over JuanHR.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JuanHR Alternative — YAHSHUA HRIS',
+    title: 'JuanHR Alternative: YAHSHUA HRIS',
     description: 'A JuanHR alternative built for Philippine SMEs: see the price, get the full lifecycle.',
   },
   alternates: {

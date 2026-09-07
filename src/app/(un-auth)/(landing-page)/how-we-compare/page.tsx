@@ -4,8 +4,8 @@ import CompetitorsContent from "@/components/pages/(un-auth)/(landing-page)/comp
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'How YAHSHUA HRIS Compares to Other HR Software in the Philippines',
-  description: 'See how YAHSHUA HRIS compares to other HR and payroll software options in the Philippines. Transparent feature and pricing comparisons for growing businesses.',
+  title: 'YAHSHUA HRIS vs Other HR Software in the Philippines',
+  description: 'Compare YAHSHUA HRIS to Sprout, GreatDay HR, JuanHR, and other Philippine HR software on pricing, DOLE compliance, and features.',
   keywords: 'hris comparison philippines, hr software comparison, yahshua hris competitors, best hris philippines',
   openGraph: {
     title: 'How YAHSHUA HRIS Compares to Other HR Software',

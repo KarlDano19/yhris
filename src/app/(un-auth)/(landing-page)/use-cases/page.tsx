@@ -3,7 +3,7 @@ import UseCasesContent from "@/components/pages/(un-auth)/(landing-page)/use-cas
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA HRIS Use Cases — How Philippine Businesses Use Our Platform',
+  title: 'YAHSHUA HRIS Use Cases for Philippine Businesses',
   description: 'Explore how Philippine businesses use YAHSHUA HRIS for employee onboarding, performance management, DOLE compliance, document management, and more.',
   keywords: 'hris use cases philippines, employee onboarding software, performance management philippines, hr document management',
   openGraph: {

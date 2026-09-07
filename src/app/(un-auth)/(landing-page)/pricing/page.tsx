@@ -9,8 +9,8 @@ import { SessionData, sessionOptions } from '@/lib/session';
 import { YAHSHUA_PRICING, PRICING_LABELS } from '@/lib/yahshuaPricing';
 
 export const metadata = {
-  title: 'YAHSHUA HRIS Pricing — HR & Payroll Plans for Philippines',
-  description: 'Simple, transparent pricing for YAHSHUA HRIS. Get payroll automation, employee management, DOLE compliance, and more. Plans designed for small and growing businesses in the Philippines.',
+  title: 'YAHSHUA HRIS Pricing: HR & Payroll Plans for Philippines',
+  description: 'Simple, transparent pricing for YAHSHUA HRIS: payroll automation, employee management, and DOLE compliance for growing Philippine businesses.',
   openGraph: {
     title: 'YAHSHUA HRIS Pricing - Affordable HR & Payroll Plans',
     description: 'Simple, transparent pricing for YAHSHUA HRIS. Payroll automation, employee management, and DOLE compliance. Plans for every business size.',

@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import PayrollErrorsArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollErrorsArticle";
 
 export const metadata: Metadata = {
-  title: 'What Philippine Payroll Errors Actually Cost MSMEs | YAHSHUA HRIS',
-  description: 'Philippine MSMEs running payroll on outdated SSS, PhilHealth, and BIR rates face surcharges of 25%, 12% annual interest, and up to ₱50,000 in compromise penalties. Here is what the cost actually looks like, and how to catch errors before the government does.',
+  title: 'What Payroll Errors Actually Cost Philippine MSMEs',
+  description: "Philippine MSMEs on outdated SSS, PhilHealth, and BIR rates face 25% surcharges, 12% annual interest, and up to ₱50,000 in penalties. Here's the real cost.",
   keywords: 'payroll errors Philippines 2026, SSS contribution rate 2026, PhilHealth premium 2026, BIR withholding tax penalties Philippines, MSME payroll compliance Philippines',
   openGraph: {
     title: 'What Philippine Payroll Errors Actually Cost MSMEs',
