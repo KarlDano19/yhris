@@ -296,6 +296,27 @@ const HolidayPayComputationArticle = () => {
           </div>
         </article>
 
+        {/* Related reading */}
+        <section className="pb-16">
+          <div className="lp-section-container max-w-3xl mx-auto">
+            <div className="rounded-xl p-6" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/blog/thirteenth-month-pay-tracking-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    How to Track 13th Month Pay in the Philippines →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/dole-compliance-requirements-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    DOLE Compliance Requirements for Philippine Employers →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* End CTA */}
         <section className="py-16" style={{ background: "#FFFBF0", borderTop: "1px solid rgba(255,193,7,0.2)" }}>
           <div className="lp-section-container max-w-3xl mx-auto text-center">
