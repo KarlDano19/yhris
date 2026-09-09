@@ -14,6 +14,10 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
   SparklesIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  DocumentArrowDownIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
 import BackButton from '@/components/BackButton';
@@ -26,6 +30,7 @@ import { useUpdatePolicyHandbook } from './hooks/useUpdatePolicyHandbook';
 import { useDeletePolicySection } from './hooks/useDeletePolicySection';
 import { useCopyPolicyHandbookForLLM } from './hooks/useCopyPolicyHandbookForLLM';
 import { useSyncPolicyHandbookFromHris } from './hooks/useSyncPolicyHandbookFromHris';
+import { useExportPolicyHandbookPDF } from './hooks/useExportPolicyHandbookPDF';
 import useGetOrgStructureForHandbook from './hooks/useGetOrgStructureForHandbook';
 import SectionModal from './modals/SectionModal';
 import VersionHistoryModal from './modals/VersionHistoryModal';
@@ -70,17 +75,77 @@ const CATEGORY_LABELS: Record<string, string> = {
   dole_annual_medical: 'Annual Medical Report',
 };
 
+// Groups the sidebar by theme - order here is the sidebar's display order
+const CATEGORY_GROUPS: { key: string; label: string; categories: string[] }[] = [
+  {
+    key: 'payroll_compensation',
+    label: 'Payroll & Compensation',
+    categories: [
+      'pay_schedule',
+      'rate_calculation',
+      'overtime_rules',
+      'night_differential',
+      'timekeeping',
+      'geotagging_geofencing',
+      'government_contributions',
+      'tax_settings',
+      'de_minimis_benefits',
+      'thirteenth_month_pay',
+      'payslip_components',
+      'custom',
+    ],
+  },
+  {
+    key: 'administration_access',
+    label: 'Administration & Access',
+    categories: ['approval_workflow', 'roles_permissions', 'employee_id_format'],
+  },
+  {
+    key: 'hr_people_management',
+    label: 'HR & People Management',
+    categories: [
+      'onboarding_checklist',
+      'company_directives',
+      'designed_benefits',
+      'safety_health_policy',
+      'evaluation_templates',
+      'company_surveys',
+      'org_structure',
+      'job_posting',
+      'screen_applicant',
+      'offboarding',
+      'employee_201',
+      'employee_list',
+    ],
+  },
+  {
+    key: 'dole_compliance',
+    label: 'DOLE Compliance',
+    categories: [
+      'dole_ec_logbook',
+      'dole_work_accident_illness',
+      'dole_work_environment',
+      'dole_awair',
+      'dole_health_safety_org',
+      'dole_shc_minutes',
+      'dole_annual_medical',
+    ],
+  },
+];
+
 const Content = () => {
   const { data: handbook, isLoading } = useGetPolicyHandbook();
   const { mutate: updateHandbook } = useUpdatePolicyHandbook();
   const { mutate: deleteSection, isLoading: isDeleting } = useDeletePolicySection();
   const { mutate: exportForLLM, isLoading: isCopying } = useCopyPolicyHandbookForLLM();
   const { mutate: syncFromHris, isLoading: isSyncing } = useSyncPolicyHandbookFromHris();
+  const { mutate: exportPDF, isLoading: isExportingPDF } = useExportPolicyHandbookPDF();
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState<number | null>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   const [sectionModal, setSectionModal] = useState<{ open: boolean; section: PolicyHandbookSectionData | null }>({
     open: false,
@@ -115,6 +180,25 @@ const Content = () => {
   }, [handbook?.id, searchQuery, sections.length]);
 
   const selectedSection = filteredSections.find((section) => section.id === selectedSectionId) ?? null;
+
+  // A section is flagged as changed-since-publish only once the handbook has actually been
+  // published at least once, and only if it was edited after that publish timestamp
+  const isChangedSincePublish = (section: PolicyHandbookSectionData) =>
+    handbook?.status === 'published' &&
+    !!handbook.published_at &&
+    new Date(section.updated_at).getTime() > new Date(handbook.published_at).getTime();
+
+  const toggleGroup = (groupKey: string) => {
+    setCollapsedGroups((previous) => {
+      const next = new Set(previous);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  };
 
   // Org Structure is the one section shown as a visual diagram - only fetched while it's selected
   const { data: orgStructureRoots } = useGetOrgStructureForHandbook(selectedSection?.category === 'org_structure');
@@ -193,6 +277,25 @@ const Content = () => {
         } catch {
           toast.custom(() => <CustomToast message='Could not access the clipboard in this browser.' type='error' />);
         }
+      },
+      onError: (error: Error) => {
+        toast.custom(() => <CustomToast message={error.message} type='error' />);
+      },
+    });
+  };
+
+  const handleExportPDF = () => {
+    exportPDF(undefined, {
+      onSuccess: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'policy-handbook.pdf';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast.custom(() => <CustomToast message='Handbook exported as PDF.' type='success' />);
       },
       onError: (error: Error) => {
         toast.custom(() => <CustomToast message={error.message} type='error' />);
@@ -316,6 +419,17 @@ const Content = () => {
                 <ArrowPathIcon className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
                 {isSyncing ? 'Syncing...' : 'Sync from HRIS'}
               </button>
+              <button
+                onClick={handleExportPDF}
+                disabled={isExportingPDF}
+                className='flex items-center gap-1 border border-savoy-blue text-savoy-blue text-sm font-medium px-4 py-2 rounded-md hover:bg-blue-50 disabled:opacity-50'
+                data-tooltip-id='export-pdf-tooltip'
+                data-tooltip-content='Download the whole handbook as a PDF'
+                data-tooltip-place='top'
+              >
+                <DocumentArrowDownIcon className='w-4 h-4' />
+                {isExportingPDF ? 'Exporting...' : 'Export PDF'}
+              </button>
             </div>
 
             {sections.length === 0 && (
@@ -334,19 +448,50 @@ const Content = () => {
                   </div>
                   <nav className='max-h-[32rem] overflow-y-auto'>
                     {filteredSections.length === 0 && <p className='p-4 text-sm text-gray-400'>No matching policies.</p>}
-                    {filteredSections.map((section) => (
-                      <button
-                        key={section.id}
-                        onClick={() => setSelectedSectionId(section.id)}
-                        className={`block w-full text-left px-4 py-2.5 text-sm border-l-4 transition-colors ${
-                          section.id === selectedSectionId
-                            ? 'border-savoy-blue bg-blue-50 text-savoy-blue font-semibold'
-                            : 'border-transparent text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {section.title}
-                      </button>
-                    ))}
+                    {CATEGORY_GROUPS.map((group) => {
+                      const groupSections = filteredSections.filter((section) => group.categories.includes(section.category));
+                      if (groupSections.length === 0) return null;
+
+                      const isCollapsed = collapsedGroups.has(group.key);
+
+                      return (
+                        <div key={group.key} className='border-b border-gray-100 last:border-b-0'>
+                          <button
+                            onClick={() => toggleGroup(group.key)}
+                            className='flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 hover:bg-gray-50'
+                          >
+                            <span>{group.label}</span>
+                            {isCollapsed ? (
+                              <ChevronRightIcon className='w-3.5 h-3.5 text-gray-400' />
+                            ) : (
+                              <ChevronDownIcon className='w-3.5 h-3.5 text-gray-400' />
+                            )}
+                          </button>
+                          {!isCollapsed &&
+                            groupSections.map((section) => (
+                              <button
+                                key={section.id}
+                                onClick={() => setSelectedSectionId(section.id)}
+                                className={`flex items-center justify-between gap-2 w-full text-left px-4 py-2.5 text-sm border-l-4 transition-colors ${
+                                  section.id === selectedSectionId
+                                    ? 'border-savoy-blue bg-blue-50 text-savoy-blue font-semibold'
+                                    : 'border-transparent text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                <span className='truncate'>{section.title}</span>
+                                {isChangedSincePublish(section) && (
+                                  <span
+                                    className='w-1.5 h-1.5 rounded-full bg-amber-500 flex-none'
+                                    data-tooltip-id='changed-since-publish-tooltip'
+                                    data-tooltip-content='Changed since last published'
+                                    data-tooltip-place='right'
+                                  />
+                                )}
+                              </button>
+                            ))}
+                        </div>
+                      );
+                    })}
                   </nav>
                 </div>
 
@@ -368,6 +513,12 @@ const Content = () => {
                             {selectedSection.is_ai_generated && (
                               <span className='text-xs font-semibold uppercase tracking-wide text-purple-700 bg-purple-50 px-2 py-0.5 rounded'>
                                 AI Generated
+                              </span>
+                            )}
+                            {isChangedSincePublish(selectedSection) && (
+                              <span className='flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-amber-700 bg-amber-50 px-2 py-0.5 rounded'>
+                                <ExclamationTriangleIcon className='w-3.5 h-3.5' />
+                                Changed since published
                               </span>
                             )}
                           </div>
@@ -456,6 +607,8 @@ const Content = () => {
       <Tooltip id='status-tooltip' />
       <Tooltip id='copy-for-llm-tooltip' />
       <Tooltip id='sync-tooltip' />
+      <Tooltip id='export-pdf-tooltip' />
+      <Tooltip id='changed-since-publish-tooltip' />
       <Tooltip id='history-tooltip' />
       <Tooltip id='edit-section-tooltip' />
       <Tooltip id='delete-section-tooltip' />

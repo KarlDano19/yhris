@@ -59,6 +59,7 @@ export interface PolicyHandbookData {
   id: number;
   title: string;
   status: 'draft' | 'published';
+  published_at: string | null;
   created_at: string;
   updated_at: string;
   sections: PolicyHandbookSectionData[];
