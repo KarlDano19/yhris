@@ -1,7 +1,5 @@
 import { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
-import Image from 'next/image';
-
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -12,7 +10,10 @@ import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
 import ReactQuill from '@/components/ReactQuillResizableDynamic';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
+import useGenerateMemoPreview from '../hooks/useGenerateMemoPreview';
 import SignatureModal from './SignatureModal';
+import LetterheadField from '../components/LetterheadField';
+import MemoPreviewModal from './MemoPreviewModal';
 import EmailField from '@/components/common/EmailField';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
 
@@ -23,6 +24,11 @@ import EyePassword from '@/svg/EyePassword';
 
 import { DirectiveData, MemoFormData } from '@/types/directives';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import {
+  prepareSignature,
+  SIGNATURE_MAX_DISPLAY_HEIGHT,
+  SIGNATURE_MAX_DISPLAY_WIDTH,
+} from '@/helpers/prepareSignature';
 
 
 interface CachedProfileData {
@@ -55,7 +61,17 @@ export default function CreateMemoModal({
   const [employeeSelected, setEmployeeSelected] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<MemoFormData>();
+  // Authoring mode — either the memo is built from the fields below and rendered into a
+  // document, or the user supplies their own PDF and that file *is* the memo.
+  const [documentMode, setDocumentMode] = useState<'form' | 'upload'>('form');
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [signaturePlacement, setSignaturePlacement] = useState('');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewError, setPreviewError] = useState('');
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const { mutate, isLoading } = useAddDirectivesItems();
+  const { mutateAsync: generatePreview, isLoading: isPreviewLoading } = useGenerateMemoPreview();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient
     .getQueryCache()
@@ -83,12 +99,33 @@ export default function CreateMemoModal({
       return; // Prevent form submission
     }
 
+    if (documentMode === 'upload' && !documentFile) {
+      toast.custom(() => <CustomToast message={'Please upload a PDF document.'} type='error' />, {
+        duration: 5000,
+      });
+      return; // Prevent form submission
+    }
+
     data['to'] = tagsTo;
     data.directive_type = 'memo';
     // Add multiple attachments - pass files array directly
     const payload: any = { ...toSaveData, ...data };
     if (files.length > 0) {
       payload.attachments = files;
+    }
+
+    if (documentMode === 'upload') {
+      // The uploaded PDF replaces the composed memo entirely, so none of the body/signatory
+      // fields are sent — the backend stores the file and skips rendering.
+      payload.document = documentFile;
+      payload.body = '';
+      payload.name = '';
+      payload.position = '';
+      payload.signature = undefined;
+      // An uploaded PDF carries its own letterhead already.
+      payload.letterhead = undefined;
+    } else if (signaturePlacement) {
+      payload.signature_placement = signaturePlacement;
     }
 
     const callbackReq = {
@@ -111,6 +148,9 @@ export default function CreateMemoModal({
         setSignatureFileExist(false);
         setToSaveData(null);
         setSignatureUrl('');
+        setDocumentMode('form');
+        setDocumentFile(null);
+        setSignaturePlacement('');
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -120,6 +160,66 @@ export default function CreateMemoModal({
     };
     mutate(payload, callbackReq);
   });
+
+  // Upload mode — the memo document itself. Only PDF, because the public page shows it in an
+  // iframe and browsers render nothing else there natively.
+  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast.custom(() => <CustomToast message={'The document must be a PDF file.'} type='error' />, {
+        duration: 5000,
+      });
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 20000000) {
+      toast.custom(() => <CustomToast message={'Maximum document size is 20mb.'} type='error' />, {
+        duration: 5000,
+      });
+      event.target.value = '';
+      return;
+    }
+
+    setDocumentFile(file);
+  };
+
+  // `placementOverride` matters: a state setter does not update the value this closure can
+  // see, so re-rendering straight after "Apply position" would use the previous placement
+  // and only catch up on the next click. The new placement is passed through directly.
+  const handleOpenPreview = async (placementOverride?: string) => {
+    setPreviewError('');
+    setIsPreviewOpen(true);
+    try {
+      const url = await generatePreview({
+        ...getValues(),
+        directive_type: 'memo',
+        signature: signatureUrl || getValues('signature'),
+        signature_placement: placementOverride ?? signaturePlacement,
+      });
+      // Release the previous preview before replacing it — each render is a fresh object URL.
+      setPreviewUrl((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return url;
+      });
+    } catch (err: any) {
+      setPreviewError(err?.message || 'Failed to generate the preview.');
+    }
+  };
+
+  // The draw pad hands back a mostly-empty 900x200 canvas; cropping to the ink is what makes
+  // the drag box match the signature the user actually sees.
+  const handleDrawnSignature = async (dataUrl: string) => {
+    setSignatureUrl(await prepareSignature(dataUrl));
+  };
+
+  const handleSignaturePlacementSave = (placement: string) => {
+    setSignaturePlacement(placement);
+    // Re-render so the user confirms the new position against the real document rather than
+    // against the drag overlay.
+    handleOpenPreview(placement);
+  };
 
   const uploadOnChange = ({ target }: { target: any }) => {
     const file = target.files[0];
@@ -423,10 +523,82 @@ export default function CreateMemoModal({
                         </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
+                      <label className='block text-sm font-medium leading-6 text-gray-900'>
+                        Memo Content
+                      </label>
+                      <div className='mt-2 inline-flex rounded-md ring-1 ring-inset ring-gray-300'>
+                        <button
+                          type='button'
+                          onClick={() => setDocumentMode('form')}
+                          className={`rounded-l-md px-3 py-2 text-sm font-semibold ${
+                            documentMode === 'form' ? 'bg-savoy-blue text-white' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          Fill up the form
+                        </button>
+                        <button
+                          type='button'
+                          onClick={() => setDocumentMode('upload')}
+                          className={`rounded-r-md px-3 py-2 text-sm font-semibold ${
+                            documentMode === 'upload' ? 'bg-savoy-blue text-white' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          Upload a PDF
+                        </button>
+                      </div>
+                      <p className='mt-2 text-xs text-gray-500'>
+                        Either way the memo is delivered as a document, so it looks the same on a
+                        phone as it does on a computer.
+                      </p>
+                    </div>
+
+                    {documentMode === 'upload' && (
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='document' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Memo Document<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='mt-2'>
+                          <input
+                            id='document'
+                            ref={documentInputRef}
+                            type='file'
+                            accept='application/pdf'
+                            onChange={handleDocumentUpload}
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                          />
+                          <p className='mt-2 text-xs text-gray-500'>
+                            PDF only, up to 20mb. Export from Word as PDF before uploading.
+                          </p>
+                          {documentFile && (
+                            <div className='mt-2 flex items-center gap-3'>
+                              <span className='text-sm text-gray-700'>{documentFile.name}</span>
+                              <button
+                                type='button'
+                                className='underline text-savoy-blue text-sm'
+                                onClick={() => {
+                                  setDocumentFile(null);
+                                  if (documentInputRef.current) documentInputRef.current.value = '';
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={documentMode === 'upload' ? 'hidden' : undefined}>
+                      <LetterheadField
+                        existingUrl={null}
+                        onChange={(file) => setValue('letterhead', file)}
+                      />
+
+                    <div className='sm:col-span-4 mt-4'>
                       <label htmlFor='body' className='block text-sm font-medium leading-6 text-gray-900'>
                         Body
                       </label>
-                      <div className='mt-2 h-72 min-h-[18rem] mb-12 resize-y overflow-hidden memo-quill-resize-clip'>
+                      <div className='mt-2 h-72 min-h-[18rem] mb-12 resize-y overflow-hidden quill-resize-clip'>
                         <textarea rows={4} {...register('body')} id='body' hidden />
                         <ReactQuill
                           ref={bodyQuillRef}
@@ -506,46 +678,81 @@ export default function CreateMemoModal({
                       </div>
                     </div>
                     <p className='my-4 block text-sm font-medium leading-6 text-gray-900'>Signature</p>
-                    <div className='flex flex-col md:flex-row items-start gap-6 mt-4'>
-                      <div className='flex-1'>
-                        <button
-                          id='draw'
-                          type='button'
-                          className={`block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
-                            signatureUrl ? 'bg-savoy-blue text-white ' : ''
-                          }`}
-                          onClick={() => {
-                            setSignatureModalOpen(true);
-                            // setSignatureUrl("");
-                          }}
-                        >
-                          Draw
-                        </button>
-                      </div>
-                      <p className='text-center mt-2'>or</p>
-                      <div className='flex-1'>
-                        <input
-                          id='signature'
-                          type='file'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-                          {...register('signature', {
-                            onChange: (e) => {
-                              if (e.target.files && e.target.files.length > 0) {
-                                setSignatureUrl('');
-                                setSignatureFileExist(true);
-                              } else {
-                                setSignatureFileExist(false);
+                    {signatureUrl === '' ? (
+                      <div className='flex flex-col md:flex-row items-start gap-6 mt-4'>
+                        <div className='flex-1'>
+                          <button
+                            id='draw'
+                            type='button'
+                            className='block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                            onClick={() => setSignatureModalOpen(true)}
+                          >
+                            Draw
+                          </button>
+                        </div>
+                        <p className='text-center mt-2'>or</p>
+                        <div className='flex-1'>
+                          <input
+                            id='signature'
+                            type='file'
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                            {...register('signature', {
+                              onChange: (e) => {
+                                if (e.target.files && e.target.files.length > 0) {
+                                  setSignatureFileExist(true);
+                                  // Read as a data URL rather than an object URL: cropping
+                                  // draws the image to a canvas, and a data URL can never
+                                  // taint it.
+                                  const reader = new FileReader();
+                                  reader.onload = () => handleDrawnSignature(reader.result as string);
+                                  reader.readAsDataURL(e.target.files[0]);
+                                } else {
+                                  setSignatureFileExist(false);
+                                  setSignatureUrl('');
+                                }
                               }
-                            }
-                          })}
-                        />
-                        {signatureFileExist && (
+                            })}
+                          />
+                          {/* The blank margin around a signature is trimmed off by detecting
+                              transparency, so a photo or scan (no transparency) keeps its
+                              paper background and sits on the memo as a white box. */}
+                          <p className='mt-2 text-xs text-gray-500'>Use a PNG with a transparent background.</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className='mt-4 rounded-md border border-gray-300 bg-white px-4 py-4'>
+                        <div className='flex items-center justify-center min-h-[6rem] overflow-hidden'>
+                          <img
+                            src={signatureUrl}
+                            alt='Signature'
+                            className='object-contain'
+                            style={{ maxWidth: SIGNATURE_MAX_DISPLAY_WIDTH, maxHeight: SIGNATURE_MAX_DISPLAY_HEIGHT }}
+                          />
+                        </div>
+                        {/* Sizing lives on the drag box in the preview, where it's done
+                            against the actual memo — two size controls would only fight each
+                            other, since a placement's width supersedes the image's own. */}
+                        <p className='mt-4 text-center text-xs text-gray-500'>
+                          {signaturePlacement
+                            ? 'Positioned on the memo — open the preview to move or resize it.'
+                            : 'Open the preview to place and resize the signature on the memo.'}
+                        </p>
+                        <div className='flex items-center justify-center gap-3 mt-3'>
                           <button
                             type='button'
-                            className='underline text-savoy-blue text-sm mt-1'
+                            className='inline-flex justify-center rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50'
+                            onClick={() => handleOpenPreview()}
+                          >
+                            Preview &amp; Position
+                          </button>
+                          <button
+                            type='button'
+                            className='inline-flex justify-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90'
                             onClick={() => {
                               setValue('signature', null as never);
                               setSignatureFileExist(false);
+                              setSignatureUrl('');
+                              setSignaturePlacement('');
                               // Reset the input by accessing it via DOM
                               const signatureInput = document.getElementById('signature') as HTMLInputElement;
                               if (signatureInput) {
@@ -555,21 +762,11 @@ export default function CreateMemoModal({
                           >
                             Remove Signature
                           </button>
-                        )}
-                      </div>
-                    </div>
-                    {signatureUrl !== '' && (
-                      <div className='mt-4'>
-                        <Image
-                          className='border-0 ring-1 ring-inset ring-gray-300 m-auto'
-                          src={signatureUrl}
-                          width={500}
-                          height={200}
-                          alt='signatureImage'
-                        />
+                        </div>
                       </div>
                     )}
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    </div>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4'>
                       <div>
                         <label htmlFor='qr_code' className='block text-sm font-medium leading-6 text-gray-900'>
                           QR Code
@@ -776,6 +973,18 @@ export default function CreateMemoModal({
                     >
                       Close
                     </button>
+                    {/* Once a signature exists, Preview lives on the signature card
+                        instead — two of them would just be the same button twice. This keeps
+                        the memo previewable when there is no signature to position. */}
+                    {documentMode === 'form' && signatureUrl === '' && (
+                      <button
+                        type='button'
+                        className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:mr-3 sm:w-auto'
+                        onClick={() => handleOpenPreview()}
+                      >
+                        Preview
+                      </button>
+                    )}
                   </div>
                 </form>
               </DialogPanel>
@@ -783,9 +992,21 @@ export default function CreateMemoModal({
           </div>
         </div>
         <SignatureModal
-          setSignatureUrl={setSignatureUrl}
+          setSignatureUrl={handleDrawnSignature}
           isOpen={signatureModalOpen}
           setIsOpen={setSignatureModalOpen}
+        />
+        <MemoPreviewModal
+          isOpen={isPreviewOpen}
+          handleClose={() => setIsPreviewOpen(false)}
+          previewUrl={previewUrl}
+          isLoading={isPreviewLoading}
+          error={previewError}
+          signatureUrl={signatureUrl}
+          name={watch('name')}
+          position={watch('position')}
+          signaturePlacement={signaturePlacement}
+          onSignaturePlacementSave={handleSignaturePlacementSave}
         />
       </Dialog>
     </Transition>

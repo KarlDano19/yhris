@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import PhilippineComplianceArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PhilippineComplianceArticle";
 
 export const metadata: Metadata = {
-  title: 'Philippine Compliance 2026: Why You Need One System, Not Five Checklists | YAHSHUA HRIS',
-  description: 'PhilHealth E-Claims 3.0 deadline is June 30, BIR cross-border income sourcing rules are active, and DOLE AERW filing is open. Here is what every Philippine employer needs to know, and why disconnected systems make it worse.',
+  title: 'Philippine HR Compliance 2026 | YAHSHUA HRIS',
+  description: 'PhilHealth E-Claims 3.0, BIR cross-border sourcing rules, and DOLE AERW filing are all active in 2026. What every Philippine employer needs to know.',
   keywords: 'PhilHealth E-Claims compliance Philippines, HRIS payroll Philippines 2026, DOLE AERW filing 2026, BIR RMC 38-2024 payroll, Philippine compliance deadlines',
   openGraph: {
     title: 'Philippine Compliance 2026: Why You Need One System, Not Five Checklists',

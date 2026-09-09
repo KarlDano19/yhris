@@ -14,6 +14,8 @@ import SalaryHistoryModal from "../modals/EmploymentDetails/SalaryHistoryModal";
 import EmploymentHistoryModal from "../modals/EmploymentDetails/EmploymentHistoryModal";
 import CustomDatePicker from "@/components/CustomDatePicker";
 
+import { useHasPermission } from "@/hooks/useUserPermissions";
+
 import { s } from "../utils/_shared";
 
 import type { Employee } from "@/types/employee-201-records/employee";
@@ -43,6 +45,10 @@ export default function EmploymentDetailsForm({
   const searchParams = useSearchParams();
   const [showSalaryModal, setShowSalaryModal] = useState(false);
   const [showEmploymentModal, setShowEmploymentModal] = useState(false);
+
+  // Salary is gated by the `view_salary` RBAC permission. Users without it
+  // never see the salary entry point (nor the modal, even via a direct URL).
+  const canViewSalary = useHasPermission("view_salary");
 
   // --- helpers ---
   const setSalaryModalParam = (open: boolean) => {
@@ -227,15 +233,9 @@ export default function EmploymentDetailsForm({
 
   const validate = {
     date_hired: (d?: Date) => {
+      // Future dates are allowed: HR often onboards employees ahead of their
+      // actual start date (see Linear I-644).
       if (!d || isNaN(d.getTime())) return "Date Hired is missing.";
-      const today = new Date();
-      const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const tOnly = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-      if (dOnly > tOnly) return "Date Hired cannot be in the future.";
       return null;
     },
     employment_status: (v: string) =>
@@ -504,20 +504,22 @@ export default function EmploymentDetailsForm({
           showErrors={editing}
         />
 
-        <div className="mt-6">
-          <button
-            data-testid="view-salary-history-btn"
-            type="button"
-            onClick={() => {
-              setShowSalaryModal(true);
-              setSalaryModalParam(true);
-            }}
-            className="w-full rounded-md border border-[#355fd0] text-[#355fd0] px-4 py-2 text-sm hover:bg-[#355fd0]/5"
-          >
-            View Salary History
-          </button>
-          <p className="mt-1 text-xs text-gray-500">+ Add salary here</p>
-        </div>
+        {canViewSalary && (
+          <div className="mt-6">
+            <button
+              data-testid="view-salary-history-btn"
+              type="button"
+              onClick={() => {
+                setShowSalaryModal(true);
+                setSalaryModalParam(true);
+              }}
+              className="w-full rounded-md border border-[#355fd0] text-[#355fd0] px-4 py-2 text-sm hover:bg-[#355fd0]/5"
+            >
+              View Salary History
+            </button>
+            <p className="mt-1 text-xs text-gray-500">+ Add salary here</p>
+          </div>
+        )}
 
         <div className="mt-6">
           <button
@@ -533,7 +535,7 @@ export default function EmploymentDetailsForm({
         </div>
       </Grid>
 
-      {showSalaryModal && (
+      {canViewSalary && showSalaryModal && (
         <SalaryHistoryModal
           isOpen
           onClose={() => {

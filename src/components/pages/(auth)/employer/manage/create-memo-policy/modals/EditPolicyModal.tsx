@@ -6,10 +6,14 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useTagTo from '@/components/hooks/useTagTo';
 import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
 import useUpdateDirective from '../hooks/useUpdateDirective';
+import useGenerateMemoPreview from '../hooks/useGenerateMemoPreview';
 import RemoveFieldConfirmModal from './RemoveFieldConfirmModal';
+import MemoPreviewModal from './MemoPreviewModal';
+import LetterheadField from '../components/LetterheadField';
 import EmailField from '@/components/common/EmailField';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -17,6 +21,10 @@ import { MinusCircleIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outli
 
 import DeleteIcon from '@/svg/DeleteIcon';
 import EyePassword from '@/svg/EyePassword';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import { linkify } from '@/helpers/linkify';
+import { isRichTextEmpty } from '@/helpers/richText';
 
 const DEFAULT_POLICY_FIELDS = [
   { inputLabel: 'Purpose', inputName: '' },
@@ -47,13 +55,63 @@ export default function EditPolicyModal({
   const [isToFocused, setIsToFocused] = useState(false);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, clearErrors, watch, control, formState: { errors }, setError } = useForm<any>({
+  const { register, handleSubmit, setValue, reset, clearErrors, watch, control, getValues, formState: { errors }, setError } = useForm<any>({
     defaultValues: {
       custom_policy_fields: DEFAULT_POLICY_FIELDS,
     },
   });
   const { fields, append, remove, replace } = useFieldArray({ control, name: 'custom_policy_fields' });
   const updateMutation = useUpdateDirective();
+  const { mutateAsync: generatePreview, isLoading: isPreviewLoading } = useGenerateMemoPreview();
+
+  // Authoring mode — either the policy is built from the fields below and rendered into a
+  // document, or the user supplies their own PDF and that file *is* the policy.
+  const [documentMode, setDocumentMode] = useState<'form' | 'upload'>('form');
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [documentUrl, setDocumentUrl] = useState<string>('');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewError, setPreviewError] = useState('');
+  const documentInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload mode — the policy document itself. Only PDF, because the public page shows it in
+  // an iframe and browsers render nothing else there natively.
+  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast.custom(() => <CustomToast message={'The document must be a PDF file.'} type='error' />, { duration: 5000 });
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 20000000) {
+      toast.custom(() => <CustomToast message={'Maximum document size is 20mb.'} type='error' />, { duration: 5000 });
+      event.target.value = '';
+      return;
+    }
+
+    setDocumentFile(file);
+  };
+
+  const handleOpenPreview = async () => {
+    setPreviewError('');
+    setIsPreviewOpen(true);
+    try {
+      const url = await generatePreview({
+        ...getValues(),
+        directiveId: directiveId as number,
+        directive_type: 'policy',
+      });
+      // Release the previous preview before replacing it — each render is a fresh object URL.
+      setPreviewUrl((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return url;
+      });
+    } catch (err: any) {
+      setPreviewError(err?.message || 'Failed to generate the preview.');
+    }
+  };
 
   // load existing directive details
   const { data, refetch: refetchDetails, isFetching } = useGetDirectiveDetails(directiveId);
@@ -74,6 +132,11 @@ export default function EditPolicyModal({
       });
       replace(data.custom_policy_fields?.length ? data.custom_policy_fields : DEFAULT_POLICY_FIELDS);
       setExistingAttachments(data.attachments || []);
+      // Reopen in whichever mode the policy was saved in. A policy created before documents
+      // existed has no document_source at all and correctly lands back in form mode.
+      setDocumentMode(data.document_source === 'uploaded' ? 'upload' : 'form');
+      setDocumentFile(null);
+      setDocumentUrl(typeof data.document === 'string' ? data.document : '');
       try {
         const toArr = Array.isArray(data.to) ? data.to : JSON.parse(data.to || '[]');
         setTagsTo(toArr);
@@ -144,17 +207,30 @@ export default function EditPolicyModal({
   const onSubmit = handleSubmit((dataForm) => {
     if (!isNextForm) return;
 
+    if (documentMode === 'upload' && !documentFile && !documentUrl) {
+      toast.custom(() => <CustomToast message={'Please upload a PDF document.'} type='error' />, { duration: 5000 });
+      return;
+    }
+
+    const isUpload = documentMode === 'upload';
+
     updateMutation.mutate({
       id: directiveId as number,
       directive_type: 'policy',
       title: dataForm.title,
-      eligibility: dataForm.eligibility,
-      application: dataForm.application,
-      coverage: dataForm.coverage,
-      termination: dataForm.termination,
+      eligibility: isUpload ? '' : dataForm.eligibility,
+      application: isUpload ? '' : dataForm.application,
+      coverage: isUpload ? '' : dataForm.coverage,
+      termination: isUpload ? '' : dataForm.termination,
       to: tagsTo,
-      custom_policy_fields: dataForm.custom_policy_fields,
+      custom_policy_fields: isUpload ? [] : dataForm.custom_policy_fields,
       attachments: files,
+      // Always sent so switching back to form mode makes the backend re-render the document
+      // instead of leaving the previously uploaded PDF in place.
+      document_source: isUpload ? 'uploaded' : 'generated',
+      document: documentFile || undefined,
+      // An uploaded PDF carries its own letterhead already.
+      letterhead: isUpload ? undefined : dataForm.letterhead,
     }, {
       onSuccess: () => {
         toast.custom(() => <CustomToast message={'Successfully updated a policy'} type='success' />, { duration: 5000 });
@@ -193,16 +269,25 @@ export default function EditPolicyModal({
       hasErrors = true;
     }
 
-    customFields?.forEach((field: any, index: number) => {
-      if (!field.inputLabel?.trim()) {
-        setError(`custom_policy_fields.${index}.inputLabel` as any, { type: 'manual', message: 'Field title is required.' });
+    // Upload mode replaces the composed policy wholesale, so requiring the fields it is
+    // about to discard would make the mode impossible to reach.
+    if (documentMode === 'upload') {
+      if (!documentFile && !documentUrl) {
+        toast.custom(() => <CustomToast message={'Please upload a PDF document.'} type='error' />, { duration: 5000 });
         hasErrors = true;
       }
-      if (!field.inputName?.trim()) {
-        setError(`custom_policy_fields.${index}.inputName` as any, { type: 'manual', message: 'Field content is required.' });
-        hasErrors = true;
-      }
-    });
+    } else {
+      customFields?.forEach((field: any, index: number) => {
+        if (!field.inputLabel?.trim()) {
+          setError(`custom_policy_fields.${index}.inputLabel` as any, { type: 'manual', message: 'Field title is required.' });
+          hasErrors = true;
+        }
+        if (isRichTextEmpty(field.inputName)) {
+          setError(`custom_policy_fields.${index}.inputName` as any, { type: 'manual', message: 'Field content is required.' });
+          hasErrors = true;
+        }
+      });
+    }
 
     if (!hasErrors) setIsNextForm(true);
   };
@@ -261,26 +346,49 @@ export default function EditPolicyModal({
                             {watchedFields?.[index]?.inputLabel}
                           </label>
                           <div className='mt-2'>
-                            <textarea rows={4} value={watchedFields?.[index]?.inputName || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' />
+                            <div
+                              className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                              dangerouslySetInnerHTML={{ __html: linkify(watchedFields?.[index]?.inputName || '') }}
+                            />
                           </div>
                         </div>
                       ))}
                       <p className='font-bold my-4'>Provisions</p>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Eligibility</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('eligibility') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('eligibility') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Application</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('application') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('application') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Coverage</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('coverage') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('coverage') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Termination</label>
-                        <div className='mt-2'><textarea rows={3} value={watch('termination') || ''} disabled className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 disabled:bg-gray-100' /></div>
+                        <div className='mt-2'>
+                          <div
+                            className='ql-editor block max-h-60 w-full overflow-y-auto rounded-md border-0 bg-gray-100 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300'
+                            dangerouslySetInnerHTML={{ __html: linkify(watch('termination') || '') }}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Attachments</label>
@@ -346,6 +454,76 @@ export default function EditPolicyModal({
                           </div>
                         </div>
                       </div>
+                      {/* Sits before the content fields, not after them: choosing to upload a
+                          PDF means none of the fields below need filling, and offering the
+                          choice only on the next step made people type a whole policy first. */}
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>
+                          Policy Content
+                        </label>
+                        <div className='mt-2 inline-flex rounded-md ring-1 ring-inset ring-gray-300'>
+                          <button
+                            type='button'
+                            onClick={() => setDocumentMode('form')}
+                            className={`rounded-l-md px-3 py-2 text-sm font-semibold ${
+                              documentMode === 'form' ? 'bg-savoy-blue text-white' : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            Fill up the form
+                          </button>
+                          <button
+                            type='button'
+                            onClick={() => setDocumentMode('upload')}
+                            className={`rounded-r-md px-3 py-2 text-sm font-semibold ${
+                              documentMode === 'upload' ? 'bg-savoy-blue text-white' : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            Upload a PDF
+                          </button>
+                        </div>
+                        <p className='mt-2 text-xs text-gray-500'>
+                          Either way the policy is delivered as a document, so it looks the same on
+                          a phone as it does on a computer.
+                        </p>
+                      </div>
+
+                      {documentMode === 'upload' && (
+                        <div className='sm:col-span-4 mt-4'>
+                          <label htmlFor='document' className='block text-sm font-medium leading-6 text-gray-900'>
+                            Policy Document<span className='text-red-600'>*</span>
+                          </label>
+                          <div className='mt-2'>
+                            <input
+                              id='document'
+                              ref={documentInputRef}
+                              type='file'
+                              accept='application/pdf'
+                              onChange={handleDocumentUpload}
+                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                            />
+                            <p className='mt-2 text-xs text-gray-500'>
+                              PDF only, up to 20mb. Export from Word as PDF before uploading.
+                            </p>
+                            {documentFile && (
+                              <div className='mt-2 flex items-center gap-3'>
+                                <span className='text-sm text-gray-700'>{documentFile.name}</span>
+                                <button
+                                  type='button'
+                                  className='underline text-savoy-blue text-sm'
+                                  onClick={() => {
+                                    setDocumentFile(null);
+                                    if (documentInputRef.current) documentInputRef.current.value = '';
+                                  }}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className={documentMode === 'upload' ? 'hidden' : undefined}>
                       {fields.map((item: any, index: number) => {
                         const labelError = (errors.custom_policy_fields as any)?.[index]?.inputLabel;
                         const contentError = (errors.custom_policy_fields as any)?.[index]?.inputName;
@@ -376,8 +554,23 @@ export default function EditPolicyModal({
                               </button>
                             </label>
                             {labelError && (<p className='text-xs text-red-600 mt-1'>{(labelError as any)?.message || 'Field title is required.'}</p>)}
-                            <div className='mt-2'>
-                              <textarea rows={4} {...register(`custom_policy_fields.${index}.inputName`, { required: "Field content is required." })} placeholder={`Enter ${item.inputLabel}...`} id={`custom_policy_fields.${index}.inputName`} className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' />
+                            <div className='quill-resize-clip mt-2 h-56 min-h-[14rem] resize-y overflow-hidden' id={`custom_policy_fields.${index}.inputName`}>
+                              <input
+                                type='text'
+                                {...register(`custom_policy_fields.${index}.inputName`, {
+                                  validate: (value: string) =>
+                                    !isRichTextEmpty(value) || "Field content is required."
+                                })}
+                                hidden
+                              />
+                              <ReactQuill
+                                onChange={(value: string) => setValue(`custom_policy_fields.${index}.inputName`, value)}
+                                formats={QUILL_FORMATS}
+                                modules={QUILL_MODULES}
+                                placeholder={`Enter ${watchedFields?.[index]?.inputLabel || item.inputLabel}...`}
+                                style={{ height: '100%' }}
+                                value={watchedFields?.[index]?.inputName || ''}
+                              />
                             </div>
                             {contentError && (<p className='text-xs text-red-600 mt-1'>{(contentError as any)?.message || 'Field content is required.'}</p>)}
                             <RemoveFieldConfirmModal
@@ -398,6 +591,7 @@ export default function EditPolicyModal({
                           Add Field
                         </button>
                       </div>
+                      </div>
                     </div>
                     <hr />
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4 mb-4'>
@@ -407,22 +601,65 @@ export default function EditPolicyModal({
                 ) : (
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
+                      <div className={documentMode === 'upload' ? 'hidden' : undefined}>
+                      <LetterheadField
+                        existingUrl={typeof data?.letterhead === 'string' ? data.letterhead : null}
+                        onChange={(file) => setValue('letterhead', file)}
+                      />
+
                       <p className='font-bold my-4'>Provisions</p>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='eligibility' className='block text-sm font-medium leading-6 text-gray-900'>Eligibility</label>
-                        <div className='mt-2'><textarea rows={3} {...register('eligibility')} id='eligibility' className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='eligibility'>
+                          <input type='text' {...register('eligibility')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('eligibility', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('eligibility') || ''}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='application' className='block text-sm font-medium leading-6 text-gray-900'>Application</label>
-                        <div className='mt-2'><textarea rows={3} {...register('application')} id='application' className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='application'>
+                          <input type='text' {...register('application')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('application', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('application') || ''}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='coverage' className='block text-sm font-medium leading-6 text-gray-900'>Coverage</label>
-                        <div className='mt-2'><textarea rows={3} id='coverage' {...register('coverage')} className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='coverage'>
+                          <input type='text' {...register('coverage')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('coverage', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('coverage') || ''}
+                          />
+                        </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='termination' className='block text-sm font-medium leading-6 text-gray-900'>Termination</label>
-                        <div className='mt-2'><textarea rows={3} id='termination' {...register('termination')} className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300' /></div>
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='termination'>
+                          <input type='text' {...register('termination')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('termination', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('termination') || ''}
+                          />
+                        </div>
+                      </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>Attachments</label>
@@ -495,6 +732,15 @@ export default function EditPolicyModal({
                         {!updateMutation.isLoading && 'Save'}
                       </button>
                       <button type="button" className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto' onClick={() => setIsNextForm(false)}>Back</button>
+                      {documentMode === 'form' && (
+                        <button
+                          type='button'
+                          className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:mr-3 sm:w-auto'
+                          onClick={handleOpenPreview}
+                        >
+                          Preview
+                        </button>
+                      )}
                     </div>
                   </form>
                 )}
@@ -502,6 +748,13 @@ export default function EditPolicyModal({
             </TransitionChild>
           </div>
         </div>
+        <MemoPreviewModal
+          isOpen={isPreviewOpen}
+          handleClose={() => setIsPreviewOpen(false)}
+          previewUrl={previewUrl}
+          isLoading={isPreviewLoading}
+          error={previewError}
+        />
       </Dialog>
     </Transition>
   );

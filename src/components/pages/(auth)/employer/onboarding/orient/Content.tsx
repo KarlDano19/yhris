@@ -10,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal from '@/components/DeleteModal';
 import BackButton from '@/components/BackButton';
 import SeederButton from '@/components/SeederButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -27,6 +28,7 @@ import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
+import useDeleteApplicantOrient from './hooks/useDeleteApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import { handleEmailSending, updateOrientItems } from './functions/emailHandlers';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
@@ -35,6 +37,7 @@ import LocationDepartmentModal from './modals/LocationDepartmentModal';
 import EnrollRedirectModal from './modals/EnrollRedirectModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
@@ -93,6 +96,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
   });
   const { mutate, isLoading } = useUpdateApplicantOrient();
+  const { mutate: deleteApplicantOrient, isLoading: isDeleting } = useDeleteApplicantOrient();
   const { mutate: enrollToYP, isLoading: isEnrolling } = useEnrollEmployeeToYP();
   const { mutate: syncEmployees } = useSyncEmployees();
   const [loginType, setLoginType] = useState<string | null>(null);
@@ -117,6 +121,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
   const [enrollingId, setEnrollingId] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    id?: string;
+    name?: string;
+  } | null>({ open: false });
 
   const handleFilterChange = (newFilters: FilterValues) => {
     setFilters(newFilters);
@@ -306,6 +315,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
               birthdate: orientItemCopy[itemIndex].birth_date,
+              // Pass date hired explicitly (today) from enrollment so Payroll
+              // persists it at the source. Payroll no longer defaults the hire
+              // date to "today" during sync (fixed on the 201 side), so it must
+              // be provided here or the enrolled employee lands with no hire date.
+              date_hired: new Date().toLocaleDateString('en-CA'),
               address: orientItemCopy[itemIndex].address,
               gender: orientItemCopy[itemIndex].gender,
               department: orientItemCopy[itemIndex].department_id,
@@ -360,6 +374,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       },
     };
     mutate(orientItemCopy[itemIndex], callbackReq);
+  };
+
+  const handleDelete = (data?: { open: boolean; id?: string; name?: string }) => {
+    if (!data?.id) return;
+    deleteApplicantOrient(data.id, {
+      onSuccess: (res: any) => {
+        setDeleteModal({ open: false });
+        refetch();
+        // Enrolled applicants become selectable employees elsewhere; refresh that cache too
+        queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+        toast.custom(
+          () => (
+            <CustomToast
+              message={res?.message || 'Onboarding record removed successfully.'}
+              type='success'
+            />
+          ),
+          { duration: 5000 }
+        );
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
   };
 
   const handleSearch = () => {
@@ -490,6 +530,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isLoading={enrollingId === String(item.id)}
                 isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
+            </div>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='flex justify-center'>
+              <button
+                type='button'
+                onClick={() =>
+                  setDeleteModal({
+                    open: true,
+                    id: String(item.id),
+                    name: `${item?.firstname ?? ''} ${item?.lastname ?? ''}`.trim(),
+                  })
+                }
+                className='inline-flex items-center justify-center rounded-md p-1.5 text-red-600 hover:bg-red-50'
+                data-tooltip-id='onboarding-delete-tooltip'
+                data-tooltip-content='Remove from onboarding'
+                data-tooltip-place='left'
+              >
+                <TrashIcon className='h-5 w-5' />
+              </button>
             </div>
           </td>
         </tr>
@@ -700,6 +760,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Enroll to system
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -1054,7 +1117,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </button>
         </div>
       </NoticeModal>
+      {deleteModal?.open && (
+        <DeleteModal
+          isOpen={deleteModal}
+          setIsOpen={(value) => setDeleteModal(value ?? { open: false })}
+          onConfirm={handleDelete}
+          isLoading={isDeleting}
+          customText={
+            deleteModal?.name
+              ? `${deleteModal.name} from onboarding`
+              : 'this onboarding record'
+          }
+        />
+      )}
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='onboarding-delete-tooltip'/>
     </>
   );
 };

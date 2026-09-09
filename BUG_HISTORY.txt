@@ -109,6 +109,612 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-045
+DATE FILED: 2026-09-03
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Internal request - Module > Onboarding > Orient (position applicants list)
+
+ISSUE DESCRIPTION:
+  The Onboarding list (Onboarding > open a position) had no way to remove an
+  applicant entry. Mistaken, seeded, or no-longer-needed onboarding records
+  could not be cleaned up because the list only supported Send Contract,
+  Orient, assign Location/Department, Introduce, and Enroll - never delete.
+
+DESIRED OUTCOME:
+  Users should be able to remove an onboarding entry from the list, with a
+  confirmation prompt before it is deleted.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+- src/components/pages/(auth)/employer/onboarding/orient/hooks/useDeleteApplicantOrient.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - delete button, confirmation modal, list refresh)
+☑ Custom hooks tested (useDeleteApplicantOrient manual verification)
+☑ React Query hooks tested (list refetch + employee-select cache invalidation)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (delete removes row, persists on reload)
+☑ Edge cases tested (delete of enrolled applicant removes only the onboarding row)
+
+FIX EXPLANATION:
+  Added an Action column to the onboarding table with a red trash button per
+  row. Clicking it opens the shared DeleteModal (showing the applicant name)
+  for confirmation. On confirm, a new useDeleteApplicantOrient hook calls
+  DELETE /api/applicant-orientations/{id}/ (see backend companion). On success
+  the list refetches, the employee-select cache is invalidated, and a success
+  toast is shown. COMPANION: Backend BUG_HISTORY HRIS-2026-041.
+
+================================================================================
+
+BUG ID: HRIS-2026-044
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-645) - Employee 201 Records > Disciplinary Records
+
+ISSUE DESCRIPTION:
+  Under an employee's 201 file > Disciplinary Records tab, users could see that
+  an incident exists (Type, Place, Status) but could not open the record to
+  view its full details. The rows were not clickable and there was no detail
+  view, so description, NTE/decision progress, and attachments were unreachable
+  from the 201 file.
+
+DESIRED OUTCOME:
+  Users should be able to open an incident from the 201 file and view its full
+  details (brief background, status, dates, response, attachments, etc.).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/DisciplinaryRecordsForm.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/modals/ViewIncidentModal.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useGetDisciplinaryRecordDetail.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - clickable rows, View button, detail modal)
+☑ Custom hooks tested (useGetDisciplinaryRecordDetail manual verification)
+☑ React Query hooks tested (detail fetch on open, loading/error states)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (open record shows full details + attachments)
+☑ Edge cases tested (loading state, fetch error state, missing attachments)
+
+FIX EXPLANATION:
+  Added a read-only ViewIncidentModal that fetches the full incident via a new
+  useGetDisciplinaryRecordDetail hook (GET /api/employee-issues/attachments/{id}/,
+  an existing endpoint - no backend change). DisciplinaryRecordsForm now has an
+  Actions column with a View (eye) button and clickable rows that open the modal.
+  The modal shows employee/position/department, incident date and place, issue
+  type, status, full brief background, NTE/decision progress and dates, prepared
+  by, investigation decision, employee response, and NTE/Decision attachments.
+
+================================================================================
+
+BUG ID: HRIS-2026-043
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-644) - Employee 201 Records > Employment Details
+
+ISSUE DESCRIPTION:
+  The "Date Hired" field in Employment Details rejected future dates. Entering a
+  future start date (e.g. next week) and saving showed "Date Hired cannot be in
+  the future" and blocked the save, so HR could not onboard an employee ahead of
+  their actual start date.
+
+DESIRED OUTCOME:
+  The system should accept a future Date Hired so HR can complete onboarding in
+  advance.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - future Date Hired saves without error)
+☑ Form validation tested (presence/validity still enforced; future no longer blocked)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (future date saves; empty/invalid still flagged)
+☑ Edge cases tested (date picker had no maxDate; validator was the only block)
+
+FIX EXPLANATION:
+  Removed the future-date guard in the date_hired validator in
+  EmploymentDetailsForm.tsx. The validator still flags a missing or invalid
+  date, but no longer returns "Date Hired cannot be in the future," so future
+  hire dates save normally. Note: the same "cannot be in the future" pattern in
+  Training & Development and the DOLE accident report is intentional and was left
+  unchanged.
+
+================================================================================
+
+BUG ID: HRIS-2026-042
+DATE FILED: 2026-08-27
+DATE FIXED: 2026-08-27
+CLIENT/REPORTER: Internal (Linear I-643), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Opening the "View current file" preview for a Completed Training's Proof of
+  Completion showed the full signed AWS S3 URL - including
+  AWSAccessKeyId=..., Signature=..., and Expires=... query parameters - in the
+  File Preview modal's title bar. The Document Repository tab's file preview
+  (same underlying upload mechanism) was unaffected.
+
+  Root cause: TrainingDevelopmentForm.tsx derived the modal's `fileName` prop
+  directly from the raw file URL via `previewFileUrl.split("/").pop()`.
+  `previewFileUrl` is `row.existingFileUrl`, which is the pre-signed S3 URL
+  itself (useGetFilePreviewUrl returns non-relative URLs unchanged rather than
+  proxying them), so `.split("/").pop()` returned everything after the last
+  "/" - including the un-stripped query string - and FilePreviewModal's title
+  renders as `${base} - ${fileName}`. DocumentRepositoryForm.tsx does not have
+  this bug because it passes a real stored `file_name` field from the document
+  record instead of deriving a name from the URL.
+
+DESIRED OUTCOME:
+  The Training & Development file preview title should show only the file's
+  name (e.g. "KHP__EI_-_08262026_1787812050.pdf"), with no AWS query
+  parameters, matching the Document Repository preview.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - `fileName` passed to `<FilePreviewModal>` now strips the query string
+      before extracting the filename: changed
+      `previewFileUrl?.split("/").pop() ?? ""` to
+      `previewFileUrl?.split("?")[0].split("/").pop() ?? ""`.
+
+Backend:
+- N/A - frontend-only fix; the signed URL itself is unchanged, only how its
+  filename is displayed.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual reasoning verified against the reported repro URL
+  ("KHP__EI_-_08262026_1787812050.pdf?AWSAccessKeyId=...&Signature=...&Expires=...")
+  - fix yields "KHP__EI_-_08262026_1787812050.pdf" as the displayed name
+☐ Manual browser verification completed (recommended before shipping): open
+  a Completed Training's "View current file" and confirm the modal title
+  shows only the filename
+
+Integration & E2E:
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (blob: URLs from a freshly-attached, not-yet-saved
+  file never reach this code path - `hasServerFile`/`existingFileUrl` gate
+  this button to server-stored files only, which are the ones with signed
+  query strings)
+☐ Cross-browser testing completed (not performed)
+
+KNOWN REMAINING ISSUE:
+  The same `url.split('/').pop()` pattern (without stripping a query string)
+  exists in several unrelated components - SendEmailModal.tsx,
+  ViewAuditLogDetails.tsx, AddCertificationModal.tsx (both yahshua-connect
+  variants), AddProjectModal.tsx, FloatingMenuBar.tsx, DocumentPageFourteen.tsx,
+  DocumentPageFifteen.tsx, and offboarding/[id]/Content.tsx. None were changed
+  here - out of scope for this Linear issue - but any of them could leak
+  query-string credentials the same way if they ever render a signed URL.
+
+FIX EXPLANATION:
+  FilePreviewModal already strips the query string internally when detecting
+  file type (`source.split('?')[0]`), but it trusts whatever `fileName` its
+  caller passes for the title. TrainingDevelopmentForm was the one caller
+  building that name from the raw pre-signed URL instead of a clean stored
+  filename, so the fix mirrors FilePreviewModal's own `split('?')[0]` pattern
+  at the point the prop is built, before falling back to `split('/').pop()`
+  to isolate the last path segment.
+
+================================================================================
+
+BUG ID: HRIS-2026-041
+DATE FILED: 2026-08-19
+DATE FIXED: 2026-08-19
+CLIENT/REPORTER: Internal (User), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Three compounding bugs made it impossible to save Completed Trainings on the
+  Employee 201 Records > Training & Development tab:
+
+  1. Save button never became enabled after adding/editing a training row.
+     Root cause: TrainingDevelopmentForm's `hasErrors`/`dirty` were computed in
+     `useMemo(() => {...watch('rows')...}, [watch])`. `watch` is a stable
+     function reference from useForm, so the memo never recomputed when rows
+     were added, edited, or deleted - `onDirtyChange`/`onErrorsChange` kept
+     firing their initial (empty-array) values forever, so the parent's
+     `sections.training.dirty` never became true and the Save button's
+     `canSave` check stayed false permanently.
+
+  2. Attaching a Proof of Completion file silently cleared the Training Title
+     and Training Provider fields already typed into that row.
+     Root cause: `updateRow()` built its patch from `fields[index]` -
+     `useFieldArray`'s structural snapshot, which does NOT reflect values
+     typed into `register()`-bound inputs (title/provider). Calling
+     `update(index, { ...fields[index], ...filePatch })` on file select
+     overwrote the row with the stale snapshot's original (empty) title/
+     provider, discarding what the user had typed.
+
+  3. Even with 1 and 2 fixed, clicking Save/Confirm threw a runtime error
+     "createTraining is not a function" and the save never happened.
+     Root cause: `useCreateTrainingRecord`, `usePatchTrainingRecord`, and
+     `useDeleteTrainingRecord` each return a standard TanStack Query
+     `useMutation` object (`mutate`/`mutateAsync`/etc.), but Content.tsx
+     destructured them as `{ create }`, `{ update }`, `{ remove }` -
+     properties that don't exist on a mutation object - and called them with
+     positional args (`createTraining(id, input)`) instead of the single
+     params object each mutation function actually expects.
+
+  A fourth, smaller issue was found in the same investigation: the Date
+  Completed picker allowed choosing a future date in the calendar UI itself
+  (only caught after the fact by a "cannot be in the future" validation
+  message), instead of disabling future dates up front.
+
+DESIRED OUTCOME:
+  A user can add a training row, fill in all fields, attach a file, and Save
+  successfully - with the Save button enabling as soon as the form has valid,
+  unsaved changes, typed fields surviving a file attach, and the future-dated
+  Date Completed being unselectable in the calendar rather than only rejected
+  after submit.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - Imported `useWatch` from react-hook-form; replaced the `[watch]`-keyed
+      `hasErrors`/`dirty` useMemo blocks with a `useWatch({ control, name:
+      "rows" })` subscription (`watchedRows`) so both recompute reactively on
+      every row change.
+    - `updateRow()` now reads the row's live values via `getValues(\`rows.${index}\`)`
+      (falling back to `fields[index]`) before merging in the patch, so a file
+      attach no longer clobbers already-typed Title/Provider values.
+    - Added `maxDate={new Date()}` to the Date Completed `CustomDatePicker` so
+      future dates are disabled in the calendar itself.
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+    - Changed `const { create: createTraining } = useCreateTrainingRecord()`
+      (and the matching update/remove destructures) to
+      `const { mutateAsync: createTraining } = useCreateTrainingRecord()` etc.
+    - Updated the three call sites in `saveTrainingTab()` to pass a single
+      `{ employeeId, input }` / `{ employeeId, recordId, input }` /
+      `{ employeeId, recordId }` object, matching each mutation function's
+      actual signature, instead of positional arguments.
+
+Backend:
+- N/A - frontend-only fix; no backend endpoint or contract changes required.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: added a training row, typed Title/Provider,
+  attached a file, confirmed values persisted; Save button enabled once the
+  row was valid and dirty; Save/Confirm completed without the
+  "createTraining is not a function" error
+☑ TypeScript types verified for the changed call sites (CreateTrainingInput /
+  UpdateTrainingInput shapes match what's now passed)
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (create -> update -> delete flow via
+  Save exercised against the real training-records endpoints)
+☑ Edge cases considered (attaching a file after typing other fields; future
+  date selection blocked in the picker in addition to the existing
+  post-submit validation message)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Bug 1 was a stale-dependency problem: `useMemo` only recomputes when an
+  item in its dependency array changes by reference, and `watch` (the
+  function) never changes - only its *return value* does, and only if you
+  subscribe to it via `useWatch`. Switching to `useWatch({ control, name:
+  "rows" })` gives a value that actually changes reference on every row
+  edit, so the `hasErrors`/`dirty` memos - and therefore the parent's Save
+  button - now update live.
+
+  Bug 2 was a data-source mismatch: `useFieldArray`'s `fields` array is a
+  structural snapshot (correct for add/remove/reorder) but is NOT kept in
+  sync with values from `register()`-bound inputs on every keystroke. Basing
+  the file-attach patch on `getValues()` instead reads the form's actual
+  current values, so title/provider survive.
+
+  Bug 3 was an API-shape mismatch introduced when the hooks were written
+  against the standard `useMutation` return shape but the call site was
+  written as if they returned custom `{ create/update/remove }` helpers.
+  Destructuring `mutateAsync` under the same aliases and passing the single
+  params object each hook's mutation function expects resolves the runtime
+  error with no changes to the hooks themselves.
+
+  The date picker fix simply passes `maxDate={new Date()}` through to
+  `CustomDatePicker`, which already supported the prop - disabling future
+  dates in the calendar UI is a strict improvement over relying solely on
+  the post-submit "cannot be in the future" error message.
+
+================================================================================
+
+BUG ID: HRIS-2026-040
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - QA (Jam recording) - Module > Onboarding > Orient > Enroll to Payroll
+COMPANION: Backend BUG_HISTORY HRIS-2026-040 (Repair Rate Statuses proxy endpoint)
+
+ISSUE DESCRIPTION:
+Enrolling an onboarded applicant into Yahshua Payroll (YP) failed, and the affected
+employee's YP profile then showed the error: "'NoneType' object has no attribute
+'dayspermonth'".
+
+Root cause: the onboarding "Enroll" action did not send a hire date to YP. The employee
+was created in YP with no hire date, so YP bootstrapped a rate status with a NULL
+effectivity date. YP cannot resolve a "current rate" from a NULL-dated row, so every YP
+read path that touches the rate crashed. Employees who had already crashed were left with
+orphaned NULL-dated rate rows in YP.
+
+DESIRED OUTCOME:
+- Enrollment sends a valid hire date so YP builds a usable rate status and the flow no
+  longer errors.
+- Admins can repair employees already broken (NULL-dated rate rows) from the UI, without a
+  manual DB script.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+    - Enroll-to-Payroll payload now sends `date_hired: new Date().toLocaleDateString('en-CA')`
+      (today, YYYY-MM-DD). Set explicitly at the source so YP persists it, rather than
+      relying on any sync-time default (the 201 side no longer rewrites hire dates to today).
+- src/components/hooks/useRepairRateStatus.ts (NEW)
+    - Mutation hook: POST /api/employees/repair-rate-status/ (triggers YP rate-status cleanup).
+- src/components/FloatingSyncButton.tsx
+    - Added "Repair Rate Statuses (YP)" as the FIRST Master Sync step, NON-BLOCKING (a
+      failure marks only that step and the sync continues). Subsequent step indices bumped.
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: enroll no longer errors; Master Sync shows the Repair step
+  first and a broken employee's YP profile loads afterward
+☑ React Query hooks tested: useRepairRateStatus verified via Master Sync run
+☐ Cross-browser testing completed (Chrome verified)
+☐ Mobile responsiveness verified (N/A - desktop admin flow)
+
+Integration & E2E:
+☑ API integration tests completed (repair step round-trips through HRIS BE to YP)
+☐ Cypress/Playwright e2e tests updated (not added)
+☑ Manual regression testing completed (existing Master Sync steps still run in order)
+
+FIX EXPLANATION:
+Two-part frontend fix. (1) The Enroll-to-Payroll payload now carries today's date as
+`date_hired`, so YP creates newly enrolled employees with a valid hire date and bootstraps a
+usable rate status - preventing any new breakage. (2) A new, non-blocking "Repair Rate
+Statuses (YP)" step was added to the top of the Master Sync (FloatingSyncButton) via the new
+useRepairRateStatus hook; it calls an HRIS proxy that asks YP to backfill the NULL-dated rate
+rows for the current company (see companion BE entry). This heals employees already broken by
+the bug without touching the YP shared model. It runs first and is non-blocking so a repair
+failure never aborts the rest of the sync.
+
+================================================================================
+
+BUG ID: HRIS-2026-039
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - Consultant (Christen Daayata, via #team-hris Slack)
+MODULE: Admin > Client Monitoring > Send Advisory (shared SendEmailModal)
+
+ISSUE DESCRIPTION:
+  An advisory composed in the Send Advisory modal arrived in Gmail formatted
+  differently from how it was written. Three symptoms, all originating from Quill's
+  saved HTML but via three different mechanisms:
+
+  1. Words split mid-word. "YAHSHUA HRIS" arrived as "Y" / "AHSHUA HRIS" across two
+     lines, "August 17, 2026" as "Augu" / "st 17, 2026". Cause: ReactQuill
+     (react-quill-new / Quill 2.0) serializes every ordinary space as a NON-BREAKING
+     space (\u00A0 / &nbsp;). A real nbsp never offers a line-break opportunity, so a
+     whole sentence becomes one unbreakable token and the email client is forced to
+     break at an arbitrary character instead of between words. No CSS can fix this -
+     nbsp's non-breaking behavior cannot be overridden by any stylesheet rule.
+
+  2. Blank lines disappeared. Deliberate spacing between sections rendered as a plain
+     next line with no gap ("displays it just next line no spacing"). Cause:
+     getSemanticHTML() saves a deliberate blank line as a truly empty <p></p> with no
+     <br> inside, which has zero height. In-app previews are unaffected because
+     globals.css carries ".ql-editor p:empty { min-height: 1em }" - an email client has
+     no access to that stylesheet.
+
+  3. Extra spaces compressed. The reporter added several spaces while editing and they
+     came out collapsed to one. Cause: once nbsp is normalized to a regular space, the
+     HTML renderer collapses consecutive whitespace as usual.
+
+  Why prior fixes did not cover this: HRIS-2026-034 (normalizeNbsp) targets in-app
+  display only - all 46 of its call sites are dangerouslySetInnerHTML on pages and
+  modals. HRIS-2026-033 targets the WeasyPrint PDF generators. HRIS-2026-032 (backend)
+  was email-related but concerned paragraph MARGINS, not nbsp or empty paragraphs. The
+  email path had therefore never been treated for either issue: no email template has
+  wrap CSS and no email-sending view normalizes nbsp.
+
+DESIRED OUTCOME:
+  An email composed in the Send Email modal should arrive reading the way it was
+  written - wrapping at real word boundaries, keeping the blank lines the composer
+  typed, and keeping deliberate multi-space runs - without a backend or template change.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/linkify.ts
+    (added and exported prepareRichTextForEmail() - normalizes Quill's nbsp runs and
+     restores blank lines; placed alongside the existing normalizeNbsp so all nbsp
+     logic stays in one file, per the developer feedback recorded in HRIS-2026-034)
+- src/components/SendEmailModal.tsx
+    (one call at the point the payload is built:
+     message: prepareRichTextForEmail(data.message), so every module using the modal is
+     covered by a single change)
+
+Backend:
+- N/A - deliberately none. Editing without_attachment_email.tpl was considered and
+  rejected: it is shared by 10 backend views (advisory, applicant, employee_issue,
+  screen_applicant x2, separation x3, and 4 DOLE reports), so a template edit silently
+  changes every module. Same reasoning as HRIS-2026-034's rejection of the backend
+  normalization + data migration approach.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+[x] Helper verified against the real failing cases: <p></p> and <p>&nbsp;</p> both
+    become <p><br></p>; nbsp-joined text gains real break points;
+    "Note:&nbsp;&nbsp;&nbsp;" keeps its width; plain paragraphs and class attributes on
+    an empty <p> are left untouched; empty input returns unchanged
+[ ] Jest/RTL tests (N/A - no frontend test harness in this repo)
+[x] Manual verification completed: advisory re-sent and confirmed in Gmail - blank
+    lines between sections restored, "YAHSHUA HRIS" no longer split mid-word
+
+Integration & E2E:
+[x] Manual regression testing completed (advisory flow, Gmail web)
+[ ] Regression pass still needed on the other 9 modules that use SendEmailModal:
+    offboarding, orientation, screen-applicants, address-employee-issue, and the 5 DOLE
+    pages. All shared the same defect, so this is a fix rather than a behavior change,
+    but the call site is shared code
+[x] Edge cases considered (nbsp-only blank paragraphs; empty <p> carrying Quill class
+    attributes such as ql-align-center; multi-space runs; content with no nbsp at all)
+[ ] Cross-browser/client testing completed (verified in Gmail web only)
+
+KNOWN REMAINING ISSUE:
+  A long URL still splits mid-address in the sent email (e.g. "https://canva.link/" /
+  "qu3nl2z7jjqr9fn") instead of moving to the next line whole. This is NOT the nbsp bug
+  - the URL genuinely has no internal break opportunity to restore - and cannot be fixed
+  from the content side. It needs overflow-wrap plus an atomic-link rule
+  (display:inline-block; max-width:100%) in the email template, which is shared by the
+  10 views listed above. Deliberately left unfixed to keep this change frontend-only.
+
+FIX EXPLANATION:
+  The defect is content, not layout: what Quill saves is not what an email client can
+  render faithfully, and the app's own stylesheet (which papers over both problems on
+  screen) does not travel with the email. prepareRichTextForEmail() therefore repairs
+  the HTML before it leaves the app:
+
+    .replace(/&nbsp;/gi, '\u00A0')
+    .replace(/[ \u00A0]*\u00A0[ \u00A0]*/g, (run) => ' ' + '&nbsp;'.repeat(run.length - 1))
+    .replace(/<p([^>]*)>(?:\s|&nbsp;)*<\/p>/gi, '<p$1><br></p>');
+
+  The middle line is the part that resolves symptoms 1 and 3 together: rather than
+  swapping every nbsp for a plain space (which restores wrapping but lets the renderer
+  collapse deliberate multi-space runs), each run keeps its full width while its FIRST
+  space becomes a real, breakable space. One legal break point per run is all the client
+  needs to wrap between words. The third line puts back the <br> that getSemanticHTML()
+  strips, giving blank paragraphs height in any client without relying on a stylesheet
+  the recipient will never load.
+
+  The call sits in SendEmailModal where the payload is assembled rather than in the
+  advisory hook, so all 10 modules that send Quill content through this modal are fixed
+  by one change instead of the advisory alone.
+
+================================================================================
+
+BUG ID: HRIS-2026-038
+DATE FILED: 2026-08-12
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: HR (raised in group chat, w/ screenshot) - Module > Manage > Memo/Policy > Policy
+LINEAR: I-635
+COMPANION: Backend BUG_HISTORY HRIS-2026-038 (duplicate memo/policy endpoint)
+
+ISSUE DESCRIPTION:
+  The Policy form's content boxes (Purpose / Policy / Procedure, plus the Provisions:
+  Eligibility, Application, Coverage, Termination) were plain <textarea> fields, so
+  nothing recorded where the writer pressed Enter. The public policy page recipients
+  open from the emailed link renders those values as HTML, so every line break was
+  lost and numbered items ran together into one solid block:
+    "Policy 1. National Holidays ... 2. Local Holidays ... 3. Business Requirements ..."
+  all on one line. HR asked for "the same content array/layout ... like what we did sa
+  email content" - i.e. numbering should reflect the spacing as written.
+
+  Two further requests came in while fixing it:
+  - Start with the Evaluation Template's editor (no toolbar), then ADD the toolbar
+    after seeing it (formatting options were wanted after all).
+  - Make the boxes draggable/taller like the Create Memo body, so long content is
+    readable while typing.
+
+DESIRED OUTCOME:
+  Policy content reads exactly as typed - each numbered item on its own line, spacing
+  between paragraphs preserved - in the form, the View Policy screen, and the public
+  page. Writers get formatting options and can drag each box taller.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/richText.ts (new - isRichTextEmpty(); Quill serializes an empty editor
+  as "<p><br></p>", so the old !value.trim() required-checks passed on blank input)
+- src/components/pages/(auth)/employer/manage/create-memo-policy/modals/
+  CreatePolicyModal.tsx (custom_policy_fields[].inputName + the 4 provisions:
+  <textarea> -> ReactQuillDynamic with QUILL_FORMATS + QUILL_MODULES; required-validation
+  and the clear-error-on-type watcher use isRichTextEmpty; invalid-field focus now
+  targets the .ql-editor surface, not the hidden backing input)
+- .../modals/EditPolicyModal.tsx (same conversions; the view-only pane rendered values
+  in a disabled <textarea>, which would have shown raw HTML tags - now a read-only
+  ql-editor block via linkify)
+- src/components/pages/(un-auth)/directives/Content.tsx (policy fields, provisions and
+  the legacy-field fallback were wrapped in <p dangerouslySetInnerHTML>; block markup
+  inside a <p> is invalid so the browser hoists it out - now <div class="ql-editor !p-0">,
+  matching how the memo body already renders)
+- src/app/globals.css (renamed .memo-quill-resize-clip -> .quill-resize-clip and shared
+  it with the policy editors; rules unchanged)
+- .../modals/CreateMemoModal.tsx, EditMemoModal.tsx (class rename only)
+- .../DirectiveList.tsx (Duplicate action - see backend HRIS-2026-038: DuplicateIcon
+  button with bordered box + tooltip, ConfirmModal, toast, back to page 1 + refetch)
+- .../hooks/useDuplicateDirective.ts (new - POST /api/directives/<id>/duplicate/)
+
+Backend:
+- See backend BUG_HISTORY HRIS-2026-038 (duplicate endpoint only; the formatting fix
+  needed no backend change - Directive.custom_policy_fields is a JSONField and the
+  values now simply carry HTML).
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☑ TypeScript types verified - npx tsc --noEmit clean on all changed files
+☑ Form validation tested (React Hook Form): empty editor still flagged as required via
+  isRichTextEmpty; error clears once real text is typed
+☐ Jest/RTL component tests (N/A - no frontend test harness in this repo)
+☑ Custom hook follows the existing useSendDirectiveEmail fetch/mutation pattern
+
+Integration & E2E:
+☑ Backend regression suite green (tests.views.test_directive - 50 tests OK)
+☐ Manual QA still needed: create a policy with numbered items, send it, open the
+  emailed public link and confirm it renders line by line
+☑ Edge cases considered:
+  - Policies saved before this fix still open normally; they keep showing as one
+    paragraph until re-typed (no data migration performed)
+  - Toolbar + fixed-height box: quill.snow's .ql-container{height:100%} is measured
+    against the .quill wrapper, so toolbar + editor overflow the box and the bottom of
+    the typing area is cut off. Reused the memo's flex-column fix (.quill-resize-clip)
+  - The public page and View Policy render saved HTML, so the ql-editor styles in
+    globals.css (list markers, empty-paragraph height) apply to policies too
+
+FIX EXPLANATION:
+  Replaced the plain textareas in both policy modals with the same React Quill editor
+  the rest of the app uses (ReactQuillDynamic + QUILL_FORMATS + QUILL_MODULES), so the
+  saved value carries real paragraph markup instead of bare text. Display surfaces that
+  already treated the value as HTML were corrected to use a <div class="ql-editor">
+  wrapper - a <p> cannot legally contain <p>/<ol>, and the browser silently hoisted the
+  content out, which is what flattened the layout. Required-field checks moved to
+  isRichTextEmpty because Quill never returns an empty string once focused. Each editor
+  sits in a resize-y box sharing the memo's .quill-resize-clip rule, which lays the
+  wrapper out as a flex column so the toolbar keeps its natural height and the editor
+  fills exactly the remaining space at any dragged height.
+
+================================================================================
+
 BUG ID: HRIS-2026-037
 DATE FILED: 2026-08-05
 DATE FIXED: 2026-08-05

@@ -103,38 +103,74 @@ function EmployeeProfile({
     }
   }, [locationData]);
 
-  useEffect(() => {
-    if (isEdit) {
-      const subscription = watch((value: any) => {
-        const currentPositionValue = value.current_position;
-        const newPositionValue = value.new_position;
-        const currentEmploymentStatusValue = value.current_employment_status;
-        const newEmploymentStatusValue = value.new_employment_status;
-        const movementTypeValue = value.movement_type;
-        const newLocationValue = value.new_location;
+  // Mirror the form values into the local select state.
+  //
+  // These read watch('field') instead of subscribing with watch(callback) on purpose.
+  // A callback subscription only fires on LATER changes, so whenever the parent's
+  // setValue() calls ran before this component subscribed - a mount-order race that
+  // depends on which fetch resolves first - the initial values were missed entirely
+  // and every select fell back to "Select...". Reading the value directly gives the
+  // current value on first render too, so the render can't lose the race.
+  const currentPositionValue = watch('current_position');
+  const newPositionValue = watch('new_position');
+  const currentEmploymentStatusValue = watch('current_employment_status');
+  const newEmploymentStatusValue = watch('new_employment_status');
+  const movementTypeValue = watch('movement_type');
+  const newLocationValue = watch('new_location');
+  const employeeValue = watch('employee');
 
-        if (currentPositionValue) {
-          setCurrentPosition(String(currentPositionValue));
-        }
-        if (newPositionValue) {
-          setNewPosition(String(newPositionValue));
-        }
-        if (currentEmploymentStatusValue) {
-          setCurrentEmploymentStatus(String(currentEmploymentStatusValue));
-        }
-        if (newEmploymentStatusValue) {
-          setNewEmploymentStatus(String(newEmploymentStatusValue));
-        }
-        if (movementTypeValue) {
-          setMovementType(String(movementTypeValue));
-        }
-        if (newLocationValue) {
-          setNewLocation(String(newLocationValue));
-        }
-      });
-      return () => subscription.unsubscribe();
+  useEffect(() => {
+    if (!isEdit) return;
+
+    if (currentPositionValue) {
+      setCurrentPosition(String(currentPositionValue));
     }
-  }, [isEdit, watch, setCurrentPosition, setNewPosition, setCurrentEmploymentStatus, setNewEmploymentStatus, setMovementType, setNewLocation]);
+    if (newPositionValue) {
+      setNewPosition(String(newPositionValue));
+    }
+    if (currentEmploymentStatusValue) {
+      setCurrentEmploymentStatus(String(currentEmploymentStatusValue));
+    }
+    if (newEmploymentStatusValue) {
+      setNewEmploymentStatus(String(newEmploymentStatusValue));
+    }
+    if (movementTypeValue) {
+      setMovementType(String(movementTypeValue));
+    }
+    if (newLocationValue) {
+      setNewLocation(String(newLocationValue));
+    }
+  }, [
+    isEdit,
+    currentPositionValue,
+    newPositionValue,
+    currentEmploymentStatusValue,
+    newEmploymentStatusValue,
+    movementTypeValue,
+    newLocationValue,
+    setCurrentPosition,
+    setNewPosition,
+    setCurrentEmploymentStatus,
+    setNewEmploymentStatus,
+    setMovementType,
+    setNewLocation,
+  ]);
+
+  // Current Location has no column on the PMF record - it is read off the employee. On
+  // create it gets filled by the employee picker's onChange, but when viewing an
+  // existing PMF that handler never runs, so the field stayed empty. Resolve it from
+  // the employee list instead, once that list has loaded.
+  useEffect(() => {
+    if (!isEdit || currentLocation) return;
+    if (!employeeValue || employeeItems.length === 0) return;
+
+    const matchingEmployee = employeeItems.find(
+      (item: any) => String(item.id) === String(employeeValue)
+    );
+    if (matchingEmployee?.location) {
+      setCurrentLocation(matchingEmployee.location);
+    }
+  }, [isEdit, currentLocation, employeeValue, employeeItems, setCurrentLocation]);
 
   const onSubmit = (data: any) => {
     if (isEdit && !isEditable) {
@@ -145,6 +181,13 @@ function EmployeeProfile({
   };
 
   const isReassignment = movementType === 'reassignment';
+
+  // A <select> discards a value that has no matching <option> yet. The option lists and
+  // the PMF record load from separate requests, so when the record wins the race the
+  // value is applied against an empty list and dropped - the field then reads
+  // "Select..." even though the value is in form state. Holding the value back until
+  // its options exist means it is applied on the render that can actually keep it.
+  const selectValue = (value: string, items: any[]) => (items.length > 0 ? value : '');
 
   return (
     <form onSubmit={isEdit && !isEditable ? onSubmit : handleSubmit(onSubmit)}>
@@ -295,7 +338,7 @@ function EmployeeProfile({
             <div className='relative mt-2'>
               <select
                 id='current_position'
-                value={currentPosition}
+                value={selectValue(currentPosition, positionItems)}
                 onChange={e => {
                   setCurrentPosition(e.target.value);
                   setValue('current_position', e.target.value);
@@ -336,7 +379,7 @@ function EmployeeProfile({
                 <select
                   id='new_position'
                   {...register('new_position', { required: !isReassignment })}
-                  value={newPosition}
+                  value={selectValue(newPosition, positionItems)}
                   onChange={e => {
                     setNewPosition(e.target.value);
                     setValue('new_position', e.target.value);
@@ -373,7 +416,7 @@ function EmployeeProfile({
               <div className='relative mt-2'>
                 <select
                   id='current_employment_status'
-                  value={currentEmploymentStatus}
+                  value={selectValue(currentEmploymentStatus, employeeStatusItems)}
                   onChange={e => {
                     setCurrentEmploymentStatus(e.target.value);
                     setValue('current_employment_status', e.target.value);
@@ -415,7 +458,7 @@ function EmployeeProfile({
                 <select
                   id='new_employment_status'
                   {...register('new_employment_status', { required: !isReassignment })}
-                  value={newEmploymentStatus}
+                  value={selectValue(newEmploymentStatus, employeeStatusItems)}
                   onChange={e => {
                     setNewEmploymentStatus(e.target.value);
                     setValue('new_employment_status', e.target.value);
@@ -478,7 +521,7 @@ function EmployeeProfile({
                 <select
                   id='new_location'
                   {...register('new_location', { required: isReassignment })}
-                  value={newLocation}
+                  value={selectValue(newLocation, locationItems)}
                   onChange={e => {
                     setNewLocation(e.target.value);
                     setValue('new_location', e.target.value);
@@ -621,7 +664,7 @@ function EmployeeProfile({
                       Apply % Increase
                     </label>
                   </div>
-                  <div className='ml-6 mt-2'>
+                  <div className='ml-6 mt-2 flex items-center gap-2'>
                     <input
                       type='number'
                       {...register('percentage_increase', {
@@ -631,9 +674,9 @@ function EmployeeProfile({
                       })}
                       disabled={watch('proposed_rate') !== 'Apply Increase' || (isEdit && !isEditable)}
                       placeholder='Enter percentage'
-                      className='rounded-md w-32 border-0 px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500'
+                      className='min-w-0 flex-1 rounded-md border-0 px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
                     />
-                    <span className='ml-2 text-sm text-gray-500'>%</span>
+                    <span className='shrink-0 text-sm text-gray-500'>%</span>
                   </div>
                   {errors?.percentage_increase && (
                     <p className='text-red-600 text-sm mt-1'>Percentage increase is required</p>
@@ -650,7 +693,7 @@ function EmployeeProfile({
                       Apply Amount Increase
                     </label>
                   </div>
-                  <div className='ml-6 mt-2'>
+                  <div className='ml-6 mt-2 flex items-center gap-2'>
                     <input
                       type='number'
                       step='0.01'
@@ -660,9 +703,9 @@ function EmployeeProfile({
                       })}
                       disabled={watch('proposed_rate') !== 'Apply Amount Increase' || (isEdit && !isEditable)}
                       placeholder='Enter monthly amount'
-                      className='rounded-md w-40 border-0 px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500'
+                      className='min-w-0 flex-1 rounded-md border-0 px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
                     />
-                    <span className='ml-2 text-sm text-gray-500'>/ month</span>
+                    <span className='shrink-0 whitespace-nowrap text-sm text-gray-500'>/ month</span>
                   </div>
                   {errors?.amount_increase && (
                     <p className='text-red-600 text-sm mt-1'>Amount increase is required</p>

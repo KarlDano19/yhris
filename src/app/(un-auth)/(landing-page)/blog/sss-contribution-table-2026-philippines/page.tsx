@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import SssContributionTable2026Article from "@/components/pages/(un-auth)/(landing-page)/blog/articles/SssContributionTable2026Article";
 
 export const metadata: Metadata = {
-  title: 'SSS Contribution Table 2026: PhilHealth and Pag-IBIG Rates for Philippine Employers | YAHSHUA HRIS',
-  description: 'SSS is now at 15% with a ₱35,000 MSC ceiling. PhilHealth is at 5% with a ₱100,000 ceiling. Pag-IBIG caps at ₱400/month. Updated contribution tables, computation examples, and what employers must update now.',
+  title: 'SSS Contribution Table 2026: PhilHealth & Pag-IBIG Rates',
+  description: '2026 SSS is 15% with a ₱35,000 MSC ceiling. PhilHealth is 5%, ₱100,000 ceiling. Pag-IBIG caps at ₱400/month. Full tables and computation examples.',
   keywords: 'SSS contribution table 2026, PhilHealth contribution rate 2026, Pag-IBIG contribution 2026, SSS mandatory provident fund, Philippine statutory contributions 2026',
   openGraph: {
     title: '2026 SSS, PhilHealth and Pag-IBIG Contribution Rates: Philippine Employer Guide',

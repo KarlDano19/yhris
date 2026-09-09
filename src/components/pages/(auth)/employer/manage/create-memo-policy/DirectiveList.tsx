@@ -14,6 +14,7 @@ import ProgressModal from '@/components/ProgressModal';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 import useBulkDeleteDirectives from './hooks/useBulkDeleteDirectives';
+import useDuplicateDirective from './hooks/useDuplicateDirective';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
@@ -24,6 +25,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import ClipIcon from '@/svg/ClipIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import DuplicateIcon from '@/svg/DuplicateIcon';
 import EditIcon from '@/svg/EditIcon';
 import EyePassword from '@/svg/EyePassword';
 import Image from 'next/image';
@@ -78,6 +80,8 @@ const DirectiveList = ({
   const [isSearching, setIsSearching] = useState(false);
   const [isSendConfirmOpen, setIsSendConfirmOpen] = useState(false);
   const [pendingSendId, setPendingSendId] = useState<number | null>(null);
+  const [isDuplicateConfirmOpen, setIsDuplicateConfirmOpen] = useState(false);
+  const [pendingDuplicateId, setPendingDuplicateId] = useState<number | null>(null);
 
   // Bulk delete states
   const [selectedDirectives, setSelectedDirectives] = useState<Set<number>>(new Set());
@@ -93,6 +97,7 @@ const DirectiveList = ({
     directiveType,
   });
   const sendMutation = useSendDirectiveEmail();
+  const duplicateMutation = useDuplicateDirective();
 
   useEffect(() => {
     if (dataDirectives) {
@@ -230,6 +235,26 @@ const DirectiveList = ({
     }
   };
 
+  const confirmDuplicate = async () => {
+    const idToDuplicate = pendingDuplicateId;
+    if (!idToDuplicate) return;
+    try {
+      const data = await duplicateMutation.mutateAsync(idToDuplicate);
+      toast.custom(
+        () => <CustomToast message={data?.message || `${label} duplicated successfully`} type='success' />,
+        { duration: 4000 }
+      );
+      setIsDuplicateConfirmOpen(false);
+      setCurrentPage(1);
+      refetch();
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.custom(() => <CustomToast message={msg} type='error' />, { duration: 4000 });
+    } finally {
+      setPendingDuplicateId(null);
+    }
+  };
+
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
@@ -363,6 +388,19 @@ const DirectiveList = ({
                         <EditIcon />
                       </button>
                     )}
+
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setPendingDuplicateId(item.id);
+                        setIsDuplicateConfirmOpen(true);
+                      }}
+                      className='cursor-pointer rounded-md border border-gray-300 bg-white p-[7px] hover:opacity-75'
+                      data-tooltip-id='duplicate-directive-tooltip'
+                      data-tooltip-content={`Duplicate ${label}`}
+                    >
+                      <DuplicateIcon />
+                    </button>
 
                     <button
                       type='button'
@@ -653,8 +691,25 @@ const DirectiveList = ({
         />
       )}
 
+      {/* Duplicate Confirmation Modal */}
+      {isDuplicateConfirmOpen && (
+        <ConfirmModal
+          isOpen={isDuplicateConfirmOpen}
+          setIsOpen={setIsDuplicateConfirmOpen}
+          message={`Duplicate this ${label.toLowerCase()}?
+The copy is unsent, so you can edit it before sending.`}
+          confirmAction={confirmDuplicate}
+          cancelAction={() => {
+            setIsDuplicateConfirmOpen(false);
+            setPendingDuplicateId(null);
+          }}
+          isLoading={duplicateMutation.isLoading}
+        />
+      )}
+
       <Tooltip id='search-tooltip'/>
       <Tooltip id='view-directive-tooltip'/>
+      <Tooltip id='duplicate-directive-tooltip'/>
       <Tooltip id='view-responses-tooltip'/>
     </>
   );

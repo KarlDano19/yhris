@@ -5,10 +5,17 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useTagTo from '@/components/hooks/useTagTo';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
+import useGenerateMemoPreview from '../hooks/useGenerateMemoPreview';
 import RemoveFieldConfirmModal from './RemoveFieldConfirmModal';
+import MemoPreviewModal from './MemoPreviewModal';
+import LetterheadField from '../components/LetterheadField';
 import EmailField from '@/components/common/EmailField';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import { isRichTextEmpty } from '@/helpers/richText';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MinusCircleIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
@@ -61,9 +68,58 @@ export default function CreatePolicyModal({
     name: 'custom_policy_fields',
   });
   const { mutate, isLoading } = useAddDirectivesItems();
+  const { mutateAsync: generatePreview, isLoading: isPreviewLoading } = useGenerateMemoPreview();
+
+  // Authoring mode — either the policy is built from the fields below and rendered into a
+  // document, or the user supplies their own PDF and that file *is* the policy.
+  const [documentMode, setDocumentMode] = useState<'form' | 'upload'>('form');
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewError, setPreviewError] = useState('');
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddField = () => {
     clearErrors('custom_policy_fields');
+  };
+
+  // Upload mode — the policy document itself. Only PDF, because the public page shows it in
+  // an iframe and browsers render nothing else there natively.
+  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast.custom(() => <CustomToast message={'The document must be a PDF file.'} type='error' />, {
+        duration: 5000,
+      });
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 20000000) {
+      toast.custom(() => <CustomToast message={'Maximum document size is 20mb.'} type='error' />, {
+        duration: 5000,
+      });
+      event.target.value = '';
+      return;
+    }
+
+    setDocumentFile(file);
+  };
+
+  const handleOpenPreview = async () => {
+    setPreviewError('');
+    setIsPreviewOpen(true);
+    try {
+      const url = await generatePreview({ ...getValues(), directive_type: 'policy' });
+      // Release the previous preview before replacing it — each render is a fresh object URL.
+      setPreviewUrl((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return url;
+      });
+    } catch (err: any) {
+      setPreviewError(err?.message || 'Failed to generate the preview.');
+    }
   };
 
   const onSubmit = handleSubmit((data) => {
@@ -88,6 +144,13 @@ export default function CreatePolicyModal({
         });
       },
     };
+    if (documentMode === 'upload' && !documentFile) {
+      toast.custom(() => <CustomToast message={'Please upload a PDF document.'} type='error' />, {
+        duration: 5000,
+      });
+      return;
+    }
+
     data['to'] = tagsTo;
     data.directive_type = 'policy';
     // Add multiple attachments - pass files array directly
@@ -95,6 +158,20 @@ export default function CreatePolicyModal({
     if (files.length > 0) {
       payload.attachments = files;
     }
+
+    if (documentMode === 'upload') {
+      // The uploaded PDF replaces the composed policy entirely, so none of the provision
+      // fields are sent — the backend stores the file and skips rendering.
+      payload.document = documentFile;
+      // An uploaded PDF carries its own letterhead already.
+      payload.letterhead = undefined;
+      payload.custom_policy_fields = [];
+      payload.eligibility = '';
+      payload.application = '';
+      payload.coverage = '';
+      payload.termination = '';
+    }
+
     mutate(payload, callbackReq);
   });
 
@@ -138,8 +215,17 @@ export default function CreatePolicyModal({
       }
     }
 
+    // Upload mode replaces the composed policy wholesale, so requiring the fields it is
+    // about to discard would make the mode impossible to reach.
+    if (documentMode === 'upload' && !documentFile) {
+      toast.custom(() => <CustomToast message={'Please upload a PDF document.'} type='error' />, {
+        duration: 5000,
+      });
+      hasErrors = true;
+    }
+
     // Validate custom policy fields
-    if (customFields && customFields.length > 0) {
+    if (documentMode === 'form' && customFields && customFields.length > 0) {
       customFields.forEach((field: PolicyField, index: number) => {
         // Validate inputLabel (field title)
         if (!field.inputLabel || field.inputLabel.trim() === "") {
@@ -151,7 +237,7 @@ export default function CreatePolicyModal({
         }
         
         // Validate inputName (field content)
-        if (!field.inputName || field.inputName.trim() === "") {
+        if (isRichTextEmpty(field.inputName)) {
           setError(`custom_policy_fields.${index}.inputName` as any, {
             type: "manual",
             message: "Field content is required."
@@ -170,7 +256,7 @@ export default function CreatePolicyModal({
         // Focus on the email input field
         const emailInput = document.querySelector('input[type="text"]') as HTMLInputElement;
         if (emailInput) emailInput.focus();
-      } else if (customFields && customFields.length > 0) {
+      } else if (documentMode === 'form' && customFields && customFields.length > 0) {
         // Focus on the first invalid policy field
         for (let i = 0; i < customFields.length; i++) {
           const field = customFields[i];
@@ -181,8 +267,11 @@ export default function CreatePolicyModal({
               el.focus();
             }
             break;
-          } else if (!field.inputName || field.inputName.trim() === "") {
-            const el = document.getElementById(`custom_policy_fields.${i}.inputName`);
+          } else if (isRichTextEmpty(field.inputName)) {
+            // Focus the Quill editing surface, not the hidden input backing the field.
+            const el = document.querySelector(
+              `#custom_policy_fields\\.${i}\\.inputName .ql-editor`
+            ) as HTMLElement | null;
             if (el) el.focus();
             break;
           }
@@ -291,7 +380,10 @@ export default function CreatePolicyModal({
           const fieldName = name.split('.').pop();
           if (fieldName === 'inputLabel' || fieldName === 'inputName') {
             const fieldValue = value.custom_policy_fields?.[parseInt(fieldIndex)]?.[fieldName as keyof PolicyField];
-            if (fieldValue && String(fieldValue).trim() !== '') {
+            const isFilled = fieldName === 'inputName'
+              ? !isRichTextEmpty(fieldValue as string)
+              : Boolean(fieldValue && String(fieldValue).trim() !== '');
+            if (isFilled) {
               clearErrors(name as any);
             }
           }
@@ -428,6 +520,76 @@ export default function CreatePolicyModal({
                           </div>
                         </div>
                       </div>
+                      {/* Sits before the content fields, not after them: choosing to upload a
+                          PDF means none of the fields below need filling, and offering the
+                          choice only on the next step made people type a whole policy first. */}
+                      <div className='sm:col-span-4 mt-4'>
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>
+                          Policy Content
+                        </label>
+                        <div className='mt-2 inline-flex rounded-md ring-1 ring-inset ring-gray-300'>
+                          <button
+                            type='button'
+                            onClick={() => setDocumentMode('form')}
+                            className={`rounded-l-md px-3 py-2 text-sm font-semibold ${
+                              documentMode === 'form' ? 'bg-savoy-blue text-white' : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            Fill up the form
+                          </button>
+                          <button
+                            type='button'
+                            onClick={() => setDocumentMode('upload')}
+                            className={`rounded-r-md px-3 py-2 text-sm font-semibold ${
+                              documentMode === 'upload' ? 'bg-savoy-blue text-white' : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            Upload a PDF
+                          </button>
+                        </div>
+                        <p className='mt-2 text-xs text-gray-500'>
+                          Either way the policy is delivered as a document, so it looks the same on
+                          a phone as it does on a computer.
+                        </p>
+                      </div>
+
+                      {documentMode === 'upload' && (
+                        <div className='sm:col-span-4 mt-4'>
+                          <label htmlFor='document' className='block text-sm font-medium leading-6 text-gray-900'>
+                            Policy Document<span className='text-red-600'>*</span>
+                          </label>
+                          <div className='mt-2'>
+                            <input
+                              id='document'
+                              ref={documentInputRef}
+                              type='file'
+                              accept='application/pdf'
+                              onChange={handleDocumentUpload}
+                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                            />
+                            <p className='mt-2 text-xs text-gray-500'>
+                              PDF only, up to 20mb. Export from Word as PDF before uploading.
+                            </p>
+                            {documentFile && (
+                              <div className='mt-2 flex items-center gap-3'>
+                                <span className='text-sm text-gray-700'>{documentFile.name}</span>
+                                <button
+                                  type='button'
+                                  className='underline text-savoy-blue text-sm'
+                                  onClick={() => {
+                                    setDocumentFile(null);
+                                    if (documentInputRef.current) documentInputRef.current.value = '';
+                                  }}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className={documentMode === 'upload' ? 'hidden' : undefined}>
                       {fields.map((item: PolicyField, index: number) => {
                         const labelError = errors.custom_policy_fields?.[index]?.inputLabel;
                         const contentError = errors.custom_policy_fields?.[index]?.inputName;
@@ -482,15 +644,24 @@ export default function CreatePolicyModal({
                                 {labelError.message || 'Field title is required.'}
                               </p>
                             )}
-                            <div className='mt-2'>
-                              <textarea
-                                rows={4}
+                            <div className='quill-resize-clip mt-2 h-56 min-h-[14rem] resize-y overflow-hidden' id={`custom_policy_fields.${index}.inputName`}>
+                              <input
+                                type='text'
                                 {...register(`custom_policy_fields.${index}.inputName`, {
-                                  required: "Field content is required."
+                                  validate: (value?: string) =>
+                                    !isRichTextEmpty(value) || "Field content is required."
                                 })}
+                                hidden
+                              />
+                              <ReactQuill
+                                onChange={(value: string) =>
+                                  setValue(`custom_policy_fields.${index}.inputName`, value)
+                                }
+                                formats={QUILL_FORMATS}
+                                modules={QUILL_MODULES}
                                 placeholder={`Enter ${item.inputLabel}...`}
-                                id={`custom_policy_fields.${index}.inputName`}
-                                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                style={{ height: '100%' }}
+                                value={watch(`custom_policy_fields.${index}.inputName`) || ''}
                               />
                             </div>
                             {contentError && (
@@ -529,6 +700,7 @@ export default function CreatePolicyModal({
                           Add Field
                         </button>
                       </div>
+                      </div>
                     </div>
                     <hr />
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4 mb-4'>
@@ -545,17 +717,25 @@ export default function CreatePolicyModal({
                   // Second Form Step - Final form with provisions and submit
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
+                      <div className={documentMode === 'upload' ? 'hidden' : undefined}>
+                      <LetterheadField
+                        existingUrl={null}
+                        onChange={(file) => setValue('letterhead', file)}
+                      />
+
                       <p className='font-bold my-4'>Provisions</p>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='eligibility' className='block text-sm font-medium leading-6 text-gray-900'>
                           Eligibility
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            {...register('eligibility')}
-                            id='eligibility'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='eligibility'>
+                          <input type='text' {...register('eligibility')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('eligibility', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('eligibility') || ''}
                           />
                         </div>
                       </div>
@@ -564,12 +744,14 @@ export default function CreatePolicyModal({
                         <label htmlFor='application' className='block text-sm font-medium leading-6 text-gray-900'>
                           Application
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            {...register('application')}
-                            id='application'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='application'>
+                          <input type='text' {...register('application')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('application', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('application') || ''}
                           />
                         </div>
                       </div>
@@ -577,12 +759,14 @@ export default function CreatePolicyModal({
                         <label htmlFor='coverage' className='block text-sm font-medium leading-6 text-gray-900'>
                           Coverage
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            id='coverage'
-                            {...register('coverage')}
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='coverage'>
+                          <input type='text' {...register('coverage')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('coverage', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('coverage') || ''}
                           />
                         </div>
                       </div>
@@ -590,14 +774,17 @@ export default function CreatePolicyModal({
                         <label htmlFor='termination' className='block text-sm font-medium leading-6 text-gray-900'>
                           Termination
                         </label>
-                        <div className='mt-2'>
-                          <textarea
-                            rows={3}
-                            id='termination'
-                            {...register('termination')}
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        <div className='quill-resize-clip mt-2 h-48 min-h-[12rem] resize-y overflow-hidden' id='termination'>
+                          <input type='text' {...register('termination')} hidden />
+                          <ReactQuill
+                            onChange={(value: string) => setValue('termination', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('termination') || ''}
                           />
                         </div>
+                      </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -723,6 +910,15 @@ export default function CreatePolicyModal({
                       >
                         Back
                       </button>
+                      {documentMode === 'form' && (
+                        <button
+                          type='button'
+                          className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:mr-3 sm:w-auto'
+                          onClick={handleOpenPreview}
+                        >
+                          Preview
+                        </button>
+                      )}
                     </div>
                   </form>
                 )}
@@ -730,6 +926,13 @@ export default function CreatePolicyModal({
             </TransitionChild>
           </div>
         </div>
+        <MemoPreviewModal
+          isOpen={isPreviewOpen}
+          handleClose={() => setIsPreviewOpen(false)}
+          previewUrl={previewUrl}
+          isLoading={isPreviewLoading}
+          error={previewError}
+        />
       </Dialog>
     </Transition>
   );

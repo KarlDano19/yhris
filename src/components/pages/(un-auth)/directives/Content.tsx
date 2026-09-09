@@ -233,10 +233,11 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
     );
   };
 
-  // Check if directive has viewable files
+  // Check if directive has files that actually appear in the dropdown.
+  // The signature is rendered inline with the document, so it must not be counted here —
+  // otherwise a directive with a signature but no attachments shows an empty dropdown.
   const hasViewableFiles = directive && (
     directive.qr_code ||
-    directive.signature ||
     (Array.isArray(directive.attachments) && directive.attachments.length > 0) ||
     (directive.attachments && typeof directive.attachments === 'string') ||
     (directive as any)?.attachment
@@ -284,35 +285,35 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
             {directive.custom_policy_fields.map((field, index) => (
               <div className="mb-6" key={index}>
                 <h3 className="font-semibold text-lg">{field.inputLabel}</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(field.inputName) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(field.inputName) }} />
               </div>
             ))}
 
             {directive.eligibility && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Eligibility</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
               </div>
             )}
 
             {directive.application && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Application</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
               </div>
             )}
 
             {directive.coverage && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Coverage</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
               </div>
             )}
 
             {directive.termination && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Termination</h3>
-                <p dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
+                <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
               </div>
             )}
           </div>
@@ -346,35 +347,35 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
               {legacyPolicyFields.map((field, index) => (
                 <div className="mb-6" key={index}>
                   <h3 className="font-semibold text-lg">{field.fieldName.charAt(0).toUpperCase() + field.fieldName.slice(1)}</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(field.fieldValue) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(field.fieldValue) }} />
                 </div>
               ))}
 
               {directive.eligibility && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Eligibility</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
                 </div>
               )}
 
               {directive.application && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Application</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
                 </div>
               )}
 
               {directive.coverage && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Coverage</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
                 </div>
               )}
 
               {directive.termination && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Termination</h3>
-                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
+                  <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
                 </div>
               )}
             </div>
@@ -402,29 +403,58 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
     }}>
       <div className="relative w-full max-w-4xl mx-auto my-8">
         <div className="bg-white rounded-lg overflow-hidden border border-[#ACB9CB]">
-          <div className="px-16 py-12">
-            <h1 className="text-xl font-bold text-center text-blue-600 mb-10">
-              {directiveType === 'memo' ? 'MEMO:' : 'POLICY:'} {directive.title}
-            </h1>
+          <div className={directive.document ? 'px-4 py-6 sm:px-8' : 'px-16 py-12'}>
+            {!directive.document && (
+              <h1 className="text-xl font-bold text-center text-blue-600 mb-10">
+                {directiveType === 'memo' ? 'MEMO:' : 'POLICY:'} {directive.title}
+              </h1>
+            )}
 
             <div className="mb-20">
-              {renderDirectiveContent()}
+              {directive.document ? (
+                /* The memo as a fixed-page document. A PDF page does not reflow, so a phone
+                   and a desktop show the identical layout — which an HTML rendering cannot
+                   promise, and which is why the signature can be positioned freely at all. */
+                <>
+                  <iframe
+                    src={directive.document as string}
+                    title={`${directiveType === 'memo' ? 'Memo' : 'Policy'}: ${directive.title}`}
+                    className="w-full h-[70vh] rounded border border-gray-200"
+                  />
+                  {/* iOS Safari commonly renders only the first page of a PDF inside an
+                      iframe, so the escape hatch is not optional. */}
+                  <a
+                    href={directive.document as string}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-block text-sm font-medium text-[#355FD0] hover:underline"
+                  >
+                    Open the document in a new tab
+                  </a>
+                </>
+              ) : (
+                /* Memos and policies created before documents existed keep rendering exactly
+                   as they always have. */
+                <>
+                  {renderDirectiveContent()}
 
-              {directiveType === 'memo' && (
-                <div className="mt-20">
-                  {directive.signature && (
-                    <div className="mb-2">
-                      <img
-                        src={directive.signature as string}
-                        alt="Signature"
-                        className="h-12 object-contain object-left"
-                        style={{ maxWidth: '200px' }}
-                      />
+                  {directiveType === 'memo' && (
+                    <div className="mt-20">
+                      {directive.signature && (
+                        <div className="mb-2">
+                          <img
+                            src={directive.signature as string}
+                            alt="Signature"
+                            className="h-12 object-contain object-left"
+                            style={{ maxWidth: '200px' }}
+                          />
+                        </div>
+                      )}
+                      <p className="font-semibold text-sm mb-2">{directive.name}</p>
+                      <p className="text-gray-600 text-sm">{directive.position}</p>
                     </div>
                   )}
-                  <p className="font-semibold text-sm mb-2">{directive.name}</p>
-                  <p className="text-gray-600 text-sm">{directive.position}</p>
-                </div>
+                </>
               )}
             </div>
 
