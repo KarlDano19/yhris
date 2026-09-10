@@ -186,8 +186,11 @@ const SssContributionTable2026Article = () => {
 
               {/* ===================== PhilHealth ===================== */}
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
-                PhilHealth Contribution Rate 2026
+                PhilHealth Contribution Table 2026
               </h2>
+              <p style={{ fontSize: "1.0625rem", color: "#111827", fontWeight: 500, marginBottom: "1rem" }}>
+                The PhilHealth contribution rate in 2026 is 5% of monthly basic salary, split 2.5% employer and 2.5% employee, with a ₱500 minimum and ₱5,000 maximum premium per month.
+              </p>
               <p style={{ marginBottom: "1rem" }}>
                 The PhilHealth premium contribution rate in 2026 is <strong>5% of the member&apos;s monthly basic salary</strong>, shared equally between employer and employee at 2.5% each. This rate applies to all employed members in both private and government sectors.
               </p>
@@ -195,10 +198,11 @@ const SssContributionTable2026Article = () => {
                 The salary floor is ₱10,000, meaning members earning below ₱10,000 pay a fixed minimum premium of ₱500 per month. The salary ceiling is ₱100,000, meaning members earning ₱100,000 or more pay a fixed maximum of ₱5,000 per month. Salaries above ₱100,000 do not increase the premium further.
               </p>
               <p style={{ marginBottom: "1.5rem" }}>
-                According to PhilHealth&apos;s official advisory released May 6, 2025, the 5% rate is the final scheduled adjustment under Republic Act No. 11223 (the Universal Health Care Act). No further increases are scheduled under the current law.
+                According to PhilHealth&apos;s official advisory released May 6, 2025, the 5% rate is the final scheduled adjustment under Republic Act No. 11223 (the Universal Health Care Act). No further increases are scheduled under the current law. This table covers only the base premium; see the penalties and remittance deadlines sections below if a payment was late or incorrect.
               </p>
 
               {/* PhilHealth rate table */}
+              <p style={{ fontWeight: "700", color: "#111827", marginBottom: "0.75rem" }}>2026 PhilHealth Contribution Table (Employee and Employer Share)</p>
               <div style={{ overflowX: "auto", marginBottom: "2rem" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
                   <thead>
