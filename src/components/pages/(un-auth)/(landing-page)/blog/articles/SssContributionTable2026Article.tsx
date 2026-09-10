@@ -164,8 +164,14 @@ const SssContributionTable2026Article = () => {
               <p style={{ marginBottom: "1rem" }}>
                 In practice, employees earning above ₱20,000 per month will see two SS-related deductions on their payslip: regular SS and MPF. The MPF portion is credited to a provident fund account that earns dividends and is paid out on retirement, total disability, or death, similar to SSS retirement benefits.
               </p>
-              <p style={{ marginBottom: "2rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
+              <p style={{ marginBottom: "1rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
                 <strong style={{ color: "#111827" }}>Example:</strong> An employee with an MSC of ₱25,000 pays 5% on ₱20,000 (₱1,000 regular SS) plus 5% on ₱5,000 (₱250 MPF), for a total employee deduction of ₱1,250 per month. The employer pays 10% on each portion, plus the ₱30 EC premium.
+              </p>
+              <p style={{ marginBottom: "2rem" }}>
+                For the full breakdown of who is automatically enrolled, how WISP investments and payouts work, and how it differs from the separate, voluntary WISP Plus program, see our{" "}
+                <Link href="/blog/sss-mandatory-provident-fund-philippines" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>
+                  deep-dive on the SSS Mandatory Provident Fund
+                </Link>.
               </p>
 
               {/* H3: What changed from 2025 */}
