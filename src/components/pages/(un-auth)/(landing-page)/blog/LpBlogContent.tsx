@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "ai-workforce-management-philippines",
+    category: "Future of Work",
+    title: "Beyond BPO: How AI Is Changing Workforce Management in Philippine Retail, Manufacturing, and Logistics",
+    excerpt: "AI adoption is highest in Philippine logistics (86.4%) and retail (85.5%), lowest in manufacturing (72.4%). Most future-of-work coverage still defaults to BPO. Here is what the data actually shows.",
+    date: "September 2026",
+    readTime: "8 min read",
+    image: "/blog/ai-workforce-management.png",
+  },
+  {
     slug: "night-differential-holiday-pay-philippines",
     category: "DOLE Compliance",
     title: "Night Differential and Holiday Pay: How the Rates Actually Stack",
