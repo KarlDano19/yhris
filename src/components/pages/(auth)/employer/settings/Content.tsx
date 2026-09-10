@@ -39,7 +39,7 @@ const menus = [
     isAvailable: true,
   },
   {
-    icon: <KeyIcon className='h-12 w-12 text-indigo-dye' />,
+    icon: <KeyIcon className='h-12 w-12 text-savoy-blue' />,
     text: <>AI Access<br/>Tokens</>,
     link: '/settings/ai-access',
     isAvailable: true,

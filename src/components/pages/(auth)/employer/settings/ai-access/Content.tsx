@@ -195,46 +195,65 @@ const AiAccessContent = () => {
         )}
       </div>
 
-      {/* Generate modal */}
+      {/* Generate modal — styled to match Add User Account (savoy-blue header/actions,
+          ring inputs, two-column grid, hr divider, reversed footer). */}
       <ModalLayout isOpen={isGenerateOpen} handleClose={() => setIsGenerateOpen(false)} title='Generate AI access token'>
-        <div className='space-y-4'>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Label</label>
-            <input
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder='e.g. ChatGPT on my laptop'
-              className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:outline-none'
-            />
+        <div className='md:mx-6 my-4'>
+          <div className='px-4 pt-4 pb-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5'>
+              <div className='grid-item'>
+                <label htmlFor='token-label' className='block text-sm font-medium leading-6 text-gray-900'>
+                  Label
+                </label>
+                <div className='mt-2'>
+                  <input
+                    id='token-label'
+                    value={label}
+                    onChange={(e) => setLabel(e.target.value)}
+                    type='text'
+                    placeholder='e.g. ChatGPT on my laptop'
+                    className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                  />
+                </div>
+              </div>
+              <div className='grid-item'>
+                <label htmlFor='token-expiry' className='block text-sm font-medium leading-6 text-gray-900'>
+                  Expires
+                </label>
+                <div className='mt-2'>
+                  <select
+                    id='token-expiry'
+                    value={expiresIn}
+                    onChange={(e) => setExpiresIn(e.target.value)}
+                    className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6'
+                  >
+                    {EXPIRY_OPTIONS.map((opt) => (
+                      <option key={opt.label} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Expires</label>
-            <select
-              value={expiresIn}
-              onChange={(e) => setExpiresIn(e.target.value)}
-              className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:outline-none'
-            >
-              {EXPIRY_OPTIONS.map((opt) => (
-                <option key={opt.label} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className='flex justify-end gap-2 pt-2'>
+          <hr />
+          <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
             <button
-              onClick={() => setIsGenerateOpen(false)}
-              className='rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
-            >
-              Cancel
-            </button>
-            <button
+              type='button'
               onClick={handleGenerate}
               disabled={createMutation.isLoading}
-              className='inline-flex items-center gap-2 rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-600 disabled:opacity-60'
+              className='inline-flex w-full items-center justify-center gap-2 rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60 sm:ml-3 sm:w-auto'
             >
               {createMutation.isLoading && <LoadingSpinner size='xs' color='white' />}
               Generate
+            </button>
+            <button
+              type='button'
+              onClick={() => setIsGenerateOpen(false)}
+              className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:w-auto'
+            >
+              Close
             </button>
           </div>
         </div>
@@ -249,30 +268,35 @@ const AiAccessContent = () => {
         }}
         title='Copy your token now'
       >
-        <div className='space-y-4'>
-          <div className='rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800'>
-            This token is shown <b>once</b>. Copy it now — you won’t be able to see it again.
+        <div className='md:mx-6 my-4'>
+          <div className='px-4 pt-4 pb-6 space-y-4'>
+            <div className='rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800'>
+              This token is shown <b>once</b>. Copy it now — you won’t be able to see it again.
+            </div>
+            <div className='flex items-center gap-2 rounded-md bg-gray-50 p-3 shadow-sm ring-1 ring-inset ring-gray-300'>
+              <code className='flex-1 text-sm text-gray-800 break-all'>{newToken}</code>
+              <button
+                type='button'
+                onClick={() => copyToClipboard(newToken, 'Token copied.')}
+                className='shrink-0 inline-flex items-center gap-1 rounded-md bg-savoy-blue px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90'
+              >
+                <ClipboardIcon className='h-4 w-4' />
+                Copy
+              </button>
+            </div>
+            <div className='text-xs text-gray-500'>
+              Paste this as the <b>Bearer token</b> in your AI client’s MCP connector, with the server URL above.
+            </div>
           </div>
-          <div className='flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 p-3'>
-            <code className='flex-1 text-sm text-gray-800 break-all'>{newToken}</code>
+          <hr />
+          <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
             <button
-              onClick={() => copyToClipboard(newToken, 'Token copied.')}
-              className='shrink-0 inline-flex items-center gap-1 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-700'
-            >
-              <ClipboardIcon className='h-4 w-4' />
-              Copy
-            </button>
-          </div>
-          <div className='text-xs text-gray-500'>
-            Paste this as the <b>Bearer token</b> in your AI client’s MCP connector, with the server URL above.
-          </div>
-          <div className='flex justify-end pt-2'>
-            <button
+              type='button'
               onClick={() => {
                 setIsTokenOpen(false);
                 setNewToken('');
               }}
-              className='rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-600'
+              className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
             >
               Done
             </button>
