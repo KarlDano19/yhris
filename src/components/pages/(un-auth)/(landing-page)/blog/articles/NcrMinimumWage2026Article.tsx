@@ -57,6 +57,11 @@ const NcrMinimumWage2026Article = () => {
           <div className="lp-section-container max-w-3xl mx-auto">
             <div className="prose prose-lg max-w-none" style={{ color: "#374151", lineHeight: "1.8" }}>
 
+              {/* Direct-answer opener, for snippet extraction */}
+              <p style={{ fontSize: "1.125rem", color: "#374151", marginBottom: "1.5rem", fontWeight: 500 }}>
+                As of July 25, 2026, the NCR (Metro Manila) minimum wage is ₱755 per day for non-agriculture workers, and ₱718 per day for agriculture, small retail/service (15 or fewer workers), and small manufacturing (fewer than 10 workers) employers, under Wage Order No. NCR-27.
+              </p>
+
               {/* Quick reference callout */}
               <div style={{ background: "rgba(255,193,7,0.06)", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "12px", padding: "1.25rem 1.5rem", marginBottom: "2.5rem" }}>
                 <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#374151" }}>
