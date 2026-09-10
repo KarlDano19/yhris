@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "sss-mandatory-provident-fund-philippines",
+    category: "Statutory Compliance",
+    title: "Inside the SSS Mandatory Provident Fund (WISP): What It Is and How It Changes Your Payroll Math",
+    excerpt: "Above a ₱20,000 Monthly Salary Credit, part of every SSS contribution goes to WISP instead of the regular program. How the split, investment, and payout work, and why it is not the same as WISP Plus.",
+    date: "September 2026",
+    readTime: "8 min read",
+    image: "/blog/sss-mandatory-provident-fund.png",
+  },
+  {
     slug: "ai-workforce-management-philippines",
     category: "Future of Work",
     title: "Beyond BPO: How AI Is Changing Workforce Management in Philippine Retail, Manufacturing, and Logistics",
