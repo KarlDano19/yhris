@@ -35,6 +35,12 @@ const jsonLd = {
       "legalName": "YAHSHUA Outsourcing Worldwide, Inc.",
       "alternateName": "YOWI",
       "url": "https://yahshuahris.com",
+      "sameAs": [
+        "https://www.yahshua-abba.com/#organization"
+      ],
+      "parentOrganization": {
+        "@id": "https://www.theabbainitiative.com/#organization"
+      },
       "logo": {
         "@type": "ImageObject",
         "url": "https://yahshuahris.com/logo.png"
