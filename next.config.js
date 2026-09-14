@@ -84,6 +84,8 @@ const nextConfig = {
       '/blog/ai-guidance-vs-automation-hr-software',
       '/blog/ncr-minimum-wage-2026',
       '/blog/night-differential-holiday-pay-philippines',
+      '/blog/ai-workforce-management-philippines',
+      '/blog/sss-mandatory-provident-fund-philippines',
       '/faqs',
       '/docs',
       '/jobs',

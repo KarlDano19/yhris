@@ -164,8 +164,14 @@ const SssContributionTable2026Article = () => {
               <p style={{ marginBottom: "1rem" }}>
                 In practice, employees earning above ₱20,000 per month will see two SS-related deductions on their payslip: regular SS and MPF. The MPF portion is credited to a provident fund account that earns dividends and is paid out on retirement, total disability, or death, similar to SSS retirement benefits.
               </p>
-              <p style={{ marginBottom: "2rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
+              <p style={{ marginBottom: "1rem", padding: "1rem 1.25rem", borderLeft: "3px solid rgba(255,193,7,0.5)", background: "rgba(255,193,7,0.05)", borderRadius: "0 8px 8px 0" }}>
                 <strong style={{ color: "#111827" }}>Example:</strong> An employee with an MSC of ₱25,000 pays 5% on ₱20,000 (₱1,000 regular SS) plus 5% on ₱5,000 (₱250 MPF), for a total employee deduction of ₱1,250 per month. The employer pays 10% on each portion, plus the ₱30 EC premium.
+              </p>
+              <p style={{ marginBottom: "2rem" }}>
+                For the full breakdown of who is automatically enrolled, how WISP investments and payouts work, and how it differs from the separate, voluntary WISP Plus program, see our{" "}
+                <Link href="/blog/sss-mandatory-provident-fund-philippines" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>
+                  deep-dive on the SSS Mandatory Provident Fund
+                </Link>.
               </p>
 
               {/* H3: What changed from 2025 */}
@@ -180,8 +186,11 @@ const SssContributionTable2026Article = () => {
 
               {/* ===================== PhilHealth ===================== */}
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
-                PhilHealth Contribution Rate 2026
+                PhilHealth Contribution Table 2026
               </h2>
+              <p style={{ fontSize: "1.0625rem", color: "#111827", fontWeight: 500, marginBottom: "1rem" }}>
+                The PhilHealth contribution rate in 2026 is 5% of monthly basic salary, split 2.5% employer and 2.5% employee, with a ₱500 minimum and ₱5,000 maximum premium per month.
+              </p>
               <p style={{ marginBottom: "1rem" }}>
                 The PhilHealth premium contribution rate in 2026 is <strong>5% of the member&apos;s monthly basic salary</strong>, shared equally between employer and employee at 2.5% each. This rate applies to all employed members in both private and government sectors.
               </p>
@@ -189,10 +198,11 @@ const SssContributionTable2026Article = () => {
                 The salary floor is ₱10,000, meaning members earning below ₱10,000 pay a fixed minimum premium of ₱500 per month. The salary ceiling is ₱100,000, meaning members earning ₱100,000 or more pay a fixed maximum of ₱5,000 per month. Salaries above ₱100,000 do not increase the premium further.
               </p>
               <p style={{ marginBottom: "1.5rem" }}>
-                According to PhilHealth&apos;s official advisory released May 6, 2025, the 5% rate is the final scheduled adjustment under Republic Act No. 11223 (the Universal Health Care Act). No further increases are scheduled under the current law.
+                According to PhilHealth&apos;s official advisory released May 6, 2025, the 5% rate is the final scheduled adjustment under Republic Act No. 11223 (the Universal Health Care Act). No further increases are scheduled under the current law. This table covers only the base premium; see the penalties and remittance deadlines sections below if a payment was late or incorrect.
               </p>
 
               {/* PhilHealth rate table */}
+              <p style={{ fontWeight: "700", color: "#111827", marginBottom: "0.75rem" }}>2026 PhilHealth Contribution Table (Employee and Employer Share)</p>
               <div style={{ overflowX: "auto", marginBottom: "2rem" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
                   <thead>
@@ -427,6 +437,32 @@ const SssContributionTable2026Article = () => {
             </div>
           </div>
         </article>
+
+        {/* Related reading */}
+        <section className="pb-16">
+          <div className="lp-section-container max-w-3xl mx-auto">
+            <div className="rounded-xl p-6" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/blog/ncr-minimum-wage-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    NCR Minimum Wage 2026: Wage Order No. 27 Rates →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/thirteenth-month-pay-tracking-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    How to Track 13th Month Pay in the Philippines →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/payroll-registration-checklist-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Philippine Payroll Registration Checklist →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
         {/* End CTA */}
         <section className="py-16" style={{ background: "#FFFBF0", borderTop: "1px solid rgba(255,193,7,0.2)" }}>

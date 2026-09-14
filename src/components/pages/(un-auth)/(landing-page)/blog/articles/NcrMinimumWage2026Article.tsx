@@ -57,6 +57,11 @@ const NcrMinimumWage2026Article = () => {
           <div className="lp-section-container max-w-3xl mx-auto">
             <div className="prose prose-lg max-w-none" style={{ color: "#374151", lineHeight: "1.8" }}>
 
+              {/* Direct-answer opener, for snippet extraction */}
+              <p style={{ fontSize: "1.125rem", color: "#374151", marginBottom: "1.5rem", fontWeight: 500 }}>
+                As of July 25, 2026, the NCR (Metro Manila) minimum wage is ₱755 per day for non-agriculture workers, and ₱718 per day for agriculture, small retail/service (15 or fewer workers), and small manufacturing (fewer than 10 workers) employers, under Wage Order No. NCR-27.
+              </p>
+
               {/* Quick reference callout */}
               <div style={{ background: "rgba(255,193,7,0.06)", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "12px", padding: "1.25rem 1.5rem", marginBottom: "2.5rem" }}>
                 <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#374151" }}>
@@ -273,6 +278,27 @@ const NcrMinimumWage2026Article = () => {
             </div>
           </div>
         </article>
+
+        {/* Related reading */}
+        <section className="pb-16">
+          <div className="lp-section-container max-w-3xl mx-auto">
+            <div className="rounded-xl p-6" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/blog/sss-contribution-table-2026-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    2026 SSS, PhilHealth, and Pag-IBIG Contribution Rates →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/payroll-registration-checklist-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Philippine Payroll Registration Checklist →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
         {/* End CTA */}
         <section className="py-16" style={{ background: "#FFFBF0", borderTop: "1px solid rgba(255,193,7,0.2)" }}>

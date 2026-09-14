@@ -200,6 +200,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
+    {
+      url: `${BASE_URL}/blog/ai-workforce-management-philippines`,
+      lastModified: new Date('2026-09-10'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/blog/sss-mandatory-provident-fund-philippines`,
+      lastModified: new Date('2026-09-10'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
 
     // ── Tools ─────────────────────────────────────────────────────────────
     {
