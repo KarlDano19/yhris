@@ -32,15 +32,11 @@ const jsonLd = {
       "@type": "Organization",
       "@id": "https://yahshuahris.com/#organization",
       "name": "YAHSHUA HRIS",
-      "legalName": "YAHSHUA Outsourcing Worldwide, Inc.",
-      "alternateName": "YOWI",
+      "legalName": "The ABBA Initiative (OPC)",
       "url": "https://yahshuahris.com",
       "sameAs": [
-        "https://www.yahshua-abba.com/#organization"
+        "https://www.theabbainitiative.com/#organization"
       ],
-      "parentOrganization": {
-        "@id": "https://www.theabbainitiative.com/#organization"
-      },
       "logo": {
         "@type": "ImageObject",
         "url": "https://yahshuahris.com/logo.png"
