@@ -327,6 +327,20 @@ const DirectiveList = ({
                     <span>{item.title}</span> <ClipIcon />
                   </div>
                 </td>
+                <td className='whitespace-nowrap px-3 py-5 text-sm text-center'>
+                  {/* Multi-signatory readiness. 'none' = no signatories assigned. */}
+                  {item.signatory_status === 'pending' ? (
+                    <span className='rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700'>
+                      Pending
+                    </span>
+                  ) : item.signatory_status === 'ready' ? (
+                    <span className='rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700'>
+                      Ready
+                    </span>
+                  ) : (
+                    <span className='text-gray-300'>—</span>
+                  )}
+                </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
                   <button
                     type='button'
@@ -346,11 +360,16 @@ const DirectiveList = ({
                   <div className='flex items-center justify-center gap-3'>
                     <button
                       type='button'
+                      disabled={item.signatory_status === 'pending'}
                       onClick={() => {
                         setPendingSendId(item.id);
                         setIsSendConfirmOpen(true);
                       }}
-                      className='border rounded-md py-[0.65em] px-[0.65em] border-[#3d6cee9f]'
+                      className={`border rounded-md py-[0.65em] px-[0.65em] border-[#3d6cee9f] ${
+                        item.signatory_status === 'pending' ? 'opacity-40 cursor-not-allowed' : ''
+                      }`}
+                      data-tooltip-id={item.signatory_status === 'pending' ? 'send-pending-tooltip' : undefined}
+                      data-tooltip-content='All assigned signatories must sign before sending'
                     >
                       <Image
                         src='/assets/send-icon.png'
@@ -559,6 +578,9 @@ const DirectiveList = ({
                       Title
                     </th>
                     <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
+                      Status
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
                       Responses
                     </th>
                     <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
@@ -711,6 +733,7 @@ The copy is unsent, so you can edit it before sending.`}
       <Tooltip id='view-directive-tooltip'/>
       <Tooltip id='duplicate-directive-tooltip'/>
       <Tooltip id='view-responses-tooltip'/>
+      <Tooltip id='send-pending-tooltip'/>
     </>
   );
 };
