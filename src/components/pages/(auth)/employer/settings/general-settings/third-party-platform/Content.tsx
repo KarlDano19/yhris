@@ -63,6 +63,28 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
+  // Reconnect re-runs the Yahshua Payroll OAuth "connect" flow, which overwrites the
+  // stored integration row with a fresh access AND refresh token. Use this when the
+  // saved refresh token has been revoked/expired (payroll calls start 500ing with
+  // "Failed to refresh access token"). Same popup + BroadcastChannel plumbing as create.
+  const handleReconnect = (provider: string) => {
+    if (provider !== 'yahshua-payroll') return;
+
+    // Flag this run as a "connect" so the shared /sso callback links the current
+    // company (refreshing its tokens) instead of logging in / creating a company.
+    localStorage.setItem('yp_oauth_mode', 'connect');
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth/`;
+    const left = (window.innerWidth - 900) / 2;
+    const top = (window.innerHeight - 700) / 2;
+    const popup = window.open(url, 'popup', `width=900, height=900, left=${left}, top=${top}`);
+    const checkOAuthStatus = setInterval(() => {
+      if (popup?.closed) {
+        clearInterval(checkOAuthStatus);
+      }
+    }, 1000);
+  };
+
   useEffect(() => {
     refetchThirdPartyIntegration();
   }, []);
@@ -131,6 +153,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.provider}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {/* Reconnect only applies to Yahshua Payroll — the connect callback handles that provider */}
+            {item.provider === 'yahshua-payroll' && (
+              <button
+                className='inline-flex justify-center rounded-md border border-savoy-blue px-4 py-1.5 text-sm font-semibold text-savoy-blue shadow-sm hover:bg-gray-50'
+                onClick={() => handleReconnect(item.provider)}
+              >
+                Reconnect
+              </button>
+            )}
+          </td>
         </tr>
       ));
     } else {
@@ -209,6 +242,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Provider
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
                       </th>
                     </tr>
                   </thead>
