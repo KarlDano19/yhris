@@ -7,6 +7,14 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "de-minimis-benefits-2026-philippines",
+    category: "Statutory Compliance",
+    title: "BIR's New Tax-Free Benefit Limits (RR No. 29-2025): What Changed in De Minimis Benefits",
+    excerpt: "Effective January 6, 2026, the BIR raised tax-exempt ceilings on 10 categories of de minimis benefits, including rice subsidy and clothing allowance. What changed, what did not, and how the excess-over-ceiling rule works with the ₱90,000 cap.",
+    date: "September 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "final-pay-computation-philippines",
     category: "DOLE Compliance",
     title: "Final Pay Computation for Resigned Employees: What DOLE's Labor Advisory Actually Requires",
