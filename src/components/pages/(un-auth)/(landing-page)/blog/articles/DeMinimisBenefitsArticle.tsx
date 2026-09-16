@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 
@@ -37,6 +38,19 @@ const DeMinimisBenefitsArticle = () => {
             </ScrollFadeIn>
           </div>
         </section>
+
+        {/* Featured Image */}
+        <div className="lp-section-container max-w-3xl mx-auto pt-10 pb-0">
+          <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: "360px" }}>
+            <Image
+              src="/blog/de-minimis-benefits-2026.png"
+              alt="BIR's New Tax-Free Benefit Limits (RR No. 29-2025)"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        </div>
 
         {/* Article Body */}
         <article className="py-16">
