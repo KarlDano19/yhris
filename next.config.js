@@ -86,6 +86,7 @@ const nextConfig = {
       '/blog/night-differential-holiday-pay-philippines',
       '/blog/ai-workforce-management-philippines',
       '/blog/sss-mandatory-provident-fund-philippines',
+      '/blog/final-pay-computation-philippines',
       '/faqs',
       '/docs',
       '/jobs',
