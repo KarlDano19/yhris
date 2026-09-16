@@ -7,6 +7,14 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "final-pay-computation-philippines",
+    category: "DOLE Compliance",
+    title: "Final Pay Computation for Resigned Employees: What DOLE's Labor Advisory Actually Requires",
+    excerpt: "Final pay is due within 30 days of separation under DOLE Labor Advisory No. 06-20, a different clock than the employee's 30-day resignation notice. What must be included, what generally does not (separation pay), and a worked example.",
+    date: "September 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "sss-mandatory-provident-fund-philippines",
     category: "Statutory Compliance",
     title: "Inside the SSS Mandatory Provident Fund (WISP): What It Is and How It Changes Your Payroll Math",
