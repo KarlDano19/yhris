@@ -280,11 +280,15 @@ const SssContributionTable2026Article = () => {
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
                 Pag-IBIG Contribution Table 2026
               </h2>
+              <p style={{ fontSize: "1.0625rem", color: "#111827", fontWeight: 500, marginBottom: "1rem" }}>
+                The Pag-IBIG (HDMF) contribution rate in 2026 is 2% of monthly salary from the employer, and 1% to 2% from the employee depending on salary level, capped at a Fund Salary of ₱10,000 for a maximum combined contribution of ₱400 per month.
+              </p>
               <p style={{ marginBottom: "1rem" }}>
-                Pag-IBIG Fund (HDMF) contribution rates are unchanged in 2026. The employer always contributes 2% of the employee&apos;s monthly salary. The employee contributes 1% for salaries at or below ₱1,500, or 2% for salaries above ₱1,500. Contributions are capped at a Fund Salary (FS) of ₱10,000, meaning the maximum monthly deduction is ₱200 for the employee and ₱200 for the employer, regardless of actual salary.
+                Pag-IBIG Fund (HDMF) contribution rates are unchanged in 2026. The employer always contributes 2% of the employee&apos;s monthly salary. The employee contributes 1% for salaries at or below ₱1,500, or 2% for salaries above ₱1,500. Contributions are capped at a Fund Salary (FS) of ₱10,000, meaning the maximum monthly deduction is ₱200 for the employee and ₱200 for the employer, regardless of actual salary. This table covers only the base rate; see the common payroll error and remittance deadline notes below for how the ₱10,000 cap applies in practice.
               </p>
 
               {/* Pag-IBIG table */}
+              <p style={{ fontWeight: "700", color: "#111827", marginBottom: "0.75rem" }}>2026 Pag-IBIG Contribution Table (Employee and Employer Share)</p>
               <div style={{ overflowX: "auto", marginBottom: "2rem" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
                   <thead>
