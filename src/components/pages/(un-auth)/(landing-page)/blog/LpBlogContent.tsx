@@ -13,6 +13,7 @@ const posts = [
     excerpt: "Effective January 6, 2026, the BIR raised tax-exempt ceilings on 10 categories of de minimis benefits, including rice subsidy and clothing allowance. What changed, what did not, and how the excess-over-ceiling rule works with the ₱90,000 cap.",
     date: "September 2026",
     readTime: "7 min read",
+    image: "/blog/de-minimis-benefits-2026.png",
   },
   {
     slug: "final-pay-computation-philippines",
@@ -21,6 +22,7 @@ const posts = [
     excerpt: "Final pay is due within 30 days of separation under DOLE Labor Advisory No. 06-20, a different clock than the employee's 30-day resignation notice. What must be included, what generally does not (separation pay), and a worked example.",
     date: "September 2026",
     readTime: "7 min read",
+    image: "/blog/final-pay-computation.png",
   },
   {
     slug: "sss-mandatory-provident-fund-philippines",
