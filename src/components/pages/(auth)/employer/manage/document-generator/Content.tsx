@@ -722,6 +722,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onClose={() => setIsSignatureModalOpen(false)}
           onSave={handleSignatureSave}
           onTransparencyCheck={handleTransparencyCheck}
+          currentSignature={currentData.signature}
         />
       )}
       
