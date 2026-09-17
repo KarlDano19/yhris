@@ -33,11 +33,6 @@ const menus = [
     link: '/manage/create-memo-policy',
   },
   {
-    icon: <CreateMemoLogo />,
-    text: 'Pending Signatures',
-    link: '/manage/pending-signatures',
-  },
-  {
     icon: <BenefitsLogo />,
     text: 'Design Benefits',
     link: '/manage/design-benefits',

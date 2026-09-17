@@ -19,6 +19,8 @@ import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
 import EditMemoModal from './modals/EditMemoModal';
+import SignMemoModal from './modals/SignMemoModal';
+import ViewDirectiveModal from './modals/ViewDirectiveModal';
 import EditPolicyModal from './modals/EditPolicyModal';
 import ConfirmModal from '@/components/ConfirmModal';
 
@@ -71,6 +73,13 @@ const DirectiveList = ({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedDirectiveId, setSelectedDirectiveId] = useState<number | null>(null);
+  // Multi-signatory signing modal
+  const [isSignOpen, setIsSignOpen] = useState(false);
+  const [signSignatoryId, setSignSignatoryId] = useState<number | null>(null);
+  const [signMemoTitle, setSignMemoTitle] = useState<string>('');
+  // Document + signatories preview modal
+  const [isDocViewOpen, setIsDocViewOpen] = useState(false);
+  const [docViewDirectiveId, setDocViewDirectiveId] = useState<number | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -358,6 +367,38 @@ const DirectiveList = ({
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
                   <div className='flex items-center justify-center gap-3'>
+                    {/* Preview the rendered document and the signatories' signing status. */}
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setDocViewDirectiveId(item.id);
+                        setIsDocViewOpen(true);
+                      }}
+                      className='cursor-pointer hover:opacity-75'
+                      data-tooltip-id='view-document-tooltip'
+                      data-tooltip-content='View document & signatories'
+                    >
+                      <EyePassword visible />
+                    </button>
+
+                    {/* Sign — shown only when the logged-in user is a pending signatory
+                        of this memo. Opens the signing modal. */}
+                    {item.can_sign && (
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setSignSignatoryId(item.my_signatory_id);
+                          setSignMemoTitle(item.title);
+                          setIsSignOpen(true);
+                        }}
+                        className='rounded-md bg-emerald-600 px-3 py-[7px] text-xs font-semibold text-white hover:opacity-90'
+                        data-tooltip-id='sign-memo-tooltip'
+                        data-tooltip-content='Sign this memo'
+                      >
+                        Sign
+                      </button>
+                    )}
+
                     <button
                       type='button'
                       disabled={item.signatory_status === 'pending'}
@@ -627,6 +668,13 @@ const DirectiveList = ({
             directiveId={selectedDirectiveId}
             viewOnly
           />
+          <SignMemoModal
+            isOpen={isSignOpen}
+            setIsOpen={setIsSignOpen}
+            signatoryId={signSignatoryId}
+            memoTitle={signMemoTitle}
+            refetch={refetch}
+          />
         </>
       ) : (
         <>
@@ -654,6 +702,11 @@ const DirectiveList = ({
         setIsOpen={setIsEmployeeResponsesModalOpen}
         memoTitle={selectedMemoTitle}
         directiveId={selectedMemoTitle?.id}
+      />
+      <ViewDirectiveModal
+        isOpen={isDocViewOpen}
+        setIsOpen={setIsDocViewOpen}
+        directiveId={docViewDirectiveId}
       />
       {isDeleteModalOpen && (
         <DeleteModal
@@ -734,6 +787,8 @@ The copy is unsent, so you can edit it before sending.`}
       <Tooltip id='duplicate-directive-tooltip'/>
       <Tooltip id='view-responses-tooltip'/>
       <Tooltip id='send-pending-tooltip'/>
+      <Tooltip id='sign-memo-tooltip'/>
+      <Tooltip id='view-document-tooltip'/>
     </>
   );
 };

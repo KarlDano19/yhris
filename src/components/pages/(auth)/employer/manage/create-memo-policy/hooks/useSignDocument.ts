@@ -37,7 +37,7 @@ export function useSignDocument() {
   const queryClient = useQueryClient();
   return useMutation((payload: SignDocumentPayload) => signDocument(payload), {
     onSuccess: () => {
-      queryClient.invalidateQueries(['pendingSignaturesCache']);
+      queryClient.invalidateQueries(['directivesItemCache']);
     },
   });
 }
