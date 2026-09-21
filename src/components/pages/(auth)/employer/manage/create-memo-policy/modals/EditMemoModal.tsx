@@ -18,6 +18,7 @@ import LetterheadField from '../components/LetterheadField';
 import MemoPreviewModal from './MemoPreviewModal';
 import EmailField from '@/components/common/EmailField';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
+import UserMultiSelect from '@/components/common/UserMultiSelect';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -107,6 +108,8 @@ export default function EditMemoModal({
         name: data.name || '',
         position: data.position || '',
         company_name: data.company_name || cachedProfile?.state?.data?.name || '',
+        // Seed the multi-signatory picker with the currently assigned user ids.
+        signatories: (data.signatories || []).map((signatory: any) => signatory.user_id),
       });
       setValue('body', data.body || '');
       // Cropped on load as well, so a memo saved before cropping existed positions the same
@@ -735,6 +738,64 @@ export default function EditMemoModal({
                         </div>
                       </div>
                     </div>
+
+                    {/* Multiple signatories. Signed rows are locked (cannot be removed);
+                        each shows its current signing status. Hidden once the memo is sent
+                        except as a read-only summary. */}
+                    <div className='mt-6'>
+                      <label className='block text-sm font-medium leading-6 text-gray-900'>
+                        Signatories <span className='text-gray-400 font-normal'>(optional)</span>
+                      </label>
+                      <p className='text-xs text-gray-500 mb-2'>
+                        The memo stays in draft (Pending) until every assigned signatory has signed.
+                        Signed signatories can no longer be removed.
+                      </p>
+                      {viewOnly ? (
+                        <div className='flex flex-col gap-1'>
+                          {(data?.signatories || []).length === 0 ? (
+                            <span className='text-sm text-gray-400'>No signatories assigned.</span>
+                          ) : (
+                            (data?.signatories || []).map((signatory: any) => (
+                              <div key={signatory.id} className='flex items-center gap-2 text-sm'>
+                                <span className='text-gray-800'>{signatory.user_name}</span>
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-xs ${
+                                    signatory.status === 'signed'
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-amber-100 text-amber-700'
+                                  }`}
+                                >
+                                  {signatory.status === 'signed' ? 'Signed' : 'Pending'}
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      ) : (
+                        <UserMultiSelect
+                          control={control}
+                          name='signatories'
+                          lockedIds={(data?.signatories || [])
+                            .filter((signatory: any) => signatory.status === 'signed')
+                            .map((signatory: any) => signatory.user_id)}
+                          statusById={(data?.signatories || []).reduce(
+                            (accumulator: Record<number, 'pending' | 'signed'>, signatory: any) => {
+                              accumulator[signatory.user_id] = signatory.status;
+                              return accumulator;
+                            },
+                            {}
+                          )}
+                          namesById={(data?.signatories || []).reduce(
+                            (accumulator: Record<number, string>, signatory: any) => {
+                              accumulator[signatory.user_id] = signatory.user_name;
+                              return accumulator;
+                            },
+                            {}
+                          )}
+                        />
+                      )}
+                    </div>
+
                     <p className='my-4 block text-sm font-medium leading-6 text-gray-900'>Signature</p>
                     {signatureUrl === '' ? (
                       <div className='flex flex-col md:flex-row items-start gap-6 mt-4'>

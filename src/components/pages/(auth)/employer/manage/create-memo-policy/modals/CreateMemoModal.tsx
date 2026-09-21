@@ -16,6 +16,7 @@ import LetterheadField from '../components/LetterheadField';
 import MemoPreviewModal from './MemoPreviewModal';
 import EmailField from '@/components/common/EmailField';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
+import UserMultiSelect from '@/components/common/UserMultiSelect';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -669,13 +670,25 @@ export default function CreateMemoModal({
                             data-tooltip-content="Auto-populated from selected employee"
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
                           />
-                          <Tooltip 
-                            id="position-tooltip" 
+                          <Tooltip
+                            id="position-tooltip"
                             place="bottom"
                             style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
                         </div>
                       </div>
+                    </div>
+
+                    {/* Multiple signatories (optional). Assigned users each sign later,
+                        in-app; the memo stays a draft until everyone has signed. */}
+                    <div className='mt-6'>
+                      <label className='block text-sm font-medium leading-6 text-gray-900'>
+                        Signatories <span className='text-gray-400 font-normal'>(optional)</span>
+                      </label>
+                      <p className='text-xs text-gray-500 mb-2'>
+                        Assign company users who must sign. The memo stays in draft (Pending) until all have signed.
+                      </p>
+                      <UserMultiSelect control={control} name='signatories' />
                     </div>
                     <p className='my-4 block text-sm font-medium leading-6 text-gray-900'>Signature</p>
                     {signatureUrl === '' ? (

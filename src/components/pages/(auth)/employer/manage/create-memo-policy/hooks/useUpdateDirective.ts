@@ -14,6 +14,15 @@ async function updateDirective(directive: DirectiveData) {
     formData.append('to', JSON.stringify(directive.to));
     formData.append('directive_type', directive.directive_type || '');
 
+    // Multi-signatory reconciliation. Send whenever the field is present so the backend
+    // adds/removes assignments; already-signed signatories are preserved server-side.
+    if (Array.isArray(directive.signatories)) {
+      const userIds = directive.signatories.map((signatory: any) =>
+        typeof signatory === 'object' ? signatory.user_id : signatory
+      );
+      formData.append('signatories', JSON.stringify(userIds));
+    }
+
     if (directive.attachments) {
       if (Array.isArray(directive.attachments)) {
         directive.attachments.forEach((item) => {
