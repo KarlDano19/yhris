@@ -39,7 +39,7 @@ import EnrollRedirectModal from './modals/EnrollRedirectModal';
 import Checklist201Modal from './modals/Checklist201Modal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
@@ -546,7 +546,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex justify-center'>
+            <div className='flex mt-2 justify-center'>
               <button
                 type='button'
                 onClick={() =>
@@ -556,12 +556,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     name: `${item?.firstname ?? ''} ${item?.lastname ?? ''}`.trim(),
                   })
                 }
-                className='inline-flex items-center justify-center rounded-md p-1.5 text-red-600 hover:bg-red-50'
+                className='inline-flex items-center justify-center hover:opacity-80'
                 data-tooltip-id='onboarding-delete-tooltip'
                 data-tooltip-content='Remove from onboarding'
                 data-tooltip-place='left'
               >
-                <TrashIcon className='h-5 w-5' />
+                <DeleteIcon />
               </button>
             </div>
           </td>
