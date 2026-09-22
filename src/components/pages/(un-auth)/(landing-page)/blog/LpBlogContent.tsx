@@ -7,6 +7,42 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "de-minimis-benefits-2026-philippines",
+    category: "Statutory Compliance",
+    title: "BIR's New Tax-Free Benefit Limits (RR No. 29-2025): What Changed in De Minimis Benefits",
+    excerpt: "Effective January 6, 2026, the BIR raised tax-exempt ceilings on 10 categories of de minimis benefits, including rice subsidy and clothing allowance. What changed, what did not, and how the excess-over-ceiling rule works with the ₱90,000 cap.",
+    date: "September 2026",
+    readTime: "7 min read",
+    image: "/blog/de-minimis-benefits-2026.png",
+  },
+  {
+    slug: "final-pay-computation-philippines",
+    category: "DOLE Compliance",
+    title: "Final Pay Computation for Resigned Employees: What DOLE's Labor Advisory Actually Requires",
+    excerpt: "Final pay is due within 30 days of separation under DOLE Labor Advisory No. 06-20, a different clock than the employee's 30-day resignation notice. What must be included, what generally does not (separation pay), and a worked example.",
+    date: "September 2026",
+    readTime: "7 min read",
+    image: "/blog/final-pay-computation.png",
+  },
+  {
+    slug: "sss-mandatory-provident-fund-philippines",
+    category: "Statutory Compliance",
+    title: "Inside the SSS Mandatory Provident Fund (WISP): What It Is and How It Changes Your Payroll Math",
+    excerpt: "Above a ₱20,000 Monthly Salary Credit, part of every SSS contribution goes to WISP instead of the regular program. How the split, investment, and payout work, and why it is not the same as WISP Plus.",
+    date: "September 2026",
+    readTime: "8 min read",
+    image: "/blog/sss-mandatory-provident-fund.png",
+  },
+  {
+    slug: "ai-workforce-management-philippines",
+    category: "Future of Work",
+    title: "Beyond BPO: How AI Is Changing Workforce Management in Philippine Retail, Manufacturing, and Logistics",
+    excerpt: "AI adoption is highest in Philippine logistics (86.4%) and retail (85.5%), lowest in manufacturing (72.4%). Most future-of-work coverage still defaults to BPO. Here is what the data actually shows.",
+    date: "September 2026",
+    readTime: "8 min read",
+    image: "/blog/ai-workforce-management.png",
+  },
+  {
     slug: "night-differential-holiday-pay-philippines",
     category: "DOLE Compliance",
     title: "Night Differential and Holiday Pay: How the Rates Actually Stack",

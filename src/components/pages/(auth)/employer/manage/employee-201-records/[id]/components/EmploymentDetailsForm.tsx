@@ -41,6 +41,16 @@ export default function EmploymentDetailsForm({
   editing = false,
 }: Props) {
   const emit = (patch: Record<string, any>) => onPatchChange?.(patch);
+
+  // Org-assignment fields (Employment Status, Location, Position, Department)
+  // are READ-ONLY on the 201 even while `editing`. Editing them here pushes a
+  // change to Payroll (YP) with no real effectivity date, which mis-dates — and
+  // for Location can scramble — the history trail (see I-654/I-657). These must
+  // be changed through the Personnel Movement (PMF) so they carry a proper
+  // effective date. Only Date Hired stays editable on the 201. Flip this to
+  // `editing` to re-enable inline editing if that ever changes.
+  const editingOrgFields = false;
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showSalaryModal, setShowSalaryModal] = useState(false);
@@ -379,8 +389,8 @@ export default function EmploymentDetailsForm({
               : undefined
           }
           error={showErr("employment_status")}
-          disabled={!editing} // 👈 ensure AddableSelect supports this
-          showErrors={editing} // 👈 gate inline error display
+          disabled={!editingOrgFields} // read-only on 201 — change via Personnel Movement
+          showErrors={editingOrgFields}
         />
 
         {/* Location */}
@@ -419,8 +429,8 @@ export default function EmploymentDetailsForm({
               : undefined
           }
           error={showErr("location")}
-          disabled={!editing}
-          showErrors={editing}
+          disabled={!editingOrgFields} // read-only on 201 — change via Personnel Movement
+          showErrors={editingOrgFields}
         />
       </Grid>
 
@@ -461,8 +471,8 @@ export default function EmploymentDetailsForm({
               : undefined
           }
           error={showErr("position")}
-          disabled={!editing}
-          showErrors={editing}
+          disabled={!editingOrgFields} // read-only on 201 — change via Personnel Movement
+          showErrors={editingOrgFields}
         />
 
         <AddableSelect
@@ -500,8 +510,8 @@ export default function EmploymentDetailsForm({
               : undefined
           }
           error={showErr("department")}
-          disabled={!editing}
-          showErrors={editing}
+          disabled={!editingOrgFields} // read-only on 201 — change via Personnel Movement
+          showErrors={editingOrgFields}
         />
 
         {canViewSalary && (

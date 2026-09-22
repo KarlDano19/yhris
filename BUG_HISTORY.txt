@@ -109,6 +109,69 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-046
+DATE FILED: 2026-09-18
+DATE FIXED: 2026-09-18
+CLIENT/REPORTER: Charmaine - Manyu Marketing Corporation (raised via Payroll team)
+COMPANION: Backend BUG_HISTORY HRIS-2026-042 (root cause) + Payroll GLOBAL BUG-183
+           (location/department/position/employment-type trail preservation)
+
+ISSUE DESCRIPTION:
+  Employees' location history/effectivity trails in Payroll (YP) went missing or
+  got corrupted after syncing from HRIS: some lost their entire location trail,
+  others were left with only the most recent entry stamped with a wrong start
+  date. Root-cause tracing showed the damage was triggered when Location,
+  Department, Position, or Employment Status were changed on the 201 Records
+  (employee detail) screen and then pushed to YP. Those 201 edits carry NO real
+  per-change effectivity date, so YP dated the appended trail line to the wrong
+  date (latest salary date, or the hire date) - and for Location this could
+  produce an inverted date range (date_to before date_from) that scrambled the
+  chronological trail. The correct place to change these fields is the Personnel
+  Movement (PMF), which carries a proper effective date.
+
+DESIRED OUTCOME:
+  On the 201 Records employment-details screen, Location, Department, Position,
+  and Employment Status must be read-only even in edit mode, so users cannot make
+  effectivity-less changes that mis-date the YP history trail. Only Date Hired
+  stays editable. Those org changes must go through the Personnel Movement (PMF).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - mounted EmploymentDetailsForm with editing=true;
+  confirmed in live DOM that Employment Status/Location/Position/Department are
+  disabled=true and Date Hired is disabled=false)
+☑ Form validation tested (locked-but-empty fields do not block Save - "missing"
+  messages are non-blocking per isBlockingError)
+☑ AddableSelect verified to honor disabled (dropdown disabled, onChange ignored,
+  "+ Add new" affordance hidden)
+☑ TypeScript types verified (no new type errors; FE dev server compiled clean)
+
+Integration & E2E:
+☑ Manual regression testing completed (edit mode renders the four fields locked,
+  Date Hired editable, System ID read-only as before)
+
+FIX EXPLANATION:
+  Introduced a single self-documenting flag `editingOrgFields = false` in
+  EmploymentDetailsForm and pointed the four org fields' `disabled` and
+  `showErrors` props at it instead of the form's `editing` flag. The result:
+  Employment Status, Location, Position, and Department render greyed-out and
+  non-interactive even while the rest of the row is in edit mode; Date Hired
+  continues to key off `editing` and stays editable. Because the shared
+  AddableSelect fully honors `disabled` (disables the select, ignores changes,
+  hides the "+ Add new" button), no handler rewiring was needed. Empty locked
+  fields still do not block Save. Flag is a one-line revert if inline editing is
+  ever re-enabled. This is the frontend guard that closes the workflow the client
+  actually used; the trail-preservation fix itself lives on the Payroll side
+  (see Payroll GLOBAL BUG-183 / I-654/I-657/I-658).
+
+================================================================================
+
 BUG ID: HRIS-2026-045
 DATE FILED: 2026-09-03
 DATE FIXED: 2026-09-03
