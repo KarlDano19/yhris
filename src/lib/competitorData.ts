@@ -28,8 +28,8 @@ export const COMPETITORS = {
   sprout: {
     slug: "sprout",
     name: "Sprout HR",
-    lastReviewed: "June 2026",
-    pricingModel: "Per-seat pricing, roughly PHP 200 to 300 per employee per month at mid-tier",
+    lastReviewed: "September 2026",
+    pricingModel: "Custom, quote-based pricing, not published (as of Sept 2026). Only outsourced Payroll Starter bundles list prices.",
     comparisonRows: [
       { feature: "Multi-platform job posting", yahshua: true, competitor: false },
       { feature: "Pre-screened talent pool", yahshua: true, competitor: false },
