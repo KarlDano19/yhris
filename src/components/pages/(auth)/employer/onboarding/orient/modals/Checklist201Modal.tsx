@@ -12,7 +12,7 @@ import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import useUpdateApplicantOrient from '../hooks/useUpdateApplicantOrient';
 
 import { MagnifyingGlassIcon, PlusIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
-import { XMarkIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline';
 
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -243,10 +243,10 @@ export default function Checklist201Modal({
                     onClick={() => setViewingRemarksItem(item)}
                     className='text-gray-400 hover:text-savoy-blue flex-shrink-0'
                     data-tooltip-id='checklist-action-tooltip'
-                    data-tooltip-content='View remarks'
+                    data-tooltip-content='Expand remarks'
                     data-tooltip-place='top'
                   >
-                    <EyeIcon className='w-4 h-4' />
+                    <ArrowsPointingOutIcon className='w-4 h-4' />
                   </button>
                 )}
               </div>
