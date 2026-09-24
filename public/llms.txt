@@ -1,6 +1,6 @@
 # YAHSHUA HRIS
 
-> YAHSHUA HRIS is a Philippine HR management system for small and mid-sized businesses, built by YAHSHUA Outsourcing Worldwide, Inc. (YOWI). It covers hiring, onboarding, attendance, leave, performance, DOLE compliance, and payroll integration. Flat pricing starting at PHP 4,000/month for up to 100 employees. No per-seat fees, no long-term contracts.
+> YAHSHUA HRIS is a Philippine HR management system for small and mid-sized businesses, built by YAHSHUA Outsourcing Worldwide, Inc. (YOWI). It covers hiring, onboarding, attendance, leave, performance, DOLE compliance, and payroll integration. Sold as one bundle, YAHSHUA HRIS and Payroll: flat pricing at PHP 7,000/month (VAT excluded) for up to 100 employees, YAHSHUA Payroll included, no long-term contracts.
 
 ## What It Does
 
@@ -22,12 +22,12 @@ Philippine SMEs and growing businesses with 10 to 500+ employees that need DOLE-
 ## Key Differentiators
 
 - Only HRIS in the Philippines with DOLE compliance automation built in (no add-ons)
-- Flat monthly pricing starting at PHP 4,000 for up to 100 employees — not per-seat
-- Real-time payroll sync with YAHSHUA Payroll — no manual data entry between HR and payroll
-- SOC2 Type 2 certified and ISO 27001 certified — enterprise-grade security
+- One flat monthly rate of PHP 7,000 for up to 100 employees, with YAHSHUA Payroll included
+- Real-time payroll sync with YAHSHUA Payroll: no manual data entry between HR and payroll
+- SOC2 Type 2 certified and ISO 27001 certified: enterprise-grade security
 - GDPR compliant and registered with the Philippine National Privacy Commission (DPA 2012)
 - 17+ years in operation, 100,000+ users nationwide
-- Tech + managed services hybrid — proprietary software with outsourced expertise available
+- Tech + managed services hybrid: proprietary software with outsourced expertise available
 
 ## Certifications
 
@@ -43,10 +43,13 @@ Del Monte Philippines Inc., DTI Region X, University of St. La Salle - Bacolod, 
 
 ## Pricing Summary
 
-- Starts at PHP 4,000/month for up to 100 employees
-- Flat pricing — no per-seat fees
-- No long-term contracts required
-- 14-day free trial, no credit card required
+- PHP 7,000/month flat for up to 100 employees (VAT excluded)
+- PHP 60 per additional employee per month beyond 100
+- One-time PHP 35,000 setup fee (implementation, data migration, onboarding training)
+- YAHSHUA Payroll included at no extra charge
+- No long-term contracts, cancel anytime
+- Free-forever Freemium plan (job posting and applicant screening), no credit card required
+- Trial of the full platform available on request during a demo
 - Full pricing: https://yahshuahris.com/pricing
 
 ## Pages

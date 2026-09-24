@@ -45,7 +45,7 @@ const jsonLd = {
           "priceCurrency": YAHSHUA_PRICING.currency,
           "unitText": "month"
         },
-        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus a one-time ${PRICING_LABELS.setup} setup fee. No per-seat fees, no long-term contracts.`,
+        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month and a one-time ${PRICING_LABELS.setup} setup fee. VAT excluded. YAHSHUA Payroll included. No long-term contracts.`,
         "url": "https://yahshuahris.com/pricing"
       },
       "publisher": {

@@ -121,7 +121,7 @@ const PhilippineComplianceArticle = () => {
                 YAHSHUA HRIS replaces disconnected platforms with one unified ecosystem. SSS, PhilHealth, Pag-IBIG, and BIR compliance are not add-ons — they are built in, maintained in real time, and surfaced to your team before deadlines, not after. Our dedicated DOLE module covers eight sub-functions including Establishment Registration, Compensation Logbook, Annual Data Report, and OSH documentation.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                One client prevented ₱480,000 in payroll errors in a single engagement. Another processed payroll for 50 employees in the same time it used to take for 10. And because YAHSHUA HRIS does not charge per seat, scaling from 50 employees to 500 does not change your cost structure.
+                One client prevented ₱480,000 in payroll errors in a single engagement. Another processed payroll for 50 employees in the same time it used to take for 10. And because YAHSHUA HRIS charges one flat rate for the first 100 employees, growing from 10 to 100 employees does not change your monthly cost.
               </p>
 
               {/* FAQ */}
