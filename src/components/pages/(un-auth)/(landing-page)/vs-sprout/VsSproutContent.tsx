@@ -59,7 +59,7 @@ const VsSproutContent = () => {
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-3">YAHSHUA HRIS VS SPROUT HR</span>
-                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: June 2026</p>
+                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                   Why Philippine businesses<br className="hidden md:inline" />
                   <span className="text-primary"> choose YAHSHUA over Sprout.</span>
@@ -186,7 +186,7 @@ const VsSproutContent = () => {
                       {[
                         "Your team is an SME, not an enterprise with a dedicated Sprout admin",
                         "You want recruitment and HR under one roof instead of a second hiring tool",
-                        "Predictable, flat costs matter more than a per-seat model that scales with headcount",
+                        "You want a published, flat price up front instead of a quote that depends on headcount",
                         "DOLE reporting needs to be guided, not something your HR team figures out alone",
                       ].map((s) => (
                         <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
@@ -206,7 +206,7 @@ const VsSproutContent = () => {
                       {[
                         "You're already running on Sprout's broader module suite",
                         "Earned wage access through ReadyCash or ReadyWage is a must-have for your workforce",
-                        "Your headcount and plan tier make per-seat pricing the cheaper option in practice",
+                        "Your Sprout quote for your headcount and modules comes in lower than our published rate",
                       ].map((s) => (
                         <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
                           <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gray-100 border border-gray-200" />

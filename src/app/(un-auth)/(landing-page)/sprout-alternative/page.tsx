@@ -62,7 +62,7 @@ const jsonLd = {
           "name": "Why do businesses look for a Sprout HR alternative?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Common reasons include Sprout HR's per-seat pricing, which becomes harder to predict as headcount grows, the lack of built-in multi-platform job posting in its standard offering, and the absence of automated DOLE compliance reporting such as OSH reports and AERW filing."
+            "text": "Common reasons include Sprout HR's quote-based pricing, which is not published and is harder to plan around before a sales call, the lack of built-in multi-platform job posting in its standard offering, and the absence of automated DOLE compliance reporting such as OSH reports and AERW filing."
           }
         }
       ]
