@@ -5,7 +5,7 @@ import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'Sprout HR Alternative: YAHSHUA HRIS for Philippine SMEs',
-  description: 'Looking for a Sprout HR alternative? YAHSHUA HRIS offers flat pricing, built-in recruitment, and guided DOLE compliance, with no per-seat fees.',
+  description: 'Looking for a Sprout HR alternative? YAHSHUA HRIS offers flat pricing, built-in recruitment, and guided DOLE compliance, with YAHSHUA Payroll included.',
   keywords: 'sprout hr alternative, sprout solutions alternative, switch from sprout, hris alternative philippines',
   openGraph: {
     title: 'Sprout HR Alternative: YAHSHUA HRIS',
@@ -46,7 +46,7 @@ const jsonLd = {
           "name": "What is a good alternative to Sprout HR for Philippine SMEs?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS is a Sprout HR alternative built specifically for Philippine SMEs. It uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees instead of per-seat billing, and includes multi-platform job posting, a pre-screened talent pool, and a guided DOLE compliance module in every plan.`
+            "text": `YAHSHUA HRIS is a Sprout HR alternative built specifically for Philippine SMEs. It uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA Payroll included, and includes multi-platform job posting, a pre-screened talent pool, and a guided DOLE compliance module in every plan.`
           }
         },
         {

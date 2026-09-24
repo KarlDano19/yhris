@@ -42,7 +42,7 @@ export const COMPETITORS = {
       { feature: "Flat pricing for up to 100 employees", yahshua: true, competitor: false },
       { feature: "SME-focused pricing", yahshua: true, competitor: false },
       { feature: "Philippine-specific features", yahshua: true, competitor: false },
-      { feature: "No per-seat pricing", yahshua: true, competitor: false },
+      { feature: "Publicly listed pricing", yahshua: true, competitor: false },
     ],
     strengths: [
       "Native earned wage access through ReadyCash and ReadyWage",

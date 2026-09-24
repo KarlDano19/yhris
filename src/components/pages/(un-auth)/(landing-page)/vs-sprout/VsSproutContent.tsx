@@ -33,8 +33,8 @@ const valueProps = [
   },
   {
     title: "Pricing Built for Philippine SMEs",
-    body: `Flat monthly pricing starting at ${PRICING_LABELS.base} for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. No per-seat fees, no surprise charges, no long-term contracts.`,
-    metric: "Up to 60% lower cost than Sprout HR.",
+    body: `Flat ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. YAHSHUA Payroll included. Published pricing, no long-term contracts.`,
+    metric: "One flat rate. Payroll included.",
   },
   {
     title: "Performance Evaluations Included",
