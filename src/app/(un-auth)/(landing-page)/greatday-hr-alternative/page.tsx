@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   keywords: 'greatday hr alternative, switch from greatday hr, hris alternative philippines, greatday hr competitor',
   openGraph: {
     title: 'GreatDay HR Alternative: YAHSHUA HRIS',
-    description: 'No add-on fees, no license minimum, guided DOLE compliance included. See why Philippine SMEs choose YAHSHUA HRIS over GreatDay HR.',
+    description: 'No add-on fees for recruitment or performance, guided DOLE compliance included. See why Philippine SMEs choose YAHSHUA HRIS over GreatDay HR.',
     type: 'website',
     locale: 'en_US',
   },
@@ -30,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/greatday-hr-alternative#webpage",
       "name": "GreatDay HR Alternative: YAHSHUA HRIS for Philippine SMEs",
-      "description": `YAHSHUA HRIS as a GreatDay HR alternative for Philippine SMEs: flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with no license minimum, and recruitment, performance management, and DOLE compliance included at no extra cost.`,
+      "description": `YAHSHUA HRIS as a GreatDay HR alternative for Philippine SMEs: flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, and recruitment, performance management, and DOLE compliance included at no extra cost.`,
       "url": "https://yahshuahris.com/greatday-hr-alternative",
       "dateModified": "2026-08-14T00:00:00.000Z",
       "publisher": {
@@ -46,7 +46,7 @@ const jsonLd = {
           "name": "What is a good alternative to GreatDay HR for Philippine SMEs?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS is a GreatDay HR alternative built for Philippine SMEs. It uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with no license minimum, and includes recruitment, performance management, and a guided DOLE compliance module in every plan at no extra cost.`
+            "text": `YAHSHUA HRIS is a GreatDay HR alternative built for Philippine SMEs. It uses flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, and includes recruitment, performance management, and a guided DOLE compliance module in every plan at no extra cost.`
           }
         },
         {
@@ -62,7 +62,7 @@ const jsonLd = {
           "name": "Why do businesses look for a GreatDay HR alternative?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Common reasons include GreatDay HR selling recruitment and performance management as paid add-ons rather than including them in its base package, a 50-employee-license minimum purchase on its Basic Starter Package, and the lack of a published guided DOLE reporting module for company registration, OSH reports, and AERW filing."
+            "text": "Common reasons include GreatDay HR selling recruitment and performance management as paid add-ons rather than including them in its base package, per-employee pricing on a Basic Starter Package sold as a 50-license bundle, and the lack of a published guided DOLE reporting module for company registration, OSH reports, and AERW filing."
           }
         }
       ]

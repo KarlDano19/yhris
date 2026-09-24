@@ -5,7 +5,7 @@ import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS vs Other HR Software in the Philippines',
-  description: 'Compare YAHSHUA HRIS to Sprout, GreatDay HR, JuanHR, and other Philippine HR software on pricing, DOLE compliance, and features.',
+  description: 'Compare YAHSHUA HRIS to Sprout, GreatDay HR, and other Philippine HR software on pricing, DOLE compliance, and features.',
   keywords: 'hris comparison philippines, hr software comparison, yahshua hris competitors, best hris philippines',
   openGraph: {
     title: 'How YAHSHUA HRIS Compares to Other HR Software',

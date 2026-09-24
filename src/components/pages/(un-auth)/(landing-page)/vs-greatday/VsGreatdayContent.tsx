@@ -23,18 +23,18 @@ const valueProps = [
   },
   {
     title: "Guided DOLE Compliance Module",
-    body: "GreatDay HR automates BIR 2316, Alphalist, and payroll-side compliance well, but stops there. YAHSHUA's DOLE Module goes further, guiding you through company registration, OSH reports, and AERW filing, all in every plan.",
+    body: "GreatDay HR automates BIR 2316, Alphalist, and payroll-side compliance well, but doesn't publish a DOLE reporting module. YAHSHUA's DOLE Module goes further, guiding you through company registration, OSH reports, and AERW filing, all in every plan.",
     metric: "100% compliance rate. Zero penalties.",
   },
   {
     title: "Flat Pricing With a Real Cap",
-    body: `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. GreatDay HR charges PHP 77 per employee per month starting from employee one, with no ceiling.`,
+    body: `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. GreatDay HR's Basic Starter Package is PHP 77 per employee per month, sold as a 50-license bundle (about PHP 3,850/month as of September 2026), with recruitment and performance as paid add-ons.`,
     metric: "Predictable cost as you scale past 50 or 100 staff.",
   },
   {
-    title: "No Minimum Headcount to Start",
-    body: "Start free with the Freemium plan and upgrade when you're ready. GreatDay HR's Basic Starter Package requires a minimum purchase of 50 employee licenses.",
-    metric: "No license minimum. No forced upfront spend.",
+    title: "Free Plan to Start",
+    body: "Start on the free Freemium plan for job posting and applicant screening, then upgrade to the full platform when you're ready.",
+    metric: "Free plan. No credit card required.",
   },
   {
     title: "Complete Hiring-to-Offboarding",
@@ -59,7 +59,7 @@ const VsGreatdayContent = () => {
           <div className="lp-section-container relative z-10 text-center">
             <ScrollFadeIn>
               <span className="lp-section-label justify-center mb-3">YAHSHUA HRIS VS GREATDAY HR</span>
-              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: August 2026</p>
+              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                 Why Philippine businesses<br className="hidden md:inline" />
                 <span className="text-primary"> choose YAHSHUA over GreatDay HR.</span>
@@ -165,7 +165,7 @@ const VsGreatdayContent = () => {
               </div>
             </ScrollFadeIn>
             <p className="text-xs text-gray-400 text-center mt-6 max-w-lg mx-auto">
-              GreatDay HR offers strong mobile GPS attendance and biometric facial recognition, useful for field and frontline teams. Pricing and feature details sourced from GreatDay HR's public Philippines pricing page as of August 2026.
+              GreatDay HR offers strong mobile GPS attendance and biometric facial recognition, useful for field and frontline teams. Pricing and feature details sourced from GreatDay HR's public Philippines pricing page as of September 2026. GreatDay notes its prices are changing, so confirm current rates with GreatDay.
             </p>
           </div>
         </section>
@@ -188,9 +188,9 @@ const VsGreatdayContent = () => {
                   <ul className="space-y-3">
                     {[
                       "You want recruitment and performance management included, not sold as add-ons",
-                      "Your team is under 50 people and a license minimum doesn't make sense yet",
+                      "You'd rather pay one flat rate up to 100 employees than per employee",
                       "You want DOLE reporting guided beyond just payroll-side BIR compliance",
-                      "Flat pricing matters more than a per-employee rate that climbs from day one",
+                      "Recruitment, performance, DOLE, and payroll in one price matter more than the lowest base rate",
                     ].map((s) => (
                       <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
                         <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(255,193,7,0.1)", border: "1px solid rgba(255,193,7,0.2)" }}>
@@ -209,7 +209,7 @@ const VsGreatdayContent = () => {
                     {[
                       "Your workforce is field-based and needs GPS or selfie attendance verification",
                       "Facial recognition biometric attendance is a requirement, not a nice-to-have",
-                      "You're already past the 50-license minimum and using the add-ons you're paying for",
+                      "You mainly need core HR, attendance, and payroll, where GreatDay's base package can cost less than our flat rate",
                     ].map((s) => (
                       <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
                         <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gray-100 border border-gray-200" />

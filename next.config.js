@@ -62,10 +62,8 @@ const nextConfig = {
       '/payroll-integration',
       '/vs-sprout',
       '/vs-greatday',
-      '/vs-juanhr',
       '/sprout-alternative',
       '/greatday-hr-alternative',
-      '/juanhr-alternative',
       '/how-we-compare',
       '/use-cases',
       '/use-cases/employee-onboarding',
@@ -128,6 +126,13 @@ const nextConfig = {
         destination: 'https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026',
         permanent: true,
       },
+      // JuanHR comparison pages retired (Sept 2026): zero search impressions
+      // in GSC since launch and no presence in PH HRIS roundups or AI answers.
+      ...['/vs-juanhr', '/vs-juanhr/', '/juanhr-alternative', '/juanhr-alternative/'].map((source) => ({
+        source,
+        destination: '/how-we-compare',
+        permanent: true,
+      })),
       // Old slug from before the post was renamed to use "-table-"
       {
         source: '/blog/sss-contribution-rate-2026-philippines',

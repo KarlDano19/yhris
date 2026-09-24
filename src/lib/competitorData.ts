@@ -51,14 +51,13 @@ export const COMPETITORS = {
   greatday: {
     slug: "greatday",
     name: "GreatDay HR",
-    lastReviewed: "August 2026",
-    pricingModel: "Per-employee pricing from PHP 77/employee/month, 50-employee license minimum",
+    lastReviewed: "September 2026",
+    pricingModel: "PHP 77/employee/month; Basic Starter Package sold as a 50-license bundle (about PHP 3,850/month) as of Sept 2026. GreatDay notes prices are changing.",
     comparisonRows: [
       { feature: "Multi-platform job posting included", yahshua: true, competitor: false },
       { feature: "Performance evaluation module included", yahshua: true, competitor: false },
       { feature: "Guided DOLE reporting (OSH, AERW, registration)", yahshua: true, competitor: false },
       { feature: "Flat pricing with an employee-count cap", yahshua: true, competitor: false },
-      { feature: "No minimum license purchase", yahshua: true, competitor: false },
       { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, competitor: true },
       { feature: "Employee self-service portal", yahshua: true, competitor: true },
       { feature: "Philippine-localized platform", yahshua: true, competitor: true },
@@ -68,28 +67,6 @@ export const COMPETITORS = {
     strengths: [
       "Mobile GPS and selfie-verified attendance built for field teams",
       "Facial recognition biometric attendance, available as a paid add-on",
-    ],
-  },
-  juanhr: {
-    slug: "juanhr",
-    name: "JuanHR",
-    lastReviewed: "August 2026",
-    pricingModel: "Custom, quote-based pricing, not published",
-    comparisonRows: [
-      { feature: "Multi-platform job posting and ATS", yahshua: true, competitor: false },
-      { feature: "Performance evaluation module", yahshua: true, competitor: false },
-      { feature: "Published, flat monthly pricing", yahshua: true, competitor: false },
-      { feature: "Guided DOLE reporting (OSH, AERW, registration)", yahshua: true, competitor: false },
-      { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, competitor: true },
-      { feature: "Philippine-built and supported", yahshua: true, competitor: true },
-      { feature: "Biometric device integration (fingerprint, facial, palm)", yahshua: false, competitor: true },
-      { feature: "Geo-fenced field work attendance tracking", yahshua: false, competitor: true },
-      { feature: "Government agency HRMIS edition", yahshua: false, competitor: true },
-    ],
-    strengths: [
-      "Biometric device integration across fingerprint, facial, and palm scanners",
-      "Geo-fenced field work and site location attendance tracking",
-      "A dedicated HRMIS edition built for government agencies",
     ],
   },
 } as const satisfies Record<string, CompetitorProfile>;
