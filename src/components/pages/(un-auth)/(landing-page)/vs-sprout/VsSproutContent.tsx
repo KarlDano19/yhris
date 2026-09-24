@@ -13,7 +13,7 @@ const competitor = COMPETITORS.sprout;
 const valueProps = [
   {
     title: "Multi-Channel Job Posting",
-    body: "Post to LinkedIn, Facebook, and YAHSHUA Jobs from one dashboard, something Sprout HR's standard offering doesn't include. No separate job boards, no manual reposting.",
+    body: "Post to LinkedIn, Facebook, and YAHSHUA Jobs from one dashboard, included in every plan. No separate job boards, no manual reposting.",
     metric: "80% faster job posting. 3x wider reach.",
   },
   {
@@ -23,7 +23,7 @@ const valueProps = [
   },
   {
     title: "Complete Hiring-to-Offboarding",
-    body: "One connected workflow: Screen, Orient, Manage, Train, Evaluate, Separate, instead of pairing Sprout's HR modules with a separate recruitment tool to cover the full employee lifecycle.",
+    body: "One connected workflow: Screen, Orient, Manage, Train, Evaluate, Separate, covering the full employee lifecycle within the same plan price.",
     metric: "70% time savings. 95% process efficiency.",
   },
   {
@@ -185,9 +185,9 @@ const VsSproutContent = () => {
                     <ul className="space-y-3">
                       {[
                         "Your team is an SME, not an enterprise with a dedicated Sprout admin",
-                        "You want recruitment and HR under one roof instead of a second hiring tool",
+                        "You want recruitment and HR in one plan instead of a separately quoted hiring product",
                         "You want a published, flat price up front instead of a quote that depends on headcount",
-                        "DOLE reporting needs to be guided, not something your HR team figures out alone",
+                        "You want guided DOLE reporting included in your plan price",
                       ].map((s) => (
                         <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
                           <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(255,193,7,0.1)", border: "1px solid rgba(255,193,7,0.2)" }}>

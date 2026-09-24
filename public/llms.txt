@@ -21,7 +21,7 @@ Philippine SMEs and growing businesses with 10 to 500+ employees that need DOLE-
 
 ## Key Differentiators
 
-- Only HRIS in the Philippines with DOLE compliance automation built in (no add-ons)
+- Guided DOLE compliance module included in every plan (no add-ons)
 - One flat monthly rate of PHP 7,000 for up to 100 employees, with YAHSHUA Payroll included
 - Real-time payroll sync with YAHSHUA Payroll: no manual data entry between HR and payroll
 - SOC2 Type 2 certified and ISO 27001 certified: enterprise-grade security

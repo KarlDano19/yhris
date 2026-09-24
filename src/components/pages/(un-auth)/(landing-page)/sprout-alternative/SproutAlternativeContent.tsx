@@ -15,20 +15,20 @@ const painPoints = [
   },
   {
     icon: PuzzleIcon,
-    title: "Recruitment isn't part of the core platform",
-    body: "Sprout's standard offering doesn't include multi-platform job posting or a pre-screened talent pool, so hiring often means a separate tool on top.",
+    title: "Hiring and compliance are separate products",
+    body: "Sprout offers recruitment (Recruit+) and compliance (Sprout Comply) as separately named products, each through a sales conversation. YAHSHUA HRIS includes job posting, applicant screening, and a guided DOLE module in one published plan price.",
   },
   {
     icon: ShieldAlert,
-    title: "DOLE compliance isn't automated",
-    body: "Company registration, OSH reports, and AERW filing aren't built into Sprout's standard package the way they are in a dedicated DOLE module.",
+    title: "An enterprise-scale suite for an SME team",
+    body: "Sprout serves companies from SMEs to large enterprises with a broad product lineup. If you have up to 100 employees, YAHSHUA HRIS gives you HR, hiring, DOLE compliance, and payroll at one flat rate without choosing between products.",
   },
 ];
 
 const switchFor = [
   "You want flat pricing that doesn't grow per employee up to 100 staff",
-  "You need job posting, screening, and hiring in the same platform as HR",
-  "You want guided DOLE reporting without a separate compliance vendor",
+  "You want job posting, screening, and hiring included in the same plan price as HR",
+  "You want a guided DOLE module included, not a separately quoted product",
   "You want to know your price up front instead of waiting on a sales quote",
 ];
 
