@@ -4,19 +4,19 @@ import VsSproutContent from "@/components/pages/(un-auth)/(landing-page)/vs-spro
 import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA HRIS vs Sprout Solutions: Which Is Right?',
-  description: 'Compare YAHSHUA HRIS and Sprout Solutions side by side on features, pricing, DOLE compliance, and payroll integration.',
-  keywords: 'yahshua hris vs sprout solutions, sprout solutions alternative, hris comparison philippines, hr software philippines',
+  title: 'Sprout Solutions vs YAHSHUA HRIS: 2026 PH Comparison',
+  description: `Sprout Solutions vs YAHSHUA HRIS on pricing, payroll, DOLE compliance, and hiring. YAHSHUA: ${PRICING_LABELS.base}/mo flat, payroll included. Sprout: quote-based.`,
+  keywords: 'sprout solutions vs yahshua hris, compare sprout solutions, sprout solutions alternative philippines, hris comparison philippines, hr software philippines',
   openGraph: {
-    title: 'YAHSHUA HRIS vs Sprout Solutions',
-    description: 'Compare YAHSHUA HRIS and Sprout Solutions on features, pricing, and DOLE compliance. Built for Philippine businesses.',
+    title: 'Sprout Solutions vs YAHSHUA HRIS: 2026 PH Comparison',
+    description: `Pricing, payroll, DOLE compliance, and hiring compared. YAHSHUA HRIS is ${PRICING_LABELS.base}/mo flat with payroll included; Sprout is quote-based.`,
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'YAHSHUA HRIS vs Sprout Solutions',
-    description: 'Side-by-side comparison of YAHSHUA HRIS and Sprout Solutions for Philippine businesses.',
+    title: 'Sprout Solutions vs YAHSHUA HRIS: 2026 PH Comparison',
+    description: 'Side-by-side comparison of Sprout Solutions and YAHSHUA HRIS for Philippine businesses.',
   },
   alternates: {
     canonical: 'https://yahshuahris.com/vs-sprout'
@@ -29,7 +29,7 @@ const jsonLd = {
     {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/vs-sprout#webpage",
-      "name": "YAHSHUA HRIS vs Sprout Solutions: Side-by-Side Comparison",
+      "name": "Sprout Solutions vs YAHSHUA HRIS: 2026 Philippine Comparison",
       "description": `Feature and pricing comparison between YAHSHUA HRIS and Sprout HR for Philippine businesses. YAHSHUA includes DOLE compliance automation, multi-platform job posting, and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA Payroll included.`,
       "url": "https://yahshuahris.com/vs-sprout",
       "dateModified": "2026-09-24T00:00:00.000Z",
