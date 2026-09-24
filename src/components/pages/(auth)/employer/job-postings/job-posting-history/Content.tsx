@@ -16,6 +16,7 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import BackButton from '@/components/BackButton';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
+import copyToClipboard from '@/helpers/copyToClipboard';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -568,6 +569,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
     window.open(LinkedInSharer);
   };
 
+  const handleCopyLink = async (jobPostId: number) => {
+    // Build from the current origin instead of the stored og_url, which bakes in whatever host the job was created from
+    const og_url = `${window.location.origin}/jobs/${jobPostId}`;
+    try {
+      await copyToClipboard(og_url);
+      toast.custom(() => <CustomToast message='Link copied to clipboard.' type='success' />, { duration: 3000 });
+    } catch {
+      toast.custom(() => <CustomToast message='Failed to copy link.' type='error' />, { duration: 4000 });
+    }
+  };
+
   const handleSearch = () => {
     const dateFrom = Date.parse(pendingFilter.from);
     const dateTo = Date.parse(pendingFilter.to);
@@ -895,6 +907,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
                                   })}
                                 </div>
                               )}
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyLink(jobPost.id)}
+                                  className='data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b'
+                                >
+                                  Copy Link
+                                </button>
+                              </MenuItem>
                               <MenuItem>
                                 <button
                                   type="button"
