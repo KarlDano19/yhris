@@ -1,6 +1,6 @@
 # YAHSHUA HRIS
 
-> YAHSHUA HRIS is a Philippine HR management system for small and mid-sized businesses, built by YAHSHUA Outsourcing Worldwide, Inc. (YOWI). It covers hiring, onboarding, attendance, leave, performance, DOLE compliance, and payroll integration. Sold as one bundle, YAHSHUA HRIS and Payroll: flat pricing at PHP 7,000/month (VAT excluded) for up to 100 employees, YAHSHUA Payroll included, no long-term contracts.
+> YAHSHUA HRIS is a Philippine HR management system for small and mid-sized businesses, built by The ABBA Initiative, the company that also builds YAHSHUA One. It covers hiring, onboarding, attendance, leave, performance, DOLE compliance, and payroll integration. Sold as one bundle, YAHSHUA HRIS and Payroll: flat pricing at PHP 7,000/month (VAT excluded) for up to 100 employees, YAHSHUA Payroll included, no long-term contracts.
 
 ## What It Does
 
@@ -71,8 +71,9 @@ Del Monte Philippines Inc., DTI Region X, University of St. La Salle - Bacolod, 
 
 ## Company
 
-- Full Name: YAHSHUA Outsourcing Worldwide, Inc.
-- Short Name: YOWI
+- Company: The ABBA Initiative (OPC)
+- Company website: https://www.theabbainitiative.com
+- About YAHSHUA HRIS: https://yahshuahris.com/about
 - Headquarters: Cagayan de Oro City, Philippines
 - Contact: clientrelations@abba.works | +63 917 306 2539
 - Website: https://yahshuahris.com
