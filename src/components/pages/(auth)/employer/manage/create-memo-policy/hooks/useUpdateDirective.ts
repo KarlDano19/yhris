@@ -56,7 +56,11 @@ async function updateDirective(directive: DirectiveData) {
         inlineImageFiles.forEach((file) => formData.append('inline_images', file));
       }
       if (directive.signature) {
-        if (typeof directive.signature === 'string' && directive.signature.length) {
+        // Only a data URL is a new signature. An untouched existing one comes back as its
+        // storage URL (prepareSignature falls back to it when the remote image can't be
+        // cropped) — fetching that cross-origin fails with "Failed to fetch", and the
+        // partial update keeps the stored signature when the field is omitted anyway.
+        if (typeof directive.signature === 'string' && directive.signature.startsWith('data:')) {
           const signatureBlob = await fetch(directive.signature).then((res) => res.blob());
           formData.append('signature', signatureBlob, 'signature.jpg');
         } else if (directive.signature instanceof FileList && directive.signature.length > 0) {
