@@ -11,8 +11,8 @@ import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 
 import useUpdateApplicantOrient from '../hooks/useUpdateApplicantOrient';
 
-import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/solid';
-import { XMarkIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline';
 
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -243,15 +243,21 @@ export default function Checklist201Modal({
                     onClick={() => setViewingRemarksItem(item)}
                     className='text-gray-400 hover:text-savoy-blue flex-shrink-0'
                     data-tooltip-id='checklist-action-tooltip'
-                    data-tooltip-content='View remarks'
+                    data-tooltip-content='Expand remarks'
                     data-tooltip-place='top'
                   >
-                    <EyeIcon className='w-4 h-4' />
+                    <ArrowsPointingOutIcon className='w-4 h-4' />
                   </button>
                 )}
               </div>
               {item.updated_by_name && (
-                <p className='text-[11px] text-gray-400 mt-0.5 truncate max-w-[160px]'>Updated by {item.updated_by_name}</p>
+                item.updated_by == null ? (
+                  <span className='inline-flex items-center gap-1 mt-1 rounded-full bg-blue-50 text-blue-600 px-2 py-0.5 text-[11px] font-medium'>
+                    <CheckCircleIcon className='w-3 h-3' /> Auto-verified
+                  </span>
+                ) : (
+                  <p className='text-[11px] text-gray-400 mt-0.5 truncate max-w-[160px]'>Updated by {item.updated_by_name}</p>
+                )
               )}
             </>
           )}
@@ -360,7 +366,7 @@ export default function Checklist201Modal({
                 disabled={isLoading}
                 className='inline-flex items-center gap-1 rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                <PlusIcon className='w-4 h-4' /> Add Requirement
+              Add Requirement
               </button>
             </div>
           </div>
