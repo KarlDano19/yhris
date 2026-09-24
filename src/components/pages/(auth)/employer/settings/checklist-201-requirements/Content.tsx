@@ -190,7 +190,7 @@ const Content = () => {
                 onClick={() => setIsAddModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
               >
-                + Add Requirement
+              Add Requirement
               </SmartButton>
             </div>
           </div>
