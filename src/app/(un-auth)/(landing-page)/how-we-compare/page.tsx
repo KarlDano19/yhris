@@ -30,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/how-we-compare#webpage",
       "name": "How YAHSHUA HRIS Compares to Other HR Software in the Philippines",
-      "description": "Feature comparison between YAHSHUA HRIS and other HR software options for Philippine businesses. YAHSHUA is the only Philippine HRIS with DOLE compliance automation built in, flat pricing, and complete hiring-to-offboarding workflow.",
+      "description": "Feature comparison between YAHSHUA HRIS and other HR software options for Philippine businesses. YAHSHUA HRIS includes a guided DOLE compliance module, published flat pricing, and a complete hiring-to-offboarding workflow in one plan.",
       "url": "https://yahshuahris.com/how-we-compare",
       "dateModified": "2026-09-24T00:00:00.000Z",
       "publisher": {
@@ -46,7 +46,7 @@ const jsonLd = {
           "name": "What makes YAHSHUA HRIS different from other HR software in the Philippines?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS is the only HRIS in the Philippines with DOLE compliance automation built in, covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings, with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA Payroll included. Most Philippine HR software requires separate modules for compliance and charges per employee.`
+            "text": `YAHSHUA HRIS includes a guided DOLE compliance module in every plan, covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings, with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA Payroll included. Many Philippine HR platforms sell compliance and recruitment as separate modules or products and do not publish pricing.`
           }
         },
         {
@@ -62,7 +62,7 @@ const jsonLd = {
           "name": "What HR software in the Philippines includes DOLE compliance?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is the only HR platform in the Philippines that includes full DOLE compliance automation as a built-in feature, not an add-on. This covers DOLE company registration, Occupational Safety and Health (OSH) reporting, annual medical reports, and AERW filing. Other Philippine HR software typically requires separate compliance modules or manual management of DOLE filings."
+            "text": "Several Philippine HR platforms offer DOLE compliance tools. YAHSHUA HRIS includes a guided DOLE module in every plan as a built-in feature, not an add-on, covering DOLE company registration, Occupational Safety and Health (OSH) reporting, annual medical reports, and AERW filing. Some other platforms offer DOLE compliance as a separate module or product."
           }
         },
         {
@@ -70,7 +70,7 @@ const jsonLd = {
           "name": "Can YAHSHUA HRIS handle hiring and recruitment?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. YAHSHUA HRIS includes multi-platform job posting across LinkedIn, Facebook, and YAHSHUA Jobs from a single dashboard. It has a centralized applicant tracking system, a pre-screened talent pool for faster hiring, and a complete hiring-to-offboarding workflow covering onboarding, training, performance, and separation. Most competing Philippine HR platforms do not include multi-platform job posting or a ready talent pool."
+            "text": "Yes. YAHSHUA HRIS includes multi-platform job posting across LinkedIn, Facebook, and YAHSHUA Jobs from a single dashboard. It has a centralized applicant tracking system, a pre-screened talent pool for faster hiring, and a complete hiring-to-offboarding workflow covering onboarding, training, performance, and separation. Job posting and applicant screening are included in the same plan price, not sold as a separate recruitment product."
           }
         }
       ]

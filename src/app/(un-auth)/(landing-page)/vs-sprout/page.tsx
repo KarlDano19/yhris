@@ -57,7 +57,7 @@ const jsonLd = {
           "name": "What is the main difference between YAHSHUA HRIS and Sprout HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS includes DOLE compliance automation, multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), and a pre-screened talent pool, all built in at no extra cost. Sprout HR does not include DOLE compliance automation or multi-platform job posting in its standard offering. YAHSHUA also publishes flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA Payroll included, while Sprout HR pricing is quote-based.`
+            "text": `Both platforms cover Philippine HR, payroll, and compliance. The main differences are packaging and pricing transparency. YAHSHUA HRIS includes a guided DOLE module, multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), and YAHSHUA Payroll in one published plan price of ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Sprout offers compliance (Sprout Comply) and recruitment (Recruit+) as separately named products, and its pricing is quote-based.`
           }
         },
         {
@@ -65,7 +65,7 @@ const jsonLd = {
           "name": "Does YAHSHUA HRIS include DOLE compliance automation?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. YAHSHUA HRIS includes a guided DOLE Module covering company registration through annual reports: OSH reports, AERW filing, and mandatory DOLE filings, all included in every plan with no add-on required. Sprout HR does not include DOLE compliance automation."
+            "text": "Yes. YAHSHUA HRIS includes a guided DOLE Module covering company registration through annual reports: OSH reports, AERW filing, and mandatory DOLE filings, all included in every plan with no add-on required. Sprout offers DOLE compliance tools through Sprout Comply, a separately named product with quote-based pricing."
           }
         },
         {
@@ -81,7 +81,7 @@ const jsonLd = {
           "name": "Which HR software is better for Philippine SMEs: YAHSHUA HRIS or Sprout HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS is designed specifically for Philippine SMEs. It includes DOLE compliance automation, Philippine-specific features, one flat rate for up to 100 employees with payroll included, and a complete hiring-to-offboarding workflow. Sprout HR is a larger platform that scales from SMEs to enterprises, with quote-based pricing. Philippine businesses with 10 to 500 employees that need DOLE compliance out of the box typically find YAHSHUA HRIS a better fit."
+            "text": "YAHSHUA HRIS is designed specifically for Philippine SMEs. It includes a guided DOLE module, multi-platform job posting, a complete hiring-to-offboarding workflow, and payroll at one flat rate for up to 100 employees. Sprout HR is a larger platform that scales from SMEs to enterprises, with quote-based pricing. SMEs that want compliance, hiring, and payroll at one published price are a strong fit for YAHSHUA HRIS; companies that need Sprout's broader enterprise suite or earned wage access may prefer Sprout."
           }
         }
       ]
