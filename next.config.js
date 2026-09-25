@@ -86,6 +86,7 @@ const nextConfig = {
       '/blog/sss-mandatory-provident-fund-philippines',
       '/blog/final-pay-computation-philippines',
       '/blog/de-minimis-benefits-2026-philippines',
+      '/blog/minimum-wage-philippines-2026-by-region',
       '/faqs',
       '/docs',
       '/jobs',
