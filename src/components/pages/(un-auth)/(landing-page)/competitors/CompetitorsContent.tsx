@@ -5,11 +5,12 @@ import Link from "next/link";
 import { Check, X, ArrowRight, ArrowUpRight } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
 
 const valueProps = [
   {
     title: "Multi-Channel Job Posting",
-    body: "Post openings to LinkedIn, Facebook, and YAHSHUA Jobs from a single dashboard, then manage every application in one place. Most Philippine HR platforms leave recruitment to a separate tool.",
+    body: "Post openings to LinkedIn, Facebook, and YAHSHUA Jobs from a single dashboard, then manage every application in one place, included in every plan.",
     metric: "80% faster job posting. 3x wider reach.",
   },
   {
@@ -19,7 +20,7 @@ const valueProps = [
   },
   {
     title: "Complete Hiring-to-Offboarding Automation",
-    body: "Every stage of the employee lifecycle, Screen, Orient, Manage, Train, Evaluate, Separate, lives in one platform instead of the three or four point solutions most HR software in the Philippines requires you to stitch together.",
+    body: "Every stage of the employee lifecycle, Screen, Orient, Manage, Train, Evaluate, Separate, lives in one platform and one plan price.",
     metric: "70% time savings. 95% process efficiency.",
   },
   {
@@ -39,20 +40,37 @@ const valueProps = [
   },
 ];
 
-const comparisonRows = [
-  { feature: "Multi-platform job posting", yahshua: true, competitor: false },
-  { feature: "Centralized application management", yahshua: true, competitor: false },
-  { feature: "Pre-screened talent pool", yahshua: true, competitor: false },
-  { feature: "DOLE compliance automation", yahshua: true, competitor: false },
-  { feature: "Philippine labor law compliance", yahshua: true, competitor: true },
-  { feature: "Secure document management", yahshua: true, competitor: true },
-  { feature: "Complete hiring-to-offboarding", yahshua: true, competitor: false },
-  { feature: "Custom performance evaluation forms", yahshua: true, competitor: true },
-  { feature: "Employee self-service portal", yahshua: true, competitor: true },
-  { feature: "SME-focused design", yahshua: true, competitor: true },
-  { feature: "Philippine-specific features", yahshua: true, competitor: false },
-  { feature: "Professional image enhancement", yahshua: true, competitor: false },
+// Competitor cells verified against each vendor's public site, Sept 2026.
+// true = included, false = not offered, string = how it is offered.
+type Cell = boolean | string;
+const comparisonRows: { feature: string; yahshua: Cell; sprout: Cell; greatday: Cell }[] = [
+  { feature: "Pricing", yahshua: `${PRICING_LABELS.base}/mo flat, up to ${YAHSHUA_PRICING.employeeCap} employees`, sprout: "Quote-based, not published", greatday: "PHP 77/employee/mo, 50-license bundle" },
+  { feature: "Payroll", yahshua: "Included", sprout: "Available (Sprout Payroll)", greatday: "Included in base" },
+  { feature: "Multi-platform job posting", yahshua: "Included", sprout: "Separate product (Recruit+)", greatday: "Paid add-on" },
+  { feature: "Performance management", yahshua: "Included", sprout: "Available", greatday: "Paid add-on" },
+  { feature: "DOLE compliance tools", yahshua: "Guided DOLE module, included", sprout: "Separate product (Sprout Comply)", greatday: "No published DOLE module" },
+  { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, sprout: true, greatday: true },
+  { feature: "Employee self-service portal", yahshua: true, sprout: true, greatday: true },
+  { feature: "Mobile attendance app", yahshua: "Web only, app in development", sprout: "Mobile app", greatday: "GPS and selfie clock-in" },
 ];
+
+const renderCell = (value: Cell, highlight: boolean) => {
+  if (value === true) {
+    return (
+      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={highlight ? { background: "rgba(255,193,7,0.12)", border: "1px solid rgba(255,193,7,0.2)" } : { background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.1)" }}>
+        <Check className={`w-3 h-3 ${highlight ? "text-primary" : "text-gray-400"}`} strokeWidth={2.5} />
+      </div>
+    );
+  }
+  if (value === false) {
+    return (
+      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(239,68,68,0.08)" }}>
+        <X className="w-3 h-3 text-red-400" strokeWidth={2} />
+      </div>
+    );
+  }
+  return <span className={`text-xs text-center leading-snug ${highlight ? "font-semibold text-gray-900" : "text-gray-500"}`}>{value}</span>;
+};
 
 const CompetitorsContent = () => {
   return (
@@ -68,7 +86,7 @@ const CompetitorsContent = () => {
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-3">HOW WE COMPARE</span>
-                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: June 2026</p>
+                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                   YAHSHUA HRIS<br className="hidden md:inline" />
                   <span className="text-primary"> vs the competition.</span>
@@ -130,48 +148,33 @@ const CompetitorsContent = () => {
                 </div>
               </ScrollFadeIn>
               <ScrollFadeIn delay={100}>
-                <div className="rounded-xl overflow-hidden max-w-3xl mx-auto" style={{ border: "1px solid rgba(255,193,7,0.25)", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+                <div className="rounded-xl overflow-hidden max-w-4xl mx-auto" style={{ border: "1px solid rgba(255,193,7,0.25)", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
                   {/* Header row */}
-                  <div className="grid grid-cols-3 px-6 py-4" style={{ background: "rgba(255,193,7,0.08)", borderBottom: "1px solid rgba(255,193,7,0.15)" }}>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Feature</span>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-primary text-center">YAHSHUA HRIS</span>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-center">Competitors</span>
+                  <div className="grid grid-cols-[1.3fr_1fr_1fr_1fr] gap-2 sm:gap-4 px-3 sm:px-6 py-4 items-end" style={{ background: "rgba(255,193,7,0.08)", borderBottom: "1px solid rgba(255,193,7,0.15)" }}>
+                    <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-gray-400">Feature</span>
+                    <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-primary text-center">YAHSHUA HRIS</span>
+                    <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-gray-400 text-center">Sprout</span>
+                    <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-gray-400 text-center">GreatDay HR</span>
                   </div>
                   {comparisonRows.map((row, i) => (
                     <div
                       key={row.feature}
-                      className="grid grid-cols-3 px-6 py-4 items-center"
+                      className="grid grid-cols-[1.3fr_1fr_1fr_1fr] gap-2 sm:gap-4 px-3 sm:px-6 py-4 items-center"
                       style={{
                         background: i % 2 === 0 ? "#ffffff" : "rgba(255,250,235,0.6)",
                         borderBottom: i < comparisonRows.length - 1 ? "1px solid rgba(255,193,7,0.1)" : "none",
                       }}
                     >
-                      <span className="text-sm text-gray-700">{row.feature}</span>
-                      <div className="flex justify-center">
-                        {row.yahshua ? (
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(255,193,7,0.12)", border: "1px solid rgba(255,193,7,0.2)" }}>
-                            <Check className="w-3 h-3 text-primary" strokeWidth={2.5} />
-                          </div>
-                        ) : (
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(239,68,68,0.08)" }}>
-                            <X className="w-3 h-3 text-red-400" strokeWidth={2} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex justify-center">
-                        {row.competitor ? (
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.1)" }}>
-                            <Check className="w-3 h-3 text-gray-400" strokeWidth={2.5} />
-                          </div>
-                        ) : (
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(239,68,68,0.08)" }}>
-                            <X className="w-3 h-3 text-red-400" strokeWidth={2} />
-                          </div>
-                        )}
-                      </div>
+                      <span className="text-xs sm:text-sm text-gray-700">{row.feature}</span>
+                      <div className="flex justify-center">{renderCell(row.yahshua, true)}</div>
+                      <div className="flex justify-center">{renderCell(row.sprout, false)}</div>
+                      <div className="flex justify-center">{renderCell(row.greatday, false)}</div>
                     </div>
                   ))}
                 </div>
+                <p className="text-xs text-gray-400 text-center mt-6 max-w-lg mx-auto">
+                  Competitor details sourced from each vendor&apos;s public website as of September 2026. Pricing and packaging change, so confirm current terms with each vendor.
+                </p>
               </ScrollFadeIn>
             </div>
           </section>
@@ -187,11 +190,10 @@ const CompetitorsContent = () => {
                 </h2>
               </div>
             </ScrollFadeIn>
-            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
               {[
                 { name: "Sprout Solutions", vsHref: "/vs-sprout", altHref: "/sprout-alternative" },
                 { name: "GreatDay HR", vsHref: "/vs-greatday", altHref: "/greatday-hr-alternative" },
-                { name: "JuanHR", vsHref: "/vs-juanhr", altHref: "/juanhr-alternative" },
               ].map((c, i) => (
                 <ScrollFadeIn key={c.name} delay={i * 60}>
                   <div className="lp-light-card p-6 h-full flex flex-col justify-between gap-4">
