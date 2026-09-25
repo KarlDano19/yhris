@@ -135,10 +135,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
-      url: `${BASE_URL}/blog/thirteenth-month-pay-tracking-philippines`,
-      lastModified: new Date('2026-06-10'),
-      changeFrequency: 'monthly',
-      priority: 0.85,
+      url: `${BASE_URL}/blog/13th-month-pay-computation-philippines-2026`,
+      lastModified: new Date('2026-09-25'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     {
       url: `${BASE_URL}/blog/payroll-automation-philippines`,

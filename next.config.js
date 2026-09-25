@@ -73,7 +73,7 @@ const nextConfig = {
       '/blog',
       '/blog/dole-compliance-requirements-philippines',
       '/blog/philippine-holiday-pay-computation-guide',
-      '/blog/thirteenth-month-pay-tracking-philippines',
+      '/blog/13th-month-pay-computation-philippines-2026',
       '/blog/payroll-automation-philippines',
       '/blog/philippine-compliance-hris-2026',
       '/blog/philippine-payroll-errors-msme',
@@ -132,6 +132,13 @@ const nextConfig = {
       ...['/vs-juanhr', '/vs-juanhr/', '/juanhr-alternative', '/juanhr-alternative/'].map((source) => ({
         source,
         destination: '/how-we-compare',
+        permanent: true,
+      })),
+      // 13th month post replaced by the 2026 computation guide (old URL had
+      // zero GSC impressions; its best sections were merged into the new post)
+      ...['/blog/thirteenth-month-pay-tracking-philippines', '/blog/thirteenth-month-pay-tracking-philippines/'].map((source) => ({
+        source,
+        destination: '/blog/13th-month-pay-computation-philippines-2026',
         permanent: true,
       })),
       // Old slug from before the post was renamed to use "-table-"
