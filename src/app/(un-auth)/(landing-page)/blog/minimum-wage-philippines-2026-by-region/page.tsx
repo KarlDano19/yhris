@@ -35,7 +35,7 @@ const jsonLd = {
       "@id": `${URL}#article`,
       "headline": "Minimum Wage in the Philippines 2026 by Region: A Multi-Branch Employer's Guide",
       "description": "The current daily minimum wage in every Philippine region as of September 26, 2026, ranging from ₱401 in BARMM provinces to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and scheduled changes for each region.",
-      "image": "https://yahshuahris.com/blog/ncr-minimum-wage-2026.png",
+      "image": "https://yahshuahris.com/blog/minimum-wage-by-region-2026.png",
       "datePublished": "2026-09-25T00:00:00.000Z",
       "dateModified": "2026-09-25T00:00:00.000Z",
       "author": {

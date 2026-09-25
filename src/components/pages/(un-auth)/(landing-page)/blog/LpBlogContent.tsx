@@ -22,7 +22,7 @@ const posts = [
     excerpt: "Every region's current daily minimum wage as of September 26, 2026, from ₱401 in BARMM to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and the increases already scheduled for December.",
     date: "September 2026",
     readTime: "9 min read",
-    image: "/blog/ncr-minimum-wage-2026.png",
+    image: "/blog/minimum-wage-by-region-2026.png",
   },
   {
     slug: "de-minimis-benefits-2026-philippines",
