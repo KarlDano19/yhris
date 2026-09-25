@@ -454,8 +454,8 @@ const SssContributionTable2026Article = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog/thirteenth-month-pay-tracking-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
-                    How to Track 13th Month Pay in the Philippines →
+                  <Link href="/blog/13th-month-pay-computation-philippines-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    13th Month Pay Computation 2026: Formula and Calculator →
                   </Link>
                 </li>
                 <li>

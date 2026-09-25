@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "13th-month-pay-computation-philippines-2026",
+    category: "Payroll Compliance",
+    title: "13th Month Pay Computation 2026: The Formula, the Common Mistakes, and a Free Calculator",
+    excerpt: "13th month pay is total basic salary earned ÷ 12, due by December 24. What counts as basic salary, worked examples for new hires, resigned and daily-paid employees (including 2026 wage order increases), the ₱90,000 tax cap, and a free calculator.",
+    date: "September 2026",
+    readTime: "9 min read",
+    image: "/blog/start-tracking-13th-month.png",
+  },
+  {
     slug: "minimum-wage-philippines-2026-by-region",
     category: "Statutory Compliance",
     title: "Minimum Wage in the Philippines 2026 by Region: A Multi-Branch Employer's Guide",
@@ -122,15 +131,6 @@ const posts = [
     date: "June 2026",
     readTime: "7 min read",
     image: "/blog/payroll-message.png",
-  },
-  {
-    slug: "thirteenth-month-pay-tracking-philippines",
-    category: "Payroll Compliance",
-    title: "Start Tracking 13th Month Pay Now — Or Pay For It in November",
-    excerpt: "Philippine employers owe 13th month pay by December 24. The ones that don't scramble are the ones tracking it every payroll run, not just in November. Here's the formula, who qualifies, and how to set it up.",
-    date: "June 2026",
-    readTime: "6 min read",
-    image: "/blog/start-tracking-13th-month.png",
   },
   {
     slug: "philippine-holiday-pay-computation-guide",
