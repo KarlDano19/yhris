@@ -54,9 +54,9 @@ const posts = [
   {
     slug: "ncr-minimum-wage-2026",
     category: "Statutory Compliance",
-    title: "NCR Minimum Wage 2026: New Rates Under Wage Order No. 27 Are Now in Effect",
-    excerpt: "Non-agriculture workers in Metro Manila now earn a minimum of ₱755/day under Wage Order No. NCR-27, effective July 25, 2026. A second tranche of ₱25 follows January 20, 2027. Full rate table, who is covered, and employer payroll checklist.",
-    date: "July 2026",
+    title: "NCR Minimum Wage 2026: ₱755/Day Under Wage Order NCR-28, Effective September 26",
+    excerpt: "Metro Manila's minimum wage rises to ₱755/day (₱718 for the lower category) on September 26, 2026 under Wage Order NCR-28. Why the ₱85 NCR-27 order never took effect, the rate table, and the employer payroll checklist.",
+    date: "Updated September 2026",
     readTime: "8 min read",
     image: "/blog/ncr-minimum-wage-2026.png",
   },

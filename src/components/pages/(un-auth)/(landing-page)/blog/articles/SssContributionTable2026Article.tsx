@@ -450,7 +450,7 @@ const SssContributionTable2026Article = () => {
               <ul className="space-y-2">
                 <li>
                   <Link href="/blog/ncr-minimum-wage-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
-                    NCR Minimum Wage 2026: Wage Order No. 27 Rates →
+                    NCR Minimum Wage 2026: ₱755 Under Wage Order NCR-28 →
                   </Link>
                 </li>
                 <li>
