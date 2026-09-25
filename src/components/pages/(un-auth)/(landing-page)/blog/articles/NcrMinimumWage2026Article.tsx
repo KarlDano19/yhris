@@ -306,6 +306,11 @@ const NcrMinimumWage2026Article = () => {
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
               <ul className="space-y-2">
                 <li>
+                  <Link href="/blog/minimum-wage-philippines-2026-by-region" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Minimum Wage in the Philippines 2026 by Region →
+                  </Link>
+                </li>
+                <li>
                   <Link href="/blog/night-differential-holiday-pay-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
                     Night Differential and Holiday Pay Stacking Rules →
                   </Link>

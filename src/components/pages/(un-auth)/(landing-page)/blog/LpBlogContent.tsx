@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "minimum-wage-philippines-2026-by-region",
+    category: "Statutory Compliance",
+    title: "Minimum Wage in the Philippines 2026 by Region: A Multi-Branch Employer's Guide",
+    excerpt: "Every region's current daily minimum wage as of September 26, 2026, from ₱401 in BARMM to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and the increases already scheduled for December.",
+    date: "September 2026",
+    readTime: "9 min read",
+    image: "/blog/ncr-minimum-wage-2026.png",
+  },
+  {
     slug: "de-minimis-benefits-2026-philippines",
     category: "Statutory Compliance",
     title: "BIR's New Tax-Free Benefit Limits (RR No. 29-2025): What Changed in De Minimis Benefits",
