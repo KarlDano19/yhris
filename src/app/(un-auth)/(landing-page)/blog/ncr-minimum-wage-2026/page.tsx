@@ -2,12 +2,12 @@ import { Metadata } from 'next';
 import NcrMinimumWage2026Article from "@/components/pages/(un-auth)/(landing-page)/blog/articles/NcrMinimumWage2026Article";
 
 export const metadata: Metadata = {
-  title: 'Metro Manila Minimum Wage 2026: ₱755/Day in Every NCR City',
-  description: '₱755/day from July 25, 2026 (₱718 for small retail and agriculture), the same in Manila, Quezon City, Makati, and every NCR city. ₱780 from Jan 20, 2027.',
-  keywords: 'Manila minimum wage 2026, Quezon City minimum wage 2026, Makati minimum wage 2026, NCR minimum wage 2026, Metro Manila minimum wage, Wage Order NCR-27, minimum wage Philippines 2026',
+  title: 'Metro Manila Minimum Wage 2026: ₱755/Day From Sept 26',
+  description: '₱755/day from Sept 26, 2026 under Wage Order NCR-28 (₱718 small retail, agriculture), same in Manila, Quezon City, Makati. Why NCR-27 never took effect.',
+  keywords: 'Manila minimum wage 2026, Quezon City minimum wage 2026, Makati minimum wage 2026, NCR minimum wage 2026, Wage Order NCR-28, Wage Order NCR-27, Metro Manila minimum wage, minimum wage Philippines 2026',
   openGraph: {
-    title: 'Metro Manila Minimum Wage 2026: ₱755/Day in Every NCR City',
-    description: 'Wage Order No. NCR-27 took effect July 25, 2026. Non-agriculture: ₱755/day. Agriculture and small establishments: ₱718/day. Second tranche of ₱25 on January 20, 2027. Full rate table and payroll checklist.',
+    title: 'Metro Manila Minimum Wage 2026: ₱755/Day From Sept 26',
+    description: 'Wage Order No. NCR-28 raises the NCR minimum wage to ₱755/day (non-agriculture) and ₱718/day (lower category) from September 26, 2026, in a single tranche. NCR-27 never took effect due to court injunctions.',
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-07-21T00:00:00.000Z',
@@ -16,13 +16,49 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Metro Manila Minimum Wage 2026: ₱755/Day in Every NCR City',
-    description: 'NCR minimum wage is now ₱755/day (non-agriculture) effective July 25, 2026. Second tranche of ₱25 follows January 20, 2027. Employer checklist and full rate table.',
+    title: 'Metro Manila Minimum Wage 2026: ₱755/Day From Sept 26',
+    description: 'NCR minimum wage is ₱755/day (non-agriculture) from September 26, 2026 under Wage Order NCR-28. What happened to NCR-27, and the employer payroll checklist.',
   },
   alternates: {
     canonical: 'https://yahshuahris.com/blog/ncr-minimum-wage-2026',
   },
 };
+
+// Keep these in sync with the visible FAQ in NcrMinimumWage2026Article.tsx
+const faqs = [
+  {
+    q: "What is the NCR minimum wage in 2026?",
+    a: "From September 26, 2026, the NCR minimum wage is ₱755 per day for non-agriculture workers and ₱718 per day for agriculture, service and retail establishments with 15 or fewer workers, and manufacturing establishments with fewer than 10 regular workers, under Wage Order No. NCR-28. Before September 26, the NCR-26 rates of ₱695 and ₱658 applied.",
+  },
+  {
+    q: "Is the minimum wage the same in Manila, Quezon City, and Makati?",
+    a: "Yes. One wage order, Wage Order No. NCR-28, sets the minimum wage for all 17 local government units in Metro Manila: Caloocan, Las Piñas, Makati, Malabon, Mandaluyong, Manila, Marikina, Muntinlupa, Navotas, Parañaque, Pasay, Pasig, Quezon City, San Juan, Taguig, Valenzuela, and the municipality of Pateros. Non-agriculture workers earn ₱755 per day from September 26, 2026 in every one of them. The rate follows where the employee works, not where they live: a worker who lives in Bulacan but reports to an office in Makati is covered by the NCR rate.",
+  },
+  {
+    q: "What happened to Wage Order NCR-27 and the ₱85 increase?",
+    a: "NCR-27, issued June 23, 2026, granted ₱85 in two tranches but never took effect. The Pasig Regional Trial Court issued a status quo ante order on July 24, 2026, followed by a temporary restraining order and a writ of preliminary injunction, in cases filed by employers. Labor groups have asked the Supreme Court to set those orders aside. The wage board then issued NCR-28, a separate single ₱60 increase effective September 26, 2026, without prejudice to the pending case.",
+  },
+  {
+    q: "Will the NCR minimum wage go up by ₱25 in January 2027?",
+    a: "Not under NCR-28, which is a single tranche. The ₱25 January 2027 increase was part of NCR-27, and whether it is ever implemented depends on the outcome of the court cases. As of September 25, 2026, no further NCR increase is scheduled.",
+  },
+  {
+    q: "Do employers owe back pay for July 25 to September 25, 2026?",
+    a: "As of September 25, 2026, no DOLE directive requires retroactive payment for that period, because NCR-27 was restrained before it took effect. That could change depending on how the courts rule on NCR-27, so keep accurate payroll records for the period.",
+  },
+  {
+    q: "Does the NCR minimum wage increase apply to all workers?",
+    a: "Wage Order No. NCR-28 applies to private-sector workers in the National Capital Region. Kasambahay (household helpers) are covered by a separate instrument: Wage Order No. NCR-DW-06, which set the monthly minimum wage for domestic workers in NCR at ₱7,800, effective February 7, 2026. Government employees are not covered by regional wage orders.",
+  },
+  {
+    q: "Does a minimum wage increase affect overtime and holiday pay?",
+    a: "Yes. Overtime pay, holiday pay, and night differential are computed from the daily rate, so their peso amounts rise for workers at or near the minimum. Ordinary-day overtime is 125% of the hourly rate, a worked regular holiday is 200% of the daily rate, and work on a rest day is 130%. Recompute these using the updated daily rate from September 26, 2026.",
+  },
+  {
+    q: "What happens if an employer does not comply with the NCR minimum wage order?",
+    a: "Non-compliance with a wage order is a violation of the Wage Rationalization Act (RA 6727). DOLE labor inspectors can issue compliance orders requiring employers to pay the wage differential from the effective date. Continued non-compliance can result in penalties under RA 8188, which amended RA 6727: fines of ₱25,000 to ₱100,000, imprisonment of two to four years, or both, plus double indemnity on the unpaid wage increase. Responsible officers of the employing company can be held personally liable.",
+  },
+];
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -30,8 +66,8 @@ const jsonLd = {
     {
       "@type": "Article",
       "@id": "https://yahshuahris.com/blog/ncr-minimum-wage-2026#article",
-      "headline": "NCR Minimum Wage 2026: New Rates Under Wage Order No. 27 Are Now in Effect",
-      "description": "Non-agriculture workers in Metro Manila now earn a minimum of ₱755 per day under Wage Order No. NCR-27, effective July 25, 2026. A second tranche of ₱25 takes effect January 20, 2027. This article covers the full rate table, who is covered, and the employer payroll update checklist.",
+      "headline": "NCR Minimum Wage 2026: ₱755/Day Under Wage Order NCR-28, Effective September 26",
+      "description": "Wage Order No. NCR-28 raises the Metro Manila minimum wage to ₱755 per day for non-agriculture workers and ₱718 for the lower category from September 26, 2026, in a single tranche. The earlier ₱85 order, NCR-27, never took effect because of court injunctions. Rate table, timeline, who is covered, and the employer payroll checklist.",
       "image": "https://yahshuahris.com/blog/ncr-minimum-wage-2026.png",
       "datePublished": "2026-07-21T00:00:00.000Z",
       "dateModified": "2026-09-25T00:00:00.000Z",
@@ -52,69 +88,19 @@ const jsonLd = {
         "@type": "WebPage",
         "@id": "https://yahshuahris.com/blog/ncr-minimum-wage-2026"
       },
-      "keywords": "NCR minimum wage 2026, Wage Order NCR-27, Metro Manila minimum wage July 2026, minimum wage Philippines 2026, RTWPB-NCR wage order"
+      "keywords": "NCR minimum wage 2026, Wage Order NCR-28, Wage Order NCR-27, Metro Manila minimum wage September 2026, minimum wage Philippines 2026, RTWPB-NCR wage order"
     },
     {
       "@type": "FAQPage",
       "@id": "https://yahshuahris.com/blog/ncr-minimum-wage-2026#faq",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is the new NCR minimum wage in 2026?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Under Wage Order No. NCR-27, the minimum daily wage for non-agriculture workers in Metro Manila is ₱755 effective July 25, 2026. Workers in agriculture, service and retail establishments with 15 workers or fewer, and manufacturing establishments with fewer than 10 regular workers receive ₱718 per day. A second tranche of ₱25 takes effect on January 20, 2027, bringing the non-agriculture floor to ₱780 and the lower category to ₱743."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is the minimum wage the same in Manila, Quezon City, and Makati?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. One wage order, Wage Order No. NCR-27, sets the minimum wage for all 17 local government units in Metro Manila: Caloocan, Las Piñas, Makati, Malabon, Mandaluyong, Manila, Marikina, Muntinlupa, Navotas, Parañaque, Pasay, Pasig, Quezon City, San Juan, Taguig, Valenzuela, and the municipality of Pateros. Non-agriculture workers earn ₱755 per day from July 25, 2026 in every one of them. The rate follows where the employee works, not where they live: a worker who lives in Bulacan but reports to an office in Makati is covered by the NCR rate."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "When did the NCR wage increase take effect?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The first tranche of the increase took effect on July 25, 2026. This is 15 days after the wage order was published in The Philippine Star on July 9, 2026, as required under the Wage Rationalization Act (RA 6727). The second tranche takes effect on January 20, 2027."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Which wage order covers the 2026 NCR minimum wage increase?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Wage Order No. NCR-27, issued by the Regional Tripartite Wages and Productivity Board-National Capital Region (RTWPB-NCR) on June 23, 2026. It grants a total increase of ₱85 per day delivered in two tranches: ₱60 upon effectivity on July 25, 2026, and ₱25 on January 20, 2027."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does the NCR minimum wage increase apply to all workers?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Wage Order No. NCR-27 applies to private-sector workers in the National Capital Region. Kasambahay (household helpers) are covered by a separate instrument: Wage Order No. NCR-DW-06, which set the monthly minimum wage for domestic workers in NCR at ₱7,800, effective February 7, 2026. Government employees are not covered by RTWPB wage orders."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does a minimum wage increase affect overtime and holiday pay?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Overtime pay, holiday pay, and night differential are all computed as a percentage of the daily rate. When the minimum daily wage increases, the peso amount of these premium pays increases for workers at or near the minimum. Overtime on ordinary days is 125% of the hourly rate, regular holiday pay for hours worked is 200%, and rest day overtime on a regular holiday is 260%. All of these must be recomputed using the updated daily rate effective July 25, 2026."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What happens if an employer does not comply with the NCR minimum wage order?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Non-compliance with a wage order is a violation of the Wage Rationalization Act (RA 6727). DOLE labor inspectors can issue compliance orders requiring employers to pay the wage differential from the effective date. Continued non-compliance can result in penalties under RA 8188, which amended RA 6727: fines of ₱25,000 to ₱100,000, imprisonment of two to four years, or both, plus double indemnity on the unpaid wage increase. Responsible officers of the employing company can be held personally liable."
-          }
+      "mainEntity": faqs.map((f) => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.a
         }
-      ]
+      }))
     },
     {
       "@type": "BreadcrumbList",
@@ -135,7 +121,7 @@ const jsonLd = {
         {
           "@type": "ListItem",
           "position": 3,
-          "name": "NCR Minimum Wage 2026: Wage Order No. 27",
+          "name": "NCR Minimum Wage 2026: Wage Order NCR-28",
           "item": "https://yahshuahris.com/blog/ncr-minimum-wage-2026"
         }
       ]
