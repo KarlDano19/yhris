@@ -9,6 +9,7 @@ import UserLogo from '@/svg/UserIcon';
 import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
+import Checklist201Logo from '@/svg/Checklist201Logo';
 
 const menus = [
   {
@@ -34,6 +35,12 @@ const menus = [
     icon: <CreateMemoLogo />,
     text: 'Acceptance Form',
     link: '/settings/acceptance-form',
+    isAvailable: true,
+  },
+  {
+    icon: <Checklist201Logo />,
+    text: <>201 Checklist<br/>Templates</>,
+    link: '/settings/checklist-201-requirements',
     isAvailable: true,
   },
 ];

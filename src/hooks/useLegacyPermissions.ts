@@ -96,6 +96,7 @@ export const useLegacyPermissions = () => {
       'create_employee_status', 'edit_employee_status', 'delete_employee_status',
       'create_movement_settings', 
       'create_email_template', 'edit_email_template', 'delete_email_template',
+      'create_checklist_201_requirement', 'edit_checklist_201_requirement', 'delete_checklist_201_requirement',
 
     ];
 
