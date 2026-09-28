@@ -109,6 +109,68 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-047
+DATE FILED: 2026-09-25
+DATE FIXED: 2026-09-25
+CLIENT/REPORTER: Client - Galam
+
+ISSUE DESCRIPTION:
+  On Document Generator > Certificate of Employment, the "This certificate is
+  issued for ..." (Purpose) paragraph had two problems in both the preview and
+  the generated/printed certificate:
+  1. Words were cut in the middle when a line wrapped (e.g. "W&W Galam Gro / up
+     of Companies", "Mr. Ricci Cha / d G. Raagas").
+  2. Spacing typed into the Purpose textarea was not respected - extra spaces
+     collapsed into one and line breaks (Enter) were turned into spaces.
+
+DESIRED OUTCOME:
+  The Purpose paragraph wraps between whole words (only breaking inside a word
+  if a single word/string is too long to fit on a line), and it keeps the
+  spaces and line breaks exactly as the user typed them.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/document-generator/form-previews/EmployeeCertificatePreview.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Components tested (pending QA - regenerate a certificate with a long
+  Purpose, extra spaces between words, and a line break)
+☑ TypeScript types verified (style-only change, no type changes)
+
+Integration & E2E:
+☐ Manual regression testing completed (pending QA re-test)
+☑ Blast-radius check: the other generator documents (Notice to Explain,
+  Employment Agreement, Acceptance Memo) were reviewed - none use
+  break-all, and Notice to Explain's textarea fields already use
+  white-space: pre-wrap. No other changes needed.
+
+FIX EXPLANATION:
+  The Purpose paragraph had an inline style of `wordBreak: 'break-all'`, which
+  lets the browser break a line at any character, so ordinary words were split
+  mid-word. It also had no `white-space` rule, so default HTML whitespace
+  collapsing dropped the user's extra spaces and line breaks.
+  Changed the paragraph style from
+    { wordBreak: 'break-all', overflowWrap: 'anywhere' }
+  to
+    { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }
+  - Removing break-all restores normal word wrapping; `overflowWrap: 'anywhere'`
+    is kept so a very long unbroken string still cannot overflow the page.
+  - `whiteSpace: 'pre-wrap'` preserves typed spaces/line breaks while still
+    wrapping at the page edge (same pattern Notice to Explain already uses).
+  The printed certificate (print/documents/EmployeeCertificate.tsx) clones the
+  preview DOM into an iframe and its print CSS does not override these
+  properties, so the fix applies to the generated document as well.
+
+  Note: in the reported case the Purpose field itself contained a full
+  sentence ending in a period, which the template wraps with "This certificate
+  is issued for ..." and its own period - producing "issued for This is to
+  certify ..." and ". .". That is input content, not part of this fix.
+
+================================================================================
+
 BUG ID: HRIS-2026-046
 DATE FILED: 2026-09-18
 DATE FIXED: 2026-09-18

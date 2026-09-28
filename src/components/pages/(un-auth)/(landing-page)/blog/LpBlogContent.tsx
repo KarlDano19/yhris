@@ -7,6 +7,24 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "13th-month-pay-computation-philippines-2026",
+    category: "Payroll Compliance",
+    title: "13th Month Pay Computation 2026: The Formula, the Common Mistakes, and a Free Calculator",
+    excerpt: "13th month pay is total basic salary earned ÷ 12, due by December 24. What counts as basic salary, worked examples for new hires, resigned and daily-paid employees (including 2026 wage order increases), the ₱90,000 tax cap, and a free calculator.",
+    date: "September 2026",
+    readTime: "9 min read",
+    image: "/blog/start-tracking-13th-month.png",
+  },
+  {
+    slug: "minimum-wage-philippines-2026-by-region",
+    category: "Statutory Compliance",
+    title: "Minimum Wage in the Philippines 2026 by Region: A Multi-Branch Employer's Guide",
+    excerpt: "Every region's current daily minimum wage as of September 26, 2026, from ₱401 in BARMM to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and the increases already scheduled for December.",
+    date: "September 2026",
+    readTime: "9 min read",
+    image: "/blog/minimum-wage-by-region-2026.png",
+  },
+  {
     slug: "de-minimis-benefits-2026-philippines",
     category: "Statutory Compliance",
     title: "BIR's New Tax-Free Benefit Limits (RR No. 29-2025): What Changed in De Minimis Benefits",
@@ -54,9 +72,9 @@ const posts = [
   {
     slug: "ncr-minimum-wage-2026",
     category: "Statutory Compliance",
-    title: "NCR Minimum Wage 2026: New Rates Under Wage Order No. 27 Are Now in Effect",
-    excerpt: "Non-agriculture workers in Metro Manila now earn a minimum of ₱755/day under Wage Order No. NCR-27, effective July 25, 2026. A second tranche of ₱25 follows January 20, 2027. Full rate table, who is covered, and employer payroll checklist.",
-    date: "July 2026",
+    title: "NCR Minimum Wage 2026: ₱755/Day Under Wage Order NCR-28, Effective September 26",
+    excerpt: "Metro Manila's minimum wage rises to ₱755/day (₱718 for the lower category) on September 26, 2026 under Wage Order NCR-28. Why the ₱85 NCR-27 order never took effect, the rate table, and the employer payroll checklist.",
+    date: "Updated September 2026",
     readTime: "8 min read",
     image: "/blog/ncr-minimum-wage-2026.png",
   },
@@ -113,15 +131,6 @@ const posts = [
     date: "June 2026",
     readTime: "7 min read",
     image: "/blog/payroll-message.png",
-  },
-  {
-    slug: "thirteenth-month-pay-tracking-philippines",
-    category: "Payroll Compliance",
-    title: "Start Tracking 13th Month Pay Now — Or Pay For It in November",
-    excerpt: "Philippine employers owe 13th month pay by December 24. The ones that don't scramble are the ones tracking it every payroll run, not just in November. Here's the formula, who qualifies, and how to set it up.",
-    date: "June 2026",
-    readTime: "6 min read",
-    image: "/blog/start-tracking-13th-month.png",
   },
   {
     slug: "philippine-holiday-pay-computation-guide",

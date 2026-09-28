@@ -10,32 +10,32 @@ import { PRICING_LABELS, YAHSHUA_PRICING } from "@/lib/yahshuaPricing";
 const painPoints = [
   {
     icon: TrendingUp,
-    title: "Per-seat pricing climbs with headcount",
-    body: "Sprout HR bills per employee per month. Every new hire adds to the invoice, so costs get harder to forecast the more your team grows.",
+    title: "No published pricing to plan around",
+    body: "Sprout HR doesn't publish standard pricing; you book a meeting to get a quote. Quote-based pricing typically scales with headcount, so costs are harder to forecast before you talk to sales.",
   },
   {
     icon: PuzzleIcon,
-    title: "Recruitment isn't part of the core platform",
-    body: "Sprout's standard offering doesn't include multi-platform job posting or a pre-screened talent pool, so hiring often means a separate tool on top.",
+    title: "Hiring and compliance are separate products",
+    body: "Sprout offers recruitment (Recruit+) and compliance (Sprout Comply) as separately named products, each through a sales conversation. YAHSHUA HRIS includes job posting, applicant screening, and a guided DOLE module in one published plan price.",
   },
   {
     icon: ShieldAlert,
-    title: "DOLE compliance isn't automated",
-    body: "Company registration, OSH reports, and AERW filing aren't built into Sprout's standard package the way they are in a dedicated DOLE module.",
+    title: "An enterprise-scale suite for an SME team",
+    body: "Sprout serves companies from SMEs to large enterprises with a broad product lineup. If you have up to 100 employees, YAHSHUA HRIS gives you HR, hiring, DOLE compliance, and payroll at one flat rate without choosing between products.",
   },
 ];
 
 const switchFor = [
   "You want flat pricing that doesn't grow per employee up to 100 staff",
-  "You need job posting, screening, and hiring in the same platform as HR",
-  "You want guided DOLE reporting without a separate compliance vendor",
-  "You're an SME, not an enterprise already deep in a per-seat contract",
+  "You want job posting, screening, and hiring included in the same plan price as HR",
+  "You want a guided DOLE module included, not a separately quoted product",
+  "You want to know your price up front instead of waiting on a sales quote",
 ];
 
 const stayFor = [
   "You rely on Sprout's ReadyCash/ReadyWage earned wage access product",
   "You're a large enterprise already integrated across Sprout's full module suite",
-  "Your team size makes per-seat pricing genuinely cost-effective for you",
+  "Your Sprout quote for your headcount and modules comes in lower than our published rate",
 ];
 
 const SproutAlternativeContent = () => {
@@ -49,13 +49,13 @@ const SproutAlternativeContent = () => {
           <div className="lp-section-container relative z-10 text-center">
             <ScrollFadeIn>
               <span className="lp-section-label justify-center mb-3">SPROUT HR ALTERNATIVE</span>
-              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: August 2026</p>
+              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                 Looking for a<br className="hidden md:inline" />
                 <span className="text-primary"> Sprout HR alternative?</span>
               </h1>
               <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
-                Flat pricing instead of per-seat billing, hiring tools built into the platform, and guided DOLE compliance from day one.
+                Published flat pricing instead of a sales quote, hiring tools built into the platform, and guided DOLE compliance from day one.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
