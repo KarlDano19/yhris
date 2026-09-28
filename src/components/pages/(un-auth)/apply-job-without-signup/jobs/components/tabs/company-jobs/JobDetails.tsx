@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
+import ShareArrowIcon from '@/svg/ShareArrowIcon';
 
 import * as DOMPurify from 'dompurify';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
@@ -265,8 +266,8 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             onClick={handleCopyLink}
             className='inline-flex items-center gap-1.5 rounded-md border border-savoy-blue px-3 py-1.5 text-sm font-medium text-savoy-blue hover:bg-savoy-blue hover:text-white transition-colors'
           >
-            <LinkIcon className='h-4 w-4' />
-            Copy Link
+            <ShareArrowIcon className='h-4 w-4' />
+            Share
           </button>
         </div>
       )}
