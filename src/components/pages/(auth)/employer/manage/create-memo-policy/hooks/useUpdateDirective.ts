@@ -14,6 +14,15 @@ async function updateDirective(directive: DirectiveData) {
     formData.append('to', JSON.stringify(directive.to));
     formData.append('directive_type', directive.directive_type || '');
 
+    // Multi-signatory reconciliation. Send whenever the field is present so the backend
+    // adds/removes assignments; already-signed signatories are preserved server-side.
+    if (Array.isArray(directive.signatories)) {
+      const userIds = directive.signatories.map((signatory: any) =>
+        typeof signatory === 'object' ? signatory.user_id : signatory
+      );
+      formData.append('signatories', JSON.stringify(userIds));
+    }
+
     if (directive.attachments) {
       if (Array.isArray(directive.attachments)) {
         directive.attachments.forEach((item) => {
@@ -47,7 +56,11 @@ async function updateDirective(directive: DirectiveData) {
         inlineImageFiles.forEach((file) => formData.append('inline_images', file));
       }
       if (directive.signature) {
-        if (typeof directive.signature === 'string' && directive.signature.length) {
+        // Only a data URL is a new signature. An untouched existing one comes back as its
+        // storage URL (prepareSignature falls back to it when the remote image can't be
+        // cropped) — fetching that cross-origin fails with "Failed to fetch", and the
+        // partial update keeps the stored signature when the field is omitted anyway.
+        if (typeof directive.signature === 'string' && directive.signature.startsWith('data:')) {
           const signatureBlob = await fetch(directive.signature).then((res) => res.blob());
           formData.append('signature', signatureBlob, 'signature.jpg');
         } else if (directive.signature instanceof FileList && directive.signature.length > 0) {

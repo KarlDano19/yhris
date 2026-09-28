@@ -174,6 +174,11 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'edit-email-template-btn', permission: 'edit_email_template', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'delete-email-template-btn', permission: 'delete_email_template', type: 'button', fallbackBehavior: 'disable' },
 
+  // General Settings - 201 Checklist Requirements
+  { elementId: 'create-checklist-201-requirement-btn', permission: 'create_checklist_201_requirement', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'edit-checklist-201-requirement-btn', permission: 'edit_checklist_201_requirement', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'delete-checklist-201-requirement-btn', permission: 'delete_checklist_201_requirement', type: 'button', fallbackBehavior: 'disable' },
+
 ];
 
 // Helper functions
