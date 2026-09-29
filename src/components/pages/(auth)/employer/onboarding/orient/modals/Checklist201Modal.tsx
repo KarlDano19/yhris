@@ -18,6 +18,7 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import CheckIcon from '@/svg/CheckIcon';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import EyePassword from '@/svg/EyePassword';
 
 type T_ChecklistItem = {
   id: string;
@@ -29,6 +30,7 @@ type T_ChecklistItem = {
   updated_by?: number | null;
   updated_by_name?: string | null;
   updated_at?: string | null;
+  document_url?: string | null;
 };
 
 type T_EditDraft = {
@@ -178,7 +180,23 @@ export default function Checklist201Modal({
     return (
       <tr key={item.id}>
         <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>{displayIndex}</td>
-        <td className='px-3 py-4 text-sm text-gray-900 text-left'>{item.requirement}</td>
+        <td className='px-3 py-4 text-sm text-gray-900 text-left'>
+          <div className='flex items-center gap-1.5'>
+            <span>{item.requirement}</span>
+            {item.document_url && (
+              <button
+                type='button'
+                onClick={() => window.open(item.document_url as string, '_blank', 'noopener,noreferrer')}
+                className='flex-shrink-0 hover:opacity-75'
+                data-tooltip-id='checklist-action-tooltip'
+                data-tooltip-content='View submitted file'
+                data-tooltip-place='top'
+              >
+                <EyePassword visible size={24} borderColor='#355FD0' strokeColor='#355FD0' maskId={`checklist-doc-${item.id}`} />
+              </button>
+            )}
+          </div>
+        </td>
         <td className='whitespace-nowrap px-3 py-4 text-sm'>
           {isEditing ? (
             <div className='w-32 mx-auto text-left'>
