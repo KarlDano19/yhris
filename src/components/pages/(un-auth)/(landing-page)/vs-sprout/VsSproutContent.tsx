@@ -13,7 +13,7 @@ const competitor = COMPETITORS.sprout;
 const valueProps = [
   {
     title: "Multi-Channel Job Posting",
-    body: "Post to LinkedIn, Facebook, and YAHSHUA Jobs from one dashboard, something Sprout HR's standard offering doesn't include. No separate job boards, no manual reposting.",
+    body: "Post to LinkedIn, Facebook, and YAHSHUA Jobs from one dashboard, included in every plan. No separate job boards, no manual reposting.",
     metric: "80% faster job posting. 3x wider reach.",
   },
   {
@@ -23,7 +23,7 @@ const valueProps = [
   },
   {
     title: "Complete Hiring-to-Offboarding",
-    body: "One connected workflow: Screen, Orient, Manage, Train, Evaluate, Separate, instead of pairing Sprout's HR modules with a separate recruitment tool to cover the full employee lifecycle.",
+    body: "One connected workflow: Screen, Orient, Manage, Train, Evaluate, Separate, covering the full employee lifecycle within the same plan price.",
     metric: "70% time savings. 95% process efficiency.",
   },
   {
@@ -33,8 +33,8 @@ const valueProps = [
   },
   {
     title: "Pricing Built for Philippine SMEs",
-    body: `Flat monthly pricing starting at ${PRICING_LABELS.base} for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. No per-seat fees, no surprise charges, no long-term contracts.`,
-    metric: "Up to 60% lower cost than Sprout HR.",
+    body: `Flat ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. YAHSHUA Payroll included. Published pricing, no long-term contracts.`,
+    metric: "One flat rate. Payroll included.",
   },
   {
     title: "Performance Evaluations Included",
@@ -58,14 +58,14 @@ const VsSproutContent = () => {
             />
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
-                <span className="lp-section-label justify-center mb-3">YAHSHUA HRIS VS SPROUT HR</span>
-                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: June 2026</p>
+                <span className="lp-section-label justify-center mb-3">SPROUT SOLUTIONS VS YAHSHUA HRIS</span>
+                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
-                  Why Philippine businesses<br className="hidden md:inline" />
-                  <span className="text-primary"> choose YAHSHUA over Sprout.</span>
+                  Sprout Solutions vs YAHSHUA HRIS:<br className="hidden md:inline" />
+                  <span className="text-primary"> which fits your team?</span>
                 </h1>
-                <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
-                  DOLE compliance built in, flat SME-friendly pricing, and full automation from hiring to offboarding. No add-ons, no surprises.
+                <p className="text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-10">
+                  Both are Philippine HRIS platforms that handle HR, payroll, and government compliance. The difference is packaging and price transparency: YAHSHUA HRIS includes DOLE compliance, hiring, and payroll in one published rate of {PRICING_LABELS.base}/month for up to {YAHSHUA_PRICING.employeeCap} employees, while Sprout sells compliance and recruitment as separate products with quote-based pricing.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
@@ -185,9 +185,9 @@ const VsSproutContent = () => {
                     <ul className="space-y-3">
                       {[
                         "Your team is an SME, not an enterprise with a dedicated Sprout admin",
-                        "You want recruitment and HR under one roof instead of a second hiring tool",
-                        "Predictable, flat costs matter more than a per-seat model that scales with headcount",
-                        "DOLE reporting needs to be guided, not something your HR team figures out alone",
+                        "You want recruitment and HR in one plan instead of a separately quoted hiring product",
+                        "You want a published, flat price up front instead of a quote that depends on headcount",
+                        "You want guided DOLE reporting included in your plan price",
                       ].map((s) => (
                         <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
                           <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(255,193,7,0.1)", border: "1px solid rgba(255,193,7,0.2)" }}>
@@ -206,7 +206,7 @@ const VsSproutContent = () => {
                       {[
                         "You're already running on Sprout's broader module suite",
                         "Earned wage access through ReadyCash or ReadyWage is a must-have for your workforce",
-                        "Your headcount and plan tier make per-seat pricing the cheaper option in practice",
+                        "Your Sprout quote for your headcount and modules comes in lower than our published rate",
                       ].map((s) => (
                         <li key={s} className="flex items-start gap-3 text-sm text-gray-600">
                           <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gray-100 border border-gray-200" />

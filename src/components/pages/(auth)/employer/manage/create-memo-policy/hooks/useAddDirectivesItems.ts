@@ -14,6 +14,14 @@ async function addDirective(directive: DirectiveData) {
     data.append('to', JSON.stringify(directive.to));
     data.append('company_name', directive.company_name || '');
 
+    // Multi-signatory assignment (optional) — send only the user ids; each user signs later.
+    if (Array.isArray(directive.signatories) && directive.signatories.length > 0) {
+      const userIds = directive.signatories.map((signatory: any) =>
+        typeof signatory === 'object' ? signatory.user_id : signatory
+      );
+      data.append('signatories', JSON.stringify(userIds));
+    }
+
     // Handle attachments as multiple FileField
     if (directive.attachments) {
       if (Array.isArray(directive.attachments)) {

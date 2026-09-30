@@ -121,7 +121,7 @@ const PhilippineComplianceArticle = () => {
                 YAHSHUA HRIS replaces disconnected platforms with one unified ecosystem. SSS, PhilHealth, Pag-IBIG, and BIR compliance are not add-ons — they are built in, maintained in real time, and surfaced to your team before deadlines, not after. Our dedicated DOLE module covers eight sub-functions including Establishment Registration, Compensation Logbook, Annual Data Report, and OSH documentation.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                One client prevented ₱480,000 in payroll errors in a single engagement. Another processed payroll for 50 employees in the same time it used to take for 10. And because YAHSHUA HRIS does not charge per seat, scaling from 50 employees to 500 does not change your cost structure.
+                One client prevented ₱480,000 in payroll errors in a single engagement. Another processed payroll for 50 employees in the same time it used to take for 10. And because YAHSHUA HRIS charges one flat rate for the first 100 employees, growing from 10 to 100 employees does not change your monthly cost.
               </p>
 
               {/* FAQ */}
@@ -187,6 +187,37 @@ const PhilippineComplianceArticle = () => {
             </div>
           </div>
         </article>
+
+        {/* Related reading */}
+        <section className="pb-16">
+          <div className="lp-section-container max-w-3xl mx-auto">
+            <div className="rounded-xl p-6" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/blog/dole-compliance-requirements-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    DOLE Compliance Requirements for Philippine Employers →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/sss-contribution-table-2026-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    2026 SSS, PhilHealth, and Pag-IBIG Contribution Rates →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/ncr-minimum-wage-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    NCR Minimum Wage 2026: ₱755 Under Wage Order NCR-28 →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/payroll-registration-checklist-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Philippine Payroll Registration Checklist →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
         {/* End CTA */}
         <section className="py-16" style={{ background: "#FFFBF0", borderTop: "1px solid rgba(255,193,7,0.2)" }}>

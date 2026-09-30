@@ -62,10 +62,8 @@ const nextConfig = {
       '/payroll-integration',
       '/vs-sprout',
       '/vs-greatday',
-      '/vs-juanhr',
       '/sprout-alternative',
       '/greatday-hr-alternative',
-      '/juanhr-alternative',
       '/how-we-compare',
       '/use-cases',
       '/use-cases/employee-onboarding',
@@ -75,7 +73,7 @@ const nextConfig = {
       '/blog',
       '/blog/dole-compliance-requirements-philippines',
       '/blog/philippine-holiday-pay-computation-guide',
-      '/blog/thirteenth-month-pay-tracking-philippines',
+      '/blog/13th-month-pay-computation-philippines-2026',
       '/blog/payroll-automation-philippines',
       '/blog/philippine-compliance-hris-2026',
       '/blog/philippine-payroll-errors-msme',
@@ -84,6 +82,11 @@ const nextConfig = {
       '/blog/ai-guidance-vs-automation-hr-software',
       '/blog/ncr-minimum-wage-2026',
       '/blog/night-differential-holiday-pay-philippines',
+      '/blog/ai-workforce-management-philippines',
+      '/blog/sss-mandatory-provident-fund-philippines',
+      '/blog/final-pay-computation-philippines',
+      '/blog/de-minimis-benefits-2026-philippines',
+      '/blog/minimum-wage-philippines-2026-by-region',
       '/faqs',
       '/docs',
       '/jobs',
@@ -124,6 +127,20 @@ const nextConfig = {
         destination: 'https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026',
         permanent: true,
       },
+      // JuanHR comparison pages retired (Sept 2026): zero search impressions
+      // in GSC since launch and no presence in PH HRIS roundups or AI answers.
+      ...['/vs-juanhr', '/vs-juanhr/', '/juanhr-alternative', '/juanhr-alternative/'].map((source) => ({
+        source,
+        destination: '/how-we-compare',
+        permanent: true,
+      })),
+      // 13th month post replaced by the 2026 computation guide (old URL had
+      // zero GSC impressions; its best sections were merged into the new post)
+      ...['/blog/thirteenth-month-pay-tracking-philippines', '/blog/thirteenth-month-pay-tracking-philippines/'].map((source) => ({
+        source,
+        destination: '/blog/13th-month-pay-computation-philippines-2026',
+        permanent: true,
+      })),
       // Old slug from before the post was renamed to use "-table-"
       {
         source: '/blog/sss-contribution-rate-2026-philippines',

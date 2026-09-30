@@ -15,8 +15,8 @@ const painPoints = [
   },
   {
     icon: Users,
-    title: "A 50-license minimum to get started",
-    body: "GreatDay HR's Basic Starter Package requires purchasing at least 50 employee licenses upfront, whether or not your team is that size yet.",
+    title: "Per-employee pricing on top of a 50-license bundle",
+    body: "GreatDay HR's Basic Starter Package is PHP 77 per employee per month, sold as a 50-license bundle (about PHP 3,850/month as of September 2026), and add-ons like recruitment and performance cost extra.",
   },
   {
     icon: FileWarning,
@@ -27,7 +27,7 @@ const painPoints = [
 
 const switchFor = [
   "You want recruitment, performance, and DOLE compliance bundled at one flat rate",
-  "Your team is under 50 people and doesn't want to buy licenses you're not using yet",
+  "You'd rather pay one flat rate up to 100 employees than per employee plus add-ons",
   "You want a Freemium tier to try the platform before paying anything",
   "You need guided DOLE reporting, not just payroll-side BIR compliance",
 ];
@@ -35,7 +35,7 @@ const switchFor = [
 const stayFor = [
   "Your team is field-based and relies on GreatDay's GPS and selfie attendance",
   "You need facial recognition biometric attendance for frontline staff",
-  "You're already past 50 licenses and the add-ons you use justify the cost",
+  "You mainly need core HR, attendance, and payroll, where GreatDay's base package can cost less than our flat rate",
 ];
 
 const GreatdayAlternativeContent = () => {
@@ -49,13 +49,13 @@ const GreatdayAlternativeContent = () => {
           <div className="lp-section-container relative z-10 text-center">
             <ScrollFadeIn>
               <span className="lp-section-label justify-center mb-3">GREATDAY HR ALTERNATIVE</span>
-              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: August 2026</p>
+              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                 Looking for a<br className="hidden md:inline" />
                 <span className="text-primary"> GreatDay HR alternative?</span>
               </h1>
               <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
-                No add-on fees for recruitment or performance, no license minimum to start, and guided DOLE compliance in every plan.
+                No add-on fees for recruitment or performance, a free plan to start, and guided DOLE compliance in every plan.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
@@ -110,7 +110,7 @@ const GreatdayAlternativeContent = () => {
                   YAHSHUA HRIS: one flat rate, nothing unbundled.
                 </h2>
                 <p className="text-base text-gray-500 leading-relaxed">
-                  {PRICING_LABELS.base}/month covers up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that, no license minimum, no separate charge for recruitment or performance management. The DOLE Module guides you through company registration, OSH reports, and AERW filing at no extra cost.
+                  {PRICING_LABELS.base}/month covers up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that, and no separate charge for recruitment or performance management. The DOLE Module guides you through company registration, OSH reports, and AERW filing at no extra cost.
                 </p>
               </div>
             </ScrollFadeIn>

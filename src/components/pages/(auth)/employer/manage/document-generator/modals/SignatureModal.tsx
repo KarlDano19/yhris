@@ -9,20 +9,47 @@ interface SignatureModalProps {
   onClose: () => void;
   onSave: (signatureData: string | File) => void;
   onTransparencyCheck?: (result: {hasTransparency: boolean, message: string, type: 'success' | 'warning' | 'error'}) => void;
+  currentSignature?: string | File | null;
 }
 
-export default function SignatureModal({ isOpen, onClose, onSave, onTransparencyCheck }: SignatureModalProps) {
+export default function SignatureModal({ isOpen, onClose, onSave, onTransparencyCheck, currentSignature }: SignatureModalProps) {
   const [signatureMode, setSignatureMode] = useState<'draw' | 'upload'>('draw');
   const [uploadedSignature, setUploadedSignature] = useState<File | null>(null);
   const signatureRef = useRef<SignatureCanvas | null>(null);
   const cancelButtonRef = useRef(null);
   
-  // Clear signature canvas when opening modal
+  // Open on the tab matching however the existing signature was created,
+  // so "Change Signature" amends it instead of starting over
   useEffect(() => {
-    if (isOpen && signatureRef.current) {
+    if (!isOpen) return;
+
+    if (currentSignature instanceof File) {
+      setSignatureMode('upload');
+      setUploadedSignature(currentSignature);
+    } else {
+      setSignatureMode('draw');
+      setUploadedSignature(null);
+    }
+  }, [isOpen, currentSignature]);
+
+  // Repaint the saved drawing onto the canvas whenever the draw tab is mounted
+  useEffect(() => {
+    if (!isOpen || signatureMode !== 'draw' || !signatureRef.current) return;
+
+    const canvas = signatureRef.current.getCanvas();
+
+    if (typeof currentSignature === 'string' && currentSignature && canvas) {
+      // signature_pad defaults ratio to devicePixelRatio, which shrinks the
+      // restored image on HiDPI screens — the canvas is a fixed size, so draw 1:1
+      signatureRef.current.fromDataURL(currentSignature, {
+        ratio: 1,
+        width: canvas.width,
+        height: canvas.height,
+      });
+    } else {
       signatureRef.current.clear();
     }
-  }, [isOpen]);
+  }, [isOpen, currentSignature, signatureMode]);
   
   // Add body class to prevent scrolling when modal is open
   useEffect(() => {
