@@ -5,7 +5,10 @@ type T_OnboardingRecord = {
   id: number;
   employer_id: number;
   employer_name: string;
+  account_manager: string;
   status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  marked_completed_by: string;
+  marked_completed_at: string | null;
   created_at: string;
   total_items: number;
   completed_items: number;
