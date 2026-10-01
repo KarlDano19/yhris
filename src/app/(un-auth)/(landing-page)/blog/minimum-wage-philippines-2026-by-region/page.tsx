@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-09-25T00:00:00.000Z',
-    modifiedTime: '2026-09-25T00:00:00.000Z',
+    modifiedTime: '2026-10-01T00:00:00.000Z',
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -37,7 +37,7 @@ const jsonLd = {
       "description": "The current daily minimum wage in every Philippine region as of September 26, 2026, ranging from ₱401 in BARMM provinces to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and scheduled changes for each region.",
       "image": "https://yahshuahris.com/blog/minimum-wage-by-region-2026.png",
       "datePublished": "2026-09-25T00:00:00.000Z",
-      "dateModified": "2026-09-25T00:00:00.000Z",
+      "dateModified": "2026-10-01T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
