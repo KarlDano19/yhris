@@ -9,6 +9,7 @@ const posts = [
   {
     slug: "year-end-tax-annualization-philippines-2026",
     category: "Payroll Compliance",
+    image: "/blog/year-end-tax-annualization-2026.png",
     title: "Year-End Tax Annualization 2026: How to Compute It, Plus BIR Form 2316 and 1604-C Deadlines",
     excerpt: "How to recompute each employee's 2026 income tax in the December payroll: the steps, the tax table, what is not taxable, worked examples (including a bonus over the ₱90,000 ceiling), special cases, and the January and February 2027 BIR filings.",
     date: "October 2026",
@@ -17,6 +18,7 @@ const posts = [
   {
     slug: "q4-payroll-compliance-deadlines-philippines-2026",
     category: "Payroll Compliance",
+    image: "/blog/q4-payroll-compliance-countdown-2026.png",
     title: "Your Q4 Compliance Countdown: Every Payroll Deadline Between Now and December 24",
     excerpt: "Every Philippine payroll deadline from October to December 2026 in one calendar: eight national holidays and special days, NCR's November 16 to 18, wage increases in Central Visayas, Bicol, and BARMM, monthly remittances, year-end annualization, and 13th month pay.",
     date: "October 2026",
