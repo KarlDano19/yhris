@@ -13,7 +13,6 @@ const posts = [
     excerpt: "Every Philippine payroll deadline from October to December 2026 in one calendar: eight national holidays and special days, NCR's November 16 to 18, wage increases in Central Visayas, Bicol, and BARMM, monthly remittances, year-end annualization, and 13th month pay.",
     date: "October 2026",
     readTime: "8 min read",
-    image: "/blog/dole-compliance-2026.png",
   },
   {
     slug: "13th-month-pay-computation-philippines-2026",
