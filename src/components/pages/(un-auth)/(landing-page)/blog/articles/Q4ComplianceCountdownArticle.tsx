@@ -190,7 +190,7 @@ const Q4ComplianceCountdownArticle = () => {
               {/* H2: Annualization */}
               <h2 style={h2}>Year-End Tax Annualization</h2>
               <p style={{ marginBottom: "2.5rem" }}>
-                In the last payroll of December, recompute each employee&apos;s income tax for the whole year, or at the last month of employment for anyone who left (RR 2-98 as amended by RR No. 11-2018). If too little was withheld, deduct the balance from the last pay of the year. If too much was withheld, refund the employee by January 25, 2027. Remember that 13th month pay and other benefits are tax-exempt only up to ₱90,000 combined, so a large December bonus can change the result.
+                In the last payroll of December, recompute each employee&apos;s income tax for the whole year, or at the last month of employment for anyone who left (RR 2-98 as amended by RR No. 11-2018). If too little was withheld, deduct the balance from the last pay of the year. If too much was withheld, refund the employee by January 25, 2027. Remember that 13th month pay and other benefits are tax-exempt only up to ₱90,000 combined, so a large December bonus can change the result. Our <Link href="/blog/year-end-tax-annualization-philippines-2026" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>year-end annualization guide</Link> walks through the computation with examples.
               </p>
 
               {/* H2: January */}

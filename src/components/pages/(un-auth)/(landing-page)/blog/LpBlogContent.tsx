@@ -7,6 +7,14 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "year-end-tax-annualization-philippines-2026",
+    category: "Payroll Compliance",
+    title: "Year-End Tax Annualization 2026: How to Compute It, Plus BIR Form 2316 and 1604-C Deadlines",
+    excerpt: "How to recompute each employee's 2026 income tax in the December payroll: the steps, the tax table, what is not taxable, worked examples (including a bonus over the ₱90,000 ceiling), special cases, and the January and February 2027 BIR filings.",
+    date: "October 2026",
+    readTime: "9 min read",
+  },
+  {
     slug: "q4-payroll-compliance-deadlines-philippines-2026",
     category: "Payroll Compliance",
     title: "Your Q4 Compliance Countdown: Every Payroll Deadline Between Now and December 24",
