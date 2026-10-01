@@ -7,6 +7,15 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "q4-payroll-compliance-deadlines-philippines-2026",
+    category: "Payroll Compliance",
+    title: "Your Q4 Compliance Countdown: Every Payroll Deadline Between Now and December 24",
+    excerpt: "Every Philippine payroll deadline from October to December 2026 in one calendar: eight national holidays and special days, NCR's November 16 to 18, wage increases in Central Visayas, Bicol, and BARMM, monthly remittances, year-end annualization, and 13th month pay.",
+    date: "October 2026",
+    readTime: "8 min read",
+    image: "/blog/dole-compliance-2026.png",
+  },
+  {
     slug: "13th-month-pay-computation-philippines-2026",
     category: "Payroll Compliance",
     title: "13th Month Pay Computation 2026: The Formula, the Common Mistakes, and a Free Calculator",

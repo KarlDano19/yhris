@@ -87,6 +87,7 @@ const nextConfig = {
       '/blog/final-pay-computation-philippines',
       '/blog/de-minimis-benefits-2026-philippines',
       '/blog/minimum-wage-philippines-2026-by-region',
+      '/blog/q4-payroll-compliance-deadlines-philippines-2026',
       '/faqs',
       '/docs',
       '/jobs',
