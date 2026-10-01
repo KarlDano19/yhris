@@ -213,6 +213,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${BASE_URL}/blog/q4-payroll-compliance-deadlines-philippines-2026`,
+      lastModified: new Date('2026-10-01'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
       url: `${BASE_URL}/blog/minimum-wage-philippines-2026-by-region`,
       lastModified: new Date('2026-09-25'),
       changeFrequency: 'weekly',

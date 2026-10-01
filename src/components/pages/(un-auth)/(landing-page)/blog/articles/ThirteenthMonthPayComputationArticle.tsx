@@ -251,6 +251,11 @@ const ThirteenthMonthPayComputationArticle = () => {
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
               <ul className="space-y-2">
                 <li>
+                  <Link href="/blog/q4-payroll-compliance-deadlines-philippines-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Q4 2026 Payroll Deadlines: Your Compliance Countdown →
+                  </Link>
+                </li>
+                <li>
                   <Link href="/blog/final-pay-computation-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
                     Final Pay Computation for Resigned Employees →
                   </Link>
