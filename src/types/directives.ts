@@ -9,6 +9,16 @@ export interface DirectiveAttachment {
   created_at?: string;
 }
 
+// One assigned multi-signatory. Backed by the polymorphic DocumentSignatory table.
+export interface Signatory {
+  id?: number;
+  user_id: string | number;
+  user_name?: string;
+  status?: 'pending' | 'signed';
+  signed_at?: string | null;
+  signature_url?: string | null;
+}
+
 export interface DirectiveData {
   id: number;
   directive_type?: 'memo' | 'policy';
@@ -27,9 +37,25 @@ export interface DirectiveData {
   name?: string;
   position?: string;
   signature?: string | File | FileList;
+  // A full-bleed A4 portrait image carrying the company header and footer. The document is
+  // printed on top of it on every page — see utils/directive_document.py.
+  letterhead?: string | File | FileList | null;
   qr_code?: string | File;
   attachments?: string | File | File[] | DirectiveAttachment[];
   attachment?: string; // Backward compatibility field - URL of first attachment
+
+  // The memo/policy rendered as a fixed-page PDF, or the PDF the user uploaded in its place.
+  // Absent on every memo created before this existed — the public page reads that absence to
+  // fall back to the legacy HTML rendering.
+  document?: string | File | null;
+  document_source?: 'generated' | 'uploaded' | null;
+  signature_placement?: string | null; // "x,y,width" — see helpers/signaturePlacement.ts
+
+  // Multi-signatory. On write, only user_ids are sent; on read, the detail endpoint
+  // returns the full rows plus is_ready / signatory_status.
+  signatories?: Signatory[];
+  is_ready?: boolean; // read-only: true when every assigned signatory has signed
+  signatory_status?: 'none' | 'pending' | 'ready'; // read-only: table badge
 }
 
 // MemoFormData — form state type (extends DirectiveData with UI-only fields)

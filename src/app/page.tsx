@@ -6,8 +6,8 @@ import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/c
 import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA HRIS - All-in-One HR Software for Philippine Businesses',
-  description: 'YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses. Manage employees, 201 files, DOLE compliance, performance, and integrate with your payroll. Try it free.',
+  title: 'YAHSHUA HRIS: All-in-One HR Software for the Philippines',
+  description: 'YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses. Manage employees, 201 files, DOLE compliance, and payroll. Try it free.',
   keywords: 'yahshua hris, yahshua payroll, employee data, job posting, sync employee data, yahshua payroll features, use cases, use cases docs, HRIS Philippines, payroll management, employee management, DOLE compliance',
   openGraph: {
     title: 'YAHSHUA HRIS - All-in-One HR Software for Philippine Businesses',
@@ -32,9 +32,11 @@ const jsonLd = {
       "@type": "Organization",
       "@id": "https://yahshuahris.com/#organization",
       "name": "YAHSHUA HRIS",
-      "legalName": "YAHSHUA Outsourcing Worldwide, Inc.",
-      "alternateName": "YOWI",
+      "legalName": "The ABBA Initiative (OPC)",
       "url": "https://yahshuahris.com",
+      "sameAs": [
+        "https://www.theabbainitiative.com/#organization"
+      ],
       "logo": {
         "@type": "ImageObject",
         "url": "https://yahshuahris.com/logo.png"
@@ -76,7 +78,7 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": `All-in-one HR management system for Philippine businesses. Flat pricing starting at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.`,
+      "description": `All-in-one HR management system for Philippine businesses, with YAHSHUA Payroll included. Flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.`,
       "offers": {
         "@type": "Offer",
         "price": String(YAHSHUA_PRICING.basePrice),
@@ -85,9 +87,10 @@ const jsonLd = {
           "@type": "UnitPriceSpecification",
           "price": String(YAHSHUA_PRICING.basePrice),
           "priceCurrency": YAHSHUA_PRICING.currency,
-          "unitText": "month"
+          "unitText": "month",
+          "valueAddedTaxIncluded": false
         },
-        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus a one-time ${PRICING_LABELS.setup} setup fee. No per-seat fees, no long-term contracts.`,
+        "description": `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month. One-time ${PRICING_LABELS.setup} setup fee covering implementation, data migration, and training. VAT excluded. YAHSHUA Payroll included. No long-term contracts.`,
         "url": "https://yahshuahris.com/pricing"
       },
       "publisher": {

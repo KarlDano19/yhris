@@ -196,18 +196,18 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000; margin-bottom: 10px;">
           <tr>
-            <td style="width: 50%; padding: 0;">
+            <td style="width: 50%; padding: 0; overflow-wrap: anywhere;">
               <span class="detail-label">Name of Employee :</span> ${data.employeeName || '[Employee Name]'}
             </td>
-            <td style="width: 50%; padding: 0;">
+            <td style="width: 50%; padding: 0; overflow-wrap: anywhere;">
               <span class="detail-label">Date Issued:</span> ${formattedDate || '[Date Issued]'}
             </td>
           </tr>
           <tr>
-            <td style="width: 50%; padding: 0;">
+            <td style="width: 50%; padding: 0; overflow-wrap: anywhere;">
               <span class="detail-label">Position :</span> ${data.position || '[Position]'}
             </td>
-            <td style="width: 50%; padding: 0;">
+            <td style="width: 50%; padding: 0; overflow-wrap: anywhere;">
               <span class="detail-label">Company Name:</span> ${data.companyName || '[Company Name]'}
             </td>
           </tr>
@@ -226,12 +226,12 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000; margin-bottom: 10px;">
           <tr>
-            <td style="padding: 0;">
+            <td style="padding: 0; overflow-wrap: anywhere;">
               <span class="detail-label">Date of Incident :</span> ${formattedIncidentDate || '[Date of Incident]'}
             </td>
           </tr>
           <tr>
-            <td style="padding: 0;">
+            <td style="padding: 0; overflow-wrap: anywhere;">
               <span class="detail-label">Place of Incident :</span> ${data.incidentPlace || '[Place of Incident]'}
             </td>
           </tr>
@@ -410,6 +410,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           font-size: 12px;
           margin-bottom: 8px;
           color: #666;
+          overflow-wrap: anywhere;
         }
         
         .decorative-line {

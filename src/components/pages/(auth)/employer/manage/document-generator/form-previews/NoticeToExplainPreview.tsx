@@ -64,7 +64,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       
       <div className="text-center mb-4">
         <h1 className="text-base font-bold uppercase text-black">NOTICE TO EXPLAIN</h1>
-        <p className="text-xs text-gray-600">{data.incidentPlace || '[Place of Incident]'}</p>
+        <p className="text-xs text-gray-600" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.incidentPlace || '[Place of Incident]'}</p>
       </div>
 
       {/* Decorative line */}
@@ -100,11 +100,11 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       </div>
       
       <div className="text-black text-xs">
-        <div><span className="font-bold">Date of Incident :</span> {formattedIncidentDate || '[Date of Incident]'}</div>
+        <div style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}><span className="font-bold">Date of Incident :</span> {formattedIncidentDate || '[Date of Incident]'}</div>
       </div>
       
       <div className="mb-3 text-black text-xs">
-        <div><span className="font-bold">Place of Incident :</span> {data.incidentPlace || '[Place of Incident]'}</div>
+        <div style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}><span className="font-bold">Place of Incident :</span> {data.incidentPlace || '[Place of Incident]'}</div>
       </div>
       
       <div className="mb-4 text-black text-xs">

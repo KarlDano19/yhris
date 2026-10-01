@@ -28,6 +28,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: "Company",
     links: [
+      { label: "About YAHSHUA HRIS", href: "/about" },
       { label: "About The ABBA Initiative", href: "https://www.theabbainitiative.com/", external: true },
       { label: "Pricing", href: "/pricing" },
       { label: "Request a Demo", href: CALENDLY_URL, external: true },

@@ -109,6 +109,131 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-047
+DATE FILED: 2026-09-25
+DATE FIXED: 2026-09-25
+CLIENT/REPORTER: Client - Galam
+
+ISSUE DESCRIPTION:
+  On Document Generator > Certificate of Employment, the "This certificate is
+  issued for ..." (Purpose) paragraph had two problems in both the preview and
+  the generated/printed certificate:
+  1. Words were cut in the middle when a line wrapped (e.g. "W&W Galam Gro / up
+     of Companies", "Mr. Ricci Cha / d G. Raagas").
+  2. Spacing typed into the Purpose textarea was not respected - extra spaces
+     collapsed into one and line breaks (Enter) were turned into spaces.
+
+DESIRED OUTCOME:
+  The Purpose paragraph wraps between whole words (only breaking inside a word
+  if a single word/string is too long to fit on a line), and it keeps the
+  spaces and line breaks exactly as the user typed them.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/document-generator/form-previews/EmployeeCertificatePreview.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Components tested (pending QA - regenerate a certificate with a long
+  Purpose, extra spaces between words, and a line break)
+☑ TypeScript types verified (style-only change, no type changes)
+
+Integration & E2E:
+☐ Manual regression testing completed (pending QA re-test)
+☑ Blast-radius check: the other generator documents (Notice to Explain,
+  Employment Agreement, Acceptance Memo) were reviewed - none use
+  break-all, and Notice to Explain's textarea fields already use
+  white-space: pre-wrap. No other changes needed.
+
+FIX EXPLANATION:
+  The Purpose paragraph had an inline style of `wordBreak: 'break-all'`, which
+  lets the browser break a line at any character, so ordinary words were split
+  mid-word. It also had no `white-space` rule, so default HTML whitespace
+  collapsing dropped the user's extra spaces and line breaks.
+  Changed the paragraph style from
+    { wordBreak: 'break-all', overflowWrap: 'anywhere' }
+  to
+    { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }
+  - Removing break-all restores normal word wrapping; `overflowWrap: 'anywhere'`
+    is kept so a very long unbroken string still cannot overflow the page.
+  - `whiteSpace: 'pre-wrap'` preserves typed spaces/line breaks while still
+    wrapping at the page edge (same pattern Notice to Explain already uses).
+  The printed certificate (print/documents/EmployeeCertificate.tsx) clones the
+  preview DOM into an iframe and its print CSS does not override these
+  properties, so the fix applies to the generated document as well.
+
+  Note: in the reported case the Purpose field itself contained a full
+  sentence ending in a period, which the template wraps with "This certificate
+  is issued for ..." and its own period - producing "issued for This is to
+  certify ..." and ". .". That is input content, not part of this fix.
+
+================================================================================
+
+BUG ID: HRIS-2026-046
+DATE FILED: 2026-09-18
+DATE FIXED: 2026-09-18
+CLIENT/REPORTER: Charmaine - Manyu Marketing Corporation (raised via Payroll team)
+COMPANION: Backend BUG_HISTORY HRIS-2026-042 (root cause) + Payroll GLOBAL BUG-183
+           (location/department/position/employment-type trail preservation)
+
+ISSUE DESCRIPTION:
+  Employees' location history/effectivity trails in Payroll (YP) went missing or
+  got corrupted after syncing from HRIS: some lost their entire location trail,
+  others were left with only the most recent entry stamped with a wrong start
+  date. Root-cause tracing showed the damage was triggered when Location,
+  Department, Position, or Employment Status were changed on the 201 Records
+  (employee detail) screen and then pushed to YP. Those 201 edits carry NO real
+  per-change effectivity date, so YP dated the appended trail line to the wrong
+  date (latest salary date, or the hire date) - and for Location this could
+  produce an inverted date range (date_to before date_from) that scrambled the
+  chronological trail. The correct place to change these fields is the Personnel
+  Movement (PMF), which carries a proper effective date.
+
+DESIRED OUTCOME:
+  On the 201 Records employment-details screen, Location, Department, Position,
+  and Employment Status must be read-only even in edit mode, so users cannot make
+  effectivity-less changes that mis-date the YP history trail. Only Date Hired
+  stays editable. Those org changes must go through the Personnel Movement (PMF).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - mounted EmploymentDetailsForm with editing=true;
+  confirmed in live DOM that Employment Status/Location/Position/Department are
+  disabled=true and Date Hired is disabled=false)
+☑ Form validation tested (locked-but-empty fields do not block Save - "missing"
+  messages are non-blocking per isBlockingError)
+☑ AddableSelect verified to honor disabled (dropdown disabled, onChange ignored,
+  "+ Add new" affordance hidden)
+☑ TypeScript types verified (no new type errors; FE dev server compiled clean)
+
+Integration & E2E:
+☑ Manual regression testing completed (edit mode renders the four fields locked,
+  Date Hired editable, System ID read-only as before)
+
+FIX EXPLANATION:
+  Introduced a single self-documenting flag `editingOrgFields = false` in
+  EmploymentDetailsForm and pointed the four org fields' `disabled` and
+  `showErrors` props at it instead of the form's `editing` flag. The result:
+  Employment Status, Location, Position, and Department render greyed-out and
+  non-interactive even while the rest of the row is in edit mode; Date Hired
+  continues to key off `editing` and stays editable. Because the shared
+  AddableSelect fully honors `disabled` (disables the select, ignores changes,
+  hides the "+ Add new" button), no handler rewiring was needed. Empty locked
+  fields still do not block Save. Flag is a one-line revert if inline editing is
+  ever re-enabled. This is the frontend guard that closes the workflow the client
+  actually used; the trail-preservation fix itself lives on the Payroll side
+  (see Payroll GLOBAL BUG-183 / I-654/I-657/I-658).
+
+================================================================================
+
 BUG ID: HRIS-2026-045
 DATE FILED: 2026-09-03
 DATE FIXED: 2026-09-03

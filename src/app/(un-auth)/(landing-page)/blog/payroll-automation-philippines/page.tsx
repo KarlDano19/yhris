@@ -3,11 +3,11 @@ import PayrollMessageArticle from "@/components/pages/(un-auth)/(landing-page)/b
 
 export const metadata: Metadata = {
   title: 'Your Payroll Is a Message to Your Team | YAHSHUA HRIS',
-  description: 'Accurate, on-time payroll is not just compliance — it is one of the most consistent acts of leadership a Philippine business owner performs. Here is what payroll automation actually gives you.',
+  description: "Accurate, on-time payroll isn't just compliance. It's one of the most consistent acts of leadership a business owner performs. What automation gives you.",
   keywords: 'payroll automation Philippines, accurate payroll Philippines, HRIS payroll Philippines, Philippine payroll compliance, SSS PhilHealth Pag-IBIG payroll',
   openGraph: {
     title: 'Your Payroll Is a Message to Your Team',
-    description: 'Every payday, your employees are reading something. A payroll that is late says: you were not our priority. A payroll that is correct, on time, every cycle — that says something else entirely.',
+    description: 'Every payday, your employees are reading something. A payroll that is late says you were not a priority. One that is correct, on time, every cycle says something else entirely.',
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-06-22T00:00:00.000Z',

@@ -18,6 +18,7 @@ import Pagination from '@/components/Pagination';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
 import SendContract from './SendContract';
+import Checklist201Button from './Checklist201Button';
 import Orient from './Orient';
 import IntroduceToTeam from './IntroduceToTeam';
 import EnrollToPayroll from './EnrollToPayroll';
@@ -35,9 +36,10 @@ import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 import LocationDepartment from './LocationDepartment';
 import LocationDepartmentModal from './modals/LocationDepartmentModal';
 import EnrollRedirectModal from './modals/EnrollRedirectModal';
+import Checklist201Modal from './modals/Checklist201Modal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
@@ -101,6 +103,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: syncEmployees } = useSyncEmployees();
   const [loginType, setLoginType] = useState<string | null>(null);
   const [isSendContractModalOpen, setIsSendContractModalOpen] = useState(false);
+  const [isChecklist201ModalOpen, setIsChecklist201ModalOpen] = useState(false);
   const [isOrientOptionModalOpen, setIsOrientOptionModalOpen] = useState(false);
   const [isSuccessSendContractModalOpen, setIsSuccessSendContractModalOpen] = useState(false);
   const [isDoloNewHire, setIsDoloNewHire] = useState(false);
@@ -449,7 +452,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (filters.enrolled && filters.enrolled.length === 0) {
       return (
         <tr>
-          <td colSpan={8}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>No filter options selected.</h4>
           </td>
         </tr>
@@ -480,6 +483,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReceived(item.id, 'contract');
               }}
               isLoading={isLoading}
+            />
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <Checklist201Button
+              completed={item.checklist_summary?.completed || 0}
+              total={item.checklist_summary?.total || 0}
+              setIsChecklistModalOpen={(e) => {
+                setSelectedOrientId(item.id);
+                setIsChecklist201ModalOpen(e);
+              }}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -533,7 +546,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex justify-center'>
+            <div className='flex mt-2 justify-center'>
               <button
                 type='button'
                 onClick={() =>
@@ -543,12 +556,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     name: `${item?.firstname ?? ''} ${item?.lastname ?? ''}`.trim(),
                   })
                 }
-                className='inline-flex items-center justify-center rounded-md p-1.5 text-red-600 hover:bg-red-50'
+                className='inline-flex items-center justify-center hover:opacity-80'
                 data-tooltip-id='onboarding-delete-tooltip'
                 data-tooltip-content='Remove from onboarding'
                 data-tooltip-place='left'
               >
-                <TrashIcon className='h-5 w-5' />
+                <DeleteIcon />
               </button>
             </div>
           </td>
@@ -557,7 +570,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={8}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm'>Please click create to add separtion of employee.</h4>
           </td>
@@ -750,6 +763,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Send Contract
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        201 Checklist Monitoring
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Orient
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -812,6 +828,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
           submitButtonText="Send Contract"
+        />
+      )}
+      {isChecklist201ModalOpen && (
+        <Checklist201Modal
+          selectedOrientId={selectedOrientId}
+          orientItems={orientItems}
+          setOrientItems={setOrientItems}
+          isOpen={isChecklist201ModalOpen}
+          setIsOpen={setIsChecklist201ModalOpen}
         />
       )}
       {isOrientOptionModalOpen && (
