@@ -11,6 +11,8 @@ import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
 import Checklist201Logo from '@/svg/Checklist201Logo';
 
+import { KeyIcon } from '@heroicons/react/24/outline';
+
 const menus = [
   {
     icon: <GeneralSettingsLogo />,
@@ -36,6 +38,11 @@ const menus = [
     text: 'Acceptance Form',
     link: '/settings/acceptance-form',
     isAvailable: true,
+  },
+  {
+    icon: <KeyIcon className='h-12 w-12 text-savoy-blue' />,
+    text: <>AI Access<br/>Tokens</>,
+    link: '/settings/ai-access',
   },
   {
     icon: <Checklist201Logo />,
