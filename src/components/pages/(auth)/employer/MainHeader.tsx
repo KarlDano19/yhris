@@ -26,6 +26,7 @@ import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/modal/ChecklistEmployerViewModal';
 import TourCompletionModal from './modals/TourCompletionModal';
 import { useTour } from '@/components/tour/useTour';
+import ProcessFlowButton from '@/components/common/ProcessFlowButton';
 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -473,6 +474,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                       <MainLogo />
                     </Link>
                     {isOnboardingEnabled && lastRoute !== 'onboarding-checklist' && <InfoButton />}
+                    <ProcessFlowButton />
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
                     <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>

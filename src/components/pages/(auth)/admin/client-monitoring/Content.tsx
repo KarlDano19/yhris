@@ -45,7 +45,7 @@ const Content = () => {
   const [pageSize, setPageSize] = useState(10);
   const [isClientGoalModalOpen, setIsClientGoalModalOpen] = useState(false);
   const [isCreateClientOpen, setIsCreateClientOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<{ id: number; name: string; client_source: string; partner: string } | null>(null);
+  const [editTarget, setEditTarget] = useState<{ id: number; name: string; client_source: string; partner: string; account_manager: string } | null>(null);
   const [paymentTarget, setPaymentTarget] = useState<{ id: number; name: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
@@ -96,6 +96,7 @@ const Content = () => {
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-800 font-medium'>{item.name}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.partner || 'Direct Client'}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{sub?.plan_name || '—'}</td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.account_manager || '—'}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm'>
               <StatusBadge status={sub?.status || 'No Subscription'} />
             </td>
@@ -107,9 +108,9 @@ const Content = () => {
             <td className='whitespace-nowrap px-3 py-5 text-sm'>
               <div className='flex justify-center space-x-2'>
                 <button
-                  onClick={() => setEditTarget({ id: item.id, name: item.name, client_source: item.client_source || '', partner: item.partner || '' })}
+                  onClick={() => setEditTarget({ id: item.id, name: item.name, client_source: item.client_source || '', partner: item.partner || '', account_manager: item.account_manager || '' })}
                   data-tooltip-id='action-btn-tooltip'
-                  data-tooltip-content='Edit client source'
+                  data-tooltip-content='Edit client info'
                   data-tooltip-place='top'
                 >
                   <EditIcon />
@@ -296,6 +297,7 @@ const Content = () => {
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Company Name</th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Partner</th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Plan</th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Acc. Manager</th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Status</th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Start Date</th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>End Date</th>

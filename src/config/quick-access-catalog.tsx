@@ -28,6 +28,7 @@ import EmployeeIdLogo from '@/svg/EmployeeIdLogo';
 import ThirdPartyPlaformLogo from '@/svg/ThirdPartyPlaformLogo';
 import EmployeeMovementIcon from '@/svg/EmployeeMovementIcon';
 import AccountsIcon from '@/svg/AccountsIcon';
+import PolicyHandbookLogo from '@/svg/PolicyHandbookLogo';
 
 export type QuickAccessCatalogItem = {
   id: string;
@@ -55,6 +56,7 @@ export const QUICK_ACCESS_CATALOG: QuickAccessCatalogItem[] = [
   { id: 'manage-document-generator', label: 'Document Generator', url: '/manage/document-generator', parentModule: 'Manage', permissionId: 'manage-page', iconComponent: DocumentGeneratorLogo },
   { id: 'manage-201-records', label: 'Employee 201 Records', url: '/manage/employee-201-records', parentModule: 'Manage', permissionId: 'manage-page', iconComponent: Employee201RecordsLogo },
   { id: 'manage-org-structure', label: 'Org Structure', url: '/manage/org-structure', parentModule: 'Manage', permissionId: 'manage-page', iconComponent: OrgStructureLogo },
+  { id: 'manage-policy-handbook', label: 'Policy Handbook', url: '/manage/policy-handbook', parentModule: 'Manage', permissionId: 'manage-page', iconComponent: PolicyHandbookLogo },
 
   // Evaluation
   { id: 'evaluation-template', label: 'Evaluation Template', url: '/evaluation/evaluation-template', parentModule: 'Evaluation', permissionId: 'evaluation-page', iconComponent: EvaluationTemplateLogo },
