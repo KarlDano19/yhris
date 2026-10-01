@@ -39,6 +39,7 @@ export default function CreateClientModal({ isOpen, onClose }: Props) {
       mobile_number: '',
       client_source: 'Direct Client',
       partner: '',
+      account_manager: '',
       plan_id: '',
       is_trial: false,
     },
@@ -55,6 +56,7 @@ export default function CreateClientModal({ isOpen, onClose }: Props) {
         mobile_number: '',
         client_source: 'Direct Client',
         partner: '',
+        account_manager: '',
         plan_id: '',
         is_trial: false,
       });
@@ -69,6 +71,7 @@ export default function CreateClientModal({ isOpen, onClose }: Props) {
         mobile_number: data.mobile_number || '',
         client_source: data.client_source,
         partner: data.partner || '',
+        account_manager: data.account_manager.trim(),
         plan_id: Number(data.plan_id),
         is_trial: data.is_trial,
       },
@@ -182,6 +185,18 @@ export default function CreateClientModal({ isOpen, onClose }: Props) {
                       </select>
                     )}
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Account Manager</label>
+                  <input
+                    {...register('account_manager', { maxLength: { value: 100, message: 'Maximum of 100 characters.' } })}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    placeholder="Name or consultant code"
+                  />
+                  {errors.account_manager && (
+                    <p className="text-red-500 text-xs mt-1">{errors.account_manager.message}</p>
+                  )}
                 </div>
 
                 <div>

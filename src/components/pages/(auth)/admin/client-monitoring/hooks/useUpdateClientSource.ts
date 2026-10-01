@@ -5,6 +5,7 @@ type T_UpdateClientSource = {
   employer_id: number;
   client_source: string;
   partner: string;
+  account_manager: string;
 };
 
 async function updateClientSource(data: T_UpdateClientSource): Promise<void> {
@@ -20,6 +21,7 @@ async function updateClientSource(data: T_UpdateClientSource): Promise<void> {
       body: JSON.stringify({
         client_source: data.client_source,
         partner: data.partner,
+        account_manager: data.account_manager,
       }),
     }
   );
