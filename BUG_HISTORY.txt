@@ -109,6 +109,65 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-048
+DATE FILED: 2026-10-02
+DATE FIXED: 2026-10-02
+CLIENT/REPORTER: Internal
+COMPANION: Backend BUG_HISTORY HRIS-2026-043 (has_onboarded logic for YP SSO +
+           backfill migration)
+
+ISSUE DESCRIPTION:
+  New employer accounts created through Yahshua Payroll SSO never went through
+  the onboarding checklist. The middleware onboarding gate skipped anyone with
+  loginType "yahshua-payroll" / "yg-payroll" (added in HRIS-2026-013), and the
+  SSO callback never set hasCompletedOnboarding in the iron-session, so the gate
+  had no real onboarding state to check for SSO users.
+
+DESIRED OUTCOME:
+  The YP user whose first SSO login creates the HRIS company is redirected to
+  /setup-employer-profile/onboarding-checklist. Existing YP accounts and YP
+  users joining an existing company go straight to the dashboard. yg-payroll
+  stays exempt (unchanged).
+
+FILES CHANGED:
+Frontend:
+- src/middleware.ts
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/Content.tsx
+- src/app/api/refresh-onboarding-session/route.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ TypeScript types verified (no new errors in changed files; a pre-existing
+  TS2345 at sso/oauth/Content.tsx mutate(data, ...) is unrelated)
+
+Integration & E2E:
+☐ Manual: first-time YP SSO login on a new YP company -> onboarding checklist
+☐ Manual: existing YP account SSO login -> /dashboard
+☐ Manual: YP user with a pre-change session (no hasCompletedOnboarding) is
+  not redirected to the checklist
+☐ Manual: onboarding disabled globally -> SSO users go to /dashboard
+☐ Manual: Google SSO employer login still works (same callback)
+
+FIX EXPLANATION:
+  1. sso/oauth/Content.tsx - finishLogin: for employer accounts, after
+     updateSession, POST /api/refresh-onboarding-session so hasCompletedOnboarding
+     / hasOnboarded are set from the backend (update-session intentionally
+     refuses those keys). Also benefits Google SSO employers, whose sessions
+     previously had no onboarding flag either.
+  2. middleware.ts - removed the blanket yahshua-payroll exemption from the
+     onboarding gate. yg-payroll is still exempt. A yahshua-payroll session
+     where hasCompletedOnboarding is undefined (created before this change,
+     when SSO never set it) is still let through until the user logs in again.
+  3. refresh-onboarding-session/route.ts - hasOnboarded is now
+       data.is_onboarding_enabled === false || (data.has_onboarded ?? false)
+     so the global "onboarding disabled" switch is respected, matching the
+     login endpoints. Without this, SSO users would be gated even when
+     onboarding is turned off.
+
+================================================================================
+
 BUG ID: HRIS-2026-047
 DATE FILED: 2026-09-25
 DATE FIXED: 2026-09-25
