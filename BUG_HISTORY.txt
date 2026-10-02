@@ -109,6 +109,60 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-049
+DATE FILED: 2026-10-02
+DATE FIXED: 2026-10-02
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+  In Manage > Document Generator, a company that has no acceptance memo could not
+  generate one. The "Acceptance Memo" document type was only offered when the
+  company already had a memo (showAcceptanceMemo = isMemoLoading || !!existingMemo),
+  and an effect forced the selection back to Employee Certificate whenever no memo
+  existed. The memo form (and its Submit button) was therefore only reachable from
+  the onboarding checklist.
+
+DESIRED OUTCOME:
+  If the company has no acceptance memo, the Document Generator lets the user
+  fill in and submit one. Once a memo exists, the form is read-only (fields
+  disabled, "View PDF" instead of Submit).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/document-generator/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ TypeScript types verified (no errors in the document-generator files)
+
+Integration & E2E:
+☐ Manual: company with no memo -> Acceptance Memo is in the type dropdown, form is
+  editable and prefilled (company name, dates), Submit creates the memo
+☐ Manual: company with a memo -> form is read-only, "View PDF" opens the saved memo
+☐ Manual: submitting from here marks the company onboarded (Employer.has_onboarded)
+☐ Manual: opening the page from the onboarding checklist (from=checklist) still
+  locks the type to Acceptance Memo
+
+FIX EXPLANATION:
+  document-generator/Content.tsx
+  1. Removed showAcceptanceMemo and stopped passing it down, so the type
+     selector (DocumentTypeField, which defaults to showing it) always offers
+     Acceptance Memo.
+  2. Deleted the effect that switched an acceptance-memo selection back to
+     employee-certificate when no memo existed.
+  3. In the existing-memo effect, the no-memo branch now also calls
+     setIsViewMode(false), so a company without a memo always gets the editable
+     form. The existing-memo branch is unchanged: it already set view mode,
+     which disables the inputs and swaps Submit for View PDF.
+
+  Not changed: the backend memo POST is still an upsert (update_or_create), so a
+  direct call can overwrite an existing memo and re-send the HR email. The
+  read-only behaviour is enforced in the UI only.
+
+================================================================================
+
 BUG ID: HRIS-2026-048
 DATE FILED: 2026-10-02
 DATE FIXED: 2026-10-02
