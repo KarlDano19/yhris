@@ -82,6 +82,14 @@ function Content() {
     } catch (err) {
       console.error('SSO updateSession failed:', err);
     }
+    // Onboarding flags can't go through updateSession — derive them from the backend.
+    if (data.account_type === 'employer') {
+      try {
+        await fetch('/api/refresh-onboarding-session', { method: 'POST' });
+      } catch (err) {
+        console.error('SSO refresh-onboarding-session failed:', err);
+      }
+    }
     redirectAfterLogin(data);
   };
 
