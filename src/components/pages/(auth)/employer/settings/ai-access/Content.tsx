@@ -9,6 +9,7 @@ import CustomToast from '@/components/CustomToast';
 import DeleteModal from '@/components/DeleteModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ModalLayout from '@/components/ModalLayout';
+import BackButton from '@/components/BackButton';
 
 import useGetMcpTokens from './hooks/useGetMcpTokens';
 import { useCreateMcpToken } from './hooks/useCreateMcpToken';
@@ -92,7 +93,9 @@ const AiAccessContent = () => {
 
   return (
     <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-6'>
-      {/* Header */}
+      <div className='flex p-4'>
+                <BackButton label='Settings' href='/settings' />
+              </div>
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
         <div>
           <h1 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
