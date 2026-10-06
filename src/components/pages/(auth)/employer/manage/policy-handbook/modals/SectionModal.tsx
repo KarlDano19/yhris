@@ -21,6 +21,13 @@ import { PolicyHandbookSectionCategory, PolicyHandbookSectionData, PolicyHandboo
 const SECTION_BODY_SCAFFOLD =
   '<h2>Simple Version</h2><p><br></p><h2>How It Works</h2><p><br></p><h2>Current Setup</h2><p><br></p>';
 
+// react-quill-new's HTML import/export silently turns every plain space in the loaded HTML into
+// a non-breaking space (&nbsp;) on save - including in paragraphs the user never touched, since
+// this content was originally authored outside Quill (AI-generated or fallback HTML, not typed in
+// Quill to begin with). Left alone, every edit accumulates more &nbsp; throughout the whole
+// section. Undo it right before submitting so only an intentional edit changes the content.
+const normalizeQuillWhitespace = (html: string): string => html.replace(/&nbsp;| /g, ' ');
+
 const CATEGORY_OPTIONS: { value: PolicyHandbookSectionCategory; label: string }[] = [
   { value: 'pay_schedule', label: 'Pay Schedule' },
   { value: 'rate_calculation', label: 'Rate Calculation' },
@@ -97,10 +104,11 @@ const SectionModal = ({ isOpen, handleClose, section }: Props) => {
   };
 
   const onSubmit = handleSubmit((data) => {
+    const sanitizedData = { ...data, body: normalizeQuillWhitespace(data.body) };
     if (isEditMode && section) {
-      updateSection({ sectionId: section.id, data }, { onSuccess, onError });
+      updateSection({ sectionId: section.id, data: sanitizedData }, { onSuccess, onError });
     } else {
-      createSection(data, { onSuccess, onError });
+      createSection(sanitizedData, { onSuccess, onError });
     }
   });
 

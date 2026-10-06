@@ -133,6 +133,9 @@ const CATEGORY_GROUPS: { key: string; label: string; categories: string[] }[] = 
   },
 ];
 
+// Strips HTML tags so search can match against a section's actual readable content, not markup
+const stripHtml = (html: string): string => html.replace(/<[^>]+>/g, ' ');
+
 const Content = () => {
   const { data: handbook, isLoading } = useGetPolicyHandbook();
   const { mutate: updateHandbook } = useUpdatePolicyHandbook();
@@ -163,7 +166,9 @@ const Content = () => {
     if (!query) return true;
     return (
       section.title.toLowerCase().includes(query) ||
-      (CATEGORY_LABELS[section.category] ?? section.category).toLowerCase().includes(query)
+      (CATEGORY_LABELS[section.category] ?? section.category).toLowerCase().includes(query) ||
+      (section.description ?? '').toLowerCase().includes(query) ||
+      stripHtml(section.body).toLowerCase().includes(query)
     );
   });
 
