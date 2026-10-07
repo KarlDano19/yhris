@@ -12,6 +12,9 @@ export const ENHANCED_QUILL_MODULES = {
 };
 
 // Enhanced formats to better support HTML content
+// NOTE: 'bullet' is NOT a separate Quill format - bulleted lists are the 'list' format with
+// value 'bullet' (see the toolbar config above: { list: 'bullet' }). Listing 'bullet' here
+// causes Quill to log "Cannot register 'bullet' specified in 'formats' config" on every mount.
 export const ENHANCED_QUILL_FORMATS = [
   'header',
   'size',
@@ -20,7 +23,6 @@ export const ENHANCED_QUILL_FORMATS = [
   'underline',
   'strike',
   'list',
-  'bullet',
   'indent',
   'color',
   'background'
