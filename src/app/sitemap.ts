@@ -219,6 +219,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/blog/sss-philhealth-pagibig-late-remittance-penalties`,
+      lastModified: new Date('2026-10-08'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
       url: `${BASE_URL}/blog/q4-payroll-compliance-deadlines-philippines-2026`,
       lastModified: new Date('2026-10-01'),
       changeFrequency: 'weekly',

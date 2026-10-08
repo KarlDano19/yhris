@@ -198,7 +198,7 @@ const Q4ComplianceCountdownArticle = () => {
                 ]}
               />
               <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "2.5rem" }}>
-                Older guides still quote a 3% SSS penalty or a digit-based SSS schedule; both are outdated. The current sss.gov.ph rule is the last day of the following month.
+                Older guides still quote a 3% SSS penalty or a digit-based SSS schedule; both are outdated. The current sss.gov.ph rule is the last day of the following month. For what paying late actually costs, see our <Link href="/blog/sss-philhealth-pagibig-late-remittance-penalties" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>late remittance penalties guide</Link>.
               </p>
 
               {/* H2: Annualization */}
