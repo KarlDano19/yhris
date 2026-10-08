@@ -35,6 +35,7 @@ const jsonLd = {
       "@id": `${URL}#article`,
       "headline": "SSS, PhilHealth, and Pag-IBIG Late Remittance Penalties: What They Actually Cost You",
       "description": "Late SSS contributions cost 2% per month (RA 11199), late PhilHealth premiums at least 3% per month compounded (RA 11223), and late Pag-IBIG remittances one-tenth of 1% per day (HDMF Circular 275). A worked example of paying 1 to 12 months late, criminal and benefit liabilities, remittance deadlines, and the PhilHealth and SSS relief programs open in 2026.",
+      "image": "https://yahshuahris.com/blog/late-remittance-penalties-2026.png",
       "datePublished": "2026-10-08T00:00:00.000Z",
       "dateModified": "2026-10-08T00:00:00.000Z",
       "author": {
