@@ -178,7 +178,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/blog/ncr-minimum-wage-2026`,
-      lastModified: new Date('2026-07-21'),
+      lastModified: new Date('2026-10-08'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
@@ -220,6 +220,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/blog/sss-philhealth-pagibig-late-remittance-penalties`,
+      lastModified: new Date('2026-10-08'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/blog/overtime-pay-computation-philippines`,
       lastModified: new Date('2026-10-08'),
       changeFrequency: 'weekly',
       priority: 0.9,

@@ -7,6 +7,14 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "overtime-pay-computation-philippines",
+    category: "Payroll Compliance",
+    title: "Overtime Pay Computation in the Philippines (2026): Rates, Formula, and ₱755 Examples",
+    excerpt: "Every overtime rate from ordinary days to double holidays, the formula for daily-paid and monthly-paid employees, peso amounts at the new ₱755 NCR minimum wage, and who is covered.",
+    date: "October 2026",
+    readTime: "8 min read",
+  },
+  {
     slug: "sss-philhealth-pagibig-late-remittance-penalties",
     category: "Payroll Compliance",
     title: "SSS, PhilHealth, and Pag-IBIG Late Remittance Penalties: What They Actually Cost You",
