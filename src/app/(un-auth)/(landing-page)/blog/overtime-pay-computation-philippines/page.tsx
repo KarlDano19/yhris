@@ -35,6 +35,7 @@ const jsonLd = {
       "@id": `${URL}#article`,
       "headline": "Overtime Pay Computation in the Philippines (2026): Rates, Formula, and ₱755 Examples",
       "description": "Overtime pay in the Philippines is the hourly rate (daily rate divided by 8) multiplied by the overtime rate for the day: 125% on ordinary days, 169% on rest days and special days, 260% on regular holidays, and 338% on a regular holiday falling on a rest day. Peso amounts at the ₱755 NCR minimum, worked examples, monthly-paid conversion, coverage under Labor Code Article 82, and tax treatment.",
+      "image": "https://yahshuahris.com/blog/overtime-pay-computation-2026.png",
       "datePublished": "2026-10-08T00:00:00.000Z",
       "dateModified": "2026-10-08T00:00:00.000Z",
       "author": {

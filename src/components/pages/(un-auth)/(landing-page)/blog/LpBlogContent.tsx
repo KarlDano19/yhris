@@ -11,6 +11,7 @@ const posts: BlogPost[] = [
   {
     slug: "overtime-pay-computation-philippines",
     category: "Payroll Compliance",
+    image: "/blog/overtime-pay-computation-2026.png",
     title: "Overtime Pay Computation in the Philippines (2026): Rates, Formula, and ₱755 Examples",
     excerpt: "Every overtime rate from ordinary days to double holidays, the formula for daily-paid and monthly-paid employees, peso amounts at the new ₱755 NCR minimum wage, and who is covered.",
     date: "October 2026",
@@ -19,6 +20,7 @@ const posts: BlogPost[] = [
   {
     slug: "sss-philhealth-pagibig-late-remittance-penalties",
     category: "Payroll Compliance",
+    image: "/blog/late-remittance-penalties-2026.png",
     title: "SSS, PhilHealth, and Pag-IBIG Late Remittance Penalties: What They Actually Cost You",
     excerpt: "Late SSS costs 2% a month, PhilHealth at least 3% compounded, and Pag-IBIG 0.1% a day. A worked example of paying 1 to 12 months late, the criminal and benefit liabilities, and the relief programs open in 2026.",
     date: "October 2026",
