@@ -338,6 +338,11 @@ const DoleComplianceArticle = () => {
                       13th Month Pay Computation 2026: Formula and Calculator →
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/blog/philippine-compliance-hris-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                      Philippine Compliance 2026: One System, Not Five Checklists →
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </div>

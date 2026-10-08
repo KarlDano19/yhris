@@ -311,6 +311,16 @@ const LateRemittancePenaltiesArticle = () => {
                     Payroll Setup Checklist: BIR, SSS, PhilHealth, Pag-IBIG →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/philippine-payroll-errors-msme" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    What Philippine Payroll Errors Actually Cost MSMEs →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/payroll-automation-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Your Payroll Is a Message to Your Team →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
