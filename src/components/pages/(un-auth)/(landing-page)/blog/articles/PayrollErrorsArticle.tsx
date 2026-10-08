@@ -239,6 +239,16 @@ const PayrollErrorsArticle = () => {
                     NCR Minimum Wage 2026: ₱755 Under Wage Order NCR-28 →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/sss-philhealth-pagibig-late-remittance-penalties" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    SSS, PhilHealth, Pag-IBIG Late Remittance Penalties: What They Cost →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/payroll-automation-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Your Payroll Is a Message to Your Team →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -255,14 +265,16 @@ const PayrollErrorsArticle = () => {
               <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-lg mx-auto">
                 YAHSHUA HRIS automates SSS, PhilHealth, Pag-IBIG, and BIR computations and updates them as regulations change. See what compliance gaps look like in your real payroll data.
               </p>
-              <Link
-                href="/contact?utm_source=blog&utm_medium=cta&utm_campaign=payroll_errors_msme"
+              <a
+                href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=payroll_errors_msme"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white transition-all"
                 style={{ background: "hsl(38, 92%, 48%)", fontSize: "1rem" }}
               >
                 Book a free demo
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </a>
             </ScrollFadeIn>
           </div>
         </section>

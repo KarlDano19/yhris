@@ -309,6 +309,11 @@ const OvertimePayComputationArticle = () => {
                     Night Differential and Holiday Pay Stacking →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/philippine-payroll-errors-msme" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    What Philippine Payroll Errors Actually Cost MSMEs →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

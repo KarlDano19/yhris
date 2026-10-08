@@ -283,6 +283,27 @@ const AiGuidanceVsAutomationArticle = () => {
           </div>
         </article>
 
+        {/* Related reading */}
+        <section className="pb-16">
+          <div className="lp-section-container max-w-3xl mx-auto">
+            <div className="rounded-xl p-6" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/blog/ai-workforce-management-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    AI and Workforce Management in Philippine Retail, Manufacturing, and Logistics →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/philippine-compliance-hris-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Philippine Compliance 2026: One System, Not Five Checklists →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* End CTA */}
         <section className="py-16" style={{ background: "#FFFBF0", borderTop: "1px solid rgba(255,193,7,0.2)" }}>
           <div className="lp-section-container max-w-3xl mx-auto text-center">
