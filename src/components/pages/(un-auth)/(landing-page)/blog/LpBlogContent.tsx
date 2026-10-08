@@ -4,8 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Tag } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages/(un-auth)/(landing-page)/blog/BlogFeaturedSection";
 
-const posts = [
+// Newest first. Set `featured: true` on one post to pin it to the Featured slot.
+const posts: BlogPost[] = [
   {
     slug: "overtime-pay-computation-philippines",
     category: "Payroll Compliance",
@@ -33,6 +35,7 @@ const posts = [
   },
   {
     slug: "q4-payroll-compliance-deadlines-philippines-2026",
+    featured: true,
     category: "Payroll Compliance",
     image: "/blog/q4-payroll-compliance-countdown-2026.png",
     title: "Your Q4 Compliance Countdown: Every Payroll Deadline Between Now and December 24",
@@ -108,7 +111,7 @@ const posts = [
     category: "Statutory Compliance",
     title: "NCR Minimum Wage 2026: ₱755/Day Under Wage Order NCR-28, Effective September 26",
     excerpt: "Metro Manila's minimum wage rises to ₱755/day (₱718 for the lower category) on September 26, 2026 under Wage Order NCR-28. Why the ₱85 NCR-27 order never took effect, the rate table, and the employer payroll checklist.",
-    date: "Updated September 2026",
+    date: "Updated October 2026",
     readTime: "8 min read",
     image: "/blog/ncr-minimum-wage-2026.png",
   },
@@ -187,6 +190,7 @@ const posts = [
 ];
 
 const LpBlogContent = () => {
+  const { featured, recent, rest } = splitFeatured(posts);
   return (
     <div style={{ background: "#ffffff" }}>
       <main className="min-h-screen pt-16">
@@ -210,11 +214,14 @@ const LpBlogContent = () => {
           </div>
         </section>
 
+        <BlogFeaturedSection featured={featured} recent={recent} />
+
         {/* Post Grid */}
         <section className="py-16" style={{ background: "#FFFBF0" }}>
           <div className="lp-section-container">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-6">More Articles</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post, i) => (
+              {rest.map((post, i) => (
                 <ScrollFadeIn key={post.slug} delay={i * 60}>
                   <Link href={`/blog/${post.slug}`} className="group block h-full">
                     <div className="lp-light-card h-full flex flex-col overflow-hidden">
