@@ -31,7 +31,7 @@ const NcrMinimumWage2026Article = () => {
               <div className="flex items-center gap-4 text-sm text-gray-400" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.5rem" }}>
                 <span>By YAHSHUA HRIS Team</span>
                 <span>·</span>
-                <span>Updated September 25, 2026</span>
+                <span>Updated October 8, 2026</span>
                 <span>·</span>
                 <span>8 min read</span>
               </div>
@@ -109,6 +109,48 @@ const NcrMinimumWage2026Article = () => {
               </div>
               <p style={{ fontSize: "0.8rem", color: "#9ca3af", marginBottom: "2.5rem" }}>
                 Source: DOLE and NWPC. NCR covers Caloocan, Las Piñas, Makati, Malabon, Mandaluyong, Manila, Marikina, Muntinlupa, Navotas, Parañaque, Pasay, Pasig, Quezon City, San Juan, Taguig, Valenzuela, and Pateros. Verify current rates at nwpc.dole.gov.ph before updating payroll.
+              </p>
+
+              {/* H2: Pay rates at the new minimum */}
+              <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
+                ₱755 in Hourly, Monthly, Overtime, and Holiday Pay
+              </h2>
+              <p style={{ marginBottom: "1.5rem" }}>
+                What the NCR-28 minimum works out to for the pay items employers compute most, based on an 8-hour day and the multipliers in DOLE&apos;s Handbook on Workers&apos; Statutory Monetary Benefits.
+              </p>
+              <div style={{ overflowX: "auto", marginBottom: "1rem" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid rgba(0,0,0,0.1)" }}>
+                      <th style={{ textAlign: "left", padding: "0.75rem 1rem", color: "#6b7280", fontWeight: "600" }}>Pay item</th>
+                      <th style={{ textAlign: "right", padding: "0.75rem 1rem", color: "#6b7280", fontWeight: "600" }}>₱755 rate</th>
+                      <th style={{ textAlign: "right", padding: "0.75rem 1rem", color: "#6b7280", fontWeight: "600" }}>₱718 rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ["Hourly rate (daily ÷ 8)", "₱94.38", "₱89.75"],
+                      ["Monthly equivalent, 6-day week (× 313 ÷ 12)", "₱19,692.92", "₱18,727.83"],
+                      ["Monthly equivalent, 5-day week (× 261 ÷ 12)", "₱16,421.25", "₱15,616.50"],
+                      ["Overtime per hour, ordinary day (125%)", "₱117.97", "₱112.19"],
+                      ["Night shift per hour, 10 PM to 6 AM (110%)", "₱103.81", "₱98.73"],
+                      ["Rest day or special day worked, 8 hours (130%)", "₱981.50", "₱933.40"],
+                      ["Overtime per hour, rest day or special day (169%)", "₱159.49", "₱151.68"],
+                      ["Regular holiday worked, 8 hours (200%)", "₱1,510.00", "₱1,436.00"],
+                      ["Overtime per hour, regular holiday (260%)", "₱245.38", "₱233.35"],
+                      ["Regular holiday on a rest day, 8 hours (260%)", "₱1,963.00", "₱1,866.80"],
+                    ].map((row, i) => (
+                      <tr key={i} style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", background: i % 2 === 0 ? "rgba(255,193,7,0.03)" : "transparent" }}>
+                        <td style={{ padding: "0.75rem 1rem", color: "#374151" }}>{row[0]}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#111827", fontWeight: "600", textAlign: "right", whiteSpace: "nowrap" }}>{row[1]}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#374151", textAlign: "right", whiteSpace: "nowrap" }}>{row[2]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ fontSize: "0.8rem", color: "#9ca3af", marginBottom: "2.5rem" }}>
+                Hourly amounts are computed from the unrounded hourly rate (₱94.375 and ₱89.75). Monthly equivalents use DOLE&apos;s estimated equivalent monthly rate formula; use the factor that matches your work schedule. Retail and service establishments regularly employing fewer than 10 workers are exempt from regular holiday pay (Labor Code Art. 94). For the full rules and worked examples, see our <Link href="/blog/overtime-pay-computation-philippines" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>overtime pay computation guide</Link>.
               </p>
 
               {/* H2: Timeline */}

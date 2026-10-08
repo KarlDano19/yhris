@@ -90,6 +90,7 @@ const nextConfig = {
       '/blog/q4-payroll-compliance-deadlines-philippines-2026',
       '/blog/year-end-tax-annualization-philippines-2026',
       '/blog/sss-philhealth-pagibig-late-remittance-penalties',
+      '/blog/overtime-pay-computation-philippines',
       '/faqs',
       '/docs',
       '/jobs',
