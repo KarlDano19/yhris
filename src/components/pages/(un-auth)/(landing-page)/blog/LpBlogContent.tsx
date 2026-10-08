@@ -7,6 +7,14 @@ import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-pa
 
 const posts = [
   {
+    slug: "sss-philhealth-pagibig-late-remittance-penalties",
+    category: "Payroll Compliance",
+    title: "SSS, PhilHealth, and Pag-IBIG Late Remittance Penalties: What They Actually Cost You",
+    excerpt: "Late SSS costs 2% a month, PhilHealth at least 3% compounded, and Pag-IBIG 0.1% a day. A worked example of paying 1 to 12 months late, the criminal and benefit liabilities, and the relief programs open in 2026.",
+    date: "October 2026",
+    readTime: "8 min read",
+  },
+  {
     slug: "year-end-tax-annualization-philippines-2026",
     category: "Payroll Compliance",
     image: "/blog/year-end-tax-annualization-2026.png",
