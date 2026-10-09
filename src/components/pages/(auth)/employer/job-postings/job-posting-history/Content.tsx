@@ -94,6 +94,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
   const resumeDraftIdParam = searchParams.get('resumeDraftId');
   const initAutoLoadDraftId = resumeDraftIdParam !== null ? parseInt(resumeDraftIdParam, 10) : undefined;
 
+  // jobId query param — deep-link (e.g. from the AI/MCP) to review one posting;
+  // opens that posting's edit modal on load. See the effect below.
+  const jobIdParam = searchParams.get('jobId');
+
   // CreateJobModal — for resuming drafts in-place
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(
     searchParams.get('create') === 'true' || resumeDraftIdParam !== null
@@ -170,6 +174,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
   const [contextMenuOptions, setContextMenuOptions] = useState<any>([]);
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<T_JobPostingTable[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
+
+  // Deep-link: if arriving with ?jobId=<id>, open that posting's edit modal once.
+  const deepLinkJobOpenedRef = useRef(false);
+  useEffect(() => {
+    if (jobIdParam && !deepLinkJobOpenedRef.current) {
+      const deepLinkJobId = parseInt(jobIdParam, 10);
+      if (!Number.isNaN(deepLinkJobId)) {
+        deepLinkJobOpenedRef.current = true;
+        setIsEditModalOpen({ id: deepLinkJobId, open: true });
+      }
+    }
+  }, [jobIdParam]);
+
+  // After the deep-linked edit modal is closed, strip ?jobId from the URL.
+  useEffect(() => {
+    if (deepLinkJobOpenedRef.current && !isEditModalOpen?.open && jobIdParam) {
+      router.replace('/post-job');
+    }
+  }, [isEditModalOpen, jobIdParam, router]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);

@@ -21,7 +21,10 @@ type T_OnboardingPhase = {
 type T_OnboardingDetail = {
   id: number;
   employer_name: string;
+  account_manager: string;
   status: string;
+  marked_completed_by: string;
+  marked_completed_at: string | null;
   phases: T_OnboardingPhase[];
   total_items: number;
   completed_items: number;

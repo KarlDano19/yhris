@@ -16,8 +16,10 @@ import { XMarkIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline';
 
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import CheckIcon from '@/svg/CheckIcon';
+import CheckIconWithBorder from '@/svg/CheckIconWithBorder';
+import CloseIconWithBorder from '@/svg/CloseIconWithBorder';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import EyePassword from '@/svg/EyePassword';
 
 type T_ChecklistItem = {
   id: string;
@@ -29,6 +31,7 @@ type T_ChecklistItem = {
   updated_by?: number | null;
   updated_by_name?: string | null;
   updated_at?: string | null;
+  document_url?: string | null;
 };
 
 type T_EditDraft = {
@@ -178,19 +181,35 @@ export default function Checklist201Modal({
     return (
       <tr key={item.id}>
         <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>{displayIndex}</td>
-        <td className='px-3 py-4 text-sm text-gray-900 text-left'>{item.requirement}</td>
+        <td className='px-3 py-4 text-sm text-gray-900 text-left'>
+          <div className='flex items-center gap-1.5'>
+            <span>{item.requirement}</span>
+            {item.document_url && (
+              <button
+                type='button'
+                onClick={() => window.open(item.document_url as string, '_blank', 'noopener,noreferrer')}
+                className='flex-shrink-0 hover:opacity-75'
+                data-tooltip-id='checklist-action-tooltip'
+                data-tooltip-content='View submitted file'
+                data-tooltip-place='top'
+              >
+                <EyePassword visible size={24} borderColor='#355FD0' strokeColor='#355FD0' maskId={`checklist-doc-${item.id}`} />
+              </button>
+            )}
+          </div>
+        </td>
         <td className='whitespace-nowrap px-3 py-4 text-sm'>
           {isEditing ? (
-            <div className='w-32 mx-auto text-left'>
+            <div className='w-28 mx-auto text-left'>
               <Select
-                className='text-sm'
+                className='text-xs'
                 classNamePrefix='select'
                 options={STATUS_OPTIONS}
                 value={STATUS_OPTIONS.find((option) => option.value === editDraft.status)}
                 onChange={(selected) => setEditDraft({ ...editDraft, status: (selected?.value || 'pending') })}
                 components={{
                   DropdownIndicator: () => (
-                    <div className='pointer-events-none px-2'>
+                    <div className='pointer-events-none px-1'>
                       <SelectChevronDown />
                     </div>
                   ),
@@ -200,7 +219,11 @@ export default function Checklist201Modal({
                 menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
                 styles={{
                   menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                  menu: (base) => ({ ...base, zIndex: 9999 }),
+                  menu: (base) => ({ ...base, zIndex: 9999, fontSize: '0.75rem' }),
+                  control: (base) => ({ ...base, minHeight: '32px', fontSize: '0.75rem' }),
+                  valueContainer: (base) => ({ ...base, padding: '0 6px' }),
+                  singleValue: (base) => ({ ...base, fontSize: '0.75rem' }),
+                  option: (base) => ({ ...base, fontSize: '0.75rem' }),
                 }}
               />
             </div>
@@ -275,16 +298,18 @@ export default function Checklist201Modal({
                   data-tooltip-content='Save changes'
                   data-tooltip-place='top'
                 >
-                  <CheckIcon />
+                  <CheckIconWithBorder />
                 </button>
                 <button
                   type='button'
                   onClick={cancelEditing}
+                  disabled={isLoading}
+                  className='disabled:opacity-50 disabled:cursor-not-allowed'
                   data-tooltip-id='checklist-action-tooltip'
                   data-tooltip-content='Cancel'
                   data-tooltip-place='top'
                 >
-                  <XMarkIcon className='w-8 h-8 text-gray-500 hover:text-gray-700' />
+                  <CloseIconWithBorder />
                 </button>
               </>
             ) : (

@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
   const hasActiveSubscription = session.hasActiveSubscription;
   const loginType = session.loginType;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'offboarding-public', 'privacy-notice', 'blog', 'form-response'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'offboarding-public', 'privacy-notice', 'blog', 'form-response', 'process-flows'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
   const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
@@ -102,7 +102,15 @@ export async function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/dashboard', request.url));
               }
               // Allow access to other sub-routes (onboarding-checklist, etc.)
-            } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications' && loginType !== 'yahshua-payroll' && loginType !== 'yg-payroll') {
+            } else if (
+              !hasCompletedOnboarding &&
+              firstRoute !== 'settings' &&
+              firstRoute !== 'notifications' &&
+              loginType !== 'yg-payroll' &&
+              // YP sessions created before SSO started syncing the onboarding flag
+              // have no hasCompletedOnboarding at all — let those through.
+              !(loginType === 'yahshua-payroll' && hasCompletedOnboarding === undefined)
+            ) {
               // Onboarding gate: block employer routes until checklist is complete.
               // settings and notifications are exempt so users can't get trapped.
               return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
