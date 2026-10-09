@@ -2,16 +2,16 @@ import { Metadata } from 'next';
 import SssContributionTable2026Article from "@/components/pages/(un-auth)/(landing-page)/blog/articles/SssContributionTable2026Article";
 
 export const metadata: Metadata = {
-  title: 'SSS Contribution Table 2026: PhilHealth & Pag-IBIG Rates',
-  description: '2026 SSS is 15% with a ₱35,000 MSC ceiling. PhilHealth is 5%, ₱100,000 ceiling. Pag-IBIG caps at ₱400/month. Full tables and computation examples.',
+  title: 'SSS, PhilHealth, Pag-IBIG Contribution Table 2026: Rates',
+  description: '2026 tables: SSS 15% (MSC up to ₱35,000), PhilHealth 5% (₱100,000 ceiling), Pag-IBIG ₱200 each, max ₱400. Employer and employee shares with examples.',
   keywords: 'SSS contribution table 2026, PhilHealth contribution rate 2026, Pag-IBIG contribution 2026, SSS mandatory provident fund, Philippine statutory contributions 2026',
   openGraph: {
     title: '2026 SSS, PhilHealth and Pag-IBIG Contribution Rates: Philippine Employer Guide',
-    description: 'SSS raised its total rate to 15% and expanded the MSC ceiling to ₱35,000. PhilHealth is at 5% with a ₱100,000 ceiling. Pag-IBIG caps at ₱400/month. Updated tables and computation examples.',
+    description: 'SSS is 15% of the monthly salary credit up to ₱35,000, PhilHealth is 5% with a ₱100,000 ceiling, and Pag-IBIG caps at ₱400 a month. Tables with employer and employee shares and computation examples.',
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-07-14T00:00:00.000Z',
-    modifiedTime: '2026-07-14T00:00:00.000Z',
+    modifiedTime: '2026-10-09T00:00:00.000Z',
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -30,11 +30,11 @@ const jsonLd = {
     {
       "@type": "Article",
       "@id": "https://yahshuahris.com/blog/sss-contribution-table-2026-philippines#article",
-      "headline": "2026 Philippine Statutory Contribution Changes: SSS, PhilHealth and Pag-IBIG Rates Every Employer Must Update Now",
-      "description": "SSS is now at 15% with a ₱35,000 MSC ceiling. PhilHealth is at 5% with a ₱100,000 ceiling. Pag-IBIG caps at ₱400 per month. Updated contribution tables, computation examples, and employer checklist.",
+      "headline": "2026 SSS, PhilHealth and Pag-IBIG Contribution Tables: Rates and Ceilings for Employers",
+      "description": "SSS is 15% of the monthly salary credit up to ₱35,000, PhilHealth is 5% with a ₱100,000 ceiling, and Pag-IBIG caps at ₱400 per month. Contribution tables with employer and employee shares, computation examples, and an employer checklist.",
       "image": "https://yahshuahris.com/blog/sss-contribution-2026.png",
       "datePublished": "2026-07-14T00:00:00.000Z",
-      "dateModified": "2026-07-14T00:00:00.000Z",
+      "dateModified": "2026-10-09T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
@@ -63,7 +63,7 @@ const jsonLd = {
           "name": "What is the SSS contribution rate in 2026?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The SSS contribution rate in 2026 is 15% of the Monthly Salary Credit (MSC). The employer pays 10% and the employee pays 5%. The employer also pays an Employees' Compensation (EC) premium of ₱10 for MSC at or below ₱14,500, or ₱30 for MSC above ₱14,500. This is up from 14% in 2025, when the employer share was 9.5% and the employee share was 4.5%."
+            "text": "The SSS contribution rate in 2026 is 15% of the Monthly Salary Credit (MSC). The employer pays 10% and the employee pays 5%. The employer also pays an Employees' Compensation (EC) premium of ₱10 for MSC at or below ₱14,500, or ₱30 for MSC above ₱14,500. SSS raised it from 14% (employer 9.5%, employee 4.5%) in January 2025, and it is unchanged in 2026."
           }
         },
         {
@@ -100,18 +100,18 @@ const jsonLd = {
         },
         {
           "@type": "Question",
-          "name": "What are the penalties for not remitting SSS contributions?",
+          "name": "What are the penalties for not remitting SSS, PhilHealth, or Pag-IBIG contributions?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "For SSS, employers who fail to remit contributions on time are liable for a 3% monthly penalty on the unpaid amount. Willful non-remittance can lead to criminal charges under RA 11199 (Social Security Act of 2018), with penalties of up to ₱20,000 in fines and up to 12 years of imprisonment for responsible employer-officers. PhilHealth imposes a 3% per month surcharge on unpaid premiums. Pag-IBIG charges 1/10 of 1% per day of delay."
+            "text": "For SSS, employers who fail to remit contributions on time pay a penalty of 2% per month on the unpaid amount, from the due date until paid (RA 11199, Section 22(a)). Willful non-remittance can lead to criminal charges against responsible officers, with a fine of ₱5,000 to ₱20,000 and imprisonment of 6 years and 1 day to 12 years under RA 11199 (Social Security Act of 2018). For PhilHealth, late payment carries interest of at least 3% per month, compounded monthly. Pag-IBIG charges 1/10 of 1% per day of delay."
           }
         },
         {
           "@type": "Question",
-          "name": "When are SSS, PhilHealth, and Pag-IBIG remittances due in 2026?",
+          "name": "When are statutory contribution remittances due in 2026?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "SSS remittance deadlines are staggered by the last digit of the employer's SSS registration number, generally falling between the 10th and 29th of the month following the payroll period. PhilHealth remittances are due by the last day of the month following the payroll cutoff, also staggered by registration number. Pag-IBIG remittances are due on or before the 10th day of the following month. Exact schedules should be verified against each agency's current remittance calendar."
+            "text": "SSS contributions are due by the last day of the month following the contribution month for regular employers. PhilHealth premiums are due from the 11th to the 20th of the following month, by the last digit of the employer number. Pag-IBIG remittances follow a schedule based on the first letter of the employer's name, from the 10th to the end of the following month (HDMF Circular No. 275). Deadlines that fall on a weekend or holiday generally move to the next working day, so verify each agency's current calendar."
           }
         }
       ]

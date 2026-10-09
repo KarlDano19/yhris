@@ -136,7 +136,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/blog/13th-month-pay-computation-philippines-2026`,
-      lastModified: new Date('2026-09-25'),
+      lastModified: new Date('2026-10-09'),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
@@ -160,7 +160,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/blog/sss-contribution-table-2026-philippines`,
-      lastModified: new Date('2026-07-14'),
+      lastModified: new Date('2026-10-09'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },

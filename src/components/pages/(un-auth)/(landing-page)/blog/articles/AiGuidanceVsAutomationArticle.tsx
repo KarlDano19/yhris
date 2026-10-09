@@ -94,7 +94,7 @@ const AiGuidanceVsAutomationArticle = () => {
                 AI automation refers to systems that apply rules directly to payroll computations without requiring a human intermediary at each step. The system does not just know the SSS rate. It uses the SSS rate to compute the correct deduction on every payroll run, applies the Mandatory Provident Fund (MPF) split for employees above the ₱20,000 MSC threshold, and produces a remittance report formatted for submission.
               </p>
               <p style={{ marginBottom: "1rem" }}>
-                When SSS raised its total contribution rate to 15% effective January 2026, an automated system updated payroll computations on the next run. An employer using a guidance-only tool received the same information but still needed to update the rate in their spreadsheet, check the formula, and verify the output before that change was reflected in employee deductions.
+                When SSS raised its total contribution rate to 15% effective January 2025, an automated system updated payroll computations on the next run. An employer using a guidance-only tool received the same information but still needed to update the rate in their spreadsheet, check the formula, and verify the output before that change was reflected in employee deductions.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
                 The key distinction is who the actor is. In AI guidance, the human is the actor, using information the system provided. In AI automation, the system is the actor, applying rules the human configured once and the system enforces continuously.
@@ -160,10 +160,10 @@ const AiGuidanceVsAutomationArticle = () => {
                 Why Philippine Payroll Is a High-Stakes Test of This Distinction
               </h2>
               <p style={{ marginBottom: "1rem" }}>
-                Statutory contribution penalties in the Philippines do not scale to intent. A company that knew the correct SSS rate but failed to update its payroll spreadsheet owes the same 3% monthly penalty on the unremitted amount as a company that never looked up the rate at all. PhilHealth imposes a 3% per month surcharge on late or incorrect remittances. BIR late filing penalties include a 25% surcharge on the deficiency plus 12% annual interest. Under RA 11199, the corporate officer responsible for payroll can face criminal liability for willful non-remittance: fines up to ₱20,000 and imprisonment of up to 12 years.
+                Statutory contribution penalties in the Philippines do not scale to intent. A company that knew the correct SSS rate but failed to update its payroll spreadsheet owes the same 2% monthly penalty on the unremitted amount as a company that never looked up the rate at all. PhilHealth charges interest of at least 3% per month, compounded, on late or incorrect remittances. BIR late filing penalties include a 25% surcharge on the deficiency plus 12% annual interest. Under RA 11199, the corporate officer responsible for payroll can face criminal liability for willful non-remittance: fines up to ₱20,000 and imprisonment of up to 12 years.
               </p>
               <p style={{ marginBottom: "1rem" }}>
-                The clearest example is the SSS contribution rate history. Under Republic Act 11199 (the Social Security Act of 2018), SSS rates increased every year from 2019 through 2025 before reaching 15% in 2026. Each increase required employers running manual payrolls or spreadsheets to update their formulas. The employers who had guidance tools knew about each change. The ones who had automated systems applied it without action required. The compliance record of both groups depends entirely on what happened at the execution layer.
+                The clearest example is the SSS contribution rate history. Under Republic Act 11199 (the Social Security Act of 2018), SSS rates rose in scheduled steps from 2019 through 2025, reaching 15% in January 2025. Each increase required employers running manual payrolls or spreadsheets to update their formulas. The employers who had guidance tools knew about each change. The ones who had automated systems applied it without action required. The compliance record of both groups depends entirely on what happened at the execution layer.
               </p>
               <p style={{ marginBottom: "1rem" }}>
                 For most Philippine MSMEs, the risk concentration is not in not knowing the rules. DOLE, SSS, PhilHealth, Pag-IBIG, and BIR all publish their requirements publicly. The risk concentration is in the distance between knowing the rule and the payroll computation reflecting it correctly on every cycle, for every employee, including employees who received a salary increase mid-year, employees whose Pag-IBIG base should be capped at ₱10,000, and employees whose 13th month pay base is basic salary only and not gross.
@@ -181,7 +181,7 @@ const AiGuidanceVsAutomationArticle = () => {
               </p>
               <ol style={{ paddingLeft: "1.5rem", marginBottom: "2rem" }}>
                 <li style={{ marginBottom: "1.25rem" }}>
-                  <strong style={{ color: "#111827" }}>When SSS changed its rate to 15% in January 2026, did your system update automatically?</strong> If the new rate was applied without your intervention, you have automation at the contribution level. If you received a notification and had to update a field yourself, you have guidance.
+                  <strong style={{ color: "#111827" }}>When SSS changed its rate to 15% in January 2025, did your system update automatically?</strong> If the new rate was applied without your intervention, you have automation at the contribution level. If you received a notification and had to update a field yourself, you have guidance.
                 </li>
                 <li style={{ marginBottom: "1.25rem" }}>
                   <strong style={{ color: "#111827" }}>Does your system compute 13th month pay on basic salary, not gross?</strong> This requires the system to distinguish between basic salary and allowances in its data model, not just in its documentation. Ask to see a sample 13th month computation before the question becomes relevant in November.
@@ -229,7 +229,7 @@ const AiGuidanceVsAutomationArticle = () => {
                   Why is knowing the payroll rule not the same as being compliant?
                 </h3>
                 <p>
-                  Philippine statutory compliance is assessed at the remittance level, not the knowledge level. An employer who knows that SSS is 15% but whose payroll spreadsheet still runs at 14% owes the same 3% monthly penalty on the under-remitted amount as an employer who was unaware of the change. The penalty structure does not differentiate based on intent or awareness. Compliance happens when the correct amount is deducted and remitted, not when the correct amount is known.
+                  Philippine statutory compliance is assessed at the remittance level, not the knowledge level. An employer who knows that SSS is 15% but whose payroll spreadsheet still runs at 14% owes the same 2% monthly penalty on the under-remitted amount as an employer who was unaware of the change. The penalty structure does not differentiate based on intent or awareness. Compliance happens when the correct amount is deducted and remitted, not when the correct amount is known.
                 </p>
               </div>
 
@@ -256,7 +256,7 @@ const AiGuidanceVsAutomationArticle = () => {
                   What penalties does a Philippine employer face for incorrect statutory contributions?
                 </h3>
                 <p>
-                  For SSS, late or incorrect remittance carries a 3% monthly penalty on the unremitted amount plus 3% annual interest on delinquent accounts. Under RA 11199, employer-officers responsible for payroll can face criminal liability: fines up to ₱20,000 and imprisonment up to 12 years for willful non-remittance. PhilHealth imposes a 3% per month surcharge on underpaid premiums. Pag-IBIG penalties are 1/10 of 1% per day of delay. BIR penalties for incorrect withholding tax remittance include a 25% surcharge on the deficiency plus 12% annual interest. Penalties compound on the underpaid amount, meaning small per-employee discrepancies become significant over multiple payroll cycles.
+                  For SSS, late or incorrect remittance carries a penalty of 2% per month on the unremitted amount, from the due date until paid. Under RA 11199, employer-officers responsible for payroll can face criminal liability: fines up to ₱20,000 and imprisonment up to 12 years for willful non-remittance. PhilHealth charges interest of at least 3% per month, compounded, on underpaid premiums. Pag-IBIG penalties are 1/10 of 1% per day of delay. BIR penalties for incorrect withholding tax remittance include a 25% surcharge on the deficiency plus 12% annual interest. Penalties compound on the underpaid amount, meaning small per-employee discrepancies become significant over multiple payroll cycles.
                 </p>
               </div>
 

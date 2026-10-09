@@ -38,6 +38,10 @@ export const thirteenthMonthFaqs = [
     q: "Do employers need to file a 13th month pay report with DOLE?",
     a: "Yes. Covered employers submit a 13th Month Pay Compliance Report through reports.dole.gov.ph by January 15 of the following year. The deadline for 2025 payments was January 15, 2026.",
   },
+  {
+    q: "Paano mag-compute ng 13th month pay?",
+    a: "Idagdag ang kabuuang basic salary na natanggap ng empleyado mula Enero 1 hanggang Disyembre 31, at i-divide sa 12. Halimbawa, kung ₱20,000 ang buwanang basic salary buong taon, ₱240,000 ÷ 12 = ₱20,000 ang 13th month pay. Dapat itong maibigay hindi lalampas sa Disyembre 24. In English: add up the total basic salary actually earned from January 1 to December 31, then divide by 12.",
+  },
 ];
 
 const h2 = { fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" } as const;
@@ -72,7 +76,7 @@ const ThirteenthMonthPayComputationArticle = () => {
               <div className="flex items-center gap-4 text-sm text-gray-400" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.5rem" }}>
                 <span>By YAHSHUA HRIS Team</span>
                 <span>·</span>
-                <span>September 2026</span>
+                <span>Updated October 2026</span>
                 <span>·</span>
                 <span>9 min read</span>
               </div>

@@ -23,15 +23,15 @@ const SssContributionTable2026Article = () => {
                 Statutory Compliance
               </span>
               <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-gray-900 mb-6" style={{ lineHeight: "1.25" }}>
-                2026 Philippine Statutory Contribution Changes: SSS, PhilHealth and Pag-IBIG Rates Every Employer Must Update Now
+                2026 SSS, PhilHealth and Pag-IBIG Contribution Tables: Rates and Ceilings for Employers
               </h1>
               <p className="text-gray-500 text-lg leading-relaxed mb-8">
-                SSS raised its total rate to 15% and expanded the salary ceiling to ₱35,000. PhilHealth finalized at 5% with a ₱100,000 ceiling. Pag-IBIG holds at ₱400 maximum monthly. If your payroll system has not been updated for all three, you are calculating deductions incorrectly on every payroll run.
+                In 2026, SSS is 15% of the Monthly Salary Credit (up to ₱35,000), PhilHealth is 5% of basic salary (₱10,000 to ₱100,000), and Pag-IBIG is capped at ₱400 a month (₱200 each from employer and employee). If your payroll system is on older rates, you are calculating deductions incorrectly on every payroll run.
               </p>
               <div className="flex items-center gap-4 text-sm text-gray-400" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.5rem" }}>
                 <span>By YAHSHUA HRIS Team</span>
                 <span>·</span>
-                <span>July 2026</span>
+                <span>Updated October 2026</span>
                 <span>·</span>
                 <span>10 min read</span>
               </div>
@@ -60,7 +60,7 @@ const SssContributionTable2026Article = () => {
               {/* Living hub callout */}
               <div style={{ background: "rgba(255,193,7,0.06)", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "12px", padding: "1.25rem 1.5rem", marginBottom: "2.5rem" }}>
                 <p style={{ margin: 0, fontSize: "0.9rem", color: "#374151" }}>
-                  <strong style={{ color: "hsl(38, 92%, 38%)" }}>Living reference page:</strong> This page is updated in place whenever SSS, PhilHealth, or Pag-IBIG changes its rates or ceilings. Last verified: July 2026. All rates and figures should be confirmed against the issuing agency&apos;s official circular before updating your payroll system.
+                  <strong style={{ color: "hsl(38, 92%, 38%)" }}>Living reference page:</strong> This page is updated in place whenever SSS, PhilHealth, or Pag-IBIG changes its rates or ceilings. Last verified: October 9, 2026. All rates and figures should be confirmed against the issuing agency&apos;s official circular before updating your payroll system.
                 </p>
               </div>
 
@@ -69,7 +69,7 @@ const SssContributionTable2026Article = () => {
                 Every Philippine employer with at least one employee is legally required to remit monthly contributions to SSS, PhilHealth, and Pag-IBIG. These are not optional deductions. Failure to remit on time, or remitting the wrong amount, exposes the employer to penalties, surcharges, and in some cases personal liability for the employer-officer who signed off on payroll.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                In 2026, SSS implemented a rate increase to 15% and raised the maximum monthly salary credit (MSC) from ₱30,000 to ₱35,000. PhilHealth maintained its 5% rate, which became the final scheduled rate under the Universal Health Care Act (RA 11223). Pag-IBIG contribution rates remain unchanged. This guide covers the current rates for all three, with contribution tables and computation examples.
+                SSS reached its final scheduled rate of 15% and a maximum monthly salary credit (MSC) of ₱35,000 in January 2025, and both still apply in 2026. PhilHealth maintained its 5% rate, which became the final scheduled rate under the Universal Health Care Act (RA 11223). Pag-IBIG contribution rates remain unchanged. This guide covers the current rates for all three, with contribution tables and computation examples.
               </p>
 
               {/* Quick reference table */}
@@ -113,7 +113,7 @@ const SssContributionTable2026Article = () => {
                 The Social Security System (SSS) contribution rate in 2026 is <strong>15% of the Monthly Salary Credit (MSC)</strong>. The employer pays 10% and the employee pays 5%. The employer also pays a separate flat Employees&apos; Compensation (EC) premium of ₱10 for MSC at or below ₱14,500, or ₱30 for MSC above ₱14,500.
               </p>
               <p style={{ marginBottom: "1.5rem" }}>
-                The MSC minimum is ₱5,000 and the MSC maximum is ₱35,000 in 2026, up from ₱30,000 in 2025. This means employees who earn more than ₱35,000 per month have their contribution capped at the ₱35,000 MSC level.
+                The MSC minimum is ₱5,000 and the MSC maximum is ₱35,000 in 2026, unchanged since January 2025 (in 2024 the range was ₱4,000 to ₱30,000). This means employees who earn more than ₱35,000 per month have their contribution capped at the ₱35,000 MSC level.
               </p>
 
               {/* SSS rate table */}
@@ -176,12 +176,12 @@ const SssContributionTable2026Article = () => {
 
               {/* H3: What changed from 2025 */}
               <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "#111827", marginTop: "2.5rem", marginBottom: "0.75rem" }}>
-                What Changed from 2025 to 2026
+                How SSS Contributions Changed Since 2024
               </h3>
               <ul style={{ paddingLeft: "1.5rem", marginBottom: "2rem", listStyleType: "disc" }}>
-                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Rate increase.</strong> The total SSS contribution rate moved from 14% in 2025 (employer 9.5%, employee 4.5%) to 15% in 2026 (employer 10%, employee 5%).</li>
-                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Higher MSC ceiling.</strong> The maximum MSC increased from ₱30,000 to ₱35,000. Employees earning above ₱30,000 now contribute on a higher salary base, increasing both deductions and employer cost.</li>
-                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>MPF ceiling expanded.</strong> With the MSC ceiling raised to ₱35,000, the maximum MPF-eligible portion rose from ₱10,000 (₱30,000 minus ₱20,000) to ₱15,000 (₱35,000 minus ₱20,000).</li>
+                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Rate increase.</strong> The total SSS contribution rate moved from 14% in 2024 (employer 9.5%, employee 4.5%) to 15% in January 2025 (employer 10%, employee 5%), the last scheduled increase under RA 11199. It is unchanged in 2026.</li>
+                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Higher MSC range.</strong> In January 2025 the minimum MSC rose from ₱4,000 to ₱5,000 and the maximum from ₱30,000 to ₱35,000. Employees earning above ₱30,000 contribute on a higher salary base than before 2025, increasing both deductions and employer cost.</li>
+                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>MPF ceiling expanded.</strong> With the MSC ceiling at ₱35,000, the maximum MPF-eligible portion is ₱15,000 (₱35,000 minus ₱20,000), up from ₱10,000 (₱30,000 minus ₱20,000) before 2025.</li>
               </ul>
 
               {/* ===================== PhilHealth ===================== */}
@@ -319,7 +319,7 @@ const SssContributionTable2026Article = () => {
                 <strong style={{ color: "#111827" }}>Common payroll error:</strong> Some payroll systems apply the 2% Pag-IBIG rate to the employee&apos;s full gross salary instead of capping the base at ₱10,000. For an employee earning ₱40,000, the correct employee deduction is ₱200, not ₱800 (2% of ₱40,000). Over-deducting Pag-IBIG is a compliance error and the excess must be refunded to the employee.
               </p>
               <p style={{ marginBottom: "2rem" }}>
-                Employers remit contributions on or before the 10th day of the following month. Late remittance carries a penalty of 1/10 of 1% per day of delay.
+                Pag-IBIG remittances follow a schedule based on the first letter of the employer&apos;s name, from the 10th to the end of the following month (HDMF Circular No. 275); confirm your window with Pag-IBIG. Late remittance carries a penalty of 1/10 of 1% per day of delay.
               </p>
 
               {/* ===================== What to update ===================== */}
@@ -327,15 +327,15 @@ const SssContributionTable2026Article = () => {
                 What Employers Need to Update Now
               </h2>
               <p style={{ marginBottom: "1rem" }}>
-                The SSS rate change and ceiling increase took effect in January 2026. If your payroll system has been running on 2025 settings, you have been under-deducting and under-remitting SSS contributions since January. Here is the checklist:
+                The SSS rate and ceiling increases took effect in January 2025, so every 2026 payroll should already use them. If your payroll system is still running on 2024 settings, it has been under-deducting and under-remitting SSS contributions since January 2025. Here is the checklist:
               </p>
               <ul style={{ paddingLeft: "1.5rem", marginBottom: "2rem", listStyleType: "disc" }}>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Update SSS rate to 15% (employee 5%, employer 10%).</strong> If you are still on 14% (employee 4.5%, employer 9.5%), you have a shortfall that accrues penalties on top of the unpaid amount. Correct it in the current payroll period and remit the difference for prior months.</li>
-                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Update the MSC ceiling to ₱35,000.</strong> Employees earning between ₱30,000 and ₱35,000 are now contributing on a higher base. If your system still caps at ₱30,000, those employees are being under-deducted.</li>
+                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Update the MSC ceiling to ₱35,000.</strong> Employees earning between ₱30,000 and ₱35,000 have contributed on a higher base since January 2025. If your system still caps at ₱30,000, those employees are being under-deducted.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Verify PhilHealth is at 5% with a ₱100,000 ceiling.</strong> The 5% rate has been in effect since January 2024. If your system is at 4.5%, you have had a two-year shortfall to correct.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Check the Pag-IBIG cap logic.</strong> Confirm your system applies the 2% rate only up to ₱10,000 of salary, not to the full gross. Both over-deduction and under-deduction are compliance problems.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Check your payslip format.</strong> SSS payslip deductions should now show two line items for employees earning above ₱20,000: regular SS and MPF. A single combined SSS line is acceptable but some agencies prefer the split.</li>
-                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Verify remittance schedules.</strong> SSS, PhilHealth, and Pag-IBIG each have different remittance deadlines based on the last digit of your company&apos;s registration number. Confirm the current schedule with each agency as these are subject to change.</li>
+                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Verify remittance schedules.</strong> SSS contributions are due by the last day of the month after the contribution month, PhilHealth from the 11th to the 20th depending on the last digit of your employer number, and Pag-IBIG on a schedule based on the first letter of your company name (HDMF Circular No. 275). Confirm your exact dates with each agency, as deadlines move when they fall on weekends or holidays.</li>
               </ul>
 
               {/* YAHSHUA HRIS CTA callout */}
@@ -361,7 +361,7 @@ const SssContributionTable2026Article = () => {
                   What is the SSS contribution rate in 2026?
                 </h3>
                 <p>
-                  The SSS contribution rate in 2026 is 15% of the Monthly Salary Credit (MSC). The employer pays 10% and the employee pays 5%. The employer also pays an Employees&apos; Compensation (EC) premium of ₱10 (for MSC at or below ₱14,500) or ₱30 (for MSC above ₱14,500). This is up from 14% in 2025, when the employer share was 9.5% and the employee share was 4.5%.
+                  The SSS contribution rate in 2026 is 15% of the Monthly Salary Credit (MSC). The employer pays 10% and the employee pays 5%. The employer also pays an Employees&apos; Compensation (EC) premium of ₱10 (for MSC at or below ₱14,500) or ₱30 (for MSC above ₱14,500). SSS raised it from 14% (employer 9.5%, employee 4.5%) in January 2025, and it is unchanged in 2026.
                 </p>
               </div>
 
@@ -406,7 +406,7 @@ const SssContributionTable2026Article = () => {
                   What are the penalties for not remitting SSS, PhilHealth, or Pag-IBIG contributions?
                 </h3>
                 <p>
-                  For SSS, employers who fail to remit contributions on time are liable for a 3% monthly penalty on the unpaid amount, plus a 3% annual interest on delinquent accounts. Willful non-remittance can lead to criminal charges against responsible officers, with penalties of up to ₱20,000 in fines and up to 12 years of imprisonment under RA 11199 (Social Security Act of 2018). For PhilHealth, late payment carries a 3% per month surcharge on unpaid premiums. For Pag-IBIG, the penalty is 1/10 of 1% per day of delay. In all three cases, the employer-officer who authorized or failed to remit payroll can be held personally liable, not just the company.
+                  For SSS, employers who fail to remit contributions on time pay a penalty of 2% per month on the unpaid amount, from the due date until paid (RA 11199, Section 22(a)). Willful non-remittance can lead to criminal charges against responsible officers, with a fine of ₱5,000 to ₱20,000 and imprisonment of 6 years and 1 day to 12 years under RA 11199 (Social Security Act of 2018). For PhilHealth, late payment carries interest of at least 3% per month, compounded monthly. For Pag-IBIG, the penalty is 1/10 of 1% per day of delay. In all three cases, the employer-officer who authorized or failed to remit payroll can be held personally liable, not just the company. For a worked example of what paying late costs, see our <Link href="/blog/sss-philhealth-pagibig-late-remittance-penalties" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>late remittance penalties guide</Link>.
                 </p>
               </div>
 
@@ -415,7 +415,7 @@ const SssContributionTable2026Article = () => {
                   When are statutory contribution remittances due in 2026?
                 </h3>
                 <p>
-                  SSS remittance deadlines are staggered by the last digit of the employer&apos;s SSS registration number, generally falling between the 10th and 29th of the month following the applicable payroll period. PhilHealth remittances are due by the last day of the month following the payroll cutoff, with deadlines also staggered by registration number. Pag-IBIG remittances are due on or before the 10th day of the following month. Exact schedules for each agency should be verified against the agency&apos;s current remittance calendar, as deadlines shift when they fall on weekends or holidays.
+                  SSS contributions are due by the last day of the month following the contribution month for regular employers. PhilHealth premiums are due from the 11th to the 20th of the following month, by the last digit of the employer number. Pag-IBIG remittances follow a schedule based on the first letter of the employer&apos;s name, from the 10th to the end of the following month (HDMF Circular No. 275). Deadlines that fall on a weekend or holiday generally move to the next working day, so verify each agency&apos;s current calendar.
                 </p>
               </div>
 
