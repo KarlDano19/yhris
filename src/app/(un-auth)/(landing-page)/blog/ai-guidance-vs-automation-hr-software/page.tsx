@@ -71,7 +71,7 @@ const jsonLd = {
           "name": "Why is knowing the payroll rule not the same as being compliant?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Philippine statutory compliance is assessed at the remittance level, not the knowledge level. An employer who knows that SSS is 15% but whose payroll spreadsheet still runs at 14% owes the same 3% monthly penalty on the under-remitted amount as an employer who was unaware of the change. The penalty structure does not differentiate based on intent or awareness. Compliance happens when the correct amount is deducted and remitted, not when the correct amount is known."
+            "text": "Philippine statutory compliance is assessed at the remittance level, not the knowledge level. An employer who knows that SSS is 15% but whose payroll spreadsheet still runs at 14% owes the same 2% monthly penalty on the under-remitted amount as an employer who was unaware of the change. The penalty structure does not differentiate based on intent or awareness. Compliance happens when the correct amount is deducted and remitted, not when the correct amount is known."
           }
         },
         {
@@ -95,7 +95,7 @@ const jsonLd = {
           "name": "What penalties does a Philippine employer face for incorrect statutory contributions?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "For SSS, late or incorrect remittance carries a 3% monthly penalty on the unremitted amount plus 3% annual interest on delinquent accounts. Under RA 11199, employer-officers responsible for payroll can face criminal liability: fines up to ₱20,000 and imprisonment up to 12 years for willful non-remittance. PhilHealth imposes a 3% per month surcharge on underpaid premiums. Pag-IBIG penalties are 1/10 of 1% per day of delay. BIR penalties for incorrect withholding tax remittance include a 25% surcharge plus 12% annual interest. Penalties compound on the underpaid amount, meaning small per-employee discrepancies become significant over multiple payroll cycles."
+            "text": "For SSS, late or incorrect remittance carries a penalty of 2% per month on the unremitted amount, from the due date until paid. Under RA 11199, employer-officers responsible for payroll can face criminal liability: fines up to ₱20,000 and imprisonment up to 12 years for willful non-remittance. PhilHealth charges interest of at least 3% per month, compounded, on underpaid premiums. Pag-IBIG penalties are 1/10 of 1% per day of delay. BIR penalties for incorrect withholding tax remittance include a 25% surcharge plus 12% annual interest. Penalties compound on the underpaid amount, meaning small per-employee discrepancies become significant over multiple payroll cycles."
           }
         },
         {
