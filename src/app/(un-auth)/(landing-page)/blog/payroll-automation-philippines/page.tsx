@@ -71,7 +71,7 @@ const jsonLd = {
           "name": "What happens if a Philippine employer misses payroll contribution remittance deadlines?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Late SSS remittances carry a penalty of 3% per month on the unremitted amount. PhilHealth imposes a 3% per month surcharge on unpaid premiums. Pag-IBIG charges 1/10 of 1% per day of delay plus a service fee. BIR late filing penalties include a 25% surcharge on the tax due plus 12% annual interest. Repeated non-remittance can result in criminal charges against responsible officers under each agency's enabling law."
+            "text": "Late SSS remittances carry a penalty of 2% per month on the unremitted amount. PhilHealth charges interest of at least 3% per month, compounded, on unpaid premiums. Pag-IBIG charges 1/10 of 1% per day of delay plus a service fee. BIR late filing penalties include a 25% surcharge on the tax due plus 12% annual interest. Repeated non-remittance can result in criminal charges against responsible officers under each agency's enabling law."
           }
         },
         {
