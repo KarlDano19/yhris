@@ -1,3 +1,5 @@
+const STAGING_HOST = 's1.yahshuahris.com';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
@@ -171,11 +173,30 @@ const nextConfig = {
           },
         ],
       },
+      // Staging (s1.yahshuahris.com) must never be indexed, archived, or quoted by search or AI crawlers.
+      // Matches only this host, so the production site is unaffected.
+      {
+        source: '/(.*)',
+        has: [{ type: 'host', value: STAGING_HOST }],
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      },
     ];
   },
   async rewrites() {
     return {
-      beforeFiles: [],
+      beforeFiles: [
+        // Staging serves a block-all robots.txt instead of the production one.
+        {
+          source: '/robots.txt',
+          has: [{ type: 'host', value: STAGING_HOST }],
+          destination: '/robots-staging.txt',
+        },
+      ],
       afterFiles: [
         {
           source: '/ingest/static/:path*',

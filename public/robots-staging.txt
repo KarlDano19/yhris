@@ -1,0 +1,4 @@
+# Staging site (s1.yahshuahris.com): not for search engines or AI crawlers.
+# Served instead of robots.txt only on this host, via next.config.js rewrites.
+User-agent: *
+Disallow: /
