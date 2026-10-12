@@ -5,7 +5,7 @@ import { getIronSession } from 'iron-session';
 
 import { sessionOptions, SessionData } from './lib/session';
 
-export async function middleware(request: NextRequest) {
+async function appMiddleware(request: NextRequest) {
   const cookieStore = await cookies();
   const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   const listPathname = request.nextUrl.pathname.split('/');
@@ -177,6 +177,43 @@ export async function middleware(request: NextRequest) {
     }
   }
   return NextResponse.next();
+}
+
+// Staging (s1.yahshuahris.com) must never be indexed, archived, or quoted by search or AI crawlers.
+// Detected at request time, so it works whichever image or env the staging deployment uses:
+//   1. the Host header (or X-Forwarded-Host / X-Original-Host when a proxy such as CloudFront rewrites Host), or
+//   2. STAGING_NOINDEX=true (or 1) in the staging deployment's runtime environment.
+// Production hosts match neither, so production responses are unchanged.
+const STAGING_HOSTS = ['s1.yahshuahris.com'];
+const STAGING_ROBOTS_TAG = 'noindex, nofollow, noarchive, nosnippet';
+
+const isStagingRequest = (request: NextRequest) => {
+  const flag = process.env.STAGING_NOINDEX;
+  if (flag === 'true' || flag === '1') return true;
+  return ['host', 'x-forwarded-host', 'x-original-host'].some((name) => {
+    const value = request.headers.get(name);
+    if (!value) return false;
+    const host = value.split(',')[0].trim().toLowerCase().replace(/:\d+$/, '');
+    return STAGING_HOSTS.includes(host);
+  });
+};
+
+export async function middleware(request: NextRequest) {
+  const staging = isStagingRequest(request);
+
+  if (staging && request.nextUrl.pathname === '/robots.txt') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/robots-staging.txt';
+    const response = NextResponse.rewrite(url);
+    response.headers.set('X-Robots-Tag', STAGING_ROBOTS_TAG);
+    return response;
+  }
+
+  const response = await appMiddleware(request);
+  if (staging) {
+    response.headers.set('X-Robots-Tag', STAGING_ROBOTS_TAG);
+  }
+  return response;
 }
 
 export const config = {
