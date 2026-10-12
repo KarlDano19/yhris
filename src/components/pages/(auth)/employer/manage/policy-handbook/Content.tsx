@@ -573,7 +573,7 @@ const Content = () => {
                       )}
 
                       <div
-                        className='text-sm text-gray-700 leading-relaxed mt-4 [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-savoy-blue [&_a]:font-medium [&_a]:no-underline [&_a]:hover:underline'
+                        className='text-sm text-gray-700 leading-relaxed mt-4 break-words [overflow-wrap:anywhere] [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-savoy-blue [&_a]:font-medium [&_a]:no-underline [&_a]:hover:underline'
                         dangerouslySetInnerHTML={{ __html: selectedSection.body || '<p class="text-gray-400">No content yet.</p>' }}
                       />
                     </>
