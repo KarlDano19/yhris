@@ -236,15 +236,15 @@ const PayrollRegistrationChecklistArticle = () => {
                     {[
                       {
                         agency: "SSS",
-                        deadline: "11th–20th of the following month (staggered by last digit of SSS employer number)",
-                        basis: "Last digit of SSS employer number",
-                        penalty: "3% per month on unpaid amount"
+                        deadline: "Last day of the month following the contribution month (regular employers)",
+                        basis: "Calendar month, moves to the next working day if it falls on a holiday",
+                        penalty: "2% per month on unpaid amount"
                       },
                       {
                         agency: "PhilHealth",
-                        deadline: "Last day of the month following the payroll period (staggered)",
+                        deadline: "11th–15th (employer number ending 0–4) or 16th–20th (ending 5–9) of the following month",
                         basis: "Last digit of PhilHealth employer number",
-                        penalty: "3% per month surcharge on unpaid premiums"
+                        penalty: "Interest of at least 3% per month, compounded"
                       },
                       {
                         agency: "Pag-IBIG",
@@ -368,7 +368,7 @@ const PayrollRegistrationChecklistArticle = () => {
                   What happens if an employer starts paying salaries before completing government registrations?
                 </h3>
                 <p>
-                  Penalties apply from the date the first employee started work, not from the date the employer discovers the gap. For SSS, this means a 3% monthly penalty on all unpaid contributions from the employee&apos;s start date. For PhilHealth, a 3% monthly surcharge applies. For Pag-IBIG, the penalty is 1/10 of 1% per day of delay. In addition, the employer-officer responsible for payroll can face personal liability for unpaid SSS contributions under RA 11199 (Social Security Act of 2018), with penalties up to ₱20,000 and imprisonment of up to 12 years for willful non-remittance.
+                  Penalties apply from the date the first employee started work, not from the date the employer discovers the gap. For SSS, this means a 2% monthly penalty on all unpaid contributions from the employee&apos;s start date. For PhilHealth, interest of at least 3% per month, compounded, applies. For Pag-IBIG, the penalty is 1/10 of 1% per day of delay. In addition, the employer-officer responsible for payroll can face personal liability for unpaid SSS contributions under RA 11199 (Social Security Act of 2018), with penalties up to ₱20,000 and imprisonment of up to 12 years for willful non-remittance.
                 </p>
               </div>
 
