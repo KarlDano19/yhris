@@ -688,10 +688,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.incidentDate}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-              <span>{item.name}</span>
+              <span
+                className='block max-w-[12rem] truncate mx-auto'
+                data-tooltip-id='employee-issue-cell-tooltip'
+                data-tooltip-content={item.name}
+                data-tooltip-place='top'
+                data-tooltip-delay-show={300}
+              >
+                {item.name}
+              </span>
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-              <span>{item.issue_type || '—'}</span>
+              <span
+                className='block max-w-[14rem] truncate mx-auto'
+                data-tooltip-id={item.issue_type ? 'employee-issue-cell-tooltip' : undefined}
+                data-tooltip-content={item.issue_type || undefined}
+                data-tooltip-place='top'
+                data-tooltip-delay-show={300}
+              >
+                {item.issue_type || '—'}
+              </span>
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
               <SendNTE
@@ -1150,6 +1166,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='employee-issue-cell-tooltip' className='max-w-md !whitespace-normal break-words z-50' />
       <ConfirmModal
         message={
           isKioskReflected
