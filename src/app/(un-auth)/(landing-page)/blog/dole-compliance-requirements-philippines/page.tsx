@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-06-02T00:00:00.000Z',
-    modifiedTime: '2026-06-02T00:00:00.000Z',
+    modifiedTime: '2026-10-15T00:00:00.000Z',
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -34,7 +34,7 @@ const jsonLd = {
       "description": "A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.",
       "image": "https://yahshuahris.com/blog/dole-compliance-2026.png",
       "datePublished": "2026-06-02T00:00:00.000Z",
-      "dateModified": "2026-06-02T00:00:00.000Z",
+      "dateModified": "2026-10-15T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

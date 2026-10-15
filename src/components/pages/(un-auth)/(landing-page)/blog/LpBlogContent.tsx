@@ -9,6 +9,14 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "dole-osh-reports-deadlines-wair-aedr-amr",
+    category: "DOLE Compliance",
+    title: "DOLE Safety Report Deadlines: WAIR, AEDR, and AMR Under DO 252-25",
+    excerpt: "WAIR is due every 30th, AEDR by January 30, and AMR by March 31. Where each is filed, the 24-hour rule for serious accidents, the fines for missing them, and the dates through March 2027.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "overtime-pay-computation-philippines",
     category: "Payroll Compliance",
     image: "/blog/overtime-pay-computation-2026.png",
