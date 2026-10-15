@@ -11,6 +11,7 @@ const posts: BlogPost[] = [
   {
     slug: "hris-pricing-philippines-2026",
     category: "Buyer's Guide",
+    image: "/blog/hris-pricing-philippines-2026.png",
     title: "HRIS Pricing in the Philippines 2026: What a 100-Employee Company Actually Pays",
     excerpt: "Published prices for the main Philippine HR and payroll tools, the monthly and year-one cost at 50 to 300 employees, the fees that hide outside the subscription, and eight questions to ask any vendor.",
     date: "October 2026",
@@ -19,6 +20,7 @@ const posts: BlogPost[] = [
   {
     slug: "dole-osh-reports-deadlines-wair-aedr-amr",
     category: "DOLE Compliance",
+    image: "/blog/dole-safety-report-deadlines-2026.png",
     title: "DOLE Safety Report Deadlines: WAIR, AEDR, and AMR Under DO 252-25",
     excerpt: "WAIR is due every 30th, AEDR by January 30, and AMR by March 31. Where each is filed, the 24-hour rule for serious accidents, the fines for missing them, and the dates through March 2027.",
     date: "October 2026",

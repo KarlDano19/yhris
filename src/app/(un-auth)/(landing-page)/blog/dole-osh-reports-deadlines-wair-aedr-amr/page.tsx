@@ -35,6 +35,7 @@ const jsonLd = {
       "@id": `${URL}#article`,
       "headline": "DOLE Safety Report Deadlines: WAIR, AEDR, and AMR Under DO 252-25",
       "description": "Under DOLE Department Order No. 252-25, employers submit the Work Accident/Illness Report (WAIR) on the 30th of every month, the Annual Work Accident/Illness Exposure Data Report (AEDR) by January 30, and the Annual Medical Report (AMR) by March 31, even when no incident occurred. Deadlines for 2026 and 2027, the 24-hour accident reporting rule, who files, and administrative fines of 1,000, 2,000, and 3,000 pesos.",
+      "image": "https://yahshuahris.com/blog/dole-safety-report-deadlines-2026.png",
       "datePublished": "2026-10-15T00:00:00.000Z",
       "dateModified": "2026-10-15T00:00:00.000Z",
       "author": {

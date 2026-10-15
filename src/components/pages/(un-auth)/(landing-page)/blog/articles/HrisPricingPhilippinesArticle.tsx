@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 import { YAHSHUA_PRICING, calculateMonthly } from "@/lib/yahshuaPricing";
@@ -134,6 +135,19 @@ const HrisPricingPhilippinesArticle = () => {
             </ScrollFadeIn>
           </div>
         </section>
+
+        {/* Featured Image */}
+        <div className="lp-section-container max-w-3xl mx-auto pt-10 pb-0">
+          <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: "360px" }}>
+            <Image
+              src="/blog/hris-pricing-philippines-2026.png"
+              alt="HRIS pricing in the Philippines 2026 guide"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        </div>
 
         {/* Article Body */}
         <article className="py-16">

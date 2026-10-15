@@ -35,6 +35,7 @@ const jsonLd = {
       "@id": `${URL}#article`,
       "headline": "HRIS Pricing in the Philippines 2026: What a 100-Employee Company Actually Pays",
       "description": "In 2026 a 100-employee Philippine company pays roughly 5,400 to 40,000 pesos a month for HR and payroll software, depending on scope. Published prices from Timekeep, YAHSHUA HRIS, GreatDay HR, WORKSPHR, and PayrollHero, the monthly and year-one cost at 50 to 300 employees, fees outside the subscription, and how to choose. Sprout Solutions publishes no price.",
+      "image": "https://yahshuahris.com/blog/hris-pricing-philippines-2026.png",
       "datePublished": "2026-10-15T00:00:00.000Z",
       "dateModified": "2026-10-15T00:00:00.000Z",
       "author": {
