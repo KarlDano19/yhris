@@ -94,6 +94,7 @@ const nextConfig = {
       '/blog/sss-philhealth-pagibig-late-remittance-penalties',
       '/blog/overtime-pay-computation-philippines',
       '/blog/dole-osh-reports-deadlines-wair-aedr-amr',
+      '/blog/hris-pricing-philippines-2026',
       '/faqs',
       '/docs',
       '/jobs',

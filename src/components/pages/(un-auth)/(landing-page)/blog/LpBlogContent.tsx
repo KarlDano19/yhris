@@ -9,6 +9,14 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "hris-pricing-philippines-2026",
+    category: "Buyer's Guide",
+    title: "HRIS Pricing in the Philippines 2026: What a 100-Employee Company Actually Pays",
+    excerpt: "Published prices for the main Philippine HR and payroll tools, the monthly and year-one cost at 50 to 300 employees, the fees that hide outside the subscription, and eight questions to ask any vendor.",
+    date: "October 2026",
+    readTime: "9 min read",
+  },
+  {
     slug: "dole-osh-reports-deadlines-wair-aedr-amr",
     category: "DOLE Compliance",
     title: "DOLE Safety Report Deadlines: WAIR, AEDR, and AMR Under DO 252-25",

@@ -214,6 +214,11 @@ const PhilippineComplianceArticle = () => {
                     Philippine Payroll Registration Checklist →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/hris-pricing-philippines-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    HRIS Pricing in the Philippines 2026: What a 100-Employee Company Pays →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
