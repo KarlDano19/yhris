@@ -93,6 +93,7 @@ const nextConfig = {
       '/blog/year-end-tax-annualization-philippines-2026',
       '/blog/sss-philhealth-pagibig-late-remittance-penalties',
       '/blog/overtime-pay-computation-philippines',
+      '/blog/dole-osh-reports-deadlines-wair-aedr-amr',
       '/faqs',
       '/docs',
       '/jobs',

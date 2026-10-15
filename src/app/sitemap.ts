@@ -7,7 +7,7 @@ const BASE_URL = 'https://yahshuahris.com'
 const DATES = {
   homepage:    '2026-07-21', // Updated when homepage content or schema changes
   redesign:    '2026-06-02', // Light theme redesign shipped
-  doleArticle: '2026-06-02', // Last reviewed June 2026
+  doleArticle: '2026-10-15', // Last reviewed October 2026
   pricing:     '2026-06-02', // Prices verified June 2026
   legal:       '2026-03-01', // Terms and privacy last updated
   stable:      '2026-01-01', // Stable pages with infrequent content changes
@@ -227,6 +227,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${BASE_URL}/blog/overtime-pay-computation-philippines`,
       lastModified: new Date('2026-10-08'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/blog/dole-osh-reports-deadlines-wair-aedr-amr`,
+      lastModified: new Date('2026-10-15'),
       changeFrequency: 'weekly',
       priority: 0.9,
     },

@@ -112,7 +112,7 @@ const DoleComplianceArticle = () => {
                         {[
                           { report: "Employer's Work Accident/Illness Report (WAIR)", deadline: "30th of every month", filed: "DOLE regional office" },
                           { report: "Annual Work Accident/Illness Exposure Data", deadline: "January 30", filed: "DOLE regional office" },
-                          { report: "Annual Establishment Report on Wages (AERW)", deadline: "January 31", filed: "DOLE ERS portal" },
+                          { report: "Annual Establishment Report on Wages (AERW)", deadline: "Yearly window set by DOLE (2025 report: May 15 to August 31, 2026)", filed: "AERW online portal" },
                           { report: "Annual Medical Report (AMR)", deadline: "March 31", filed: "DOLE regional office" },
                           { report: "Annual OSH Report", deadline: "January 31", filed: "DOLE regional office" },
                           { report: "OSH Committee Meeting Minutes", deadline: "Ongoing, retained on site", filed: "Kept on file, produced on inspection" },
@@ -227,7 +227,7 @@ const DoleComplianceArticle = () => {
                     <strong style={{ color: "#111827" }}>Submit WAIR every month, not just after incidents.</strong> Set a recurring reminder for the 25th of each month to prepare and submit the monthly WAIR via reports.dole.gov.ph, even if the report shows zero incidents.
                   </p>
                   <p style={{ marginBottom: "1rem" }}>
-                    <strong style={{ color: "#111827" }}>Build a compliance calendar with all submission deadlines.</strong> January 30 (Annual Work Accident/Illness Exposure Data), January 31 (Annual OSH Report and AERW), and March 31 (Annual Medical Report) should all be on a shared HR calendar with reminders set at least two weeks in advance.
+                    <strong style={{ color: "#111827" }}>Build a compliance calendar with all submission deadlines.</strong> January 30 (Annual Work Accident/Illness Exposure Data), January 31 (Annual OSH Report), and March 31 (Annual Medical Report), plus the yearly AERW window that DOLE announces by labor advisory, should all be on a shared HR calendar with reminders set at least two weeks in advance.
                   </p>
                   <p style={{ marginBottom: "1rem" }}>
                     <strong style={{ color: "#111827" }}>Centralize incident records from day one.</strong> Every workplace incident, however minor, should be logged immediately in a system that stores it digitally and timestamps it automatically. This eliminates gaps in your EC Logbook and makes monthly WAIR preparation straightforward rather than a manual exercise.
@@ -311,7 +311,7 @@ const DoleComplianceArticle = () => {
                   {/* Author / Last updated */}
                   <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "2rem", marginTop: "2rem" }}>
                     <p style={{ color: "#9ca3af", fontSize: "0.85rem" }}>
-                      Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Last updated June 2026
+                      Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Last updated October 2026
                     </p>
                     <p style={{ color: "#d1d5db", fontSize: "0.8rem", marginTop: "0.5rem" }}>
                       This article reflects requirements under DOLE Department Order No. 252-25 (effective May 16, 2025). For legal advice specific to your workplace, consult a licensed labor law practitioner or your DOLE regional office.
@@ -341,6 +341,11 @@ const DoleComplianceArticle = () => {
                   <li>
                     <Link href="/blog/philippine-compliance-hris-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
                       Philippine Compliance 2026: One System, Not Five Checklists →
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/blog/dole-osh-reports-deadlines-wair-aedr-amr" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                      DOLE Safety Report Deadlines: WAIR, AEDR, and AMR Under DO 252-25 →
                     </Link>
                   </li>
                 </ul>
