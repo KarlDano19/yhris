@@ -8,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import ModalLayout from '@/components/ModalLayout';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
 import useRegenerateDirectiveSummary from '../hooks/useRegenerateDirectiveSummary';
 
@@ -94,22 +95,28 @@ const ViewDirectiveModal = ({
               <div>
                 <div className='mb-2 flex items-center justify-between gap-2'>
                   <p className='text-sm font-medium text-gray-900'>Brief Explanation</p>
-                  <button
-                    type='button'
-                    onClick={handleRegenerateSummary}
+                  {/* Hidden for users without create_memo — the backend would answer 403 */}
+                  <SmartButton
+                    id='regenerate-memo-summary-btn'
+                    asChild
                     disabled={regenerateSummaryMutation.isLoading || isRegenerateQueued}
-                    data-tooltip-id='regenerate-summary-tooltip'
-                    data-tooltip-content='Generate the AI summary again'
-                    data-tooltip-place='bottom'
-                    className='flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
                   >
-                    {regenerateSummaryMutation.isLoading ? (
-                      <LoadingSpinner size='xs' />
-                    ) : (
-                      <ArrowPathIcon className='h-4 w-4' />
-                    )}
-                    Regenerate summary
-                  </button>
+                    <button
+                      type='button'
+                      onClick={handleRegenerateSummary}
+                      data-tooltip-id='regenerate-summary-tooltip'
+                      data-tooltip-content='Generate the AI summary again'
+                      data-tooltip-place='bottom'
+                      className='flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
+                    >
+                      {regenerateSummaryMutation.isLoading ? (
+                        <LoadingSpinner size='xs' />
+                      ) : (
+                        <ArrowPathIcon className='h-4 w-4' />
+                      )}
+                      Regenerate summary
+                    </button>
+                  </SmartButton>
                 </div>
                 {summaryStatus === 'done' && data?.brief_explanation ? (
                   <p className='whitespace-pre-line rounded-md border border-gray-200 p-3 text-sm text-gray-700'>
@@ -117,13 +124,19 @@ const ViewDirectiveModal = ({
                   </p>
                 ) : summaryStatus === 'failed' ? (
                   <p className='rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700'>
-                    The summary could not be generated. Click Regenerate summary to try again.
+                    The summary could not be generated. It will be tried again tonight, or click Regenerate summary to
+                    try now.
+                  </p>
+                ) : summaryStatus === 'unsummarizable' ? (
+                  <p className='rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800'>
+                    The AI could not summarize this memo/policy, for example because it has no readable text. It won&apos;t
+                    be tried again automatically. Edit it, or click Regenerate summary to try again.
                   </p>
                 ) : (
                   <p className='rounded-md border border-gray-200 p-3 text-sm italic text-gray-400'>
                     {isRegenerateQueued
                       ? 'The summary is being generated. Reopen this memo/policy in a moment to see it.'
-                      : 'No summary yet. It is generated automatically, or click Regenerate summary.'}
+                      : 'No summary yet. New memos get one within a minute; for older ones, click Regenerate summary.'}
                   </p>
                 )}
               </div>
