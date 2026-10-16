@@ -292,6 +292,11 @@ const Q4ComplianceCountdownArticle = () => {
                     2026 SSS, PhilHealth, and Pag-IBIG Contribution Rates →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/philippine-compliance-hris-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Philippine Compliance 2026: One System, Not Five Checklists →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

@@ -296,6 +296,16 @@ const SssMandatoryProvidentFundArticle = () => {
                     Philippine Payroll Registration Checklist →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/sss-philhealth-pagibig-late-remittance-penalties" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    SSS, PhilHealth, Pag-IBIG Late Remittance Penalties: What They Cost →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/q4-payroll-compliance-deadlines-philippines-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Q4 2026 Payroll Deadlines: Your Compliance Countdown →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
