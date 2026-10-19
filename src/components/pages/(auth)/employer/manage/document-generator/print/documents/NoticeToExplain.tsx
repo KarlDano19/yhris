@@ -224,6 +224,12 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           mga lagda sa kompanya nga gipahayag sa ubos:)
         </div>
         
+        <div class="tagalog-translation">
+          (Inaatasan kang magsulat ng iyong paliwanag sa loob ng 5 araw mula sa pagkatanggap mo ng memong ito
+          kung bakit hindi ka dapat patawan ng disciplinary action dahil sa iyong diumanong paglabag sa
+          mga patakaran ng kompanya na nakasaad sa ibaba:)
+        </div>
+        
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000; margin-bottom: 10px;">
           <tr>
             <td style="padding: 0; overflow-wrap: anywhere;">
