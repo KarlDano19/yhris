@@ -2,14 +2,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 // Type definitions
-type SyncResponse = {
+export type SyncResponse = {
   message: string;
-  sync_results: {
+  results: {
+    companies_processed: number;
     users_synced: number;
     users_created: number;
     users_updated: number;
     users_skipped: number;
     errors: string[];
+    warnings: string[];
   };
 };
 
@@ -42,7 +44,8 @@ async function syncYPUsers(): Promise<SyncResponse> {
     if (!res.ok) {
       const errorData = await res.json();
       throw {
-        message: errorData.message || 'Failed to sync users from Yahshua Payroll',
+        // The sync API reports failures as { error, details }
+        message: errorData.message || errorData.details || errorData.error || 'Failed to sync users from Yahshua Payroll',
         details: errorData,
         status: res.status,
       };
