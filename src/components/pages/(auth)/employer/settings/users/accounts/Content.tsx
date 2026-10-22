@@ -115,14 +115,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle sync success/error
   useEffect(() => {
     if (isSyncSuccess && syncData) {
-      const { sync_results } = syncData;
-      const message = `Sync completed successfully!`;
-      
+      // The API answers 200 even when some (or all) users failed, so check the reported problems
+      const errors = syncData.results?.errors ?? [];
+      const warnings = syncData.results?.warnings ?? [];
+      const created = syncData.results?.users_created ?? 0;
+      const moreText = (list: string[]) => (list.length > 1 ? ` (+${list.length - 1} more)` : '');
+
+      let message = `Sync completed successfully! ${created} new user(s) added.`;
+      let type: 'success' | 'error' | 'warning' = 'success';
+      if (errors.length > 0) {
+        message = `Sync finished with ${errors.length} error(s): ${errors[0]}${moreText(errors)}`;
+        type = 'error';
+      } else if (warnings.length > 0) {
+        message = `Sync finished, ${created} new user(s) added. ${warnings[0]}${moreText(warnings)}`;
+        type = 'warning';
+      }
+
+      if (errors.length > 0 || warnings.length > 0) {
+        console.warn('YP user sync problems:', { errors, warnings });
+      }
+
       toast.custom((t) => (
-        <CustomToast 
-          message={message} 
-          type="success" 
-          duration={6000}
+        <CustomToast
+          message={message}
+          type={type}
+          duration={errors.length > 0 || warnings.length > 0 ? 10000 : 6000}
         />
       ));
       
