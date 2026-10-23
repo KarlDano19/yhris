@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 import ThirteenthMonthCalculator from "./ThirteenthMonthCalculator";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 // Single source for the visible FAQ and the FAQPage schema in page.tsx
 export const thirteenthMonthFaqs = [
@@ -132,6 +133,12 @@ const ThirteenthMonthPayComputationArticle = () => {
               </p>
 
               {/* H2: Worked examples */}
+              <InlineDemoCta
+                heading="Want 13th month pay tracked all year?"
+                body="See how YAHSHUA HRIS and Payroll can keep it on track every payroll run, so December is not a scramble. Book a free demo."
+                campaign="thirteenth_month"
+              />
+
               <h2 style={h2}>Worked Examples</h2>
 
               <div style={example}>

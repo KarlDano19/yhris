@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 // Single source for the visible FAQ and the FAQPage schema in page.tsx
 export const minimumWageByRegionFaqs = [
@@ -162,6 +163,12 @@ const MinimumWageByRegionArticle = () => {
               </p>
 
               {/* H2: Scheduled changes */}
+              <InlineDemoCta
+                heading="Running branches in more than one region?"
+                body="Book a free demo to see YAHSHUA HRIS and Payroll in action and ask how it fits multi-branch payroll."
+                campaign="min_wage_region"
+              />
+
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
                 Changes Already Scheduled, and Regions Under Review
               </h2>

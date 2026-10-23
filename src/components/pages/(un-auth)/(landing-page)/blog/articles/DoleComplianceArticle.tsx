@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 const DoleComplianceArticle = () => {
   return (
@@ -91,6 +92,12 @@ const DoleComplianceArticle = () => {
                   </ul>
 
                   {/* H2: Core DOLE Reports */}
+                  <InlineDemoCta
+                    heading="Make DOLE reports less manual."
+                    body="See how YAHSHUA HRIS generates the DOLE reports employers need, such as WAIR, EC Logbook and OSH documents, in a free demo."
+                    campaign="dole_compliance"
+                  />
+
                   <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
                     The DOLE Reports Every Employer Must Submit in 2026
                   </h2>

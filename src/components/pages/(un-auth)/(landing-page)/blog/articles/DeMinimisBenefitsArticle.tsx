@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 const DeMinimisBenefitsArticle = () => {
   return (
@@ -114,6 +115,12 @@ const DeMinimisBenefitsArticle = () => {
               </p>
 
               {/* H2: what stayed the same */}
+              <InlineDemoCta
+                heading="Managing allowances in a spreadsheet?"
+                body="Book a free demo to see how YAHSHUA HRIS and Payroll handles benefits and BIR withholding in one system."
+                campaign="de_minimis"
+              />
+
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
                 What Did Not Change
               </h2>
