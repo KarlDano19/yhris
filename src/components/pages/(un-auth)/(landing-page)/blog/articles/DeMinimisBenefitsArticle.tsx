@@ -117,7 +117,7 @@ const DeMinimisBenefitsArticle = () => {
               {/* H2: what stayed the same */}
               <InlineDemoCta
                 heading="Managing allowances in a spreadsheet?"
-                body="Book a free demo to see how YAHSHUA HRIS and Payroll handles benefits and BIR withholding in one system."
+                body="Book a free demo to see YAHSHUA HRIS and Payroll in action and ask how it handles allowances and BIR withholding."
                 campaign="de_minimis"
               />
 
