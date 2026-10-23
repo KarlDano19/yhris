@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 // Single source for the visible FAQ and the FAQPage schema in page.tsx
 export const overtimeFaqs = [
@@ -153,6 +154,12 @@ const OvertimePayComputationArticle = () => {
               </p>
 
               {/* H2: Peso table */}
+              <InlineDemoCta
+                heading="Tired of computing overtime by hand?"
+                body="See how YAHSHUA HRIS and Payroll tracks overtime, rest days and holidays and carries them into payroll. Book a free demo."
+                campaign="overtime_pay"
+              />
+
               <h2 style={h2}>Overtime Pay per Hour at the 2026 NCR Minimum Wage</h2>
               <p style={{ marginBottom: "1.25rem" }}>
                 Wage Order NCR-28 set the Metro Manila minimum at ₱755 a day (₱718 for the lower category) from September 26, 2026. Per overtime hour:

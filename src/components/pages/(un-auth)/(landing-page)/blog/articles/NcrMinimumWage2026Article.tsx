@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 const NcrMinimumWage2026Article = () => {
   return (
@@ -112,6 +113,12 @@ const NcrMinimumWage2026Article = () => {
               </p>
 
               {/* H2: Pay rates at the new minimum */}
+              <InlineDemoCta
+                heading="Rates changed. Is your payroll ready?"
+                body="See how YAHSHUA HRIS and Payroll handles overtime, holiday and night pay on top of the new minimum wage, in a free demo."
+                campaign="ncr_min_wage"
+              />
+
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
                 ₱755 in Hourly, Monthly, Overtime, and Holiday Pay
               </h2>

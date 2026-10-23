@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 const SssContributionTable2026Article = () => {
   return (
@@ -106,6 +107,12 @@ const SssContributionTable2026Article = () => {
               </div>
 
               {/* ===================== SSS ===================== */}
+              <InlineDemoCta
+                heading="Want these rates applied automatically?"
+                body="YAHSHUA HRIS and Payroll applies the current SSS, PhilHealth and Pag-IBIG rates on every payroll run. See it in a free demo."
+                campaign="sss_table"
+              />
+
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
                 SSS Contribution Table 2026
               </h2>
