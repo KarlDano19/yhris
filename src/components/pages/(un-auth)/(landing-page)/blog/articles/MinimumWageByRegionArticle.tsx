@@ -16,7 +16,7 @@ export const minimumWageByRegionFaqs = [
   },
   {
     q: "Which region has the highest minimum wage in the Philippines?",
-    a: "The National Capital Region: ₱755 per day for non-agriculture workers from September 26, 2026 under Wage Order NCR-28. The next highest are Central Luzon and CALABARZON, where non-agriculture rates reach ₱600 per day in their highest-paying areas.",
+    a: "The National Capital Region: ₱755 per day for non-agriculture workers from September 26, 2026 under Wage Order NCR-28. The next highest are Central Luzon and CALABARZON, where non-agriculture rates reach ₱600 per day in their highest-paying areas. CALABARZON rises to ₱645 from October 26, 2026 under Wage Order IVA-23.",
   },
   {
     q: "What is the minimum wage in Cebu in 2026?",
@@ -134,7 +134,7 @@ const MinimumWageByRegionArticle = () => {
                       { r: "Region I (Ilocos)", wo: "RB 1-24", na: "₱480 to ₱505", low: "₱480", since: "Nov 19, 2025" },
                       { r: "Region II (Cagayan Valley)", wo: "RTWPB 2-24", na: "₱500", low: "₱500", since: "Nov 5, 2025" },
                       { r: "Region III (Central Luzon)", wo: "RBIII-26", na: "₱560 to ₱600", low: "₱515", since: "Apr 16, 2026" },
-                      { r: "Region IV-A (CALABARZON)", wo: "IVA-22", na: "₱525 to ₱600", low: "₱508", since: "Apr 1, 2026" },
+                      { r: "Region IV-A (CALABARZON)", wo: "IVA-22 (IVA-23 from Oct 26)", na: "₱525 to ₱600 (₱550 to ₱645 from Oct 26)", low: "₱508 (₱550 from Oct 26)", since: "Apr 1, 2026" },
                       { r: "MIMAROPA (IV-B)", wo: "RB-MIMAROPA-13", na: "₱455", low: "₱455", since: "Jan 1, 2026" },
                       { r: "Region V (Bicol)", wo: "RBV-23", na: "₱455", low: "₱455", since: "Apr 8, 2026" },
                       { r: "Region VI (Western Visayas)", wo: "RBVI-29", na: "₱525 to ₱550", low: "₱520", since: "Nov 19, 2025" },
@@ -174,6 +174,7 @@ const MinimumWageByRegionArticle = () => {
               </h2>
               <ul style={{ paddingLeft: "1.5rem", marginBottom: "1.5rem", listStyleType: "disc" }}>
                 <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>October 14, 2026, Central Visayas:</strong> a new wage order affirmed by the NWPC on September 26 adds ₱42, raising Class A (Expanded Metro Cebu) to ₱582 and Class B (including Bohol, Negros Oriental, and Siquijor) to ₱542.</li>
+                <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>October 26, 2026, CALABARZON:</strong> Wage Order IVA-23 adds ₱25 to ₱45 a day depending on area class and sector, raising non-agriculture to ₱550 to ₱645 and retail and service establishments with 10 or fewer workers to ₱550.</li>
                 <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>December 1, 2026, Bicol:</strong> the second tranche of RBV-23 raises the regional rate from ₱455 to ₱480.</li>
                 <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>December 1, 2026, BARMM:</strong> the second tranche of BARMM-05 adds ₱25 to every category, bringing the range to ₱426 to ₱461.</li>
                 <li style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#111827" }}>NCR:</strong> the earlier order NCR-27, including a ₱25 increase once set for January 20, 2027, never took effect because of court injunctions and is before the courts. See our <Link href="/blog/ncr-minimum-wage-2026" style={{ color: "hsl(var(--lp-primary))", fontWeight: 600 }}>NCR minimum wage guide</Link> for the full timeline.</li>
@@ -198,6 +199,9 @@ const MinimumWageByRegionArticle = () => {
               <h3 style={{ fontSize: "1.15rem", fontWeight: "700", color: "#111827", marginTop: "2rem", marginBottom: "0.75rem" }}>CALABARZON (Region IV-A)</h3>
               <p style={{ marginBottom: "1.5rem" }}>
                 Non-agriculture is ₱600 in the Extended Metropolitan Area and component cities, ₱550 in 1st class municipalities (₱600 in Rosario, Cavite), and ₱525 in 2nd to 5th class municipalities. Agriculture is ₱525, or ₱508 in 2nd to 5th class municipalities. Retail and service establishments with 10 or fewer workers pay ₱508 in all areas.
+              </p>
+              <p style={{ marginBottom: "1.5rem" }}>
+                <strong style={{ color: "#111827" }}>From October 26, 2026, Wage Order IVA-23 raises these rates.</strong> Non-agriculture becomes ₱645 in the Extended Metropolitan Area, component cities, and Rosario, Cavite, ₱590 in other 1st class municipalities, and ₱550 in 2nd to 5th class municipalities. Agriculture becomes ₱550 in every area (the ₱525 areas rise ₱25 and the ₱508 areas rise ₱42). Retail and service establishments with 10 or fewer workers rise ₱42 to ₱550 in all areas. The minimum monthly wage of kasambahay in the region rises from ₱6,750 to ₱7,500 under a separate order. Rates apply by where the employee works, so check each branch&apos;s city or municipality class.
               </p>
 
               <h3 style={{ fontSize: "1.15rem", fontWeight: "700", color: "#111827", marginTop: "2rem", marginBottom: "0.75rem" }}>Central Visayas (Region VII)</h3>
