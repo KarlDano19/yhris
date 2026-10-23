@@ -100,10 +100,10 @@ const jsonLd = {
         },
         {
           "@type": "Question",
-          "name": "Does YAHSHUA HRIS update contribution rates automatically?",
+          "name": "Does YAHSHUA compute SSS, PhilHealth, and Pag-IBIG contributions automatically?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. YAHSHUA HRIS maintains current SSS, PhilHealth, and Pag-IBIG contribution tables natively and updates them when rates change, before the next payroll cycle runs. Employers do not need to update a rate field or verify a formula. BIR withholding tax, 13th month pay, overtime, and holiday pay computations are also built into the system under Philippine labor law."
+            "text": "Yes. YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, and Pag-IBIG contributions automatically on every payroll run, based on gross or basic salary depending on how each client sets up payroll. To see how rate changes are handled when an agency updates its tables, ask in a demo."
           }
         }
       ]
