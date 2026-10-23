@@ -9,6 +9,14 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "retirement-pay-law-ra-7641-philippines",
+    category: "DOLE Compliance",
+    title: "Retirement Pay Law (RA 7641): What Every Philippine Employer Must Set Aside",
+    excerpt: "RA 7641 sets a floor of 22.5 days of pay per year of service, not the 15 days many employers assume. Who qualifies, the formula with peso examples, who is exempt, and how to plan for it.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "hris-pricing-philippines-2026",
     category: "Buyer's Guide",
     image: "/blog/hris-pricing-philippines-2026.png",

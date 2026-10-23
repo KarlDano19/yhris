@@ -87,6 +87,7 @@ const nextConfig = {
       '/blog/ai-workforce-management-philippines',
       '/blog/sss-mandatory-provident-fund-philippines',
       '/blog/final-pay-computation-philippines',
+      '/blog/retirement-pay-law-ra-7641-philippines',
       '/blog/de-minimis-benefits-2026-philippines',
       '/blog/minimum-wage-philippines-2026-by-region',
       '/blog/q4-payroll-compliance-deadlines-philippines-2026',
