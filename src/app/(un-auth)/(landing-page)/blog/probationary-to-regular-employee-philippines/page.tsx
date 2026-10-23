@@ -56,6 +56,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/probationary-to-regular-employee-philippines#article",
       "headline": "Probationary to Regular: Getting the 6-Month Regularization Timeline Right in Payroll",
       "description": "Probationary employment in the Philippines cannot exceed six months from the day the employee started working, safest counted as 180 calendar days. How to count the days, what employers must tell new hires, what probationary employees are owed, and when they become regular.",
+      "image": "https://yahshuahris.com/blog/probationary-to-regular-employee-philippines.png",
       "datePublished": "2026-10-23T00:00:00.000Z",
       "dateModified": "2026-10-23T00:00:00.000Z",
       "author": {
