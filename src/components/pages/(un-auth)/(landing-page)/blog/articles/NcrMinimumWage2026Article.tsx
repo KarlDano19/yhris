@@ -115,7 +115,7 @@ const NcrMinimumWage2026Article = () => {
               {/* H2: Pay rates at the new minimum */}
               <InlineDemoCta
                 heading="Rates changed. Is your payroll ready?"
-                body="See how YAHSHUA HRIS and Payroll handles overtime, holiday and night pay on top of the new minimum wage, in a free demo."
+                body="Book a free demo and ask how YAHSHUA HRIS and Payroll handles overtime, holiday and night pay at the new minimum wage."
                 campaign="ncr_min_wage"
               />
 
@@ -247,10 +247,10 @@ const NcrMinimumWage2026Article = () => {
               {/* CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS flags minimum wage compliance automatically.
+                  Ask how payroll handles a new wage order.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  When a wage order takes effect, the system flags employees whose basic pay falls below the applicable floor, recomputes dependent items like overtime and holiday pay from the updated rate, and adjusts the 13th month running total going forward.
+                  YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles a new wage order, including employees whose basic pay falls below the new floor and pay items that depend on the daily rate.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how YAHSHUA handles wage order updates <ArrowRight className="w-4 h-4" />
@@ -411,10 +411,10 @@ const NcrMinimumWage2026Article = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop tracking wage order changes manually.
+              Ask how payroll handles wage order changes.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS keeps your payroll compliant with current minimum wage floors, recomputes dependent pay items automatically, and flags any employee falling below the applicable rate for your region.
+              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles minimum wage changes for your region.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=ncr_minimum_wage_2026"

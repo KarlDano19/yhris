@@ -254,10 +254,10 @@ const NightDifferentialHolidayStackingArticle = () => {
               {/* YAHSHUA CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS stacks night differential, holiday, rest day, and overtime rates automatically and correctly, every payroll run.
+                  Ask how YAHSHUA Payroll stacks night differential and holiday rates.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Multi-branch and shift-based teams don&apos;t have to maintain a lookup table or trust a spreadsheet formula. The system applies the right multiplicative rate based on each employee&apos;s actual schedule, holiday classification, and clock-in data.
+                  YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it applies night differential, holiday, rest day, and overtime rates based on each employee&apos;s schedule, holiday classification, and clock-in data.
                 </p>
                 <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   Book a free demo <ArrowRight className="w-4 h-4" />
@@ -333,10 +333,10 @@ const NightDifferentialHolidayStackingArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop stacking rates by hand for every shift.
+              Ask how payroll stacks rates for every shift.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS applies the correct multiplicative rate (night differential, holiday, rest day, and overtime) automatically, based on each employee&apos;s real schedule and attendance.
+              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it applies night differential, holiday, rest day, and overtime rates based on each employee&apos;s real schedule and attendance.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=night_differential_holiday"

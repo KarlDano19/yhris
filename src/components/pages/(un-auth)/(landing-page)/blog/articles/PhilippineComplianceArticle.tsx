@@ -118,7 +118,7 @@ const PhilippineComplianceArticle = () => {
                 The reason these months feel overwhelming for so many HR and Finance teams is not lack of effort. It is lack of unity. When your payroll system does not talk to your government remittance tracker, and your compliance calendar is a shared Google Sheet, and your BIR submissions live in a separate folder — every deadline requires its own investigation.
               </p>
               <p style={{ marginBottom: "1rem" }}>
-                YAHSHUA HRIS replaces disconnected platforms with one unified ecosystem. SSS, PhilHealth, Pag-IBIG, and BIR compliance are not add-ons — they are built in, maintained in real time, and surfaced to your team before deadlines, not after. Our dedicated DOLE module covers eight sub-functions including Establishment Registration, Compensation Logbook, Annual Data Report, and OSH documentation.
+                YAHSHUA HRIS replaces disconnected platforms with one unified ecosystem. SSS, PhilHealth, Pag-IBIG, and BIR contributions are computed in YAHSHUA Payroll, which comes with YAHSHUA HRIS rather than as a separate add-on. Our dedicated DOLE module covers eight sub-functions including Establishment Registration, Compensation Logbook, Annual Data Report, and OSH documentation.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
                 One client prevented ₱480,000 in payroll errors in a single engagement. Another processed payroll for 50 employees in the same time it used to take for 10. And because YAHSHUA HRIS charges one flat rate for the first 100 employees, growing from 10 to 100 employees does not change your monthly cost.
@@ -170,7 +170,7 @@ const PhilippineComplianceArticle = () => {
                   How does an HRIS help with multiple simultaneous compliance deadlines?
                 </h3>
                 <p>
-                  An HRIS built for Philippine compliance maintains up-to-date contribution tables, regulatory references, and reporting formats inside a single system. Rather than compiling data from separate payroll, attendance, and contribution tools every time a deadline arrives, compliance-ready data is available in real time. YAHSHUA HRIS includes a dedicated DOLE module, automated BIR withholding computation, and PhilHealth/SSS/Pag-IBIG remittance tracking — all updated as regulations change, without requiring your team to monitor every new circular.
+                  An HRIS built for Philippine compliance maintains up-to-date contribution tables, regulatory references, and reporting formats inside a single system. Rather than compiling data from separate payroll, attendance, and contribution tools every time a deadline arrives, compliance-ready data is available in real time. YAHSHUA HRIS includes a dedicated DOLE module and comes with YAHSHUA Payroll, which computes BIR withholding and SSS, PhilHealth, and Pag-IBIG contributions.
                 </p>
               </div>
 
@@ -232,7 +232,7 @@ const PhilippineComplianceArticle = () => {
               Stop managing compliance across five disconnected systems.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              PhilHealth, SSS, Pag-IBIG, BIR, and DOLE — all in one platform, built for Philippine compliance from day one. See how YAHSHUA HRIS handles every deadline without the scramble.
+              HR, payroll, and DOLE compliance in one plan, built for Philippine employers. Book a free demo and see how YAHSHUA HRIS and Payroll work together.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=ph_compliance_2026"

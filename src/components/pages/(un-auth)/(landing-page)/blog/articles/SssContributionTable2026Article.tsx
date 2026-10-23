@@ -108,8 +108,8 @@ const SssContributionTable2026Article = () => {
 
               {/* ===================== SSS ===================== */}
               <InlineDemoCta
-                heading="Want these rates applied automatically?"
-                body="YAHSHUA HRIS and Payroll applies the current SSS, PhilHealth and Pag-IBIG rates on every payroll run. See it in a free demo."
+                heading="Want contributions computed for you?"
+                body="YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth and Pag-IBIG contributions on every payroll run. See it in a free demo."
                 campaign="sss_table"
               />
 
@@ -348,10 +348,10 @@ const SssContributionTable2026Article = () => {
               {/* YAHSHUA HRIS CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS automatically applies the current SSS, PhilHealth, and Pag-IBIG rates on every payroll run.
+                  YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, and Pag-IBIG contributions on every payroll run.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  No manual rate tables to update. No ceiling errors. When SSS or PhilHealth changes rates, the system is updated before your next payroll cycle. Contributions are computed, deducted, and logged automatically, with a remittance summary ready for submission.
+                  Contributions are computed automatically, based on gross or basic salary depending on how your company sets up payroll. Ask in a demo how rate changes and remittance files are handled.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how YAHSHUA handles statutory compliance <ArrowRight className="w-4 h-4" />
@@ -480,10 +480,10 @@ const SssContributionTable2026Article = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop updating SSS, PhilHealth, and Pag-IBIG rates manually every year.
+              Ask how payroll handles SSS, PhilHealth, and Pag-IBIG changes.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS automatically computes SSS, PhilHealth, and Pag-IBIG contributions on every payroll run using the current rates and ceilings. No manual tables, no ceiling errors, no missed updates.
+              YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions on every payroll run. Book a free demo and ask how rate and ceiling changes are handled.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=sss_contribution_2026"

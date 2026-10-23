@@ -156,7 +156,7 @@ const OvertimePayComputationArticle = () => {
               {/* H2: Peso table */}
               <InlineDemoCta
                 heading="Tired of computing overtime by hand?"
-                body="See how YAHSHUA HRIS and Payroll tracks overtime, rest days and holidays and carries them into payroll. Book a free demo."
+                body="Book a free demo and ask how YAHSHUA HRIS and Payroll tracks overtime, rest days and holidays and carries them into payroll."
                 campaign="overtime_pay"
               />
 
@@ -265,7 +265,7 @@ const OvertimePayComputationArticle = () => {
                   YAHSHUA Payroll is included in every YAHSHUA HRIS plan.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Overtime, holiday, and night differential computed from attendance and the employee&apos;s current daily rate, with HR and payroll synced in real time.
+                  HR and payroll are synced in real time. Ask in a demo how overtime, holiday, and night differential are computed from attendance and each employee&apos;s daily rate.
                 </p>
                 <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See what is included <ArrowRight className="w-4 h-4" />
@@ -331,10 +331,10 @@ const OvertimePayComputationArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop computing overtime by hand.
+              Ask how payroll computes overtime.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS and Payroll applies the right rate for every type of day, so holiday season payroll comes out right the first time.
+              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it applies overtime rates for each type of day.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=overtime_pay_2026"
