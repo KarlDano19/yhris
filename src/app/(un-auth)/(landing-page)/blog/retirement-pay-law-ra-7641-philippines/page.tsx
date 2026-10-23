@@ -56,6 +56,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/retirement-pay-law-ra-7641-philippines#article",
       "headline": "Retirement Pay Law (RA 7641): What Every Philippine Employer Must Set Aside",
       "description": "Under RA 7641, retirement pay is at least 22.5 days of pay per year of service for private-sector employees who retire at 60 or older with five years of service. Who qualifies, the formula with peso examples, who is exempt, tax treatment, and how employers should plan for it.",
+      "image": "https://yahshuahris.com/blog/retirement-pay-law-ra-7641-philippines.png",
       "datePublished": "2026-10-23T00:00:00.000Z",
       "dateModified": "2026-10-23T00:00:00.000Z",
       "author": {
