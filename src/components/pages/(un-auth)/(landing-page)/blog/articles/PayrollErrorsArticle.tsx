@@ -141,7 +141,7 @@ const PayrollErrorsArticle = () => {
               </div>
 
               <p style={{ marginBottom: "2.5rem" }}>
-                YAHSHUA HRIS is built specifically for Philippine compliance. SSS, PhilHealth, Pag-IBIG, and BIR computations are automated and updated as regulations change — not left to an administrator to remember. The same platform manages timekeeping, leaves, payslips, and government remittance schedules in one unified system. No disconnected spreadsheets. No manual rate lookups.
+                YAHSHUA HRIS is built for Philippine businesses and comes with YAHSHUA Payroll, which computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips. Timekeeping and leaves are managed in the same system. Book a free demo and ask how rate changes and remittance files are handled.
               </p>
 
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>

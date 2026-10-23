@@ -200,13 +200,13 @@ const AiGuidanceVsAutomationArticle = () => {
               {/* YAHSHUA CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS is built on the automation side of this distinction.
+                  YAHSHUA Payroll, included with YAHSHUA HRIS, computes contributions automatically.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  SSS, PhilHealth, Pag-IBIG, BIR withholding, 13th month pay, holiday premiums, and overtime are all computed by the system, not by the payroll processor. Rate tables are maintained and updated as regulations change. No formulas to update manually, no lookup tables to verify before each payroll run.
+                  SSS, PhilHealth, and Pag-IBIG contributions are computed by the payroll system, not by the payroll processor, based on gross or basic salary depending on how your company sets up payroll. Ask in a demo how rate changes are handled when an agency updates its tables.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
-                  See how YAHSHUA automates statutory compliance <ArrowRight className="w-4 h-4" />
+                  See how YAHSHUA handles statutory contributions <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
 
@@ -262,10 +262,10 @@ const AiGuidanceVsAutomationArticle = () => {
 
               <div style={{ marginBottom: "3rem" }}>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
-                  Does YAHSHUA HRIS update contribution rates automatically?
+                  Does YAHSHUA compute SSS, PhilHealth, and Pag-IBIG contributions automatically?
                 </h3>
                 <p>
-                  Yes. YAHSHUA HRIS maintains current SSS, PhilHealth, and Pag-IBIG contribution tables natively and updates them when rates change, before the next payroll cycle runs. Employers do not need to update a rate field or verify a formula. BIR withholding tax, 13th month pay, overtime, and holiday pay computations are also built into the system under Philippine labor law.
+                  Yes. YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, and Pag-IBIG contributions automatically on every payroll run, based on gross or basic salary depending on how each client sets up payroll. To see how rate changes are handled when an agency updates its tables, ask in a demo.
                 </p>
               </div>
 
@@ -309,10 +309,10 @@ const AiGuidanceVsAutomationArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop transferring rules from circulars into spreadsheets by hand.
+              Ask how payroll handles contribution changes.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS applies SSS, PhilHealth, Pag-IBIG, BIR, and DOLE rules directly to every payroll run. No manual lookups, no formula updates, no hoping the rate was entered correctly.
+              YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, Pag-IBIG, and BIR withholding on every payroll run. Book a free demo and ask how it handles rate changes.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=ai_guidance_vs_automation"
