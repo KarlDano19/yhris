@@ -206,10 +206,10 @@ const SssMandatoryProvidentFundArticle = () => {
               {/* YAHSHUA CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS applies the WISP split automatically.
+                  YAHSHUA HRIS comes with YAHSHUA Payroll.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  For employees above the ₱20,000 MSC threshold, YAHSHUA HRIS computes the regular SSS and WISP portions correctly on every payroll run, using the current MSC ceiling. No manual bracket lookups, no separate spreadsheet for higher-earning employees.
+                  YAHSHUA Payroll computes SSS, PhilHealth and Pag-IBIG contributions on every payroll run. Ask in a demo how it handles the regular SSS and WISP split for employees above the ₱20,000 MSC threshold.
                 </p>
                 <Link href="/blog/sss-contribution-table-2026-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See the full 2026 SSS, PhilHealth, and Pag-IBIG contribution rates <ArrowRight className="w-4 h-4" />
@@ -316,10 +316,10 @@ const SssMandatoryProvidentFundArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop tracking SSS brackets in a separate spreadsheet.
+              Ask how payroll handles the WISP split.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS computes the regular SSS and WISP split automatically for every employee above the MSC threshold, on every payroll run.
+              YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth and Pag-IBIG contributions. Book a free demo and ask how it handles the WISP split.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=sss_mpf_wisp"

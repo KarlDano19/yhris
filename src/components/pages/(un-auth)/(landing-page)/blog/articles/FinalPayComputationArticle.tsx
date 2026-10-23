@@ -152,10 +152,10 @@ const FinalPayComputationArticle = () => {
               {/* YAHSHUA CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS tracks the 30-day final pay clock automatically.
+                  YAHSHUA HRIS keeps offboarding in one workflow.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  From the moment an offboarding is initiated, YAHSHUA HRIS computes pro-rated 13th month pay and unused leave conversion, and flags the release deadline, so final pay does not slip past the DOLE 30-day window.
+                  Manage clearance forms, quitclaims, and final pay documentation through one structured workflow, with every step tracked. YAHSHUA Payroll is included.
                 </p>
                 <Link href="/blog/dole-compliance-requirements-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See the full DOLE compliance checklist for employers <ArrowRight className="w-4 h-4" />
@@ -257,10 +257,10 @@ const FinalPayComputationArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop computing final pay by hand at the last minute.
+              Keep offboarding and final pay in one place.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS calculates pro-rated 13th month pay and leave conversion automatically the moment offboarding starts, and tracks the 30-day release deadline for you.
+              YAHSHUA HRIS runs clearance, quitclaims, and final pay documentation through one structured workflow, with YAHSHUA Payroll included. Book a free demo to see it.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=final_pay_computation"
