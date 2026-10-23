@@ -115,7 +115,7 @@ const NcrMinimumWage2026Article = () => {
               {/* H2: Pay rates at the new minimum */}
               <InlineDemoCta
                 heading="Rates changed. Is your payroll ready?"
-                body="See how YAHSHUA HRIS and Payroll handles overtime, holiday and night pay on top of the new minimum wage, in a free demo."
+                body="Book a free demo and ask how YAHSHUA HRIS and Payroll handles overtime, holiday and night pay at the new minimum wage."
                 campaign="ncr_min_wage"
               />
 

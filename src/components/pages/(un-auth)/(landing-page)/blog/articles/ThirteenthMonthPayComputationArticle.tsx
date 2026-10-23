@@ -135,7 +135,7 @@ const ThirteenthMonthPayComputationArticle = () => {
               {/* H2: Worked examples */}
               <InlineDemoCta
                 heading="Want 13th month pay tracked all year?"
-                body="See how YAHSHUA HRIS and Payroll can keep it on track every payroll run, so December is not a scramble. Book a free demo."
+                body="Book a free demo and ask how YAHSHUA HRIS and Payroll computes and tracks 13th month pay across payroll runs."
                 campaign="thirteenth_month"
               />
 

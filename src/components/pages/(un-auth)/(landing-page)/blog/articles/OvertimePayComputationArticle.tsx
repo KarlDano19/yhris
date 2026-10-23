@@ -156,7 +156,7 @@ const OvertimePayComputationArticle = () => {
               {/* H2: Peso table */}
               <InlineDemoCta
                 heading="Tired of computing overtime by hand?"
-                body="See how YAHSHUA HRIS and Payroll tracks overtime, rest days and holidays and carries them into payroll. Book a free demo."
+                body="Book a free demo and ask how YAHSHUA HRIS and Payroll tracks overtime, rest days and holidays and carries them into payroll."
                 campaign="overtime_pay"
               />
 

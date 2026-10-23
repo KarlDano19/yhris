@@ -108,8 +108,8 @@ const SssContributionTable2026Article = () => {
 
               {/* ===================== SSS ===================== */}
               <InlineDemoCta
-                heading="Want these rates applied automatically?"
-                body="YAHSHUA HRIS and Payroll applies the current SSS, PhilHealth and Pag-IBIG rates on every payroll run. See it in a free demo."
+                heading="Want contributions computed for you?"
+                body="YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth and Pag-IBIG contributions on every payroll run. See it in a free demo."
                 campaign="sss_table"
               />
 
