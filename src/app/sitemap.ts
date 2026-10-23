@@ -237,6 +237,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/blog/probationary-to-regular-employee-philippines`,
+      lastModified: new Date('2026-10-23'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/blog/retirement-pay-law-ra-7641-philippines`,
       lastModified: new Date('2026-10-23'),
       changeFrequency: 'monthly',

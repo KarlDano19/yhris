@@ -9,6 +9,14 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "probationary-to-regular-employee-philippines",
+    category: "DOLE Compliance",
+    title: "Probationary to Regular: Getting the 6-Month Regularization Timeline Right in Payroll",
+    excerpt: "Keep a probationary employee past day 180 and they are regular by law. How to count the days, what you must tell new hires on day one, what they are already owed, and when extending probation holds up.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "retirement-pay-law-ra-7641-philippines",
     category: "DOLE Compliance",
     title: "Retirement Pay Law (RA 7641): What Every Philippine Employer Must Set Aside",
