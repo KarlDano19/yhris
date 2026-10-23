@@ -233,6 +233,11 @@ const FinalPayComputationArticle = () => {
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
               <ul className="space-y-2">
                 <li>
+                  <Link href="/blog/retirement-pay-law-ra-7641-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Retirement Pay Law (RA 7641): What Employers Must Set Aside →
+                  </Link>
+                </li>
+                <li>
                   <Link href="/blog/dole-compliance-requirements-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
                     DOLE Compliance Requirements for Employers →
                   </Link>
