@@ -310,7 +310,7 @@ const Q4ComplianceCountdownArticle = () => {
               Close the payroll year without the December scramble.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS keeps your payroll compliant with current minimum wage floors, recomputes dependent pay items automatically, and accrues 13th month pay every cutoff.
+              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles minimum wage changes and 13th month pay across cutoffs.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=q4_compliance_2026"
