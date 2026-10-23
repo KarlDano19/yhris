@@ -273,7 +273,34 @@ const NcrMinimumWage2026Article = () => {
 
               <div style={{ marginBottom: "2rem" }}>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
-                  Is the minimum wage the same in Manila, Quezon City, and Makati?
+                  What is the minimum wage in Quezon City in 2026?
+                </h3>
+                <p>
+                  From September 26, 2026, the minimum wage in Quezon City is ₱755 per day for non-agriculture workers under Wage Order No. NCR-28. Quezon City has no separate rate: it follows the single Metro Manila rate, the same as Manila, Makati, and the other NCR cities. The lower ₱718 rate applies only to agriculture, service and retail establishments with 15 or fewer workers, and manufacturing establishments with fewer than 10 regular workers.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  What is the minimum wage in Makati in 2026?
+                </h3>
+                <p>
+                  From September 26, 2026, the minimum wage in Makati is ₱755 per day for non-agriculture workers under Wage Order No. NCR-28. Makati follows the same single Metro Manila rate as Quezon City and Manila, and the ₱718 rate applies only to the smaller agriculture, service, retail, and manufacturing categories. The rate follows the workplace: anyone who reports to a Makati office is covered, wherever they live.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  What is the minimum wage in Manila in 2026?
+                </h3>
+                <p>
+                  From September 26, 2026, the minimum wage in the City of Manila is ₱755 per day for non-agriculture workers under Wage Order No. NCR-28, the same rate that applies across Metro Manila. The earlier NCR-26 rate of ₱695 applied until September 25. The ₱718 rate covers only agriculture, service and retail establishments with 15 or fewer workers, and manufacturing establishments with fewer than 10 regular workers.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  Is the minimum wage the same in Taguig, Pasig, Caloocan, and the other Metro Manila cities?
                 </h3>
                 <p>
                   Yes. One wage order, Wage Order No. NCR-28, sets the minimum wage for all 17 local government units in Metro Manila: Caloocan, Las Piñas, Makati, Malabon, Mandaluyong, Manila, Marikina, Muntinlupa, Navotas, Parañaque, Pasay, Pasig, Quezon City, San Juan, Taguig, Valenzuela, and the municipality of Pateros. Non-agriculture workers earn ₱755 per day from September 26, 2026 in every one of them. The rate follows where the employee works, not where they live: a worker who lives in Bulacan but reports to an office in Makati is covered by the NCR rate.
