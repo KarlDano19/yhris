@@ -237,6 +237,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/blog/employee-vs-independent-contractor-philippines`,
+      lastModified: new Date('2026-10-27'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/blog/probationary-to-regular-employee-philippines`,
       lastModified: new Date('2026-10-23'),
       changeFrequency: 'monthly',

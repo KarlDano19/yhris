@@ -9,6 +9,14 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "employee-vs-independent-contractor-philippines",
+    category: "DOLE Compliance",
+    title: "Employee vs. Independent Contractor: How DOLE Classification Rules Affect Your Payroll Risk",
+    excerpt: "The contract label does not decide it. How Philippine courts apply the four-fold test, what DOLE Department Order 174-17 requires of an agency, and what a wrong call costs on payroll.",
+    date: "October 2026",
+    readTime: "8 min read",
+  },
+  {
     slug: "probationary-to-regular-employee-philippines",
     category: "DOLE Compliance",
     image: "/blog/probationary-to-regular-employee-philippines.png",
