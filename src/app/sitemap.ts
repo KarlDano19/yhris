@@ -178,7 +178,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/blog/ncr-minimum-wage-2026`,
-      lastModified: new Date('2026-10-08'),
+      lastModified: new Date('2026-10-27'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
@@ -237,6 +237,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/blog/employee-201-file-philippines`,
+      lastModified: new Date('2026-10-27'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/blog/employee-vs-independent-contractor-philippines`,
+      lastModified: new Date('2026-10-27'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/blog/probationary-to-regular-employee-philippines`,
       lastModified: new Date('2026-10-23'),
       changeFrequency: 'monthly',
@@ -262,7 +274,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/blog/minimum-wage-philippines-2026-by-region`,
-      lastModified: new Date('2026-09-25'),
+      lastModified: new Date('2026-10-27'),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
