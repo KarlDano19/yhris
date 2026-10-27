@@ -57,6 +57,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/employee-vs-independent-contractor-philippines#article",
       "headline": "Employee vs. Independent Contractor: How DOLE Classification Rules Affect Your Payroll Risk",
       "description": "In the Philippines, a worker is an employee or an independent contractor based on how the work is actually done, not the contract label. The four-fold test, economic dependence, DOLE Department Order 174-17 on labor-only contracting, and what misclassification costs on payroll.",
+      "image": "https://yahshuahris.com/blog/employee-vs-independent-contractor-philippines.png",
       "datePublished": "2026-10-27T00:00:00.000Z",
       "dateModified": "2026-10-27T00:00:00.000Z",
       "author": {
