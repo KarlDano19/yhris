@@ -57,6 +57,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/employee-201-file-philippines#article",
       "headline": "What Belongs in an Employee 201 File, and How Long You Are Required to Keep It",
       "description": "A 201 file is an employee's record folder. DOLE rules require employment records such as payrolls and time records to be kept at least three years from the last entry, and tax law requires books of accounts to be kept five years. What to put in a 201 file, the retention rules, and the Data Privacy Act limits.",
+      "image": "https://yahshuahris.com/blog/employee-201-file-philippines.png",
       "datePublished": "2026-10-27T00:00:00.000Z",
       "dateModified": "2026-10-27T00:00:00.000Z",
       "author": {
