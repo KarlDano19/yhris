@@ -9,6 +9,14 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "employee-201-file-philippines",
+    category: "DOLE Compliance",
+    title: "What Belongs in an Employee 201 File, and How Long You Are Required to Keep It",
+    excerpt: "The law gives no checklist for a 201 file, but it sets clocks on the records inside it. What to put in, what DOLE and tax rules say about keeping it, and where the Data Privacy Act limits you.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "employee-vs-independent-contractor-philippines",
     category: "DOLE Compliance",
     title: "Employee vs. Independent Contractor: How DOLE Classification Rules Affect Your Payroll Risk",
