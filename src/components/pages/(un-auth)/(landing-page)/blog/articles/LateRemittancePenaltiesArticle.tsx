@@ -331,10 +331,10 @@ const LateRemittancePenaltiesArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Never pay a late remittance penalty again.
+              Ask how payroll prepares your remittances.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS and Payroll computes SSS, PhilHealth, and Pag-IBIG contributions on current rates every payroll, so remittances are ready before the deadline.
+              YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions every payroll. Book a free demo and ask how remittance files are prepared before the deadline.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=late_remittance_penalties_2026"

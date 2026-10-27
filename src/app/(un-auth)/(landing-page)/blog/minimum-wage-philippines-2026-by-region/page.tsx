@@ -5,21 +5,21 @@ import PixelEvents from '@/components/PixelEvents';
 const URL = 'https://yahshuahris.com/blog/minimum-wage-philippines-2026-by-region';
 
 export const metadata: Metadata = {
-  title: 'Minimum Wage Philippines 2026 by Region: All Current Rates',
-  description: 'Daily minimum wage in every Philippine region as of Sept 2026, from ₱401 (BARMM) to ₱755 (NCR). Wage orders, effective dates, tiers, and upcoming changes.',
+  title: 'Minimum Wage Philippines 2026: Cebu, NCR & All Regions',
+  description: 'Daily minimum wage in every Philippine region, from ₱401 (BARMM) to ₱755 (NCR), including Cebu (₱582 Class A from Oct 14). Wage orders, effective dates, and upcoming changes.',
   keywords: 'minimum wage Philippines 2026, minimum wage by region Philippines, regional minimum wage 2026, minimum wage Cebu 2026, minimum wage Davao 2026, minimum wage Cagayan de Oro 2026, minimum wage CALABARZON 2026, new rate for minimum wage 2026',
   openGraph: {
-    title: 'Minimum Wage Philippines 2026 by Region: All Current Rates',
+    title: 'Minimum Wage Philippines 2026: Cebu, NCR & All Regions',
     description: 'Every region\'s current daily minimum wage, the wage order behind it, when it took effect, and the changes already scheduled. Built for multi-branch employers.',
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-09-25T00:00:00.000Z',
-    modifiedTime: '2026-10-01T00:00:00.000Z',
+    modifiedTime: '2026-10-23T00:00:00.000Z',
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Minimum Wage Philippines 2026 by Region: All Current Rates',
+    title: 'Minimum Wage Philippines 2026: Cebu, NCR & All Regions',
     description: 'Daily minimum wage in every Philippine region as of September 2026, from ₱401 in BARMM to ₱755 in NCR.',
   },
   alternates: {
@@ -37,7 +37,7 @@ const jsonLd = {
       "description": "The current daily minimum wage in every Philippine region as of September 26, 2026, ranging from ₱401 in BARMM provinces to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and scheduled changes for each region.",
       "image": "https://yahshuahris.com/blog/minimum-wage-by-region-2026.png",
       "datePublished": "2026-09-25T00:00:00.000Z",
-      "dateModified": "2026-10-01T00:00:00.000Z",
+      "dateModified": "2026-10-23T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

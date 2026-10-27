@@ -213,10 +213,10 @@ const HolidayPayComputationArticle = () => {
               {/* YAHSHUA CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS computes Philippine holiday pay automatically — correct rate, every employee, every time.
+                  Ask how YAHSHUA Payroll handles holiday pay.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Built for Philippine compliance. Regular holidays, special holidays, rest day premiums — the system applies the right multiplier based on each employee&apos;s actual attendance and work schedule. No manual lookups. No payroll errors.
+                  YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it applies regular holiday, special holiday, and rest day multipliers based on each employee&apos;s attendance and schedule.
                 </p>
                 <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   Book a free demo <ArrowRight className="w-4 h-4" />
@@ -322,10 +322,10 @@ const HolidayPayComputationArticle = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop manually looking up the right multiplier every holiday.
+              Ask how payroll applies the right holiday multiplier.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS applies the correct rate — 130%, 150%, 200%, 260% — based on each employee&apos;s actual attendance and work schedule. Automatically, every payroll run. No manual lookups, no wrong multipliers.
+              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles holiday pay rates (130%, 150%, 200%, 260%) based on each employee&apos;s attendance and work schedule.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=holiday_pay"

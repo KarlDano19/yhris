@@ -9,6 +9,24 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "probationary-to-regular-employee-philippines",
+    category: "DOLE Compliance",
+    image: "/blog/probationary-to-regular-employee-philippines.png",
+    title: "Probationary to Regular: Getting the 6-Month Regularization Timeline Right in Payroll",
+    excerpt: "Keep a probationary employee past day 180 and they are regular by law. How to count the days, what you must tell new hires on day one, what they are already owed, and when extending probation holds up.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
+    slug: "retirement-pay-law-ra-7641-philippines",
+    category: "DOLE Compliance",
+    image: "/blog/retirement-pay-law-ra-7641-philippines.png",
+    title: "Retirement Pay Law (RA 7641): What Every Philippine Employer Must Set Aside",
+    excerpt: "RA 7641 sets a floor of 22.5 days of pay per year of service, not the 15 days many employers assume. Who qualifies, the formula with peso examples, who is exempt, and how to plan for it.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "hris-pricing-philippines-2026",
     category: "Buyer's Guide",
     image: "/blog/hris-pricing-philippines-2026.png",

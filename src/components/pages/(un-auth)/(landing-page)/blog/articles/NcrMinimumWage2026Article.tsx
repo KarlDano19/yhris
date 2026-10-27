@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
 
 const NcrMinimumWage2026Article = () => {
   return (
@@ -112,6 +113,12 @@ const NcrMinimumWage2026Article = () => {
               </p>
 
               {/* H2: Pay rates at the new minimum */}
+              <InlineDemoCta
+                heading="Rates changed. Is your payroll ready?"
+                body="Book a free demo and ask how YAHSHUA HRIS and Payroll handles overtime, holiday and night pay at the new minimum wage."
+                campaign="ncr_min_wage"
+              />
+
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>
                 ₱755 in Hourly, Monthly, Overtime, and Holiday Pay
               </h2>
@@ -240,10 +247,10 @@ const NcrMinimumWage2026Article = () => {
               {/* CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS flags minimum wage compliance automatically.
+                  Ask how payroll handles a new wage order.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  When a wage order takes effect, the system flags employees whose basic pay falls below the applicable floor, recomputes dependent items like overtime and holiday pay from the updated rate, and adjusts the 13th month running total going forward.
+                  YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles a new wage order, including employees whose basic pay falls below the new floor and pay items that depend on the daily rate.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how YAHSHUA handles wage order updates <ArrowRight className="w-4 h-4" />
@@ -266,7 +273,34 @@ const NcrMinimumWage2026Article = () => {
 
               <div style={{ marginBottom: "2rem" }}>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
-                  Is the minimum wage the same in Manila, Quezon City, and Makati?
+                  What is the minimum wage in Quezon City in 2026?
+                </h3>
+                <p>
+                  From September 26, 2026, the minimum wage in Quezon City is ₱755 per day for non-agriculture workers under Wage Order No. NCR-28. Quezon City has no separate rate: it follows the single Metro Manila rate, the same as Manila, Makati, and the other NCR cities. The lower ₱718 rate applies only to agriculture, service and retail establishments with 15 or fewer workers, and manufacturing establishments with fewer than 10 regular workers.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  What is the minimum wage in Makati in 2026?
+                </h3>
+                <p>
+                  From September 26, 2026, the minimum wage in Makati is ₱755 per day for non-agriculture workers under Wage Order No. NCR-28. Makati follows the same single Metro Manila rate as Quezon City and Manila, and the ₱718 rate applies only to the smaller agriculture, service, retail, and manufacturing categories. The rate follows the workplace: anyone who reports to a Makati office is covered, wherever they live.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  What is the minimum wage in Manila in 2026?
+                </h3>
+                <p>
+                  From September 26, 2026, the minimum wage in the City of Manila is ₱755 per day for non-agriculture workers under Wage Order No. NCR-28, the same rate that applies across Metro Manila. The earlier NCR-26 rate of ₱695 applied until September 25. The ₱718 rate covers only agriculture, service and retail establishments with 15 or fewer workers, and manufacturing establishments with fewer than 10 regular workers.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  Is the minimum wage the same in Taguig, Pasig, Caloocan, and the other Metro Manila cities?
                 </h3>
                 <p>
                   Yes. One wage order, Wage Order No. NCR-28, sets the minimum wage for all 17 local government units in Metro Manila: Caloocan, Las Piñas, Makati, Malabon, Mandaluyong, Manila, Marikina, Muntinlupa, Navotas, Parañaque, Pasay, Pasig, Quezon City, San Juan, Taguig, Valenzuela, and the municipality of Pateros. Non-agriculture workers earn ₱755 per day from September 26, 2026 in every one of them. The rate follows where the employee works, not where they live: a worker who lives in Bulacan but reports to an office in Makati is covered by the NCR rate.
@@ -377,10 +411,10 @@ const NcrMinimumWage2026Article = () => {
           <div className="lp-section-container max-w-3xl mx-auto text-center">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "hsl(38, 92%, 38%)" }}>YAHSHUA HRIS</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" style={{ lineHeight: "1.3" }}>
-              Stop tracking wage order changes manually.
+              Ask how payroll handles wage order changes.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS keeps your payroll compliant with current minimum wage floors, recomputes dependent pay items automatically, and flags any employee falling below the applicable rate for your region.
+              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles minimum wage changes for your region.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=ncr_minimum_wage_2026"

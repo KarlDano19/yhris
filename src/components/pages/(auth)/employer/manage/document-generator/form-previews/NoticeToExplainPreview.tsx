@@ -99,6 +99,12 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
         mga lagda sa kompanya nga gipahayag sa ubos:)</p>
       </div>
       
+      <div className="mb-4 italic text-xs text-gray-600">
+        <p>(Inaatasan kang magsulat ng iyong paliwanag sa loob ng 5 araw mula sa pagkatanggap mo ng memong ito
+        kung bakit hindi ka dapat patawan ng disciplinary action dahil sa iyong diumanong paglabag sa
+        mga patakaran ng kompanya na nakasaad sa ibaba:)</p>
+      </div>
+      
       <div className="text-black text-xs">
         <div style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}><span className="font-bold">Date of Incident :</span> {formattedIncidentDate || '[Date of Incident]'}</div>
       </div>
