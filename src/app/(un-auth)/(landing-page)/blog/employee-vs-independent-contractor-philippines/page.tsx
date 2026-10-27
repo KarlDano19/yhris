@@ -41,7 +41,7 @@ const faqs = [
   },
   {
     q: "How much capital must a legitimate contractor have under DO 174-17?",
-    a: "At least ₱5,000,000 in paid-up capital for a corporation, partnership, or cooperative, or in net worth for a sole proprietorship. The contractor must also be registered with the DOLE regional office. The registration fee is ₱100,000 and the certificate is valid for two years.",
+    a: "As issued in 2017, DO 174-17 requires at least ₱5,000,000 in paid-up capital for a corporation, partnership, or cooperative, or in net worth for a sole proprietorship. The contractor must also be registered with the DOLE regional office, with a ₱100,000 registration fee and a certificate valid for two years. DOLE can amend these figures, so confirm the current requirements with DOLE and check your contractor's registration yourself.",
   },
   {
     q: "What happens if a contractor is reclassified as an employee?",

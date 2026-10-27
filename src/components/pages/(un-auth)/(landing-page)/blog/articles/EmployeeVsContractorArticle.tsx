@@ -146,7 +146,7 @@ const EmployeeVsContractorArticle = () => {
               {/* H2: DO 174 */}
               <h2 style={h2}>If an Agency Supplies the Workers: DO 174-17</h2>
               <p style={{ marginBottom: "1.5rem" }}>
-                Manpower and outsourcing arrangements are legal only when the contractor is a genuine one. DO 174-17 sets the line between legitimate job contracting and prohibited labor-only contracting.
+                Manpower and outsourcing arrangements are generally lawful only when the contractor is a genuine one. DO 174-17 draws the line between legitimate job contracting and prohibited labor-only contracting. The requirements below summarize the order as issued in 2017, and DOLE can amend them, so treat this as a starting point and confirm the current rules with DOLE.
               </p>
               <div style={tableWrap}>
                 <table style={table}>
@@ -171,14 +171,14 @@ const EmployeeVsContractorArticle = () => {
                 </table>
               </div>
               <p style={{ marginBottom: "1rem" }}>
-                Labor-only contracting is prohibited. It exists in two situations:
+                DO 174-17 prohibits labor-only contracting, which it describes in two situations:
               </p>
               <ol style={{ paddingLeft: "1.5rem", marginBottom: "1.5rem", listStyleType: "decimal" }}>
                 <li style={{ marginBottom: "0.5rem" }}>The contractor has no substantial capital or investment in tools, equipment, and premises, <strong style={{ color: "#111827" }}>and</strong> its workers do work directly related to your main business.</li>
                 <li style={{ marginBottom: "0.5rem" }}>The contractor does not exercise the right of control over how its workers do their work.</li>
               </ol>
               <p style={{ marginBottom: "2.5rem" }}>
-                The consequence differs by case. In a legitimate arrangement, you are still jointly and severally liable with the contractor for the wages of its workers if the contractor fails to pay them (Article 106). In a labor-only arrangement, the contractor is treated as your agent and you are responsible to the workers as if you employed them directly.
+                The consequence depends on the case. In a legitimate arrangement, you can still be jointly and severally liable with the contractor for its workers&apos; wages if the contractor fails to pay them (Article 106). Where the arrangement is found to be labor-only, the contractor is generally treated as your agent and you can be held responsible to the workers as if you employed them directly. Whether an arrangement falls on one side of the line depends on its facts, so do your own due diligence on each contractor before you sign.
               </p>
 
               {/* H2: Payroll cost */}
@@ -209,7 +209,7 @@ const EmployeeVsContractorArticle = () => {
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Ask who controls the how.</strong> If your managers set the schedule, the method, and the supervision, treat the worker as an employee, whatever the contract says.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Write a results-based service agreement</strong> for real independent contractors: the deliverable, the price, the timeline, and who supplies the tools.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Check the work itself.</strong> Routine work that needs no special skill and sits at the core of your business is hard to defend as independent.</li>
-                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Verify every agency.</strong> Ask for the DOLE certificate of registration and proof of capital, and confirm it is current before the service agreement is signed.</li>
+                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Do your due diligence on every agency.</strong> Ask for the DOLE certificate of registration and proof of capital, and confirm both are current with DOLE before the service agreement is signed.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Keep records and review yearly.</strong> The company bears the burden of proof, so file the contract, invoices, and registration proof, and re-check each arrangement once a year.</li>
               </ol>
 
@@ -261,7 +261,7 @@ const EmployeeVsContractorArticle = () => {
                   How much capital must a legitimate contractor have under DO 174-17?
                 </h3>
                 <p>
-                  At least ₱5,000,000 in paid-up capital for a corporation, partnership, or cooperative, or in net worth for a sole proprietorship. The contractor must also be registered with the DOLE regional office. The registration fee is ₱100,000 and the certificate is valid for two years.
+                  As issued in 2017, DO 174-17 requires at least ₱5,000,000 in paid-up capital for a corporation, partnership, or cooperative, or in net worth for a sole proprietorship. The contractor must also be registered with the DOLE regional office, with a ₱100,000 registration fee and a certificate valid for two years. DOLE can amend these figures, so confirm the current requirements with DOLE and check your contractor&apos;s registration yourself.
                 </p>
               </div>
 
@@ -280,7 +280,7 @@ const EmployeeVsContractorArticle = () => {
                   Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Published October 2026
                 </p>
                 <p style={{ color: "#d1d5db", fontSize: "0.8rem", marginTop: "0.5rem" }}>
-                  Based on Articles 106 to 109 of the Labor Code, DOLE Department Order No. 174, Series of 2017, <em>Francisco v. NLRC</em> (G.R. No. 170087, August 31, 2006), and <em>Ditiangkin v. Lazada E-Services Philippines, Inc.</em> (G.R. No. 246892, September 21, 2022). Classification is decided case by case on the facts, and DOLE rules change, so verify the current rules with DOLE or legal counsel before classifying a worker or engaging an agency. This article does not constitute legal advice.
+                  Based on Articles 106 to 109 of the Labor Code, DOLE Department Order No. 174, Series of 2017, <em>Francisco v. NLRC</em> (G.R. No. 170087, August 31, 2006), and <em>Ditiangkin v. Lazada E-Services Philippines, Inc.</em> (G.R. No. 246892, September 21, 2022). This article is general information. Classification is decided case by case on the facts, and DOLE rules change, so do your own due diligence and confirm the current rules with DOLE, or with counsel if you choose, before classifying a worker or engaging an agency. It does not constitute legal advice.
                 </p>
               </div>
 
