@@ -273,6 +273,15 @@ const NcrMinimumWage2026Article = () => {
 
               <div style={{ marginBottom: "2rem" }}>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
+                  When does the ₱755 minimum wage take effect in Metro Manila?
+                </h3>
+                <p>
+                  The ₱755 minimum wage took effect on September 26, 2026 under Wage Order No. NCR-28, and it applies in all 17 Metro Manila local government units. Employees paid below ₱755 a day (₱718 in the smaller agriculture, service, retail, and manufacturing categories) must be raised to at least that floor from that date. A payroll cutoff that straddles September 26 is paid at the NCR-26 rate up to September 25 and at the new rate from September 26.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#111827", marginBottom: "0.5rem" }}>
                   What is the minimum wage in Quezon City in 2026?
                 </h3>
                 <p>
