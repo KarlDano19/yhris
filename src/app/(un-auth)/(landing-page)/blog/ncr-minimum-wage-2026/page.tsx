@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     type: 'article',
     locale: 'en_US',
     publishedTime: '2026-07-21T00:00:00.000Z',
-    modifiedTime: '2026-10-23T00:00:00.000Z',
+    modifiedTime: '2026-10-27T00:00:00.000Z',
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -29,6 +29,10 @@ const faqs = [
   {
     q: "What is the NCR minimum wage in 2026?",
     a: "From September 26, 2026, the NCR minimum wage is ₱755 per day for non-agriculture workers and ₱718 per day for agriculture, service and retail establishments with 15 or fewer workers, and manufacturing establishments with fewer than 10 regular workers, under Wage Order No. NCR-28. Before September 26, the NCR-26 rates of ₱695 and ₱658 applied.",
+  },
+  {
+    q: "When does the ₱755 minimum wage take effect in Metro Manila?",
+    a: "The ₱755 minimum wage took effect on September 26, 2026 under Wage Order No. NCR-28, and it applies in all 17 Metro Manila local government units. Employees paid below ₱755 a day (₱718 in the smaller agriculture, service, retail, and manufacturing categories) must be raised to at least that floor from that date. A payroll cutoff that straddles September 26 is paid at the NCR-26 rate up to September 25 and at the new rate from September 26.",
   },
   {
     q: "What is the minimum wage in Quezon City in 2026?",
@@ -82,7 +86,7 @@ const jsonLd = {
       "description": "Wage Order No. NCR-28 raises the Metro Manila minimum wage to ₱755 per day for non-agriculture workers and ₱718 for the lower category from September 26, 2026, in a single tranche. The earlier ₱85 order, NCR-27, never took effect because of court injunctions. Rate table, timeline, who is covered, and the employer payroll checklist.",
       "image": "https://yahshuahris.com/blog/ncr-minimum-wage-2026.png",
       "datePublished": "2026-07-21T00:00:00.000Z",
-      "dateModified": "2026-10-23T00:00:00.000Z",
+      "dateModified": "2026-10-27T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
