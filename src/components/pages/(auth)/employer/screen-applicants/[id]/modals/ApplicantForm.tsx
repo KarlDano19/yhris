@@ -1,21 +1,24 @@
 import { useEffect, useState, useContext, Fragment, useRef } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import EAFModal from './EAFModal';
+import TransferHistoryModal from './TransferHistoryModal';
 import classNames from '@/helpers/classNames';
-import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
+import { normalizeNbsp } from '@/helpers/linkify';
+import { formatDateToLocal, formatDateTimeSeparate, formatWorkExperienceDateRange } from '@/helpers/date';
 import useGetApplicantDetails from '../../hooks/applicant/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../../hooks/applicant/useGenerateApplicantSummary';
 import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScreeningAnswersPDF';
 import useUpdateApplicantContactInfo from '../../hooks/applicant/useUpdateApplicantContactInfo';
 import useGetEAF from '../../hooks/eaf/useGetEAF';
+import useGetTransferHistory from '../../hooks/applicant/useGetTransferHistory';
 import StateContext from '../../contexts/StateContext';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon, PencilIcon, UserIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon, PencilIcon, UserIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -38,6 +41,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const [viewCV, setViewCV] = useState<boolean>(false);
   const [showDocxDownloadModal, setShowDocxDownloadModal] = useState<boolean>(false);
   const [showEAFModal, setShowEAFModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -59,6 +63,8 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const { data, isLoading, error, isError } = useGetApplicantDetails(applicant?.applicationId);
   const isHired = applicant?.status === 'hired';
   const { data: eafData, isError: eafNotFound } = useGetEAF(applicant?.applicationId as number, isHired);
+  const { data: transferHistory } = useGetTransferHistory(applicant?.applicationId);
+  const hasTransferHistory = Array.isArray(transferHistory) && transferHistory.length > 0;
 
   useEffect(() => {
     if (data && !isLoading) {
@@ -76,6 +82,14 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
     setShowDocxDownloadModal(false);
     setIsOpen(false);
     setTimeout(() => setActionState(initialActionState), 400);
+  };
+
+  const handleDialogClose = () => {
+    if (viewCV) {
+      setViewCV(false);
+      return;
+    }
+    handleClose();
   };
 
   const handleGenerateSummary = () => {
@@ -503,21 +517,16 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
       <>
         {applicantProfile.work_experience.map((exp: any) => {
           return (
-            <div key={exp.id} className='flex mt-8 overflow-y-auto'>
+            <div key={exp.id} className='flex mt-8'>
               <div className='mr-3'>
                 <StarIcon className='h-6 w-6 text-blue-700' />
               </div>
               <div>
                 <p className='font-semibold'>{exp.position}</p>
-                <p>
-                  {new Date(exp.dateFrom).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} -{' '}
-                  {exp.dateTo
-                    ? new Date(exp.dateTo).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                    : 'Present'}
-                </p>
+                <p>{formatWorkExperienceDateRange(exp.dateFrom, exp.dateTo)}</p>
                 <p>{exp.companyOrg}</p>
                 <p className='font-semibold mt-4'>Description/Responsibilities:</p>
-                <div className='pl-2' dangerouslySetInnerHTML={{ __html: exp.responsibilities }} />
+                <div className='ql-editor !p-0 !pl-2' dangerouslySetInnerHTML={{ __html: normalizeNbsp(exp.responsibilities || '') }} />
               </div>
             </div>
           );
@@ -842,25 +851,25 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
 
   const renderDocxDownloadModal = () => {
     return (
-      <Transition.Root show={showDocxDownloadModal} as={Fragment}>
+      <Transition show={showDocxDownloadModal} as={Fragment}>
         <Dialog as='div' className='relative z-40' onClose={() => setShowDocxDownloadModal(false)}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300' enterFrom='opacity-0' enterTo='opacity-100'
             leave='ease-in duration-200' leaveFrom='opacity-100' leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-center justify-center p-4 text-center'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300' enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
                 enterTo='opacity-100 translate-y-0 sm:scale-100'
                 leave='ease-in duration-200' leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md'>
+                <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md'>
                   <div className='flex bg-savoy-blue p-2 items-center gap-4'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Download CV/Resume</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setShowDocxDownloadModal(false)} />
@@ -886,20 +895,20 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                       Close
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     );
   };
 
   return (
     <>
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-30' initialFocus={cancelButtonRef} onClose={handleClose}>
-        <Transition.Child
+    <Transition show={isOpen} as={Fragment}>
+      <Dialog as='div' className='relative z-30' initialFocus={cancelButtonRef} onClose={handleDialogClose}>
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -909,10 +918,10 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-center justify-center p-4 text-center'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -921,15 +930,15 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel
+              <DialogPanel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
-                  viewCV ? 'max-w-4xl' : 'max-w-3xl'
+                  viewCV || jobPostingDetails?.is_video_intro_enabled ? 'max-w-4xl' : 'max-w-3xl'
                 )}
               >
                 <div className='flex bg-savoy-blue p-2 items-center gap-4'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>{title}</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer self-start' onClick={handleClose} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer self-start' onClick={handleDialogClose} />
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
@@ -1007,6 +1016,16 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 </div>
                 {!viewCV && (
                   <div className='flex items-center gap-4 text-[15px] font-bold justify-end flex-wrap p-4 border-t-[1px] border-[#355FD0]'>
+                    {hasTransferHistory && (
+                      <button
+                        type='button'
+                        onClick={() => setShowTransferModal(true)}
+                        className='flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg py-2 px-4 text-sm font-medium'
+                      >
+                        <ArrowsRightLeftIcon className='w-4 h-4' />
+                        Transfer History
+                      </button>
+                    )}
                     {isHired && !eafNotFound && eafData?.pdf_url && (
                       <button
                         type='button'
@@ -1037,8 +1056,8 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                     </button>
                   </div>
                 )}
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
         
@@ -1052,8 +1071,17 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
             positionTitle={JobTitle}
           />
         )}
+
+        {showTransferModal && applicant && (
+          <TransferHistoryModal
+            isOpen={showTransferModal}
+            onClose={() => setShowTransferModal(false)}
+            appliedJobId={applicant.applicationId}
+            applicantName={applicant.name}
+          />
+        )}
       </Dialog>
-    </Transition.Root>
+    </Transition>
     {renderDocxDownloadModal()}
     </>
   );

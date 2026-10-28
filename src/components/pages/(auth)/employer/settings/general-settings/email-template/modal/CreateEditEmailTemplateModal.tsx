@@ -1,12 +1,12 @@
-import React, { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
-import dynamic from 'next/dynamic';
-
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
@@ -21,7 +21,6 @@ import EyePassword from '@/svg/EyePassword';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
 
 type T_EmailTemplateModalData = {
   id: number | null;
@@ -59,7 +58,6 @@ export default function CreateEditEmailTemplateModal({
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const { register, handleSubmit, reset, setValue, watch, getValues } = useForm<any>();
 
   const isEditing = isOpen.mode === 'edit';
@@ -68,8 +66,13 @@ export default function CreateEditEmailTemplateModal({
     data: dataEmailTemplateDetail,
     refetch: refetchEmailTemplateDetail,
     remove: removeEmailTemplateDetail,
+    isFetching: isEmailTemplateDetailFetching,
   } = useGetEmailTemplateDetails(isOpen.id);
-  
+
+  // Create mode has nothing to fetch, so it's always ready; edit mode waits for the matching record
+  const isEmailTemplateReady =
+    !isOpen.open || !isEditing || (!isEmailTemplateDetailFetching && dataEmailTemplateDetail?.id === isOpen.id);
+
   const { mutate: createEmailTemplate, isLoading: isLoadingCreate } = useAddEmailTemplate();
   const { mutate: updateEmailTemplate, isLoading: isLoadingUpdate } = useUpdateEmailTemplate();
 
@@ -269,9 +272,9 @@ export default function CreateEditEmailTemplateModal({
   };
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog as='div' className='relative z-50' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -281,11 +284,11 @@ export default function CreateEditEmailTemplateModal({
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-50 overflow-y-auto'>
           <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -294,13 +297,18 @@ export default function CreateEditEmailTemplateModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>
                     {isEditing ? 'Edit Email Template' : 'Create Email Template'}
                   </h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
+                {!isEmailTemplateReady ? (
+                  <div className='flex min-h-[560px] items-center justify-center'>
+                    <LoadingSpinner size='xl' showText text='Loading email template...' />
+                  </div>
+                ) : (
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto'>
                     <div className='sm:col-span-4 mt-2 w-full space-y-2'>
@@ -656,12 +664,13 @@ export default function CreateEditEmailTemplateModal({
                     </div>
                   </div>
                 </form>
-              </Dialog.Panel>
-            </Transition.Child>
+                )}
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }
 

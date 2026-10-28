@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useIsFetching } from '@tanstack/react-query';
 import YahshuaLoadingLogo from './YahshuaLoadingLogo';
+import useNetworkStatus from '@/hooks/useNetworkStatus';
 
 // ─── Module-level singleton patch ────────────────────────────────────────────
 // Applied once at module load. Never inside component lifecycle.
@@ -14,6 +15,7 @@ const PATCHED = Symbol('yahshua_nav_spinner_patched');
 const NAV_START_EVENT = 'yahshua:navigation-start';
 const RECENT_NAV_WINDOW_MS = 2000;
 const HIDE_DELAY_MS = 120;
+const SLOW_LOAD_THRESHOLD_MS = 5000;
 
 type NavHandler = (url: string | URL | null | undefined) => void;
 const navHandlers = new Set<NavHandler>();
@@ -32,13 +34,15 @@ if (typeof window !== 'undefined' && !(history.pushState as any)[PATCHED]) {
   const origReplace = history.replaceState.bind(history);
 
   const patchedPush = function (state: unknown, unused: string, url?: string | URL | null) {
-    navHandlers.forEach(h => h(url));
+    // Defer handlers so state updates never fire during React's useInsertionEffect
+    // phase (Next.js 15 calls pushState internally during navigation commits).
+    setTimeout(() => navHandlers.forEach(h => h(url)), 0);
     return origPush(state as any, unused, url);
   };
   (patchedPush as any)[PATCHED] = true;
 
   const patchedReplace = function (state: unknown, unused: string, url?: string | URL | null) {
-    navHandlers.forEach(h => h(url));
+    setTimeout(() => navHandlers.forEach(h => h(url)), 0);
     return origReplace(state as any, unused, url);
   };
   (patchedReplace as any)[PATCHED] = true;
@@ -51,7 +55,9 @@ if (typeof window !== 'undefined' && !(history.pushState as any)[PATCHED]) {
 const GlobalLoadingSpinner = () => {
   const pathname = usePathname();
   const isFetching = useIsFetching() > 0;
+  const isOnline = useNetworkStatus();
   const [visible, setVisible] = useState(false);
+  const [isSlow, setIsSlow] = useState(false);
 
   const lastNavClickRef = useRef<number | null>(null);
   const prevPathRef = useRef<string | null>(null);
@@ -190,7 +196,19 @@ const GlobalLoadingSpinner = () => {
     return () => clearTimeout(t);
   }, [isFetching, pathname]);
 
-  if (!visible) return null;
+  // Surface feedback once loading drags on, so a slow/throttled connection
+  // doesn't just look frozen behind the overlay.
+  useEffect(() => {
+    if (!visible) {
+      setIsSlow(false);
+      return;
+    }
+
+    const t = setTimeout(() => setIsSlow(true), SLOW_LOAD_THRESHOLD_MS);
+    return () => clearTimeout(t);
+  }, [visible]);
+
+  if (!visible || !isOnline) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
@@ -199,6 +217,11 @@ const GlobalLoadingSpinner = () => {
         <div className="flex flex-col items-center justify-center">
           <YahshuaLoadingLogo size={96} durationMs={1000} />
           <div className="mt-3 text-xl text-yellow-100 font-semibold">Loading...</div>
+          {isSlow && (
+            <div className="mt-2 text-sm text-yellow-100/80 text-center max-w-xs">
+              This is taking longer than usual. Please check your internet connection.
+            </div>
+          )}
         </div>
       </div>
     </div>

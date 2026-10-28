@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-
 import { useEmploymentHistoryAnalysis } from "../../hooks/useEmploymentHistoryAnalysis";
 
 export default function EmploymentHistoryAnalysis({
@@ -15,13 +13,7 @@ export default function EmploymentHistoryAnalysis({
   onBack: () => void;
   onClose: () => void;
 }) {
-  const { data, error, loading, fetchAnalysis } = useEmploymentHistoryAnalysis();
-
-  useEffect(() => {
-    const abort = new AbortController();
-    fetchAnalysis(employeeId, { include_details: true }, abort.signal).catch(() => {});
-    return () => abort.abort();
-  }, [employeeId, fetchAnalysis]);
+  const { data, error, loading } = useEmploymentHistoryAnalysis(employeeId, { include_details: true });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">

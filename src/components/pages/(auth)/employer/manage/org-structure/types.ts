@@ -33,7 +33,13 @@ export interface OrgStructure {
   id: number | string;
   description: string;
   position_name: string;
-  position: number;
+  position: number | null;
+  // A node represents either a Position or a Department, never both.
+  department?: number | null;
+  department_name?: string | null;
+  node_type?: 'position' | 'department' | 'unassigned';
+  nearest_department_id?: number | null;
+  nearest_department_name?: string | null;
   parent?: number | null;
   parent_position_name?: string;
   order: number;
@@ -42,6 +48,7 @@ export interface OrgStructure {
   employees?: Employee[];
   primary_employee?: Employee;
   hiring_info?: HiringInfo | null;
+  is_manual_assignment?: boolean;
 }
 
 // Props for organization node components
@@ -67,6 +74,7 @@ export interface PositionDetailsModalProps {
   primaryEmployee?: Employee;
   isVisible: boolean;
   onClose: () => void;
+  onBack?: () => void; // Optional back navigation to the previous (action) modal
   departmentFilter?: string; // Optional department filter to apply to employee list
 }
 

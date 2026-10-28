@@ -68,7 +68,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
   const { data: checklistData } = useGetChecklist();
   const { mutate: submitMemo } = useSubmitAcceptanceMemo();
-  const showAcceptanceMemo = isMemoLoading || !!existingMemo;
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
     employeeName: '',
@@ -289,6 +288,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         });
         setIsViewMode(true);
       } else {
+        setIsViewMode(false);
         const today = new Date().toISOString().split('T')[0];
         const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
         const profileData = cachedProfile?.state?.data as { name?: string } | undefined;
@@ -301,13 +301,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }
     }
   }, [documentType, existingMemo, fromChecklist, checklistData, queryClient]);
-
-  // If no memo exists (existing account), fall back to employee-certificate
-  useEffect(() => {
-    if (!isMemoLoading && !existingMemo && documentType === 'acceptance-memo') {
-      setDocumentType('employee-certificate');
-    }
-  }, [isMemoLoading, existingMemo, documentType]);
 
   // Populate company name for all document types when switching between them
   useEffect(() => {
@@ -682,7 +675,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   isFormDisabled={documentType === 'acceptance-memo' && isMemoLoading}
                   isFieldDisabled={isFieldDisabled}
                   isViewMode={isViewMode}
-                  showAcceptanceMemo={showAcceptanceMemo}
                 />
               </div>
               <div className="transition-all duration-300">
@@ -722,6 +714,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onClose={() => setIsSignatureModalOpen(false)}
           onSave={handleSignatureSave}
           onTransparencyCheck={handleTransparencyCheck}
+          currentSignature={currentData.signature}
         />
       )}
       

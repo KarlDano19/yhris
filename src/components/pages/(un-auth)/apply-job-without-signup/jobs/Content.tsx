@@ -388,7 +388,8 @@ const Content = () => {
 
   const {
     data: jobTitleAutocompleteResults,
-    isLoading: isJobTitleAutocompleteLoading
+    isLoading: isJobTitleAutocompleteLoading,
+    isFetching: isJobTitleAutocompleteFetching,
   } = useGetJobAutocomplete(
     jobTitleSearchParams ? {
       ...jobTitleSearchParams,
@@ -398,7 +399,8 @@ const Content = () => {
 
   const {
     data: locationAutocompleteResults,
-    isLoading: isLocationAutocompleteLoading
+    isLoading: isLocationAutocompleteLoading,
+    isFetching: isLocationAutocompleteFetching,
   } = useGetJobAutocomplete(
     locationSearchParams ? {
       ...locationSearchParams,
@@ -677,8 +679,8 @@ const Content = () => {
       {/* Search Section - Collapsible */}
       <div
         className={classNames(
-          'mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out overflow-hidden',
-          isSearchSectionVisible ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          'mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out',
+          isSearchSectionVisible ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
         )}
       >
         <div className='px-4 pt-[85px]'>
@@ -701,7 +703,7 @@ const Content = () => {
                   debouncedValue={debouncedJobTitle}
                   isDebouncing={isDebouncingJobTitle}
                   autocompleteResults={jobTitleAutocompleteResults}
-                  isLoading={isJobTitleAutocompleteLoading}
+                  isLoading={isJobTitleAutocompleteLoading || isJobTitleAutocompleteFetching}
                   showAutocomplete={showJobTitleAutocomplete && shouldShowJobTitleAutocomplete}
                   selectedIndex={selectedJobTitleIndex}
                   limit={jobTitleAutocompleteLimit}
@@ -724,7 +726,7 @@ const Content = () => {
                   debouncedValue={debouncedLocation}
                   isDebouncing={isDebouncingLocation}
                   autocompleteResults={locationAutocompleteResults}
-                  isLoading={isLocationAutocompleteLoading}
+                  isLoading={isLocationAutocompleteLoading || isLocationAutocompleteFetching}
                   showAutocomplete={showLocationAutocomplete && shouldShowLocationAutocomplete}
                   selectedIndex={selectedLocationIndex}
                   limit={locationAutocompleteLimit}
@@ -860,7 +862,7 @@ const Content = () => {
                     ? 'max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-250px)]'
                     : 'max-h-[calc(100vh-120px)] lg:max-h-[calc(100vh-50px)]'
                 )}>
-                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
+                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                     <>
                       {!isGetJobsLoading
                         ? jobsItems.map((job: any) => (

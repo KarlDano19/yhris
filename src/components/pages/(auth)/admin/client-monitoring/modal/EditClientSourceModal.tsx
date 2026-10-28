@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -19,28 +19,29 @@ type Props = {
     name: string;
     client_source: string;
     partner: string;
+    account_manager: string;
   } | null;
 };
 
 export default function EditClientSourceModal({ isOpen, onClose, employer }: Props) {
   const { mutate, isLoading } = useUpdateClientSource();
   const { data: partners = [] } = useGetActivePartners();
-  const { control, handleSubmit, watch, setValue, reset } = useForm({
-    defaultValues: { client_source: '', partner: '' },
+  const { control, register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
+    defaultValues: { client_source: '', partner: '', account_manager: '' },
   });
 
   const watchedClientSource = watch('client_source');
 
   useEffect(() => {
     if (isOpen && employer) {
-      reset({ client_source: employer.client_source || 'Direct Client', partner: employer.partner || '' });
+      reset({ client_source: employer.client_source || 'Direct Client', partner: employer.partner || '', account_manager: employer.account_manager || '' });
     }
   }, [isOpen, employer, reset]);
 
   const onSubmit = handleSubmit((data) => {
     if (!employer) return;
     mutate(
-      { employer_id: employer.id, client_source: data.client_source, partner: data.partner },
+      { employer_id: employer.id, client_source: data.client_source, partner: data.partner, account_manager: data.account_manager.trim() },
       {
         onSuccess: () => {
           toast.success('Client info updated successfully.');
@@ -56,7 +57,7 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-200"
           enterFrom="opacity-0"
@@ -66,9 +67,9 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/30" />
-        </Transition.Child>
+        </TransitionChild>
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-200"
             enterFrom="opacity-0 scale-95"
@@ -77,10 +78,10 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-              <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
+            <DialogPanel className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+              <DialogTitle className="text-lg font-semibold text-gray-900 mb-4">
                 Edit Client Info — {employer?.name}
-              </Dialog.Title>
+              </DialogTitle>
 
               <form onSubmit={onSubmit} className="space-y-4">
                 <div>
@@ -119,6 +120,18 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Account Manager</label>
+                  <input
+                    {...register('account_manager', { maxLength: { value: 100, message: 'Maximum of 100 characters.' } })}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    placeholder="Name or consultant code"
+                  />
+                  {errors.account_manager && (
+                    <p className="text-red-500 text-xs mt-1">{errors.account_manager.message}</p>
+                  )}
+                </div>
+
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     type="button"
@@ -136,8 +149,8 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
                   </button>
                 </div>
               </form>
-            </Dialog.Panel>
-          </Transition.Child>
+            </DialogPanel>
+          </TransitionChild>
         </div>
       </Dialog>
     </Transition>

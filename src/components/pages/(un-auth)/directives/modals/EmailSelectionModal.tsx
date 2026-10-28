@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import DropDownArrow from '@/svg/DropDownArrow';
@@ -26,9 +26,9 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -38,11 +38,11 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -51,11 +51,11 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+              <DialogPanel className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div className="flex bg-[#355FD0] p-4 items-center">
-                  <Dialog.Title as="h3" className="flex-1 text-white ml-2 font-semibold text-lg">
+                  <DialogTitle as="h3" className="flex-1 text-white ml-2 font-semibold text-lg">
                     Select Your Email
-                  </Dialog.Title>
+                  </DialogTitle>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
                     onClick={onClose}
@@ -75,7 +75,6 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
                             value={selectedIndex}
                             onChange={(e) => setSelectedIndex(e.target.value)}
                             className="rounded-md appearance-none w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                            defaultValue=""
                           >
                             <option value="" disabled className="text-gray-400">
                               Select your email...
@@ -125,12 +124,12 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
                     </div>
                   )}
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

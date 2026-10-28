@@ -10,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal from '@/components/DeleteModal';
 import BackButton from '@/components/BackButton';
 import SeederButton from '@/components/SeederButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -17,6 +18,7 @@ import Pagination from '@/components/Pagination';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
 import SendContract from './SendContract';
+import Checklist201Button from './Checklist201Button';
 import Orient from './Orient';
 import IntroduceToTeam from './IntroduceToTeam';
 import EnrollToPayroll from './EnrollToPayroll';
@@ -27,14 +29,17 @@ import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
+import useDeleteApplicantOrient from './hooks/useDeleteApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import { handleEmailSending, updateOrientItems } from './functions/emailHandlers';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 import LocationDepartment from './LocationDepartment';
 import LocationDepartmentModal from './modals/LocationDepartmentModal';
 import EnrollRedirectModal from './modals/EnrollRedirectModal';
+import Checklist201Modal from './modals/Checklist201Modal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
@@ -93,10 +98,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
   });
   const { mutate, isLoading } = useUpdateApplicantOrient();
+  const { mutate: deleteApplicantOrient, isLoading: isDeleting } = useDeleteApplicantOrient();
   const { mutate: enrollToYP, isLoading: isEnrolling } = useEnrollEmployeeToYP();
   const { mutate: syncEmployees } = useSyncEmployees();
   const [loginType, setLoginType] = useState<string | null>(null);
   const [isSendContractModalOpen, setIsSendContractModalOpen] = useState(false);
+  const [isChecklist201ModalOpen, setIsChecklist201ModalOpen] = useState(false);
   const [isOrientOptionModalOpen, setIsOrientOptionModalOpen] = useState(false);
   const [isSuccessSendContractModalOpen, setIsSuccessSendContractModalOpen] = useState(false);
   const [isDoloNewHire, setIsDoloNewHire] = useState(false);
@@ -117,6 +124,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
   const [enrollingId, setEnrollingId] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    id?: string;
+    name?: string;
+  } | null>({ open: false });
 
   const handleFilterChange = (newFilters: FilterValues) => {
     setFilters(newFilters);
@@ -306,6 +318,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
               birthdate: orientItemCopy[itemIndex].birth_date,
+              // Pass date hired explicitly (today) from enrollment so Payroll
+              // persists it at the source. Payroll no longer defaults the hire
+              // date to "today" during sync (fixed on the 201 side), so it must
+              // be provided here or the enrolled employee lands with no hire date.
+              date_hired: new Date().toLocaleDateString('en-CA'),
               address: orientItemCopy[itemIndex].address,
               gender: orientItemCopy[itemIndex].gender,
               department: orientItemCopy[itemIndex].department_id,
@@ -362,6 +379,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     mutate(orientItemCopy[itemIndex], callbackReq);
   };
 
+  const handleDelete = (data?: { open: boolean; id?: string; name?: string }) => {
+    if (!data?.id) return;
+    deleteApplicantOrient(data.id, {
+      onSuccess: (res: any) => {
+        setDeleteModal({ open: false });
+        refetch();
+        // Enrolled applicants become selectable employees elsewhere; refresh that cache too
+        queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+        toast.custom(
+          () => (
+            <CustomToast
+              message={res?.message || 'Onboarding record removed successfully.'}
+              type='success'
+            />
+          ),
+          { duration: 5000 }
+        );
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
+  };
+
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
@@ -409,7 +452,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (filters.enrolled && filters.enrolled.length === 0) {
       return (
         <tr>
-          <td colSpan={8}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>No filter options selected.</h4>
           </td>
         </tr>
@@ -440,6 +483,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReceived(item.id, 'contract');
               }}
               isLoading={isLoading}
+            />
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <Checklist201Button
+              completed={item.checklist_summary?.completed || 0}
+              total={item.checklist_summary?.total || 0}
+              setIsChecklistModalOpen={(e) => {
+                setSelectedOrientId(item.id);
+                setIsChecklist201ModalOpen(e);
+              }}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -492,12 +545,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               />
             </div>
           </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='flex mt-2 justify-center'>
+              <button
+                type='button'
+                onClick={() =>
+                  setDeleteModal({
+                    open: true,
+                    id: String(item.id),
+                    name: `${item?.firstname ?? ''} ${item?.lastname ?? ''}`.trim(),
+                  })
+                }
+                className='inline-flex items-center justify-center hover:opacity-80'
+                data-tooltip-id='onboarding-delete-tooltip'
+                data-tooltip-content='Remove from onboarding'
+                data-tooltip-place='left'
+              >
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
         </tr>
       ));
     } else {
       return (
         <tr>
-          <td colSpan={8}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm'>Please click create to add separtion of employee.</h4>
           </td>
@@ -690,6 +763,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Send Contract
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        201 Checklist Monitoring
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Orient
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -700,6 +776,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Enroll to system
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -749,6 +828,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
           submitButtonText="Send Contract"
+        />
+      )}
+      {isChecklist201ModalOpen && (
+        <Checklist201Modal
+          selectedOrientId={selectedOrientId}
+          orientItems={orientItems}
+          setOrientItems={setOrientItems}
+          isOpen={isChecklist201ModalOpen}
+          setIsOpen={setIsChecklist201ModalOpen}
         />
       )}
       {isOrientOptionModalOpen && (
@@ -1054,7 +1142,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </button>
         </div>
       </NoticeModal>
+      {deleteModal?.open && (
+        <DeleteModal
+          isOpen={deleteModal}
+          setIsOpen={(value) => setDeleteModal(value ?? { open: false })}
+          onConfirm={handleDelete}
+          isLoading={isDeleting}
+          customText={
+            deleteModal?.name
+              ? `${deleteModal.name} from onboarding`
+              : 'this onboarding record'
+          }
+        />
+      )}
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='onboarding-delete-tooltip'/>
     </>
   );
 };

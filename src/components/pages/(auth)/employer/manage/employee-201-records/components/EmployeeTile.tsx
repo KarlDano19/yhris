@@ -61,7 +61,7 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
     <Link data-testid="employee-tile" href={`/manage/employee-201-records/${emp.id}`} className="block">
       <div
         ref={tileRef}
-        className="relative cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+        className={`relative cursor-pointer rounded-2xl border p-4 shadow-sm transition hover:shadow-md ${emp.is_resigned ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}
       >
         {!complete && (
           <div

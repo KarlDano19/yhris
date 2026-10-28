@@ -2,16 +2,17 @@ import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import Content from "@/components/pages/(auth)/employer/job-postings/post-job/Content";
+import Content from "@/components/pages/(auth)/employer/job-postings/job-posting-history/Content";
 
 import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
-  title: "Job Posting - Yahshua HRIS",
+  title: "Post a Job - Yahshua HRIS",
 };
 
 async function getSession() {
-  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   return session;
 }
 

@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -50,9 +50,9 @@ export default function CreateEmployeeCompensationLogModal({
   });
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {setIsOpen(false)}}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -62,11 +62,11 @@ export default function CreateEmployeeCompensationLogModal({
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-2 text-center md:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
@@ -75,7 +75,7 @@ export default function CreateEmployeeCompensationLogModal({
               leaveFrom='opacity-100 translate-y-0 md:scale-100'
               leaveTo='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-4xl'>
+              <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Employee Compensation Log</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -302,11 +302,11 @@ export default function CreateEmployeeCompensationLogModal({
                     </button>
                   </div>
                 </form>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog> 
-    </Transition.Root>
+    </Transition>
   );
 }

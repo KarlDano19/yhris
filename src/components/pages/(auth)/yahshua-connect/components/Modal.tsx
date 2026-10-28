@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, ReactNode } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ModalProps {
@@ -44,7 +44,7 @@ const Modal = ({
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[60]" onClose={onClose}>
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -54,12 +54,12 @@ const Modal = ({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
-        </Transition.Child>
+        </TransitionChild>
 
         {/* Modal Container */}
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-start justify-center p-4 pt-16">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95"
@@ -68,7 +68,7 @@ const Modal = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel
+              <DialogPanel
                 className={`w-full ${sizeClasses[size]} transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all sm:my-8`}
               >
                 {/* Header */}
@@ -77,9 +77,9 @@ const Modal = ({
                     <div className="flex items-center gap-3 flex-1">
                       {headerContent}
                       {title && (
-                        <Dialog.Title as="h2" className="text-lg font-semibold text-gray-800">
+                        <DialogTitle as="h2" className="text-lg font-semibold text-gray-800">
                           {title}
-                        </Dialog.Title>
+                        </DialogTitle>
                       )}
                     </div>
                     {showCloseButton && (
@@ -104,8 +104,8 @@ const Modal = ({
                     {footerContent}
                   </div>
                 )}
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>

@@ -2,6 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 import { DirectiveData } from '@/types/directives';
+import { appendLetterhead } from '@/helpers/letterhead';
+import { extractInlineImageFiles } from './extractInlineImageFiles';
 
 async function updateDirective(directive: DirectiveData) {
   try {
@@ -11,6 +13,15 @@ async function updateDirective(directive: DirectiveData) {
     if (directive.title !== undefined) formData.append('title', directive.title);
     formData.append('to', JSON.stringify(directive.to));
     formData.append('directive_type', directive.directive_type || '');
+
+    // Multi-signatory reconciliation. Send whenever the field is present so the backend
+    // adds/removes assignments; already-signed signatories are preserved server-side.
+    if (Array.isArray(directive.signatories)) {
+      const userIds = directive.signatories.map((signatory: any) =>
+        typeof signatory === 'object' ? signatory.user_id : signatory
+      );
+      formData.append('signatories', JSON.stringify(userIds));
+    }
 
     if (directive.attachments) {
       if (Array.isArray(directive.attachments)) {
@@ -22,12 +33,34 @@ async function updateDirective(directive: DirectiveData) {
       }
     }
 
+    // Upload mode — a freshly picked PDF replaces whatever document the memo had. Sending
+    // document_source on every save is what lets the user switch back to form mode: the
+    // backend re-renders the document as soon as it stops being "uploaded".
+    if (directive.document instanceof File) {
+      formData.append('document', directive.document);
+    }
+    if (directive.document_source !== undefined) {
+      formData.append('document_source', directive.document_source || '');
+    }
+
     if (directive.directive_type === 'memo') {
       if (directive.body !== undefined) formData.append('body', directive.body);
       if (directive.name !== undefined) formData.append('name', directive.name);
       if (directive.position !== undefined) formData.append('position', directive.position);
+
+      // Any images embedded (as base64) in the body get uploaded alongside this same
+      // request — the backend ties them to the directive and swaps the body's base64
+      // src for the resulting storage path.
+      if (directive.body) {
+        const inlineImageFiles = await extractInlineImageFiles(directive.body);
+        inlineImageFiles.forEach((file) => formData.append('inline_images', file));
+      }
       if (directive.signature) {
-        if (typeof directive.signature === 'string' && directive.signature.length) {
+        // Only a data URL is a new signature. An untouched existing one comes back as its
+        // storage URL (prepareSignature falls back to it when the remote image can't be
+        // cropped) — fetching that cross-origin fails with "Failed to fetch", and the
+        // partial update keeps the stored signature when the field is omitted anyway.
+        if (typeof directive.signature === 'string' && directive.signature.startsWith('data:')) {
           const signatureBlob = await fetch(directive.signature).then((res) => res.blob());
           formData.append('signature', signatureBlob, 'signature.jpg');
         } else if (directive.signature instanceof FileList && directive.signature.length > 0) {
@@ -39,6 +72,11 @@ async function updateDirective(directive: DirectiveData) {
       if (directive.qr_code instanceof File) {
         formData.append('qr_code', directive.qr_code);
       }
+      // Always sent, empty string included, so resetting the signature back to the flow
+      // layout actually persists instead of leaving the old coordinates in place.
+      if (directive.signature_placement !== undefined) {
+        formData.append('signature_placement', directive.signature_placement || '');
+      }
     } else {
       if (directive.eligibility !== undefined) formData.append('eligibility', directive.eligibility);
       if (directive.application !== undefined) formData.append('application', directive.application);
@@ -48,6 +86,10 @@ async function updateDirective(directive: DirectiveData) {
         formData.append('custom_policy_fields', JSON.stringify(directive.custom_policy_fields));
       }
     }
+
+    // Only a newly picked file is sent — a letterhead already on the memo arrives as a URL
+    // and appendLetterhead skips it, so re-saving does not re-upload the same image.
+    appendLetterhead(formData, directive.letterhead);
 
     const config = {
       method: 'PATCH',

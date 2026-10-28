@@ -1,17 +1,18 @@
 'use client';
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import { Menu, Transition } from '@headlessui/react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
+import { Tooltip } from 'react-tooltip';
 
-import ManageOrgChart from './components/ManageOrgChart';
+const ManageOrgChart = dynamic(() => import('./components/ManageOrgChart'), { ssr: false });
 import ZoomControls from './components/ZoomControls';
 import BackButton from '@/components/BackButton';
 import ExportOptionsModal from './modals/ExportOptionsModal';
@@ -25,6 +26,9 @@ import useImageToBase64, { ConvertedImage } from './hooks/useImageToBase64';
 
 import { OrgStructure } from './types';
 
+// Versioned so the guide hint can be re-triggered later if its content changes significantly.
+const GUIDE_SEEN_KEY = 'org-structure-manage-guide-seen-v1';
+
 const Content = () => {
   const router = useRouter();
   const [isExporting, setIsExporting] = useState(false);
@@ -36,7 +40,26 @@ const Content = () => {
   const [excludeAvatars, setExcludeAvatars] = useState(false);
   const [orgData, setOrgData] = useState<OrgStructure | null>(null);
   const [disableTooltips, setDisableTooltips] = useState(false);
-  
+
+  // Auto-show the guide tooltip briefly on a user's first visit to this page,
+  // then close it for good (regardless of cursor position) - after that it's
+  // only shown via a genuine hover. Kept fully controlled (never `undefined`)
+  // because react-tooltip doesn't reliably re-derive hover state once a
+  // controlled `isOpen` prop reverts to uncontrolled - it can get stuck open.
+  const [autoShowGuide, setAutoShowGuide] = useState(false);
+  const [isHoveringGuide, setIsHoveringGuide] = useState(false);
+  useEffect(() => {
+    const alreadySeen = localStorage.getItem(GUIDE_SEEN_KEY) === 'true';
+    if (alreadySeen) return;
+
+    setAutoShowGuide(true);
+    const timer = setTimeout(() => {
+      setAutoShowGuide(false);
+      localStorage.setItem(GUIDE_SEEN_KEY, 'true');
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Zoom state
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -73,41 +96,42 @@ const Content = () => {
       const selectedDepartments = departmentFilter.department || [];
       if (selectedDepartments.length > 0 && !selectedDepartments.includes('ALL')) {
         const dept = selectedDepartments[0]; // Single select, take first value
-        data = filterEmployeesByDepartment(data, dept);
+        data = pruneTreeByDepartment(data, dept) || data;
       }
-      
+
       setOrgData(data);
     } else {
       setOrgData(null);
     }
   }, [orgStructureData, departmentFilter]);
-  
-  // Function to filter employees by department (keep all positions to prevent breaking)
-  const filterEmployeesByDepartment = (node: OrgStructure, department: string): OrgStructure => {
-    const filteredNode = { ...node };
-    
-    // Filter employees to only show those matching the department
-    if (node.employees) {
-      filteredNode.employees = node.employees.filter(emp => 
-        emp.department?.toLowerCase() === department.toLowerCase()
-      );
+
+  // Prune the org tree down to the branch(es) belonging to the selected department.
+  // A node is kept if it IS the matching department node, if it belongs to that
+  // department (nearest_department_name), or if it's an ancestor of a matching node.
+  // Non-matching branches (e.g. other departments) are removed entirely instead of
+  // just hiding their employees, so the chart reflects only the selected department.
+  const pruneTreeByDepartment = (node: OrgStructure, department: string): OrgStructure | null => {
+    const target = department.toLowerCase();
+
+    const isMatchingDepartmentNode =
+      node.node_type === 'department' && node.department_name?.toLowerCase() === target;
+    const belongsToDepartment =
+      node.node_type !== 'department' && node.nearest_department_name?.toLowerCase() === target;
+
+    const filteredChildren = (node.children || [])
+      .map(child => pruneTreeByDepartment(child, department))
+      .filter((child): child is OrgStructure => child !== null);
+
+    const isMatch = isMatchingDepartmentNode || belongsToDepartment;
+
+    if (!isMatch && filteredChildren.length === 0) {
+      return null;
     }
-    
-    // Filter primary employee - only show if matches department
-    if (node.primary_employee) {
-      if (node.primary_employee.department?.toLowerCase() !== department.toLowerCase()) {
-        filteredNode.primary_employee = undefined;
-      }
-    }
-    
-    // Recursively filter children (keep all positions, just filter their employees)
-    if (node.children) {
-      filteredNode.children = node.children.map(child => 
-        filterEmployeesByDepartment(child, department)
-      );
-    }
-    
-    return filteredNode;
+
+    return {
+      ...node,
+      children: filteredChildren,
+    };
   };
 
   // Zoom handlers
@@ -358,6 +382,7 @@ const Content = () => {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       // Capture the chart as canvas with high quality
+      const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(chartContainer, {
         backgroundColor: '#ffffff',
         scale: 3, // Higher resolution
@@ -386,6 +411,7 @@ const Content = () => {
         const orientation = imgWidth > imgHeight ? 'landscape' : 'portrait';
         
         // Create PDF
+        const { jsPDF } = await import('jspdf');
         const pdf = new jsPDF({
           orientation: orientation,
           unit: 'mm',
@@ -592,7 +618,22 @@ const Content = () => {
 
       <div className='px-2 md:px-8 lg:px-4 pb-4 border-b-2 flex-shrink-0'>
         <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Organizational Structure</h2>
+          <div className='flex items-center gap-1.5'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Organizational Structure</h2>
+            <InformationCircleIcon
+              className='h-5 w-5 text-gray-400 cursor-help'
+              data-tooltip-id='org-structure-guide-tooltip'
+              data-tooltip-content='Dashed boxes (e.g. PAYROLL OPS) group positions under a department. Use the Department filter to narrow the chart to one department, or Export to save it as a PDF/PNG.'
+              data-tooltip-place='bottom'
+              onMouseEnter={() => setIsHoveringGuide(true)}
+              onMouseLeave={() => setIsHoveringGuide(false)}
+            />
+            <Tooltip
+              id='org-structure-guide-tooltip'
+              className='max-w-xs z-50'
+              isOpen={autoShowGuide || isHoveringGuide}
+            />
+          </div>
 
           {/* Filter and Export Buttons - Hide when selection mode is active */}
           {orgData && !isSelectionMode && (
@@ -610,24 +651,15 @@ const Content = () => {
             
             {/* Export Button */}
           <Menu as='div' className='relative self-end sm:self-auto'>
-            <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 text-sm sm:text-base' disabled={isExporting}>
+            <MenuButton className='bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 text-sm sm:text-base' disabled={isExporting}>
               <span className='hidden sm:inline'>{isExporting ? 'Exporting...' : 'Export'}</span>
               <span className='sm:hidden'>{isExporting ? '...' : 'Export'}</span>
               <ChevronDownIcon className='h-4 w-4 flex-shrink-0' />
-            </Menu.Button>
-          <Transition
-            as={Fragment}
-            enter='transition ease-out duration-100'
-            enterFrom='transform opacity-0 scale-95'
-            enterTo='transform opacity-100 scale-100'
-            leave='transition ease-in duration-75'
-            leaveFrom='transform opacity-100 scale-100'
-            leaveTo='transform opacity-0 scale-95'
-          >
-            <Menu.Items className='absolute right-0 z-10 mt-2 w-32 sm:w-full min-w-[120px] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+            </MenuButton>
+            <MenuItems className='absolute right-0 z-10 mt-2 w-32 sm:w-full min-w-[120px] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
               <div className='py-1'>
                 {exportOptions.map((item) => (
-                  <Menu.Item key={item.name}>
+                  <MenuItem key={item.name}>
                     {({ active }) => (
                       <span
                         className={`block px-3 sm:px-4 py-2 text-xs sm:text-sm cursor-pointer text-left ${
@@ -642,11 +674,10 @@ const Content = () => {
                         {item.name}
                       </span>
                     )}
-                  </Menu.Item>
+                  </MenuItem>
                 ))}
               </div>
-            </Menu.Items>
-          </Transition>
+            </MenuItems>
             </Menu>
             </div>
           )}

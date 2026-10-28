@@ -5,6 +5,8 @@ import React from 'react';
 import Link from 'next/link';
 
 import BackButton from '@/components/BackButton';
+import FloatingSyncButton from '@/components/FloatingSyncButton';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 import { useIncompleteEmployeeCount } from "./employee-201-records/hooks/useIncompleteEmployeeCount";
 
 import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
@@ -15,6 +17,8 @@ import EmployeeMovementLogo from '@/svg/EmployeeMovementLogo';
 import DocumentGeneratorLogo from '@/svg/DocumentGeneratorLogo';
 import Employee201RecordsLogo from '@/svg/Employee201RecordsLogo';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
+import FormsLogo from '@/svg/FormsLogo';
+import PolicyHandbookLogo from '@/svg/PolicyHandbookLogo';
 
 import TileBadge from "@/components/TileBadge"; // adjust path if your folder differs
 
@@ -59,15 +63,27 @@ const menus = [
     text: 'Org Structure',
     link: '/manage/org-structure',
   },
+  {
+    icon: <FormsLogo />,
+    text: 'Forms',
+    link: '/manage/forms',
+  },
+  {
+    icon: <PolicyHandbookLogo />,
+    text: 'Policy Handbook',
+    link: '/manage/policy-handbook',
+  },
 ];
 
-const Content = () => {
+const Content = ({ loginType, hasYpIntegration }: { loginType?: string, hasYpIntegration?: boolean }) => {
   const { count, isLoading } = useIncompleteEmployeeCount();
 
   return (
+    <>
+    {canSyncWithPayroll(loginType, hasYpIntegration) && <FloatingSyncButton />}
     <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
       <div className="flex p-4">
-        <BackButton label="Dashboard" href="/dashboard" />
+        <BackButton label="Dashboard" href="/dashboard" data-tour-id="tour-back-to-dashboard" />
       </div>
       <div className="px-2 md:px-8 lg:px-4">
         <h2 className="text-xl font-bold text-indigo-dye">Manage</h2>
@@ -77,10 +93,13 @@ const Content = () => {
             const is201 = menu.link === "/manage/employee-201-records";
             const show = is201 && (isLoading || count > 0);
 
+            const isEmployeeList = menu.link === '/manage/employees';
+
             return (
               <Link
                 href={menu.link}
                 key={i}
+                {...(isEmployeeList ? { 'data-tour-id': 'tour-manage-employees' } : {})}
                 className="relative bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80"
               >
                 {/* badge */}
@@ -94,6 +113,7 @@ const Content = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

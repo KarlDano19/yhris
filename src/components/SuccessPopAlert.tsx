@@ -1,5 +1,5 @@
 import { CheckCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { Transition } from "@headlessui/react";
+import { Transition, TransitionChild } from '@headlessui/react';
 import { Fragment } from "react";
 
 interface SuccessProps {
@@ -10,8 +10,8 @@ interface SuccessProps {
 
 const SuccessPopAlert = ({ message, open, onClose }: SuccessProps) => {
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Transition.Child
+    <Transition show={open} as={Fragment}>
+      <TransitionChild
         as={Fragment}
         enter="transition ease-out duration-100"
         enterFrom="transform opacity-0 scale-95"
@@ -82,8 +82,8 @@ const SuccessPopAlert = ({ message, open, onClose }: SuccessProps) => {
             </div>
           </div>
         </div> */}
-      </Transition.Child>
-    </Transition.Root>
+      </TransitionChild>
+    </Transition>
   );
 };
 

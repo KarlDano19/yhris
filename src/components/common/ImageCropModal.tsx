@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useCallback } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
 
@@ -79,7 +79,7 @@ const ImageCropModal = ({
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[80]" onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -89,11 +89,11 @@ const ImageCropModal = ({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/50" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
-            <Transition.Child
+            <TransitionChild
               as="div"
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95"
@@ -103,11 +103,11 @@ const ImageCropModal = ({
               leaveTo="opacity-0 scale-95"
               className="w-full max-w-lg"
             >
-              <Dialog.Panel className="w-full transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
+              <DialogPanel className="w-full transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
                 <div className="p-5 border-b border-gray-200">
-                  <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
+                  <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
                     Crop Profile Picture
-                  </Dialog.Title>
+                  </DialogTitle>
                 </div>
 
                 <div className="relative w-full h-[400px] bg-gray-900">
@@ -151,8 +151,8 @@ const ImageCropModal = ({
                     Apply
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>

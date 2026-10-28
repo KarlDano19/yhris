@@ -46,6 +46,9 @@ const EmployerDetail = ({ recordId, onBack }: EmployerDetailProps) => {
   const label = statusLabel[record.status] || 'Not Started';
   const style = statusStyle[record.status] || statusStyle['NOT_STARTED'];
   const totalPhases = record.phases ? record.phases.length : 0;
+  const markedCompletedDate = record.marked_completed_at
+    ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(record.marked_completed_at))
+    : '';
 
   return (
     <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -66,6 +69,12 @@ const EmployerDetail = ({ recordId, onBack }: EmployerDetailProps) => {
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${style}`}>
               {label}
             </span>
+            {record.marked_completed_by && (
+              <span className='ml-auto text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-1'>
+                Marked completed by <span className='font-semibold'>{record.marked_completed_by}</span>
+                {markedCompletedDate && <span className='text-green-600'> · {markedCompletedDate}</span>}
+              </span>
+            )}
           </div>
           <p className='text-sm text-gray-500 mt-1'>
             Client Onboarding Detail &nbsp;·&nbsp; {totalPhases} phase{totalPhases !== 1 ? 's' : ''}

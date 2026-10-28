@@ -1,6 +1,6 @@
 import { Fragment, useMemo } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 import {
   XMarkIcon,
@@ -66,7 +66,7 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
   return (
     <Transition show={isOpen} as={Fragment} appear={true}>
       <Dialog as="div" className="relative z-[60]" onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -76,12 +76,12 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="transform transition ease-in-out duration-300"
                 enterFrom="translate-x-full"
@@ -90,7 +90,7 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen sm:w-[85vw] md:w-[50vw]">
+                <DialogPanel className="pointer-events-auto w-screen sm:w-[85vw] md:w-[50vw]">
                   <div className="flex h-screen flex-col overflow-hidden bg-white shadow-2xl">
                     {/* Header with Action Buttons and Close button */}
                     <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
@@ -306,8 +306,8 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                       )}
                     </div>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </div>

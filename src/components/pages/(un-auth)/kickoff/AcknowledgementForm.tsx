@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, createRef } from 'react';
 
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import SignatureCanvas from 'react-signature-canvas';
 
 import CustomToast from '@/components/CustomToast';
-import { T_KickoffAcknowledgementPayload, T_KickoffAcknowledgementResponse, T_KickoffPortalData } from '@/types/kickoff';
+import { T_KickoffAcknowledgementPayload, T_KickoffAcknowledgementResponse, T_KickoffPortalData, T_KickoffSignatory } from '@/types/kickoff';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MainLogo from '@/svg/MainLogo';
 
@@ -23,8 +23,18 @@ interface SignatoryRow {
   id: number;
   contact_person: string;
   date_signed: string;
-  signatureData: string;
-  signatureRef: React.RefObject<SignatureCanvas>;
+  signatureRef: React.RefObject<SignatureCanvas | null>;
+}
+
+// Capture a SignatureCanvas as a PNG data URL (with a fallback to the raw canvas element).
+function captureSignature(ref: SignatureCanvas | null): string {
+  if (!ref) return '';
+  try {
+    return ref.getCanvas().toDataURL('image/png');
+  } catch {
+    const canvas = (ref as any)._canvas as HTMLCanvasElement | undefined;
+    return canvas ? canvas.toDataURL('image/png') : '';
+  }
 }
 
 export default function AcknowledgementForm({ token, portalData, onSuccess }: AcknowledgementFormProps) {
@@ -56,14 +66,17 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
         id: Date.now(),
         contact_person: '',
         date_signed: new Date().toISOString().split('T')[0],
-        signatureData: '',
-        signatureRef: { current: null } as React.RefObject<SignatureCanvas>,
+        signatureRef: createRef<SignatureCanvas>(),
       },
     ]);
   };
 
   const handleRemoveSignatory = (id: number) => {
     setAdditionalSignatories(prev => prev.filter(s => s.id !== id));
+  };
+
+  const handleSignatoryChange = (id: number, field: 'contact_person' | 'date_signed', value: string) => {
+    setAdditionalSignatories(prev => prev.map(s => (s.id === id ? { ...s, [field]: value } : s)));
   };
 
   const onSubmit = handleSubmit(async (data) => {
@@ -79,17 +92,38 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
       return;
     }
 
-    let signatureData = '';
-    try {
-      signatureData = primarySignatureRef.current.getCanvas().toDataURL('image/png');
-    } catch {
-      const canvas = (primarySignatureRef.current as any)._canvas as HTMLCanvasElement;
-      if (canvas) signatureData = canvas.toDataURL('image/png');
-    }
-
+    const signatureData = captureSignature(primarySignatureRef.current);
     if (!signatureData) {
       setSignatureError('Could not capture signature. Please try again.');
       return;
+    }
+
+    // Collect any additional signatories: drop fully-empty rows, but block on partially-filled ones.
+    const signatories: T_KickoffSignatory[] = [];
+    for (let i = 0; i < additionalSignatories.length; i++) {
+      const row = additionalSignatories[i];
+      const hasName = row.contact_person.trim() !== '';
+      const ref = row.signatureRef.current;
+      const hasSignature = !!ref && !ref.isEmpty();
+
+      if (!hasName && !hasSignature) continue; // untouched row — ignore it
+
+      if (!hasName || !hasSignature) {
+        toast.custom(<CustomToast message={`Signatory ${i + 2}: please provide both a name and a signature, or remove the row.`} type="error" />);
+        return;
+      }
+
+      const sig = captureSignature(ref);
+      if (!sig) {
+        toast.custom(<CustomToast message={`Could not capture the signature for signatory ${i + 2}. Please try again.`} type="error" />);
+        return;
+      }
+
+      signatories.push({
+        contact_person: row.contact_person.trim(),
+        signature_data: sig,
+        date_signed: row.date_signed || undefined,
+      });
     }
 
     const payload: T_KickoffAcknowledgementPayload = {
@@ -97,7 +131,9 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
       contact_person: data.contact_person,
       contact_email: data.contact_email,
       signature_data: signatureData,
+      date_signed: data.date_signed || undefined,
       agreed_to_terms: true,
+      ...(signatories.length > 0 ? { signatories } : {}),
     };
 
     submitMutation.mutate(payload, {
@@ -212,6 +248,8 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
             <AdditionalSignatoryRow
               key={signatory.id}
               index={index}
+              signatory={signatory}
+              onChange={(field, value) => handleSignatoryChange(signatory.id, field, value)}
               onRemove={() => handleRemoveSignatory(signatory.id)}
             />
           ))}
@@ -260,12 +298,12 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
 
 interface AdditionalSignatoryRowProps {
   index: number;
+  signatory: SignatoryRow;
+  onChange: (field: 'contact_person' | 'date_signed', value: string) => void;
   onRemove: () => void;
 }
 
-function AdditionalSignatoryRow({ index, onRemove }: AdditionalSignatoryRowProps) {
-  const sigRef = useRef<SignatureCanvas | null>(null);
-
+function AdditionalSignatoryRow({ index, signatory, onChange, onRemove }: AdditionalSignatoryRowProps) {
   return (
     <div className="border-t border-gray-300 divide-y divide-gray-300">
       <div className="flex justify-between items-center px-4 py-2 bg-gray-50">
@@ -288,6 +326,8 @@ function AdditionalSignatoryRow({ index, onRemove }: AdditionalSignatoryRowProps
           <input
             type="text"
             placeholder="Full Name"
+            value={signatory.contact_person}
+            onChange={(e) => onChange('contact_person', e.target.value)}
             className="w-full border-b border-gray-400 bg-transparent text-sm text-gray-800 focus:outline-none focus:border-[#2c3f58] pb-1 placeholder-gray-400"
           />
         </div>
@@ -301,7 +341,7 @@ function AdditionalSignatoryRow({ index, onRemove }: AdditionalSignatoryRowProps
         <div className="flex-1 p-4">
           <div className="relative border border-dashed border-gray-400 rounded-sm h-28 print:hidden">
             <SignatureCanvas
-              ref={sigRef}
+              ref={signatory.signatureRef}
               canvasProps={{ className: 'w-full h-full' }}
               backgroundColor="rgba(0,0,0,0)"
               minWidth={1}
@@ -309,7 +349,7 @@ function AdditionalSignatoryRow({ index, onRemove }: AdditionalSignatoryRowProps
             />
             <button
               type="button"
-              onClick={() => sigRef.current?.clear()}
+              onClick={() => signatory.signatureRef.current?.clear()}
               className="absolute top-2 right-2 text-xs text-[#2c3f58] underline hover:opacity-70"
             >
               Clear
@@ -326,7 +366,8 @@ function AdditionalSignatoryRow({ index, onRemove }: AdditionalSignatoryRowProps
         <div className="flex-1 p-4 flex items-center">
           <input
             type="date"
-            defaultValue={new Date().toISOString().split('T')[0]}
+            value={signatory.date_signed}
+            onChange={(e) => onChange('date_signed', e.target.value)}
             className="border-b border-gray-400 bg-transparent text-sm text-gray-800 focus:outline-none focus:border-[#2c3f58]"
           />
         </div>

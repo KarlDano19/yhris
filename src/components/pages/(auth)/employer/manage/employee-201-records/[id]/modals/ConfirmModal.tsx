@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 type Intent = "primary" | "danger" | "warning" | "success";
 
@@ -77,7 +78,7 @@ export default function ConfirmModal({
   };
   const clr = intentStyles[intent];
 
-  return (
+  return createPortal(
     <div
       data-testid="confirm-modal"
       className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6"
@@ -166,6 +167,7 @@ export default function ConfirmModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -6,8 +6,8 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions, sleep, SessionData } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   
   try {
     const token = session.token;

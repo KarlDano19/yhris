@@ -2,7 +2,7 @@ import { Dispatch, Fragment, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -46,14 +46,14 @@ export default function NavigationModal({
           <span className="text-yellow-600 font-semibold text-xl mt-4">Navigating to Onboarding page...</span>
         </div>
       )}
-      <Transition.Root show={isOpen} as={Fragment}>
+      <Transition show={isOpen} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-20"
           initialFocus={cancelButtonRef}
           onClose={setIsOpen}
         >
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -63,11 +63,11 @@ export default function NavigationModal({
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -76,7 +76,7 @@ export default function NavigationModal({
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg p-9 space-y-5">
+                <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg p-9 space-y-5">
                   <div className="flex justify-center">
                     <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
                       <CheckIcon />
@@ -115,12 +115,12 @@ export default function NavigationModal({
                       STAY HERE
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 } 

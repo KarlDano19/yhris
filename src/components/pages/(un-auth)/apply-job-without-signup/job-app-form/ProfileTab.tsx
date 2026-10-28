@@ -32,6 +32,7 @@ interface ProfileTabProps {
 
 const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setValue, watch, jobDetailData, profilePhotoList, setProfilePhotoList }: ProfileTabProps) => {
   const [birthDateError, setBirthDateError] = useState(false);
+  const [resumeError, setResumeError] = useState(false);
   const [educationInput, setEducationInput] = useState('');
   const [skillsInput, setSkillsInput] = useState('');
   const [tagsSkill, setTagsSkill] = useState<string[]>([]);
@@ -551,6 +552,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
     },
     (errors: FieldErrors) => {
       if (errors.birth_date) setBirthDateError(true);
+      if (errors.resume) setResumeError(true);
     }
   );
 
@@ -1100,7 +1102,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
         </div>
         <div className="grid-item">
           <h6 className="block text-sm font-medium leading-6 text-gray-900">
-            Curriculum Vitae/Resume (Optional)
+            Curriculum Vitae/Resume<span className="text-red-500">*</span>
           </h6>
           <div className="mt-2">
             {(watch("resume") as FileList | undefined)?.[0] && (
@@ -1111,6 +1113,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
             <input
               type="file"
               {...register("resume", {
+                required: "Curriculum Vitae/Resume is required.",
                 onChange: (e: any) => {
                   const file = e.target.files[0];
                   if (!file) return;
@@ -1153,6 +1156,8 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
                     e.target.value = null;
                     return;
                   }
+
+                  setResumeError(false);
                 },
               })}
               id="resume"
@@ -1160,6 +1165,9 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
               accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             />
             <h6 className="text-xs mt-3">Maximum file size: 5 MB</h6>
+            {resumeError && (
+              <p className="text-red-500 text-xs mt-1">Curriculum Vitae/Resume is required.</p>
+            )}
           </div>
         </div>
         <div className="grid-item">

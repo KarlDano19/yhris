@@ -15,11 +15,10 @@
   --lp-border: 0 0% 91%;
   --lp-destructive: 0 84% 60%;
 
-  /* Dark LP theme tokens */
-  --lp-page: 222 60% 4%;
-  --lp-hero: 222 40% 16%;
-  --lp-surface: 222 50% 7%;
-  --lp-surface-2: 222 45% 10%;
+  /* Light LP theme tokens */
+  --lp-page: 0 0% 100%;
+  --lp-surface: 222 47% 6%;
+  --lp-surface-2: 222 40% 10%;
 }
 
 @layer components {
@@ -44,6 +43,16 @@
   .lp-dark-card:hover {
     border-color: hsl(var(--lp-primary) / 0.3);
     box-shadow: 0 0 0 1px hsl(var(--lp-primary) / 0.1), 0 8px 40px rgba(0,0,0,0.4);
+  }
+  .lp-light-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+    @apply rounded-xl transition-all duration-300;
+  }
+  .lp-light-card:hover {
+    border-color: hsl(var(--lp-primary) / 0.4);
+    box-shadow: 0 0 0 1px hsl(var(--lp-primary) / 0.08), 0 8px 32px rgba(0,0,0,0.1);
   }
 
   /* Landing page buttons */
@@ -123,6 +132,24 @@
     background-size: 28px 28px;
   }
 
+  /* CSS scroll-driven progress bar */
+  @keyframes lp-grow-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+  .lp-scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: hsl(var(--lp-primary));
+    transform-origin: left center;
+    animation: lp-grow-progress auto linear;
+    animation-timeline: scroll(root);
+    z-index: 10000;
+  }
+
   /* Hero gradient glow */
   .lp-hero-glow::before {
     content: '';
@@ -179,51 +206,17 @@
 }
 /* ─── End landing page design system ─────────────────────────── */
 
-/* Design tokens: light palette as CSS variables (dark overrides are in dark-theme.css) */
-:root {
-  /* Legacy tokens — kept for backwards compatibility */
-  --primary: #355FD0;
-  --primary-yellow: #FFC008;
-  --success: #65C979;
-  --error: #D86841;
-  --warning: #EAC645;
-  --bg: #FFFFFF;
-  --body-text: #2C3F58;
-  --card-bg: #FFFFFF;
-  --subtle-bg: #F9FBFC;
-  --muted: #6B7280;
-
-  /* Semantic tokens — use these in new components via Tailwind (e.g. bg-theme-bg, text-theme-body) */
-  --color-bg: #FFFFFF;
-  --color-surface: #F9FBFC;
-  --color-surface-raised: #FFFFFF;
-  --color-text: #2C3F58;
-  --color-text-muted: #6B7280;
-  --color-border: #ACB9CB;
-  --color-border-subtle: rgba(172, 185, 203, 0.4);
-  --color-primary: #355FD0;
-  --color-primary-yellow: #FFC008;
-  --color-success: #65C979;
-  --color-error: #D86841;
-  --color-warning: #EAC645;
+/* ─── HR Cost Calculator range slider ────────────────────────── */
+.calc-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
 }
+.calc-range:focus { outline: none; }
 
-/* Global theme defaults via CSS variables */
-@layer base {
-  html, body {
-    background-color: var(--bg);
-    color: var(--body-text);
-  }
-
-  /* Text elements inherit the current color so components follow the global theme */
-  p, a, span, label, li, h1, h2, h3, h4, h5, h6 {
-    color: inherit;
-  }
-
-  .card {
-    background-color: var(--card-bg);
-    color: var(--body-text);
-  }
+@media print {
+  .calc-print-only { display: block !important; }
 }
 
 html,
@@ -299,11 +292,125 @@ div.remove-height {
   padding-left: unset !important;
 }
 
-.ql-editor ul > li {
-  padding-left: 0.5em !important;
+/* Shared by every editor that lives in a textarea-style resizable box (Tailwind
+   resize-y + overflow-hidden on the outer div): the memo body, and the policy
+   content/provision fields. react-quill-new's own wrapper (.quill) just stacks the
+   toolbar and .ql-container as normal block siblings with .ql-container{height:100%}
+   (quill.snow.css) — that 100% is measured against the .quill wrapper's own height,
+   so .ql-container ends up as tall as the *whole* box while the toolbar sits above
+   it, pushing the pair taller than the box and silently overflowing it. That was
+   harmless before (overflow was visible), but it means .ql-container can't be trusted
+   to leave room for the toolbar on its own — force a real flex layout instead so the
+   toolbar keeps its natural height and the editor exactly fills whatever's left,
+   whether the box is at its default height or has been dragged via the resize handle.
+   (Scrolling past the visible area still works: quill's own CSS scrolls .ql-editor.) */
+.quill-resize-clip .quill {
+  display: flex;
+  flex-direction: column;
+}
+.quill-resize-clip .ql-toolbar {
+  flex: 0 0 auto;
+}
+.quill-resize-clip .ql-container {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Scrollbar */
+/* quill.snow.css sizes headings via ".ql-snow .ql-editor h1/h2 { font-size: ... }",
+   which requires a .ql-snow ancestor. The live editor always has one
+   (react-quill-new wraps it in <div class="ql-container ql-snow">), but
+   read-only previews render bare <span class="ql-editor"> with no .ql-snow
+   wrapper, so that rule never matches and Tailwind's Preflight reset
+   (h1-h6 { font-size: inherit }) wins instead, collapsing headings to body
+   text size. Re-declare the sizes without requiring the .ql-snow ancestor. */
+.ql-editor h1 {
+  font-size: 2em;
+}
+
+.ql-editor h2 {
+  font-size: 1.5em;
+}
+
+/* getSemanticHTML() saves a deliberate blank line as a truly empty <p></p>
+   (no <br>), unlike the live editor's own blank line which always has a
+   placeholder <br> giving it height. Quill's own CSS sets margin/padding to
+   0 on .ql-editor p, so a childless <p> collapses to zero height in
+   read-only previews. Give it back a line's worth of height. */
+.ql-editor p:empty {
+  min-height: 1em;
+}
+
+/* Real editor lists (bullet, ordered, checklist) are always wrapped in an
+   <ol> with a data-list attribute on each <li> — Quill uses <ol> as the
+   container tag for every list type, differentiating via data-list.
+   li keeps its default 1.5em padding-left, so text starts at
+   0.9em (ol) + 1.5em (li) = 2.4em from the container edge — matching the
+   preview's li padding-left of 2.4em below.
+
+   Quill's own `.ql-ui::before` is `display:inline-block; text-align:right`,
+   so with a FIXED width the marker's right edge (where the item text
+   starts) stays constant no matter how many digits/characters the marker
+   has — a bullet, "9.", or "12." all right-align flush to the same edge.
+   `width: auto` (sizing the box to its content) or a width that's too
+   narrow/wide both break this: the box's right edge = (2.4em text-start)
+   + margin-left + width, so margin-left and width must be solved together
+   so that edge lands at a fixed, comfortable gap before the text (~0.4em)
+   for every possible marker width, not just the single-digit case that was
+   eyeballed originally. */
+.ql-editor ol:has(> li[data-list]) {
+  padding-left: 0.9em !important;
+}
+
+.ql-editor li[data-list] > .ql-ui::before {
+  margin-left: -2em !important;
+  width: 1.6em !important;
+}
+
+/* Saved job posting/qualification HTML is generated via getSemanticHTML(),
+   which omits the data-list attribute + .ql-ui marker span that
+   quill.snow.css relies on to draw bullets/numbers in the live editor.
+   Restore a marker for plain <li> elements (no data-list) using the same
+   inline ::before + negative-margin technique quill.snow.css uses for
+   .ql-ui, so the gap between marker and text matches the editor exactly. */
+.ql-editor ul > li:not([data-list]) {
+  list-style: none !important;
+  position: relative;
+  padding-left: 2.4em !important;
+}
+
+.ql-editor ul > li:not([data-list])::before {
+  content: '\2022';
+  position: absolute;
+  left: 1.6em;
+}
+
+.ql-editor ol > li:not([data-list]) {
+  list-style: none !important;
+  position: relative;
+  padding-left: 2.4em !important;
+  counter-increment: ql-plain-ol;
+}
+
+.ql-editor ol:not(:has(> li[data-list])) {
+  counter-reset: ql-plain-ol;
+}
+
+.ql-editor ol > li:not([data-list])::before {
+  content: counter(ql-plain-ol) '.';
+  position: absolute;
+  /* Fixed-width, right-aligned box (not `left: <fixed value>` with the
+     content growing rightward from it) so the marker's right edge stays
+     put for "1.", "9.", and "12." alike - li padding-left is 2.4em, so a
+     2em-wide box starting at the li's left edge leaves a steady ~0.4em
+     gap before the text regardless of how many digits the counter has. */
+  left: 0;
+  width: 2em;
+  text-align: right;
+}
+
+/* Style the scroll container */
 ::-webkit-scrollbar {
   width: 5px;
 }

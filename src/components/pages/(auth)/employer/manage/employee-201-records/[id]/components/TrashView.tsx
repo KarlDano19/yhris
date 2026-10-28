@@ -4,6 +4,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '../modals/ConfirmModal';
 
 import useGetDeletedDocuments from '../hooks/useGetDeletedDocuments';
 import useGetDeletedFolders from '../hooks/useGetDeletedFolders';
@@ -35,6 +36,9 @@ type Props = {
 
 export default function TrashView({ employeeId }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('documents');
+  const [confirmRestore, setConfirmRestore] = useState<
+    { type: 'document' | 'folder'; id: number; name: string } | null
+  >(null);
 
   const { data: deletedDocuments, isLoading: docsLoading } = useGetDeletedDocuments(employeeId);
   const { data: deletedFolders, isLoading: foldersLoading } = useGetDeletedFolders(employeeId);
@@ -42,47 +46,62 @@ export default function TrashView({ employeeId }: Props) {
   const { mutate: restoreDocument, isLoading: restoringDoc } = useRestoreDocument(employeeId);
   const { mutate: restoreFolder, isLoading: restoringFolder } = useRestoreFolder(employeeId);
 
-  const handleRestoreDocument = (documentId: number, fileName: string) => {
-    if (!confirm(`Restore "${fileName}"?`)) return;
-    restoreDocument(documentId, {
-      onSuccess: () => {
-        toast.custom((t) => (
-          <CustomToast toast={toast} t={t} message="Document restored successfully" type="success" />
-        ));
-      },
-      onError: (error) => {
-        toast.custom((t) => (
-          <CustomToast
-            toast={toast}
-            t={t}
-            message={error.message || 'Failed to restore document'}
-            type="error"
-          />
-        ));
-      },
-    });
+  const askRestoreDocument = (documentId: number, fileName: string) => {
+    setConfirmRestore({ type: 'document', id: documentId, name: fileName });
   };
 
-  const handleRestoreFolder = (folderId: number, folderName: string) => {
-    if (!confirm(`Restore folder "${folderName}"?`)) return;
-    restoreFolder(folderId, {
-      onSuccess: () => {
-        toast.custom((t) => (
-          <CustomToast toast={toast} t={t} message="Folder restored successfully" type="success" />
-        ));
-      },
-      onError: (error) => {
-        toast.custom((t) => (
-          <CustomToast
-            toast={toast}
-            t={t}
-            message={error.message || 'Failed to restore folder'}
-            type="error"
-          />
-        ));
-      },
-    });
+  const askRestoreFolder = (folderId: number, folderName: string) => {
+    setConfirmRestore({ type: 'folder', id: folderId, name: folderName });
   };
+
+  const handleConfirmRestore = () => {
+    if (!confirmRestore) return;
+
+    if (confirmRestore.type === 'document') {
+      restoreDocument(confirmRestore.id, {
+        onSuccess: () => {
+          toast.custom((t) => (
+            <CustomToast toast={toast} t={t} message="Document restored successfully" type="success" />
+          ));
+          setConfirmRestore(null);
+        },
+        onError: (error) => {
+          toast.custom((t) => (
+            <CustomToast
+              toast={toast}
+              t={t}
+              message={error.message || 'Failed to restore document'}
+              type="error"
+            />
+          ));
+          setConfirmRestore(null);
+        },
+      });
+    } else {
+      restoreFolder(confirmRestore.id, {
+        onSuccess: () => {
+          toast.custom((t) => (
+            <CustomToast toast={toast} t={t} message="Folder restored successfully" type="success" />
+          ));
+          setConfirmRestore(null);
+        },
+        onError: (error) => {
+          toast.custom((t) => (
+            <CustomToast
+              toast={toast}
+              t={t}
+              message={error.message || 'Failed to restore folder'}
+              type="error"
+            />
+          ));
+          setConfirmRestore(null);
+        },
+      });
+    }
+  };
+
+  const restoringConfirm =
+    confirmRestore?.type === 'document' ? restoringDoc : restoringFolder;
 
   const isLoading = activeTab === 'documents' ? docsLoading : foldersLoading;
   const isEmpty =
@@ -153,7 +172,7 @@ export default function TrashView({ employeeId }: Props) {
                 Deleted: {formatDate(doc.deleted_at)}
               </span>
               <button
-                onClick={() => handleRestoreDocument(doc.id, doc.file_name)}
+                onClick={() => askRestoreDocument(doc.id, doc.file_name)}
                 disabled={restoringDoc}
                 className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
@@ -182,7 +201,7 @@ export default function TrashView({ employeeId }: Props) {
                 Deleted: {formatDate(folder.deleted_at)}
               </span>
               <button
-                onClick={() => handleRestoreFolder(folder.id, folder.name)}
+                onClick={() => askRestoreFolder(folder.id, folder.name)}
                 disabled={restoringFolder}
                 className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
@@ -192,6 +211,21 @@ export default function TrashView({ employeeId }: Props) {
             </div>
           ))}
         </div>
+      )}
+
+      {confirmRestore && (
+        <ConfirmModal
+          title={confirmRestore.type === 'document' ? 'Restore document?' : 'Restore folder?'}
+          message={`Restore "${confirmRestore.name}"?`}
+          onCancel={() => setConfirmRestore(null)}
+          onConfirm={handleConfirmRestore}
+          busy={restoringConfirm}
+          confirmText="Restore"
+          busyText="Restoring…"
+          cancelText="Cancel"
+          intent="primary"
+          maxWidth="sm"
+        />
       )}
     </div>
   );

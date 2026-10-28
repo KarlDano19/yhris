@@ -1,17 +1,52 @@
 import { Dispatch, Fragment, useRef } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import toast from 'react-hot-toast';
 
 import { XCircleIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, LinkIcon } from "@heroicons/react/24/outline";
+
+import CustomToast from '@/components/CustomToast';
 
 import { T_JobPreviewModal } from "@/types/globals";
 import { T_JobPostingTable } from "@/types/job_posting";
 import formatPrice from '@/helpers/currencyFormat';
+import { normalizeNbsp } from '@/helpers/linkify';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
 
-import 'react-quill/dist/quill.snow.css';
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const buildJobPostingLLMExport = (item: T_JobPostingTable): string => {
+  const lines: string[] = [`# ${item.job_title}`, ''];
+
+  if (item.is_show_roles && item.job_description) {
+    lines.push('## Role', stripHtml(item.job_description), '');
+  }
+  lines.push('## Location', item.advertise_to || 'Not specified', '');
+  lines.push('## Qualifications', item.qualifications ? stripHtml(item.qualifications) : 'Not specified', '');
+  lines.push('## Job Type', item.job_type || 'Not specified', '');
+  if (item.work_setup) lines.push('## Work Setup', item.work_setup, '');
+  lines.push('## Schedule', item.job_schedule || 'Not specified', '');
+
+  if (item.is_show_salary && item.salary_range_type && item.rate) {
+    const salaryText =
+      item.salary_range_type === 'Range'
+        ? `PHP ${formatPrice(Number(item.minimum_amount) || 0)} - ${formatPrice(Number(item.maximum_amount) || 0)}`
+        : `PHP ${formatPrice(Number(item.exact_amount) || 0)}`;
+    lines.push('## Salary Range', `${salaryText} / ${item.rate}`, '');
+  }
+
+  if (item.is_show_benefits && item.offered_benefits) {
+    lines.push('## Benefits', item.offered_benefits, '');
+  }
+
+  if (item.is_show_remarks && item.job_remark) {
+    lines.push('## Notes / Remarks', stripHtml(item.job_remark), '');
+  }
+
+  return lines.join('\n').trim();
+};
 
 export default function JobPreviewModal({
   isOpen,
@@ -26,30 +61,42 @@ export default function JobPreviewModal({
 }) {
   const cancelButtonRef = useRef(null);
 
+  const currentItem = jobPostHistoryItems?.find((item) => item.id === id) ?? null;
+
+  const handleCopyForLLM = async () => {
+    if (!currentItem) return;
+    try {
+      await navigator.clipboard.writeText(buildJobPostingLLMExport(currentItem));
+      toast.custom(() => <CustomToast message='Job posting copied — paste it into Claude, ChatGPT, or Gemini.' type='success' />);
+    } catch {
+      toast.custom(() => <CustomToast message='Could not access the clipboard in this browser.' type='error' />);
+    }
+  };
+
   const renderRoleDescription = (jobDescription: any) => {
-    const markup = { __html: jobDescription };
+    const markup = { __html: normalizeNbsp(jobDescription || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderQualificationsDescription = (qualifications: any) => {
-    const markup = { __html: qualifications };
+    const markup = { __html: normalizeNbsp(qualifications || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
-  
+
   const renderNotesRemarks = (notesRemarks: any) => {
-    const markup = { __html: notesRemarks };
+    const markup = { __html: normalizeNbsp(notesRemarks || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   return (
-    <Transition.Root show={isOpen?.isOpen ? true : false} as={Fragment}>
+    <Transition show={isOpen?.isOpen ? true : false} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={() => setIsOpen({ id: isOpen?.id ? isOpen?.id : null, isOpen: false })}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -59,11 +106,11 @@ export default function JobPreviewModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -72,11 +119,21 @@ export default function JobPreviewModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <DialogPanel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Job {id} - Preview
                   </h3>
+                  {currentItem && (
+                    <button
+                      type="button"
+                      onClick={handleCopyForLLM}
+                      className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-md mr-2"
+                    >
+                      <ClipboardDocumentIcon className="w-4 h-4" />
+                      Copy for LLM
+                    </button>
+                  )}
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
                     onClick={() => setIsOpen({ id: isOpen?.id ? isOpen?.id : null, isOpen: false })}
@@ -266,11 +323,11 @@ export default function JobPreviewModal({
                     Close
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

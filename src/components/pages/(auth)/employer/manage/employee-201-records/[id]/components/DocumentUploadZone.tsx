@@ -187,7 +187,7 @@ export default function DocumentUploadZone({
         />
         <label
           htmlFor="file-upload"
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 cursor-pointer transition-colors"
+          className="inline-flex items-center px-4 py-2 bg-savoy-blue text-white text-sm font-semibold rounded-md hover:opacity-90 cursor-pointer transition-colors"
         >
           Select Files
         </label>

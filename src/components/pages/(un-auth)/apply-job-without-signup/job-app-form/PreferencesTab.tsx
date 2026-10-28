@@ -1,18 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
-import dynamic from 'next/dynamic';
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import ReactQuill from '@/components/ReactQuillDynamic';
 
 import { PlusIcon, CheckIcon } from '@heroicons/react/24/solid';
 import ConfirmationModal from './modals/ConfirmationModal';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-
-import 'react-quill/dist/quill.snow.css';
 
 
 function PreferencesTab({
@@ -41,7 +39,6 @@ function PreferencesTab({
     control: control,
     name: 'experiences',
   });
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const onSubmit = handleSubmit((data: any) => {
     let hasError = false;
     if (fields.length !== 0) {

@@ -1,10 +1,11 @@
 import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import SalaryRangeModal from '../../modals/SalaryRangeModal';
 import CreateJobPageJobTitleInfo from '../../modals/modal-pages/CreateJobPageJobTitleInfo';
 import CreateJobPageJobType from '../../modals/modal-pages/CreateJobPageJobType';
@@ -64,7 +65,12 @@ export default function UpdateJobModal({
     data: jobPostDataDetails,
     refetch: refetchJobPostDetails,
     remove: removeJobPostDetails,
+    isFetching: isJobPostDetailsFetching,
   } = useGetJobDetails(isOpen.id);
+
+  // Data is only safe to render once it belongs to the job currently being edited
+  const isJobPostDetailsReady =
+    !isOpen.open || (!isJobPostDetailsFetching && jobPostDataDetails?.id === isOpen.id);
 
   useEffect(() => {
     if (isOpen.id) {
@@ -533,9 +539,9 @@ export default function UpdateJobModal({
   };
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300'
             enterFrom='opacity-0'
@@ -545,11 +551,11 @@ export default function UpdateJobModal({
             leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300'
                 enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -558,12 +564,18 @@ export default function UpdateJobModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                <DialogPanel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Update Job Form</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
 
+                  {!isJobPostDetailsReady ? (
+                    <div className='flex min-h-[560px] items-center justify-center'>
+                      <LoadingSpinner size='xl' showText text='Loading job details...' />
+                    </div>
+                  ) : (
+                    <div className='min-h-[560px]'>
                   {/* Tab Navigation */}
                   <div className='pt-4 pb-2 px-4'>
                     <div className='flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide'>
@@ -778,6 +790,8 @@ export default function UpdateJobModal({
                     />
 
                   </div>
+                    </div>
+                  )}
                   <SalaryRangeModal
                     setPageNumber={setPageNumber}
                     isOpen={isSalaryRangeModalOpen}
@@ -788,11 +802,11 @@ export default function UpdateJobModal({
                       secondFormSubmit();
                     }}
                   />
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
   );
 }

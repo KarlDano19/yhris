@@ -4,10 +4,10 @@ import { getIronSession } from 'iron-session';
 
 import { SessionData, sessionOptions } from '@/lib/session';
 import Header from '@/app/header';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 async function getSession() {
-  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   return session;
 }
 
@@ -16,7 +16,6 @@ async function Auth({ children }: { children: React.ReactNode }) {
   const type = session.accountType;
   const hasProfile = session.hasProfile;
   const hasActiveSubscription = session.hasActiveSubscription;
-  const tokenExpiresAt = session.tokenExpiresAt;
 
   return (
     <>
@@ -24,10 +23,10 @@ async function Auth({ children }: { children: React.ReactNode }) {
         type={type}
         hasProfile={hasProfile}
         hasActiveSubscription={hasActiveSubscription}
-        tokenExpiresAt={tokenExpiresAt}
+        tokenExpiresAt={session.tokenExpiresAt}
+        isLoggedIn={session.isLoggedIn}
       />
       {children}
-      {session.isLoggedIn && <FloatingHelpButton />}
     </>
   );
 }

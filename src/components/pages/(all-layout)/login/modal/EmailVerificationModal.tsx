@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogBackdrop, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
@@ -38,13 +38,13 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({ email, 
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog
         as='div'
         className='fixed inset-0 z-10 overflow-y-auto flex items-center justify-center'
         onClose={onClose}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -53,10 +53,10 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({ email, 
           leaveFrom='opacity-100'
           leaveTo='opacity-0'
         >
-          <Dialog.Overlay className='fixed inset-0 bg-black bg-opacity-30' />
-        </Transition.Child>
+          <DialogBackdrop className='fixed inset-0 bg-black bg-opacity-30' />
+        </TransitionChild>
 
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0 scale-95'
@@ -71,9 +71,9 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({ email, 
                 <ExclamationTriangleIcon className='h-6 w-6 text-red-600' aria-hidden='true' />
               </div>
               <div className='mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left'>
-                <Dialog.Title as='h3' className='text-lg leading-6 font-medium text-gray-900'>
+                <DialogTitle as='h3' className='text-lg leading-6 font-medium text-gray-900'>
                   Email Verification
-                </Dialog.Title>
+                </DialogTitle>
                 <div className='mt-2'>
                   <p className='text-sm text-gray-500'>The email has already been sent. Please check and confirm.</p>
                 </div>
@@ -100,9 +100,9 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({ email, 
               </button>
             </div>
           </div>
-        </Transition.Child>
+        </TransitionChild>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

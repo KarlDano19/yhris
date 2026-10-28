@@ -64,6 +64,12 @@ async function updateApplicantOrient(data: any) {
         department: data.department_id, // Send as ID (ForeignKey)
         employment_status_id: data.employment_status_id, // Send as ID (ForeignKey)
       };
+    } else if (data.actionType == 'update_checklist') {
+      // 201 Checklist Monitoring — send the full mutated checklist array
+      payload = {
+        type_of_action: data.actionType,
+        checklist_items: data.checklist_items,
+      };
     } else {
       payload = {
         type_of_action: data.actionType,

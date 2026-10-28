@@ -37,6 +37,10 @@ export type T_UpdateFolderData = {
   order?: number;
 };
 
+export type T_ReorderFoldersData = {
+  folder_ids: number[];
+};
+
 export type T_UploadDocumentsData = {
   files: FileList;
   folder_id?: number | null;

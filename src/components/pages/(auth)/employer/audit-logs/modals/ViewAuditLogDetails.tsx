@@ -1,10 +1,11 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { Switch } from '@headlessui/react';
 
 import useGetAuditLogDetails from '../hooks/useGetAuditLogDetails';
 import { formatDateTimeSeparate } from '@/helpers/date';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import {
   ClockIcon,
@@ -16,7 +17,6 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline';
 
-import 'react-quill/dist/quill.snow.css';
 
 type T_ModalData = {
   id: number;
@@ -129,7 +129,7 @@ export default function EditEmployeeCompensationLogModal({
       if (typeof val === "string") {
         // Check if the string contains HTML tags
         if (val.includes('<') && val.includes('>')) {
-          const markup = { __html: val };
+          const markup = { __html: normalizeNbsp(val) };
           return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
         }
 
@@ -322,9 +322,9 @@ export default function EditEmployeeCompensationLogModal({
   const changedFields = getChangedFields(auditLogDetails.old_data, auditLogDetails.new_data);
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -334,11 +334,11 @@ export default function EditEmployeeCompensationLogModal({
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -347,7 +347,7 @@ export default function EditEmployeeCompensationLogModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-5xl'>
+              <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-5xl'>
                 {/* Header */}
                 <div className='flex bg-savoy-blue p-4 items-center'>
                   <h3 className='flex-1 text-white text-lg font-semibold'>
@@ -504,11 +504,11 @@ export default function EditEmployeeCompensationLogModal({
                     </div>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

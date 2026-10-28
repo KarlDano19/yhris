@@ -82,22 +82,12 @@ export default function CreateJobPageSalary({
     }
   }, [watchedBenefits]);
 
-  // Sync local state → form benefits (skip if value already matches to avoid circular updates)
-  useEffect(() => {
-    const concatenatedValue = isOtherBenefitOpen
-      ? [...selectedBenefitOptions, ...selectedOtherBenefit]
-      : selectedBenefitOptions;
-    const current: string[] = getValues('benefits') || [];
-    if (current.length !== concatenatedValue.length || !current.every((b, i) => b === concatenatedValue[i])) {
-      setValue('benefits', concatenatedValue);
-    }
-  }, [selectedBenefitOptions, selectedOtherBenefit, isOtherBenefitOpen, setValue, getValues]);
-
   // Convert string to array of string in other benefits
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const stringData = event.target.value;
     const arrayData = stringData.split(',');
     setSelectedOtherBenefit(arrayData);
+    setValue('benefits', [...selectedBenefitOptions, ...arrayData]);
   };
 
   return (
@@ -325,13 +315,11 @@ export default function CreateJobPageSalary({
                       rate: false,
                     });
                     setSelectedBenefitOptions((prevOptions) => {
-                      if (prevOptions.includes(benefit)) {
-                        // If the benefit is already selected, remove it from the options
-                        return prevOptions.filter((option) => option !== benefit);
-                      } else {
-                        // If the benefit is not selected, add it to the options
-                        return [...prevOptions, benefit];
-                      }
+                      const next = prevOptions.includes(benefit)
+                        ? prevOptions.filter((option) => option !== benefit)
+                        : [...prevOptions, benefit];
+                      setValue('benefits', isOtherBenefitOpen ? [...next, ...selectedOtherBenefit] : next);
+                      return next;
                     });
                   }}
                 >

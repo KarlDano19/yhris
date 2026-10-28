@@ -1,9 +1,12 @@
-import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react';
+import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import dynamic from 'next/dynamic';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import useEditLocationDetails from '../hooks/location/useEditLocationDetails';
 import useGetLocationDetails from '../hooks/location/useGetLocationDetails';
@@ -15,7 +18,7 @@ import useGetEmployeeStatusDetails from '../hooks/employee-status/useGetEmployee
 import useEditEmployeeStatusDetails from '../hooks/employee-status/useEditEmployeeStatusDetails';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill/dist/quill.snow.css';
+import ReactQuill from '@/components/ReactQuillDynamic';
 
 type T_ModalData = {
   id: number;
@@ -40,32 +43,30 @@ export default function EditModal({
     data: locationDetailsData,
     refetch: refetchLocationDetails,
     remove: removeLocation,
+    isFetching: isLocationDetailsFetching,
   } = useGetLocationDetails(isOpen.id);
   const {
     data: departmentDetailsData,
     refetch: refetchDepartmentDetails,
     remove: removeDepartment,
+    isFetching: isDepartmentDetailsFetching,
   } = useGetDepartmentDetails(isOpen.id);
   const {
     data: positionDetailsData,
     refetch: refetchPositionDetails,
     remove: removePosition,
+    isFetching: isPositionDetailsFetching,
   } = useGetPositionDetails(isOpen.id);
   const {
     data: employeeStatusDetailsData,
     refetch: refetchEmployeeStatusDetails,
     remove: removeEmployeeStatus,
+    isFetching: isEmployeeStatusDetailsFetching,
   } = useGetEmployeeStatusDetails(isOpen.id);
   const { mutate: editLocation, isLoading: isLoadingEditLocation } = useEditLocationDetails();
   const { mutate: editDepartment, isLoading: isLoadingEditDepartment } = useEditDepartmentDetails();
   const { mutate: editPosition, isLoading: isLoadingEditPosition } = useEditPositionDetails();
   const { mutate: editEmployeeStatus, isLoading: isLoadingEditEmployeeStatus } = useEditEmployeeStatusDetails();
-
-  // Dynamic import for React Quill
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
-    [isOpen]
-  );
 
   useEffect(() => {
     if (isOpen) {
@@ -102,15 +103,27 @@ export default function EditModal({
     }
   }, [locationDetailsData, departmentDetailsData, positionDetailsData, employeeStatusDetailsData]);
 
+  const isDetailsReady =
+    !isOpen.open ? true :
+    module === 'location' ? !isLocationDetailsFetching && locationDetailsData?.id === isOpen.id :
+    module === 'department' ? !isDepartmentDetailsFetching && departmentDetailsData?.id === isOpen.id :
+    module === 'position' ? !isPositionDetailsFetching && positionDetailsData?.id === isOpen.id :
+    module === 'employee-status' ? !isEmployeeStatusDetailsFetching && employeeStatusDetailsData?.id === isOpen.id :
+    true;
+
   const onSubmit = handleSubmit((data) => {
     // Add description to data if it's a position
     const submitData = module === 'position' ? { ...data, description } : data;
     
     const callbackReq = {
       onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         customCloseModal();
         refetch();
-      }
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 5000 });
+      },
     };
     if (module === 'location') {
       editLocation({ location_id: isOpen.id, data: submitData }, callbackReq);
@@ -134,9 +147,9 @@ export default function EditModal({
   };
 
   return (
-    <Transition.Root show={isOpen ? true : false} as={Fragment}>
+    <Transition show={isOpen ? true : false} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -146,11 +159,11 @@ export default function EditModal({
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -159,11 +172,16 @@ export default function EditModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 ${module === 'position' ? 'w-[750px]' : 'w-[500px]'}`}>
+              <DialogPanel className={`relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 ${module === 'position' ? 'w-[750px]' : 'w-[500px]'}`}>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit {module}</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
+                {!isDetailsReady ? (
+                  <div className={`flex items-center justify-center ${module === 'position' ? 'min-h-[420px]' : 'min-h-[200px]'}`}>
+                    <LoadingSpinner size='lg' showText text={`Loading ${module} details...`} />
+                  </div>
+                ) : (
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
                     <label htmlFor='name' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -236,11 +254,12 @@ export default function EditModal({
                     </button>
                   </div>
                 </form>
-              </Dialog.Panel>
-            </Transition.Child>
+                )}
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 async function updateOrgStructure(orgStructureId: number, data: {
-  position?: number;
+  position?: number | null;
+  department?: number | null;
   description?: string;
   parent?: number | null;
   order?: number;

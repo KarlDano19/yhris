@@ -1,14 +1,15 @@
-import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
-import AdminSidebar from '@/components/pages/(auth)/admin/AdminSidebar';
+import { cookies } from 'next/headers';
+import { getIronSession } from 'iron-session';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <AdminHeader />
-      <div className="flex flex-1 overflow-hidden">
-        <AdminSidebar />
-        <main className="flex-1 overflow-auto">{children}</main>
-      </div>
-    </div>
-  );
+import { SessionData, sessionOptions } from '@/lib/session';
+import AdminShell from '@/components/pages/(auth)/admin/AdminShell';
+
+async function getSession() {
+  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  return session;
+}
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+  return <AdminShell initialTokenExpiresAt={session.tokenExpiresAt}>{children}</AdminShell>;
 }

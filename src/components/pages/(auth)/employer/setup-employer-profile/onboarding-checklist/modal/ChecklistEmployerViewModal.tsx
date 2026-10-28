@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -37,7 +37,7 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
     <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-[20]' onClose={isVideoOpen ? () => {} : onClose}>
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-in-out duration-300'
           enterFrom='opacity-0'
@@ -47,13 +47,13 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-black bg-opacity-30' />
-        </Transition.Child>
+        </TransitionChild>
 
         {/* Side panel */}
         <div className='fixed inset-0 overflow-hidden'>
           <div className='absolute inset-0 overflow-hidden'>
             <div className='pointer-events-none fixed inset-y-0 left-0 flex max-w-full pr-10'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='transform transition ease-in-out duration-300'
                 enterFrom='-translate-x-full'
@@ -62,14 +62,14 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
                 leaveFrom='translate-x-0'
                 leaveTo='-translate-x-full'
               >
-                <Dialog.Panel className='pointer-events-auto w-screen max-w-md'>
+                <DialogPanel className='pointer-events-auto w-screen max-w-md'>
                   <div className='flex h-full flex-col bg-gray-50 shadow-xl overflow-y-auto'>
                     {/* Header */}
                     <div className='bg-white px-5 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0'>
                       <div>
-                        <Dialog.Title className='text-base font-semibold text-gray-900'>
+                        <DialogTitle className='text-base font-semibold text-gray-900'>
                           HRIS Implementation Checklist
-                        </Dialog.Title>
+                        </DialogTitle>
                         {record && (
                         <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium ${
                           record.progress_pct === 100
@@ -133,8 +133,8 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
                       )}
                     </div>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </div>

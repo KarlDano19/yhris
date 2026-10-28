@@ -194,7 +194,7 @@ function Content() {
                   <div className='border-2 rounded-lg mx-4 mt-4 mb-12'>
                     <div className='p-6 border-b-2'>
                       <p className='text-[1.2rem] font-semibold'>{evaluationTemplateDetails.name}</p>
-                      <div dangerouslySetInnerHTML={{ __html: linkify(evaluationTemplateDetails.description || '') }} />
+                      <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(evaluationTemplateDetails.description || '') }} />
                     </div>
                     <div className='px-6 py-8 mb-8'>
                       <div className='w-full mb-8'>
@@ -250,16 +250,16 @@ function Content() {
                           {convertToRoman(evaluationCriterionIndex + 1)}.{' '}
                           {evaluationForm[evaluationCriterionIndex].section_title}
                         </p>
-                        <div dangerouslySetInnerHTML={{ __html: linkify(evaluationForm[evaluationCriterionIndex].section_description || '') }} />
+                        <div className='ql-editor !p-0' dangerouslySetInnerHTML={{ __html: linkify(evaluationForm[evaluationCriterionIndex].section_description || '') }} />
                       </div>
                     )}
                     {evaluationForm[evaluationCriterionIndex].criterion.map((item: any, index: number) => {
                       return (
                         <div key={index} className='px-[1.55rem] py-6'>
-                          <div className='flex justify-between mb-8'>
-                            <div className='flex gap-1 items-start'>
+                          <div className='flex justify-between gap-4 mb-8'>
+                            <div className='flex gap-1 items-start min-w-0'>
                               <span className='shrink-0'>{index + 1}.</span>
-                              <div dangerouslySetInnerHTML={{ __html: linkify(item.title || '') }} />
+                              <div className='ql-editor !p-0 min-w-0' dangerouslySetInnerHTML={{ __html: linkify(item.title || '') }} />
                             </div>
                             {evaluationTemplateDetails.criteria_rating_view_type === 'default' && (
                               <div className='flex gap-4 items-center justify-end whitespace-nowrap'>

@@ -1,11 +1,12 @@
 import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
 import EvaluationInfoTab from '../tabs/EvaluationInfoTab';
 import EvaluationFormTab from '../tabs/EvaluationFormTab';
@@ -31,16 +32,24 @@ export default function EditEvaluationModal({
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
   const [isPreview, setIsPreview] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const { register, handleSubmit, setValue, getValues, watch, control, formState: { errors } } = useForm();
   const {
     data: dataEvaluationDetail,
+    isFetching: isEvaluationDetailFetching,
     refetch: refetchEvaluationDetail,
     remove: evaluationTemplateDetailRemove,
   } = useGetEvaluationTemplateDetails(selectedEvaluationTemplateId);
   const { mutate, isLoading } = useUpdateEvaluationTemplate();
 
+  // Data is only safe to render once the fetch (triggered on open) has resolved
+  // AND the form has been populated from it — isFetching covers the manual
+  // refetch() this modal triggers on open, since the underlying query is enabled:false.
+  const isEvaluationDetailReady = !isOpen || (isDataLoaded && !isEvaluationDetailFetching);
+
   useEffect(() => {
     if (isOpen) {
+      setIsDataLoaded(false);
       refetchEvaluationDetail();
     }
   }, [isOpen]);
@@ -59,12 +68,14 @@ export default function EditEvaluationModal({
       setValue('is_show_criteria_comment', dataEvaluationDetail.is_show_criteria_comment);
       setValue('evaluation_criterion', dataEvaluationDetail.evaluation_criterion);
       setValue('criteria_rating_view_type', dataEvaluationDetail.criteria_rating_view_type);
+      setIsDataLoaded(true);
     }
   }, [dataEvaluationDetail]);
 
   const customCloseModal = () => {
     evaluationTemplateDetailRemove();
     setIsOpen(false);
+    setIsDataLoaded(false);
   };
 
   const onSubmit = handleSubmit((data: any) => {
@@ -82,9 +93,9 @@ export default function EditEvaluationModal({
   });
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -94,11 +105,11 @@ export default function EditEvaluationModal({
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-20 overflow-y-auto'>
           <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -107,7 +118,7 @@ export default function EditEvaluationModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel
+              <DialogPanel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
                   selectedTab === 1 && 'max-w-4xl',
@@ -212,70 +223,78 @@ export default function EditEvaluationModal({
                     </nav>
                   </div>
                 )}
-                {selectedTab === 1 && (
-                  <EvaluationInfoTab
-                    {...{
-                      register,
-                      handleSubmit,
-                      setSelectedTab,
-                      errors,
-                    }}
-                  />
-                )}
-                {selectedTab === 2 && (
-                  <EvaluationFormTab
-                    {...{
-                      register,
-                      watch,
-                      setValue,
-                      handleSubmit,
-                      setSelectedTab,
-                      errors,
-                    }}
-                  />
-                )}
-                {selectedTab === 3 && (
-                  <EvaluationCriterionTab
-                    {...{
-                      control,
-                      register,
-                      watch,
-                      setValue,
-                      handleSubmit,
-                      setSelectedTab,
-                      getValues,
-                    }}
-                  />
-                )}
-                {selectedTab === 4 && (
-                  <>
-                    {!isPreview && (
-                      <ViewModeTab
+                {!isEvaluationDetailReady ? (
+                  <div className='flex min-h-[420px] items-center justify-center'>
+                    <LoadingSpinner size='xl' showText text='Loading evaluation template details...' />
+                  </div>
+                ) : (
+                  <div className='min-h-[420px]'>
+                    {selectedTab === 1 && (
+                      <EvaluationInfoTab
                         {...{
-                          setIsPreview,
-                          setValue,
-                          getValues,
-                          onSubmit,
+                          register,
+                          handleSubmit,
                           setSelectedTab,
-                          isLoading,
+                          errors,
                         }}
                       />
                     )}
-                    {isPreview && (
-                      <PreviewTab
+                    {selectedTab === 2 && (
+                      <EvaluationFormTab
                         {...{
-                          setIsPreview,
+                          register,
+                          watch,
+                          setValue,
+                          handleSubmit,
+                          setSelectedTab,
+                          errors,
+                        }}
+                      />
+                    )}
+                    {selectedTab === 3 && (
+                      <EvaluationCriterionTab
+                        {...{
+                          control,
+                          register,
+                          watch,
+                          setValue,
+                          handleSubmit,
+                          setSelectedTab,
                           getValues,
                         }}
                       />
                     )}
-                  </>
+                    {selectedTab === 4 && (
+                      <>
+                        {!isPreview && (
+                          <ViewModeTab
+                            {...{
+                              setIsPreview,
+                              setValue,
+                              getValues,
+                              onSubmit,
+                              setSelectedTab,
+                              isLoading,
+                            }}
+                          />
+                        )}
+                        {isPreview && (
+                          <PreviewTab
+                            {...{
+                              setIsPreview,
+                              getValues,
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
                 )}
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

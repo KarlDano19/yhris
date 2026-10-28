@@ -37,7 +37,7 @@ export interface SeparationData {
   pdf_content: string | null;
   approved_by: string | null;
   effective_date: string | null;
-  
+
   // Timestamps
   created_at: string;
   updated_at: string;

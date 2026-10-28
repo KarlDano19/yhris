@@ -1,9 +1,10 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import useGetWorkEnvironmentRequestDetails from "../hooks/useGetWorkEnvironmentRequestDetails";
 import useUpdateWorkEnvironmentRequest from "../hooks/useUpdateWorkEnvironmentRequest";
 import BasicAndRiskInfo from "./tabs/BasicAndRiskInfo";
@@ -34,7 +35,10 @@ export default function EditWemRequestModal({
     data: workEnvironmentRequestData,
     refetch: refetchWorkEnvironmentRequest,
     remove: removeWorkEnvironmentRequest,
+    isFetching: isWorkEnvironmentRequestFetching,
   } = useGetWorkEnvironmentRequestDetails(isOpen.id);
+  const isWorkEnvironmentRequestReady =
+    !isOpen.open || (!isWorkEnvironmentRequestFetching && workEnvironmentRequestData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkEnvironmentRequest } =
     useUpdateWorkEnvironmentRequest();
@@ -115,14 +119,14 @@ export default function EditWemRequestModal({
   });
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={() => customCloseModal()}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -132,11 +136,11 @@ export default function EditWemRequestModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -145,7 +149,7 @@ export default function EditWemRequestModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
                     Edit Work Environment Measurement (WEM) Request
@@ -155,67 +159,75 @@ export default function EditWemRequestModal({
                     onClick={() => customCloseModal()}
                   />
                 </div>
-                {selectedTab === 1 && (
-                  <BasicAndRiskInfo
-                    name_of_safety_officer={
-                      workEnvironmentRequestData?.name_of_safety_officer
-                    }
-                    control={control}
-                    setValue={setValue}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    getValues={getValues}
-                    watch={watch}
-                    errors={errors}
-                    setError={setError}
-                    clearErrors={clearErrors}
-                  />
+                {!isWorkEnvironmentRequestReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading work environment measurement request..." />
+                  </div>
+                ) : (
+                  <div className="min-h-[560px]">
+                    {selectedTab === 1 && (
+                      <BasicAndRiskInfo
+                        name_of_safety_officer={
+                          workEnvironmentRequestData?.name_of_safety_officer
+                        }
+                        control={control}
+                        setValue={setValue}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        getValues={getValues}
+                        watch={watch}
+                        errors={errors}
+                        setError={setError}
+                        clearErrors={clearErrors}
+                      />
+                    )}
+                    {selectedTab === 2 && (
+                      <WEMDetailsRequest
+                        control={control}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        getValues={getValues}
+                        watch={watch}
+                        errors={errors}
+                        setError={setError}
+                        clearErrors={clearErrors}
+                      />
+                    )}
+                    {selectedTab === 3 && (
+                      <MonitoringAndHazardInfo
+                        control={control}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        getValues={getValues}
+                        watch={watch}
+                        errors={errors}
+                        setError={setError}
+                      />
+                    )}
+                    {selectedTab === 4 && (
+                      <DataPrivacyAndCertification
+                        control={control}
+                        register={register}
+                        onSubmit={onSubmit}
+                        setSelectedTab={setSelectedTab}
+                        setValue={setValue}
+                        watch={watch}
+                        errors={errors}
+                        setError={setError}
+                        clearErrors={clearErrors}
+                        isLoading={isLoadingUpdateWorkEnvironmentRequest}
+                      />
+                    )}
+                  </div>
                 )}
-                {selectedTab === 2 && (
-                  <WEMDetailsRequest
-                    control={control}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    getValues={getValues}
-                    watch={watch}
-                    errors={errors}
-                    setError={setError}
-                    clearErrors={clearErrors}
-                  />
-                )}
-                {selectedTab === 3 && (
-                  <MonitoringAndHazardInfo
-                    control={control}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    getValues={getValues}
-                    watch={watch}
-                    errors={errors}
-                    setError={setError}
-                  />
-                )}
-                {selectedTab === 4 && (
-                  <DataPrivacyAndCertification
-                    control={control}
-                    register={register}
-                    onSubmit={onSubmit}
-                    setSelectedTab={setSelectedTab}
-                    setValue={setValue}
-                    watch={watch}
-                    errors={errors}
-                    setError={setError}
-                    clearErrors={clearErrors}
-                    isLoading={isLoadingUpdateWorkEnvironmentRequest}
-                  />
-                )}
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

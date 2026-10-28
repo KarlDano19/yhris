@@ -18,8 +18,9 @@ import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 
-export default function Content({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) {
+export default function Content({ loginType, hasActiveSubscription, hasYpIntegration }: { loginType: string, hasActiveSubscription: boolean, hasYpIntegration?: boolean }) {
   const router = useRouter();
   const [q, setQ] = useState('');
 
@@ -97,8 +98,16 @@ export default function Content({ loginType, hasActiveSubscription }: { loginTyp
       {
         onSuccess: (data) => {
           const { summary } = data;
-          const message = `Sync complete: ${summary.created} created, ${summary.updated} updated${summary.errors > 0 ? `, ${summary.errors} errors` : ''}`;
-          toast.custom(() => <CustomToast message={message} type="success" />);
+          const hasErrors = summary.errors > 0;
+          const message = `Sync complete: ${summary.created} created, ${summary.updated} updated${hasErrors ? `, ${summary.errors} failed` : ''}`;
+          toast.custom(() => <CustomToast message={message} type={hasErrors ? 'warning' : 'success'} />, { duration: hasErrors ? 8000 : 5000 });
+          if (hasErrors && (summary.error_details?.length ?? 0) > 0) {
+            const failedNames = (summary.error_details ?? [])
+              .map((e: any) => e.name || e.system_id || 'Unknown')
+              .join(', ');
+            const errorMsg = `Failed to sync: ${failedNames}. Reason: ${summary.error_details?.[0]?.error || 'unknown error'}`;
+            toast.custom(() => <CustomToast message={errorMsg} type="error" />, { duration: 10000 });
+          }
         },
         onError: (error: any) => {
           const errorMessage = typeof error === 'string' ? error : 'Failed to sync employees to Payroll';
@@ -139,7 +148,7 @@ export default function Content({ loginType, hasActiveSubscription }: { loginTyp
             }}
           />
           
-          {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
+          {canSyncWithPayroll(loginType, hasYpIntegration) && (
           <button
             className='px-4 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2'
             onClick={() => {

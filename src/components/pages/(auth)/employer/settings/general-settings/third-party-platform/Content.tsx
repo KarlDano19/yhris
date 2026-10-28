@@ -10,9 +10,11 @@ import BackButton from '@/components/BackButton';
 import CreateThirdPartyIntegrationModal from './modals/CreateThirdPartyIntegrationModal';
 import useGetThirdPartyIntegrationItems from './hooks/useGetThirdPartyIntegrationItems';
 
+import { Tooltip } from 'react-tooltip';
+
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
-import { formatDateToLocal } from '@/helpers/date';
+import { formatDateToLocal, formatDateTimeToLocal } from '@/helpers/date';
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const router = useRouter();
@@ -61,6 +63,28 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       ...itemsFilter,
       search: searchText
     });
+  };
+
+  // Reconnect re-runs the Yahshua Payroll OAuth "connect" flow, which overwrites the
+  // stored integration row with a fresh access AND refresh token. Use this when the
+  // saved refresh token has been revoked/expired (payroll calls start 500ing with
+  // "Failed to refresh access token"). Same popup + BroadcastChannel plumbing as create.
+  const handleReconnect = (provider: string) => {
+    if (provider !== 'yahshua-payroll') return;
+
+    // Flag this run as a "connect" so the shared /sso callback links the current
+    // company (refreshing its tokens) instead of logging in / creating a company.
+    localStorage.setItem('yp_oauth_mode', 'connect');
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth/`;
+    const left = (window.innerWidth - 900) / 2;
+    const top = (window.innerHeight - 700) / 2;
+    const popup = window.open(url, 'popup', `width=900, height=900, left=${left}, top=${top}`);
+    const checkOAuthStatus = setInterval(() => {
+      if (popup?.closed) {
+        clearInterval(checkOAuthStatus);
+      }
+    }, 1000);
   };
 
   useEffect(() => {
@@ -131,6 +155,38 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.provider}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {/* Access-token expiry badge. An expired access token is auto-refreshed on the
+                next call via the stored refresh token, so this is informational — only use
+                Reconnect if calls keep failing (revoked refresh token). */}
+            <span
+              data-tooltip-id='token-status-tooltip'
+              data-tooltip-content={
+                item.is_expired
+                  ? 'Access token expired — it is auto-refreshed on the next sync. Only reconnect if syncs keep failing.'
+                  : item.expires_in
+                    ? `Access token valid until ${formatDateTimeToLocal(item.expires_in, true)}`
+                    : 'No expiry recorded'
+              }
+              className={classNames(
+                'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                item.is_expired ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'
+              )}
+            >
+              {item.is_expired ? 'Expired' : 'Active'}
+            </span>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {/* Reconnect only applies to Yahshua Payroll — the connect callback handles that provider */}
+            {item.provider === 'yahshua-payroll' && (
+              <button
+                className='inline-flex justify-center rounded-md border border-savoy-blue px-4 py-1.5 text-sm font-semibold text-savoy-blue shadow-sm hover:bg-gray-50'
+                onClick={() => handleReconnect(item.provider)}
+              >
+                Reconnect
+              </button>
+            )}
+          </td>
         </tr>
       ));
     } else {
@@ -210,6 +266,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Provider
                       </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Token Status
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
@@ -219,6 +281,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
         </div>
+
+        <Tooltip id='token-status-tooltip' />
+
         
         {/* Sticky Pagination */}
         <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">

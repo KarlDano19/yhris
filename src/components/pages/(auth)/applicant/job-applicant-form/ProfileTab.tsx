@@ -16,9 +16,16 @@ interface ProfileTabProps {
 }
 
 const ProfileTab = ({ register, handleSubmit, watch, firstSubmit, setCurrentTab }: ProfileTabProps) => {
-  const profileSubmit = handleSubmit((data: any) => {
-    firstSubmit(data);
-  });
+  const [resumeError, setResumeError] = useState(false);
+
+  const profileSubmit = handleSubmit(
+    (data: any) => {
+      firstSubmit(data);
+    },
+    (errors: any) => {
+      if (errors.resume) setResumeError(true);
+    }
+  );
 
   return (
     <form onSubmit={profileSubmit}>
@@ -125,11 +132,14 @@ const ProfileTab = ({ register, handleSubmit, watch, firstSubmit, setCurrentTab 
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11'>
         <div className='grid-item'>
-          <h6 className='block text-sm font-medium leading-6 text-gray-900'>Curriculum Vitae/Resume (Optional)</h6>
+          <h6 className='block text-sm font-medium leading-6 text-gray-900'>
+            Curriculum Vitae/Resume<span className='text-red-500'>*</span>
+          </h6>
           <div className='mt-2'>
             <input
               type='file'
               {...register('resume', {
+                required: 'Curriculum Vitae/Resume is required.',
                 onChange: (e: any) => {
                   const file = e.target.files[0];
                   if (file && file.size > 5 * 1024 * 1024) {
@@ -140,7 +150,9 @@ const ProfileTab = ({ register, handleSubmit, watch, firstSubmit, setCurrentTab 
                       }
                     );
                     e.target.value = null;
+                    return;
                   }
+                  setResumeError(false);
                 },
               })}
               id='resume'
@@ -148,6 +160,7 @@ const ProfileTab = ({ register, handleSubmit, watch, firstSubmit, setCurrentTab 
               accept='application/pdf'
             />
             <h6 className='text-xs mt-3'>Maximum file size: 5 MB</h6>
+            {resumeError && <p className='text-red-500 text-xs mt-1'>Curriculum Vitae/Resume is required.</p>}
           </div>
         </div>
         <div className='grid-item'>

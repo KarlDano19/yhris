@@ -66,7 +66,15 @@ const AddWorkExperienceModal = ({
   onAddToLocal,
   onUpdateLocal,
 }: AddWorkExperienceModalProps) => {
-  const { register, handleSubmit, control, reset, watch, setValue } = useForm<WorkExperienceFormData>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<WorkExperienceFormData>({
     defaultValues: {
       title: '',
       company: '',
@@ -161,10 +169,11 @@ const AddWorkExperienceModal = ({
             </label>
             <input
               type="text"
-              {...register('title', { required: true })}
+              {...register('title', { required: 'Job title is required' })}
               placeholder="e.g., UX Designer"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
             />
+            {errors.title && <span className="text-red-500 text-sm mt-1 block">{errors.title.message}</span>}
           </div>
 
           {/* Company */}
@@ -174,21 +183,23 @@ const AddWorkExperienceModal = ({
             </label>
             <input
               type="text"
-              {...register('company', { required: true })}
+              {...register('company', { required: 'Company is required' })}
               placeholder="e.g., Google"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
             />
+            {errors.company && <span className="text-red-500 text-sm mt-1 block">{errors.company.message}</span>}
           </div>
 
           {/* Start Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Start Date
+              Start Date <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Controller
                 control={control}
                 name="startDate"
+                rules={{ required: 'Start date is required' }}
                 render={({ field }) => (
                   <CustomDatePicker
                     id="work-experience-start-date"
@@ -205,6 +216,7 @@ const AddWorkExperienceModal = ({
                 )}
               />
             </div>
+            {errors.startDate && <span className="text-red-500 text-sm mt-1 block">{errors.startDate.message}</span>}
           </div>
 
           {/* End Date */}

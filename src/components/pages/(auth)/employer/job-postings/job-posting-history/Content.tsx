@@ -3,19 +3,20 @@
 import React, { Fragment, useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useForm } from 'react-hook-form';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import BackButton from '@/components/BackButton';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
+import copyToClipboard from '@/helpers/copyToClipboard';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -87,12 +88,21 @@ type T_BulkDeleteModalData = DeleteModalData & {
 };
 
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const resumeDraftIdParam = searchParams.get('resumeDraftId');
+  const initAutoLoadDraftId = resumeDraftIdParam !== null ? parseInt(resumeDraftIdParam, 10) : undefined;
+
+  // jobId query param — deep-link (e.g. from the AI/MCP) to review one posting;
+  // opens that posting's edit modal on load. See the effect below.
+  const jobIdParam = searchParams.get('jobId');
 
   // CreateJobModal — for resuming drafts in-place
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
-  const [autoLoadDraftId, setAutoLoadDraftId] = useState<number | undefined>(undefined);
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(
+    searchParams.get('create') === 'true' || resumeDraftIdParam !== null
+  );
+  const [autoLoadDraftId, setAutoLoadDraftId] = useState<number | undefined>(initAutoLoadDraftId);
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
@@ -112,6 +122,9 @@ const Content = () => {
   const handleCloseCreateJobModal = () => {
     setIsCreateJobModalOpen(false);
     setAutoLoadDraftId(undefined);
+    if (searchParams.get('create') === 'true' || resumeDraftIdParam !== null) {
+      router.replace('/post-job');
+    }
   };
 
   const [draftCurrentPage, setDraftCurrentPage] = useState(1);
@@ -161,6 +174,25 @@ const Content = () => {
   const [contextMenuOptions, setContextMenuOptions] = useState<any>([]);
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<T_JobPostingTable[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
+
+  // Deep-link: if arriving with ?jobId=<id>, open that posting's edit modal once.
+  const deepLinkJobOpenedRef = useRef(false);
+  useEffect(() => {
+    if (jobIdParam && !deepLinkJobOpenedRef.current) {
+      const deepLinkJobId = parseInt(jobIdParam, 10);
+      if (!Number.isNaN(deepLinkJobId)) {
+        deepLinkJobOpenedRef.current = true;
+        setIsEditModalOpen({ id: deepLinkJobId, open: true });
+      }
+    }
+  }, [jobIdParam]);
+
+  // After the deep-linked edit modal is closed, strip ?jobId from the URL.
+  useEffect(() => {
+    if (deepLinkJobOpenedRef.current && !isEditModalOpen?.open && jobIdParam) {
+      router.replace('/post-job');
+    }
+  }, [isEditModalOpen, jobIdParam, router]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
@@ -560,6 +592,17 @@ const Content = () => {
     window.open(LinkedInSharer);
   };
 
+  const handleCopyLink = async (jobPostId: number) => {
+    // Build from the current origin instead of the stored og_url, which bakes in whatever host the job was created from
+    const og_url = `${window.location.origin}/jobs/${jobPostId}`;
+    try {
+      await copyToClipboard(og_url);
+      toast.custom(() => <CustomToast message='Link copied to clipboard.' type='success' />, { duration: 3000 });
+    } catch {
+      toast.custom(() => <CustomToast message='Failed to copy link.' type='error' />, { duration: 4000 });
+    }
+  };
+
   const handleSearch = () => {
     const dateFrom = Date.parse(pendingFilter.from);
     const dateTo = Date.parse(pendingFilter.to);
@@ -831,12 +874,12 @@ const Content = () => {
                     const position = open ? getDropdownPosition(jobPost.id) : { top: -9999, left: -9999 };
                     return (
                     <>
-                      <Menu.Button
+                      <MenuButton
                         ref={(el: HTMLButtonElement | null) => { menuButtonRefs.current[jobPost.id] = el; }}
                         className="flex items-center"
                       >
                         <MoreIconWithBorder />
-                      </Menu.Button>
+                      </MenuButton>
                       {typeof document !== 'undefined' && createPortal(
                         <Transition
                           as={Fragment}
@@ -849,7 +892,7 @@ const Content = () => {
                           leaveTo="transform opacity-0 scale-95"
                           beforeLeave={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: false }))}
                         >
-                          <Menu.Items
+                          <MenuItems
                             static
                             className="fixed z-[9999] w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-[calc(100vh-16px)] overflow-y-auto"
                             style={{
@@ -858,21 +901,19 @@ const Content = () => {
                             }}
                           >
                             <div className="py-1 text-left">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }));
-                                    }}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b`}
-                                  >
-                                    Share Post To <ChevronRightIcon className='inline h-4 w-4' />
-                                  </button>
-                                )}
-                              </Menu.Item>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }));
+                                  }}
+                                  className='data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b'
+                                >
+                                  Share Post To <ChevronRightIcon className='inline h-4 w-4' />
+                                </button>
+                              </MenuItem>
                               {showShareOptions[jobPost.id] && (
                                 <div className='pl-4 flex flex-wrap'>
                                   {jobPost.shared_to.split(',').map((social: any) => {
@@ -889,63 +930,62 @@ const Content = () => {
                                   })}
                                 </div>
                               )}
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_active ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_roles ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_salary ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_benefits ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
-                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm ${!jobPost.is_show_remarks ? 'text-red-500' : ''}`}
-                                  >
-                                    {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
-                                  </button>
-                                )}
-                              </Menu.Item>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyLink(jobPost.id)}
+                                  className='data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b'
+                                >
+                                  Copy Link
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_active ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_roles ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_salary ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_benefits ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
+                                  className={`data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm ${!jobPost.is_show_remarks ? 'text-red-500' : ''}`}
+                                >
+                                  {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                                </button>
+                              </MenuItem>
                             </div>
-                          </Menu.Items>
+                          </MenuItems>
                         </Transition>,
                         document.body
                       )}
@@ -974,21 +1014,12 @@ const Content = () => {
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <BackButton label="Dashboard" href="/post-job" />
+          <BackButton label="Dashboard" href="/dashboard" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='flex items-center justify-between mb-0'>
             <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
-            <div className='hidden lg:block -mb-4'>
-              <SeederButton
-                viewType="job_posting"
-                maxCount={1000}
-                defaultCount={5}
-                onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-                onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-              />
-            </div>
           </div>
         </div>
 
@@ -1059,16 +1090,27 @@ const Content = () => {
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
-              <div className='lg:hidden'>
-                <SeederButton
-                  viewType="job_posting"
-                  maxCount={1000}
-                  defaultCount={5}
-                  onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-                  onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-                />
-              </div>
+            <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
+              <SeederButton
+                viewType="job_posting"
+                maxCount={1000}
+                defaultCount={5}
+                onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
+                onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
+              />
+              <SmartButton
+                id="create-job-btn"
+                onClick={() => {
+                  setScreeningQuestions([]);
+                  setAutoRejectEnabled(false);
+                  setIsVideoIntroEnabled(false);
+                  setAutoLoadDraftId(undefined);
+                  setIsCreateJobModalOpen(true);
+                }}
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+              >
+                CREATE
+              </SmartButton>
             </div>
           </div>
           
@@ -1321,6 +1363,7 @@ const Content = () => {
           isOpen={isCreateJobModalOpen}
           setIsOpen={(open) => { if (!open) handleCloseCreateJobModal(); else setIsCreateJobModalOpen(true); }}
           openConfirmSocialShareModal={openConfirmSocialShareModal}
+          onJobCreated={refetch}
           pageNumber={pageNumber}
           setPageNumber={setPageNumber}
           isSalaryRangeModalOpen={isSalaryRangeModalOpen}

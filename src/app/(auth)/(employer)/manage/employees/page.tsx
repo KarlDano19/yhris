@@ -11,7 +11,8 @@ export const metadata = {
 };
 
 async function getSession() {
-  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   return session;
 }
 
@@ -19,7 +20,8 @@ const EmployeesPage = async () => {
     const session = await getSession();
     const loginType = session.loginType;
     const hasActiveSubscription = session.hasActiveSubscription;
-    return <Content loginType={loginType} hasActiveSubscription={hasActiveSubscription} />;
+    const hasYpIntegration = session.hasYpIntegration;
+    return <Content loginType={loginType} hasActiveSubscription={hasActiveSubscription} hasYpIntegration={hasYpIntegration} />;
 };
 
 export default EmployeesPage;

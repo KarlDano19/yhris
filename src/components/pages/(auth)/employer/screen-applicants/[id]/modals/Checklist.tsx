@@ -656,8 +656,7 @@ export default function Checklist({
                       >
                         <input
                           onChange={(e) => setValue('status', e.target.id)}
-                          defaultChecked={applicant?.status === id}
-                          checked={disabled ? false : getValues('status') === id ? true : undefined}
+                           checked={disabled ? false : getValues('status') === id}
                           disabled={disabled}
                           id={id}
                           type='radio'

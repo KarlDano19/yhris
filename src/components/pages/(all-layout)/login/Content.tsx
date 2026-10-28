@@ -211,6 +211,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       hasProfile: data.has_profile,
       accountType: data.account_type,
       loginType: data.login_type,
+      hasYpIntegration: data.has_yp_integration === true,
       isLoggedIn: true,
     })
       .catch((err) => {
@@ -222,11 +223,17 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       });
   };
 
+  const handleSSOError = (message: string) => {
+    toast.custom(() => <CustomToast message={message || 'SSO login failed. Please try again.'} type='error' />, { duration: 7000 });
+  };
+
   // Primary: window.opener.postMessage listener (works cross-origin, e.g. www vs non-www)
   useEffect(() => {
     const handlePostMessage = (event: MessageEvent) => {
       if (event.data?.isGranted) {
         handleSSOData(event.data);
+      } else if (event.data?.isGranted === false) {
+        handleSSOError(event.data.error);
       }
     };
     window.addEventListener('message', handlePostMessage);
@@ -241,6 +248,8 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
     channel.onmessage = (event) => {
       if (event.data.isGranted) {
         handleSSOData(event.data);
+      } else if (event.data.isGranted === false) {
+        handleSSOError(event.data.error);
       }
     };
 
@@ -256,9 +265,11 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       if (event.key === 'sso_result' && event.newValue) {
         try {
           const data = JSON.parse(event.newValue);
+          localStorage.removeItem('sso_result');
           if (data?.isGranted) {
-            localStorage.removeItem('sso_result');
             handleSSOData(data);
+          } else if (data?.isGranted === false) {
+            handleSSOError(data.error);
           }
         } catch (e) {
           console.error('SSO localStorage fallback parse error:', e);
@@ -275,10 +286,12 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       const stored = localStorage.getItem('sso_result');
       if (stored) {
         const data = JSON.parse(stored);
+        localStorage.removeItem('sso_result');
         if (data?.isGranted) {
-          localStorage.removeItem('sso_result');
           handleSSOData(data);
           return true;
+        } else if (data?.isGranted === false) {
+          handleSSOError(data.error);
         }
       }
     } catch (e) {
@@ -287,43 +300,17 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
     return false;
   };
 
+  // Full-page (same-tab) redirect. A popup can't hand the result back here:
+  // it travels backend domain -> Payroll domain -> frontend callback, which
+  // severs window.opener (cross-origin + COOP), so BroadcastChannel/localStorage
+  // (same-origin only) and postMessage all fail. The callback page now finishes
+  // the login itself and navigates to the dashboard.
   const loginWithGoogle = () => {
-    localStorage.removeItem('sso_result');
-    const left = (window.innerWidth - 500) / 2;
-    const top = (window.innerHeight - 600) / 2;
-    const popup = window.open(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/google-login/`,
-      'popup',
-      `width=500,height=600,left=${left},top=${top}`
-    );
-    const checkOAuthStatus = setInterval(function () {
-      if (popup?.closed) {
-        clearInterval(checkOAuthStatus);
-        setTimeout(() => consumeStoredSSOResult(), 300);
-      }
-    }, 500);
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/google-login/`;
   };
 
   const loginWithYahshuaPayroll = () => {
-    // Clear any stale SSO result before starting
-    localStorage.removeItem('sso_result');
-
-    const left = (window.innerWidth - 900) / 2;
-    const top = (window.innerHeight - 700) / 2;
-    const popup = window.open(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth`,
-      'popup',
-      `width=900, height=900, left=${left}, top=${top}`
-    );
-    const checkOAuthStatus = setInterval(function () {
-      if (popup?.closed) {
-        clearInterval(checkOAuthStatus);
-        // Last-resort: poll localStorage after popup closes.
-        // Catches cases where BroadcastChannel and the storage event
-        // both fail (e.g. macOS Chrome cross-origin popup isolation).
-        setTimeout(() => consumeStoredSSOResult(), 300);
-      }
-    }, 500);
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth`;
   };
 
   // Show the login page but redirect if already logged in
@@ -334,7 +321,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
         {/* Back Button */}
         <div className="fixed top-4 left-4 z-50">
           <Link 
-            href="/landing-page" 
+            href="/" 
             className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
             shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
             hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
@@ -376,10 +363,10 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
         <Link 
-          href="/landing-page" 
-          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
-          shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
-          hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
+          href="/"
+          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full
+          shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)]
+          hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0
           transform transition-all duration-300 ease-out hover:scale-105 active:scale-95
           border border-gray-100"
         >
@@ -517,14 +504,14 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                     >
                       <GoogleIcon className='w-4 h-4 mr-2' /> Sign in with Google
                     </button>
-                    <button
+                    {/* <button
                       id='facebook-login-button'
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => setCreateAccountModal(true)}
                       disabled={true}
                     >
                       <FacebookRoundedIcon className='w-4 h-4 mr-2' /> Facebook
-                    </button>
+                    </button> */}
                     <div className="relative w-full lg:w-full group">
                       <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-lg opacity-100 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-timed"></div>
                       <button
@@ -533,7 +520,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                         onClick={() => loginWithYahshuaPayroll()}
                       >
                         <YahshuaPayrollLogo className='w-4 h-4 mr-2' />
-                        YAHSHUA Payroll
+                        Sign in with YAHSHUA Payroll
                       </button>
                       <style jsx>{`
                         @keyframes gradient-timed {

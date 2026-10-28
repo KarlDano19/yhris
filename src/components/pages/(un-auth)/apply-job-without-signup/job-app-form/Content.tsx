@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import FloatingHelpButton from '@/components/FloatingHelpButton';
 import BackButton from '@/components/BackButton';
 import DataConfirmationModal from './modals/DataConfirmationModal';
 import DPANoticeModal from './modals/DPANoticeModal';
@@ -169,6 +170,7 @@ const Content = () => {
       />
       <DataConfirmationModal open={confirmModal} onClose={handleConfirmation} />
       <SuggestionModal open={isSuggestModal} onClose={() => setSuggestModal(false)} />
+      <FloatingHelpButton anonymousMode={true} />
     </div>
   );
 };

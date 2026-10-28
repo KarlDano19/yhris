@@ -1,5 +1,12 @@
 import { useEffect } from 'react';
 
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+
+// Accepted logo image formats
+const ACCEPTED_LOGO_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
+
 // Sample logo images
 const SAMPLE_LOGOS = [
   { path: '/assets/images/logo/yahshua.png' },
@@ -92,9 +99,25 @@ export default function LogoModal({
               if (target.files && target.files[0]) {
                 const file = target.files[0];
                 
+                // Check file type (accept filter can be bypassed via "All Files")
+                if (!ACCEPTED_LOGO_TYPES.includes(file.type)) {
+                  toast.custom(() => (
+                    <CustomToast
+                      type="error"
+                      message="Invalid file type. Please upload a PNG, JPG, or GIF image."
+                    />
+                  ));
+                  return;
+                }
+                
                 // Check file size (2MB limit)
                 if (file.size > 2 * 1024 * 1024) {
-                  alert('File size exceeds 2MB limit.');
+                  toast.custom(() => (
+                    <CustomToast
+                      type="error"
+                      message="File size exceeds the 2MB limit. Please upload a smaller image."
+                    />
+                  ));
                   return;
                 }
                 

@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
-import { headers } from 'next/headers';
 
 async function deleteAnnualAccidentIllnessReport(annual_work_accident_illness_exposure_data_report_id: number | null) {
     try {

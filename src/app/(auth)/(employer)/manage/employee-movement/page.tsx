@@ -13,7 +13,8 @@ export const metadata = {
 }
 
 async function getSession() {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
     return session;
   }
   

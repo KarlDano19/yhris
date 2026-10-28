@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import formatPrice from '@/helpers/currencyFormat';
+import copyToClipboard from '@/helpers/copyToClipboard';
 import useGetJobDetails from '../../../hooks/useGetJobDetails';
+import { normalizeNbsp } from '@/helpers/linkify';
 
 import {
   CheckCircleIcon,
@@ -15,10 +20,10 @@ import {
 } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
+import ShareArrowIcon from '@/svg/ShareArrowIcon';
 
 import * as DOMPurify from 'dompurify';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
-import 'react-quill/dist/quill.snow.css';
 
 interface JobDetailsProp {
   jobId: any;
@@ -34,18 +39,27 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
     }
   }, [data]);
 
+  const handleCopyLink = async () => {
+    try {
+      await copyToClipboard(`${window.location.origin}/jobs/${jobId}`);
+      toast.custom(() => <CustomToast message='Link copied to clipboard.' type='success' />, { duration: 3000 });
+    } catch {
+      toast.custom(() => <CustomToast message='Failed to copy link.' type='error' />, { duration: 4000 });
+    }
+  };
+
   const renderRoleDescription = (jobDescription: any) => {
-    const markup = { __html: jobDescription };
+    const markup = { __html: normalizeNbsp(jobDescription || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderQualificationsDescription = (qualifications: any) => {
-    const markup = { __html: qualifications };
+    const markup = { __html: normalizeNbsp(qualifications || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderNotesRemarks = (notesRemarks: any) => {
-    const markup = { __html: notesRemarks };
+    const markup = { __html: normalizeNbsp(notesRemarks || '') };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
@@ -243,6 +257,18 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               </div>
             </div>
           </>
+        </div>
+      )}
+      {!isLoading && jobId && (
+        <div className='flex justify-end px-4 pb-4'>
+          <button
+            type='button'
+            onClick={handleCopyLink}
+            className='inline-flex items-center gap-1.5 rounded-md border border-savoy-blue px-3 py-1.5 text-sm font-medium text-savoy-blue hover:bg-savoy-blue hover:text-white transition-colors'
+          >
+            <ShareArrowIcon className='h-4 w-4' />
+            Share
+          </button>
         </div>
       )}
     </>

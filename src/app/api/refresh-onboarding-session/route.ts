@@ -13,7 +13,8 @@ import { sessionOptions, SessionData } from '@/lib/session';
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
 
     if (!session.isLoggedIn || !session.token) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -32,7 +33,8 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await res.json();
-    const hasOnboarded = data.has_onboarded ?? false;
+    // Onboarding gate switched off globally → everyone counts as onboarded (matches login).
+    const hasOnboarded = data.is_onboarding_enabled === false || (data.has_onboarded ?? false);
 
     session.hasCompletedOnboarding = hasOnboarded;
     session.hasOnboarded = hasOnboarded;

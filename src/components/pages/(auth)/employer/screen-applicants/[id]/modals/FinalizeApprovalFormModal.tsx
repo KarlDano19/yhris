@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useState } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { ClipboardDocumentCheckIcon, EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import useUpdateEAF from '../../hooks/eaf/useUpdateEAF';
@@ -48,9 +48,9 @@ export default function FinalizeApprovalFormModal({
 
   return (
     <>
-      <Transition.Root show={isOpen} as={Fragment}>
+      <Transition show={isOpen} as={Fragment}>
         <Dialog as='div' className='relative z-40' onClose={handleClose}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300'
             enterFrom='opacity-0'
@@ -60,11 +60,11 @@ export default function FinalizeApprovalFormModal({
             leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-center justify-center p-4'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300'
                 enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -73,16 +73,16 @@ export default function FinalizeApprovalFormModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:w-full sm:max-w-lg'>
+                <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:w-full sm:max-w-lg'>
                   {/* Header */}
                   <div className='flex items-center justify-between px-6 py-4 border-b border-gray-200'>
                     <div className='flex items-center gap-3'>
                       <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100'>
                         <ClipboardDocumentCheckIcon className='h-5 w-5 text-blue-600' />
                       </div>
-                      <Dialog.Title as='h3' className='text-base font-bold text-gray-900'>
+                      <DialogTitle as='h3' className='text-base font-bold text-gray-900'>
                         Finalize Approval Form
-                      </Dialog.Title>
+                      </DialogTitle>
                     </div>
                     <button type='button' onClick={handleClose} className='text-gray-400 hover:text-gray-600'>
                       <XMarkIcon className='h-5 w-5' />
@@ -129,13 +129,13 @@ export default function FinalizeApprovalFormModal({
                       {updateEAF.isLoading ? 'Saving...' : 'Generate Preview'}
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
 
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 }

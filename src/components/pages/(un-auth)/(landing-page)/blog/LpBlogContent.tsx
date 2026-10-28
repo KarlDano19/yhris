@@ -1,12 +1,239 @@
 "use client";
 
 import Link from "next/link";
-
-import { ArrowRight, Clock, Tag } from "lucide-react";
-
+import Image from "next/image";
+import { Clock, Tag } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
+import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages/(un-auth)/(landing-page)/blog/BlogFeaturedSection";
 
-const posts = [
+// Newest first. Set `featured: true` on one post to pin it to the Featured slot.
+const posts: BlogPost[] = [
+  {
+    slug: "employee-201-file-philippines",
+    category: "DOLE Compliance",
+    image: "/blog/employee-201-file-philippines.png",
+    title: "What Belongs in an Employee 201 File, and How Long You Are Required to Keep It",
+    excerpt: "The law gives no checklist for a 201 file, but it sets clocks on the records inside it. What to put in, what DOLE and tax rules say about keeping it, and where the Data Privacy Act limits you.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
+    slug: "employee-vs-independent-contractor-philippines",
+    category: "DOLE Compliance",
+    image: "/blog/employee-vs-independent-contractor-philippines.png",
+    title: "Employee vs. Independent Contractor: How DOLE Classification Rules Affect Your Payroll Risk",
+    excerpt: "The contract label does not decide it. How Philippine courts apply the four-fold test, what DOLE Department Order 174-17 requires of an agency, and what a wrong call costs on payroll.",
+    date: "October 2026",
+    readTime: "8 min read",
+  },
+  {
+    slug: "probationary-to-regular-employee-philippines",
+    category: "DOLE Compliance",
+    image: "/blog/probationary-to-regular-employee-philippines.png",
+    title: "Probationary to Regular: Getting the 6-Month Regularization Timeline Right in Payroll",
+    excerpt: "Keep a probationary employee past day 180 and they are regular by law. How to count the days, what you must tell new hires on day one, what they are already owed, and when extending probation holds up.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
+    slug: "retirement-pay-law-ra-7641-philippines",
+    category: "DOLE Compliance",
+    image: "/blog/retirement-pay-law-ra-7641-philippines.png",
+    title: "Retirement Pay Law (RA 7641): What Every Philippine Employer Must Set Aside",
+    excerpt: "RA 7641 sets a floor of 22.5 days of pay per year of service, not the 15 days many employers assume. Who qualifies, the formula with peso examples, who is exempt, and how to plan for it.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
+    slug: "hris-pricing-philippines-2026",
+    category: "Buyer's Guide",
+    image: "/blog/hris-pricing-philippines-2026.png",
+    title: "HRIS Pricing in the Philippines 2026: What a 100-Employee Company Actually Pays",
+    excerpt: "Published prices for the main Philippine HR and payroll tools, the monthly and year-one cost at 50 to 300 employees, the fees that hide outside the subscription, and eight questions to ask any vendor.",
+    date: "October 2026",
+    readTime: "9 min read",
+  },
+  {
+    slug: "dole-osh-reports-deadlines-wair-aedr-amr",
+    category: "DOLE Compliance",
+    image: "/blog/dole-safety-report-deadlines-2026.png",
+    title: "DOLE Safety Report Deadlines: WAIR, AEDR, and AMR Under DO 252-25",
+    excerpt: "WAIR is due every 30th, AEDR by January 30, and AMR by March 31. Where each is filed, the 24-hour rule for serious accidents, the fines for missing them, and the dates through March 2027.",
+    date: "October 2026",
+    readTime: "7 min read",
+  },
+  {
+    slug: "overtime-pay-computation-philippines",
+    category: "Payroll Compliance",
+    image: "/blog/overtime-pay-computation-2026.png",
+    title: "Overtime Pay Computation in the Philippines (2026): Rates, Formula, and ₱755 Examples",
+    excerpt: "Every overtime rate from ordinary days to double holidays, the formula for daily-paid and monthly-paid employees, peso amounts at the new ₱755 NCR minimum wage, and who is covered.",
+    date: "October 2026",
+    readTime: "8 min read",
+  },
+  {
+    slug: "sss-philhealth-pagibig-late-remittance-penalties",
+    category: "Payroll Compliance",
+    image: "/blog/late-remittance-penalties-2026.png",
+    title: "SSS, PhilHealth, and Pag-IBIG Late Remittance Penalties: What They Actually Cost You",
+    excerpt: "Late SSS costs 2% a month, PhilHealth at least 3% compounded, and Pag-IBIG 0.1% a day. A worked example of paying 1 to 12 months late, the criminal and benefit liabilities, and the relief programs open in 2026.",
+    date: "October 2026",
+    readTime: "8 min read",
+  },
+  {
+    slug: "year-end-tax-annualization-philippines-2026",
+    category: "Payroll Compliance",
+    image: "/blog/year-end-tax-annualization-2026.png",
+    title: "Year-End Tax Annualization 2026: How to Compute It, Plus BIR Form 2316 and 1604-C Deadlines",
+    excerpt: "How to recompute each employee's 2026 income tax in the December payroll: the steps, the tax table, what is not taxable, worked examples (including a bonus over the ₱90,000 ceiling), special cases, and the January and February 2027 BIR filings.",
+    date: "October 2026",
+    readTime: "9 min read",
+  },
+  {
+    slug: "q4-payroll-compliance-deadlines-philippines-2026",
+    featured: true,
+    category: "Payroll Compliance",
+    image: "/blog/q4-payroll-compliance-countdown-2026.png",
+    title: "Your Q4 Compliance Countdown: Every Payroll Deadline Between Now and December 24",
+    excerpt: "Every Philippine payroll deadline from October to December 2026 in one calendar: eight national holidays and special days, NCR's November 16 to 18, wage increases in Central Visayas, Bicol, and BARMM, monthly remittances, year-end annualization, and 13th month pay.",
+    date: "October 2026",
+    readTime: "8 min read",
+  },
+  {
+    slug: "13th-month-pay-computation-philippines-2026",
+    category: "Payroll Compliance",
+    title: "13th Month Pay Computation 2026: The Formula, the Common Mistakes, and a Free Calculator",
+    excerpt: "13th month pay is total basic salary earned ÷ 12, due by December 24. What counts as basic salary, worked examples for new hires, resigned and daily-paid employees (including 2026 wage order increases), the ₱90,000 tax cap, and a free calculator.",
+    date: "September 2026",
+    readTime: "9 min read",
+    image: "/blog/start-tracking-13th-month.png",
+  },
+  {
+    slug: "minimum-wage-philippines-2026-by-region",
+    category: "Statutory Compliance",
+    title: "Minimum Wage in the Philippines 2026 by Region: A Multi-Branch Employer's Guide",
+    excerpt: "Every region's current daily minimum wage as of September 26, 2026, from ₱401 in BARMM to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and the increases already scheduled for December.",
+    date: "September 2026",
+    readTime: "9 min read",
+    image: "/blog/minimum-wage-by-region-2026.png",
+  },
+  {
+    slug: "de-minimis-benefits-2026-philippines",
+    category: "Statutory Compliance",
+    title: "BIR's New Tax-Free Benefit Limits (RR No. 29-2025): What Changed in De Minimis Benefits",
+    excerpt: "Effective January 6, 2026, the BIR raised tax-exempt ceilings on 10 categories of de minimis benefits, including rice subsidy and clothing allowance. What changed, what did not, and how the excess-over-ceiling rule works with the ₱90,000 cap.",
+    date: "September 2026",
+    readTime: "7 min read",
+    image: "/blog/de-minimis-benefits-2026.png",
+  },
+  {
+    slug: "final-pay-computation-philippines",
+    category: "DOLE Compliance",
+    title: "Final Pay Computation for Resigned Employees: What DOLE's Labor Advisory Actually Requires",
+    excerpt: "Final pay is due within 30 days of separation under DOLE Labor Advisory No. 06-20, a different clock than the employee's 30-day resignation notice. What must be included, what generally does not (separation pay), and a worked example.",
+    date: "September 2026",
+    readTime: "7 min read",
+    image: "/blog/final-pay-computation.png",
+  },
+  {
+    slug: "sss-mandatory-provident-fund-philippines",
+    category: "Statutory Compliance",
+    title: "Inside the SSS Mandatory Provident Fund (WISP): What It Is and How It Changes Your Payroll Math",
+    excerpt: "Above a ₱20,000 Monthly Salary Credit, part of every SSS contribution goes to WISP instead of the regular program. How the split, investment, and payout work, and why it is not the same as WISP Plus.",
+    date: "September 2026",
+    readTime: "8 min read",
+    image: "/blog/sss-mandatory-provident-fund.png",
+  },
+  {
+    slug: "ai-workforce-management-philippines",
+    category: "Future of Work",
+    title: "Beyond BPO: How AI Is Changing Workforce Management in Philippine Retail, Manufacturing, and Logistics",
+    excerpt: "AI adoption is highest in Philippine logistics (86.4%) and retail (85.5%), lowest in manufacturing (72.4%). Most future-of-work coverage still defaults to BPO. Here is what the data actually shows.",
+    date: "September 2026",
+    readTime: "8 min read",
+    image: "/blog/ai-workforce-management.png",
+  },
+  {
+    slug: "night-differential-holiday-pay-philippines",
+    category: "DOLE Compliance",
+    title: "Night Differential and Holiday Pay: How the Rates Actually Stack",
+    excerpt: "A night-shift employee working a regular holiday rest day earns 286%, not 200% or 260%. Full stacking tables for night differential, holiday pay, rest days, overtime, and double holidays, plus a worked example.",
+    date: "August 2026",
+    readTime: "7 min read",
+    image: "/blog/night-differential-holiday-stacking.png",
+  },
+  {
+    slug: "ncr-minimum-wage-2026",
+    category: "Statutory Compliance",
+    title: "NCR Minimum Wage 2026: ₱755/Day Under Wage Order NCR-28, Effective September 26",
+    excerpt: "Metro Manila's minimum wage rises to ₱755/day (₱718 for the lower category) on September 26, 2026 under Wage Order NCR-28. Why the ₱85 NCR-27 order never took effect, the rate table, and the employer payroll checklist.",
+    date: "Updated October 2026",
+    readTime: "8 min read",
+    image: "/blog/ncr-minimum-wage-2026.png",
+  },
+  {
+    slug: "ai-guidance-vs-automation-hr-software",
+    category: "Future of Work",
+    title: "Why \"Telling You the Rule\" Is Not Compliance: The Real Difference Between AI Guidance and AI Automation in HR Software",
+    excerpt: "An AI assistant that quotes you the SSS rate is not the same as a payroll system that applies it correctly. One informs. The other acts. This is the distinction that determines your actual compliance exposure.",
+    date: "July 2026",
+    readTime: "10 min read",
+    image: "/blog/ai-guidance-vs-automation.png",
+  },
+  {
+    slug: "payroll-registration-checklist-philippines",
+    category: "Operations Playbook",
+    title: "The Philippine Business Payroll Setup Checklist: Registering with BIR, SSS, PhilHealth, and Pag-IBIG",
+    excerpt: "Every form, fee, and deadline for setting up payroll compliance from scratch. Covers the correct registration sequence, why Pag-IBIG must come last, and what triggers penalties before your first remittance.",
+    date: "July 2026",
+    readTime: "9 min read",
+    image: "/blog/payroll-registration-checklist.png",
+  },
+  {
+    slug: "sss-contribution-table-2026-philippines",
+    category: "Statutory Compliance",
+    title: "2026 SSS, PhilHealth and Pag-IBIG Contribution Tables: Rates and Ceilings for Employers",
+    excerpt: "SSS is 15% of the monthly salary credit up to ₱35,000, PhilHealth is 5% with a ₱100,000 ceiling, and Pag-IBIG caps at ₱400 a month. Tables for every salary level with employer and employee shares and computation examples.",
+    date: "Updated October 2026",
+    readTime: "10 min read",
+    image: "/blog/sss-contribution-2026.png",
+  },
+  {
+    slug: "philippine-payroll-errors-msme",
+    category: "Payroll Compliance",
+    title: "What Philippine Payroll Errors Actually Cost MSMEs",
+    excerpt: "SSS is now at 15%, PhilHealth at 5%, and BIR penalties compound at 25% surcharge plus 12% annual interest. If your payroll system was not updated, errors have been accumulating since January.",
+    date: "June 2026",
+    readTime: "7 min read",
+    image: "/blog/payroll-errors-msme.png",
+  },
+  {
+    slug: "philippine-compliance-hris-2026",
+    category: "HRIS & Compliance",
+    title: "Philippine Compliance 2026: Why You Need One System, Not Five Checklists",
+    excerpt: "PhilHealth E-Claims 3.0 deadline is June 30. BIR income sourcing rules are active. DOLE AERW is open. Here is what each obligation means and how to face all of them without drowning.",
+    date: "June 2026",
+    readTime: "6 min read",
+    image: "/blog/why-one-system.png",
+  },
+  {
+    slug: "payroll-automation-philippines",
+    category: "Payroll & HR",
+    title: "Your Payroll Is a Message to Your Team",
+    excerpt: "A payroll that is late says: you were not our priority. A payroll that is correct, on time, every cycle says something else entirely. Here is what accurate, automated payroll actually gives Philippine businesses.",
+    date: "June 2026",
+    readTime: "7 min read",
+    image: "/blog/payroll-message.png",
+  },
+  {
+    slug: "philippine-holiday-pay-computation-guide",
+    category: "DOLE Compliance",
+    title: "Philippine Holiday Pay Computation: A Complete Employer Guide",
+    excerpt: "Correct pay rates for regular and special non-working holidays, rest day premiums, common employer mistakes, and what DOLE expects on every payroll cycle.",
+    date: "June 2026",
+    readTime: "6 min read",
+    image: "/blog/philippine-holiday-pay.png",
+  },
   {
     slug: "dole-compliance-requirements-philippines",
     category: "DOLE Compliance",
@@ -14,76 +241,88 @@ const posts = [
     excerpt: "A practical breakdown of mandatory DOLE reports under DO 252-25, including monthly WAIR submissions, the Annual Medical Report, and what the new penalty rules mean for your business.",
     date: "April 2026",
     readTime: "7 min read",
+    image: "/blog/dole-compliance-2026.png",
   },
 ];
 
-const categoryColors: Record<string, string> = {
-  "HR Tips": "bg-blue-500/10 text-blue-400",
-  "DOLE Compliance": "bg-emerald-500/10 text-emerald-400",
-  "Payroll": "bg-purple-500/10 text-purple-400",
-  "Recruitment": "bg-orange-500/10 text-orange-400",
-  "Performance": "bg-pink-500/10 text-pink-400",
-};
-
 const LpBlogContent = () => {
+  const { featured, recent, rest } = splitFeatured(posts);
   return (
-    <div style={{ background: 'hsl(var(--lp-page))' }}>
-        <main className="min-h-screen pt-16">
+    <div style={{ background: "#ffffff" }}>
+      <main className="min-h-screen pt-16">
 
-          {/* Hero */}
-          <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid lp-hero-glow" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-            <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--lp-page)))' }} />
-            <div className="lp-section-container text-center relative z-10">
-              <ScrollFadeIn>
-                <span className="lp-section-label justify-center mb-5">BLOG</span>
-                <h1 className="text-3xl md:text-4xl lg:text-[3rem] font-bold text-white mb-5" style={{ lineHeight: '1.3' }}>
-                  HR Insights for Philippine<br className="hidden md:inline" />{" "}
-                  <span className="text-primary">Business Leaders</span>
-                </h1>
-                <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed">
-                  Practical guides on DOLE compliance, payroll, recruitment, and running HR without the chaos.
-                </p>
-              </ScrollFadeIn>
-            </div>
-          </section>
+        {/* Hero */}
+        <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid-light lp-hero-glow"
+          style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+          <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, transparent, #ffffff)" }} />
+          <div className="lp-section-container text-center relative z-10">
+            <ScrollFadeIn>
+              <span className="lp-section-label justify-center mb-5">BLOG</span>
+              <h1 className="text-3xl md:text-4xl lg:text-[3rem] font-bold text-gray-900 mb-5" style={{ lineHeight: "1.3" }}>
+                HR Insights for Philippine<br className="hidden md:inline" />{" "}
+                <span className="text-primary">Business Leaders</span>
+              </h1>
+              <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
+                Practical guides on DOLE compliance, payroll, recruitment, and running HR without the chaos.
+              </p>
+            </ScrollFadeIn>
+          </div>
+        </section>
 
-          {/* Post Grid */}
-          <section className="py-16">
-            <div className="lp-section-container">
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {posts.map((post, i) => (
-                  <ScrollFadeIn key={post.slug} delay={i * 60}>
-                    <Link href={`/blog/${post.slug}`} className="group block h-full">
-                      <div className="lp-dark-card h-full flex flex-col overflow-hidden">
-                        <div className="p-6 flex flex-col flex-1">
-                          <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 self-start ${categoryColors[post.category] ?? "bg-white/10 text-white/50"}`}>
-                            <Tag className="w-3 h-3" />
-                            {post.category}
+        <BlogFeaturedSection featured={featured} recent={recent} />
+
+        {/* Post Grid */}
+        <section className="py-16" style={{ background: "#FFFBF0" }}>
+          <div className="lp-section-container">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-6">More Articles</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {rest.map((post, i) => (
+                <ScrollFadeIn key={post.slug} delay={i * 60}>
+                  <Link href={`/blog/${post.slug}`} className="group block h-full">
+                    <div className="lp-light-card h-full flex flex-col overflow-hidden">
+                      {post.image && (
+                        <div className="relative w-full overflow-hidden" style={{ height: "180px" }}>
+                          <Image
+                            src={post.image}
+                            alt={post.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <div className="p-6 flex flex-col flex-1">
+                        <span
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 self-start"
+                          style={{ background: "rgba(255,193,7,0.12)", color: "hsl(38, 92%, 38%)" }}
+                        >
+                          <Tag className="w-3 h-3" />
+                          {post.category}
+                        </span>
+                        <h3 className="text-base font-bold text-gray-900 leading-normal mb-3 group-hover:text-primary transition-colors flex-1">
+                          {post.title}
+                        </h3>
+                        <p className="text-sm text-gray-500 leading-relaxed mb-5 line-clamp-3">
+                          {post.excerpt}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-gray-400 mt-auto pt-4"
+                          style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+                          <span>{post.date}</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {post.readTime}
                           </span>
-                          <h3 className="text-base font-bold text-white leading-normal mb-3 group-hover:text-primary transition-colors flex-1">
-                            {post.title}
-                          </h3>
-                          <p className="text-sm text-white/40 leading-relaxed mb-5 line-clamp-3">
-                            {post.excerpt}
-                          </p>
-                          <div className="flex items-center justify-between text-xs text-white/30 mt-auto pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                            <span>{post.date}</span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {post.readTime}
-                            </span>
-                          </div>
                         </div>
                       </div>
-                    </Link>
-                  </ScrollFadeIn>
-                ))}
-              </div>
+                    </div>
+                  </Link>
+                </ScrollFadeIn>
+              ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-        </main>
+      </main>
     </div>
   );
 };

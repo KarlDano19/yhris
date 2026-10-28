@@ -1,6 +1,6 @@
 "use client";
 
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import EmployeeSelect from '@/components/common/EmployeeSelect';
@@ -10,6 +10,28 @@ import { ClockIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import { Tooltip } from 'react-tooltip';
 
+function computeLengthOfService(dateHired?: string | null, referenceDate?: string | Date | null) {
+  if (!dateHired || !referenceDate) return '';
+
+  const hireDate = new Date(dateHired);
+  const asOfDate = new Date(referenceDate);
+  if (isNaN(hireDate.getTime()) || isNaN(asOfDate.getTime()) || asOfDate < hireDate) return 0;
+
+  const yearsElapsed = asOfDate.getFullYear() - hireDate.getFullYear();
+  const monthsElapsed = asOfDate.getMonth() - hireDate.getMonth();
+  let completedMonths = yearsElapsed * 12 + monthsElapsed;
+
+  // Only count a month once its hire-date anniversary day has passed (e.g. hired on the
+  // 15th isn't credited for July until July 15, even if the reference date is in July).
+  const monthlyAnniversaryNotYetReached = asOfDate.getDate() < hireDate.getDate();
+  if (monthlyAnniversaryNotYetReached) {
+    completedMonths -= 1;
+  }
+  completedMonths = Math.max(0, completedMonths);
+
+  const yearsOfService = completedMonths / 12;
+  return Math.round(yearsOfService * 100) / 100;
+}
 
 function PersonalInformation({
   control,
@@ -21,6 +43,8 @@ function PersonalInformation({
   setEmployeeSearch,
   employeeSelected,
   setEmployeeSelected,
+  employeeDateHired,
+  setEmployeeDateHired,
   employeeName,
   errors,
 }: {
@@ -33,9 +57,13 @@ function PersonalInformation({
   setEmployeeSearch: (value: string) => void;
   employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
+  employeeDateHired: string | null;
+  setEmployeeDateHired: (value: string | null) => void;
   employeeName?: string;
   errors?: any;
 }) {
+
+  const dateOfIncident = useWatch({ control, name: "date_of_incident" });
 
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
@@ -72,6 +100,9 @@ function PersonalInformation({
               <Controller
                 control={control}
                 name="date_of_incident"
+                rules={{
+                  required: 'Date of Accident is required.',
+                }}
                 render={({ field }) => (
                   <CustomDatePicker
                     id="employee-work-accident-illness-report-datepicker"
@@ -79,14 +110,28 @@ function PersonalInformation({
                     className={
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                     }
-                    selected={field.value ? new Date(field.value) : null} 
-                    pickerOnChange={(date: any) => field.onChange(date)}
-                    inputOnChange={(value: any) => field.onChange(value)}
+                    selected={field.value ? new Date(field.value) : null}
+                    maxDate={new Date()}
+                    pickerOnChange={(date: any) => {
+                      field.onChange(date);
+                      if (employeeDateHired) {
+                        setValue('length_of_service', computeLengthOfService(employeeDateHired, date));
+                      }
+                    }}
+                    inputOnChange={(value: any) => {
+                      field.onChange(value);
+                      if (employeeDateHired) {
+                        setValue('length_of_service', computeLengthOfService(employeeDateHired, value));
+                      }
+                    }}
                     required={true}
                   />
                 )}
               />
             </div>
+            {errors?.date_of_incident && (
+              <p className="text-xs text-red-600 mt-1">{errors.date_of_incident.message || 'Date of Accident cannot be in the future.'}</p>
+            )}
           </div>
           <div>
             <label
@@ -161,12 +206,17 @@ function PersonalInformation({
                       setValue('age', age);
                     }
 
+                    setEmployeeDateHired(selectedOption.date_hired || null);
+                    setValue('length_of_service', computeLengthOfService(selectedOption.date_hired, dateOfIncident));
+
                     setEmployeeSearch(selectedOption.label);
                     setEmployeeSelected(true);
                   } else {
                     setValue('address', '');
                     setValue('sex', '');
                     setValue('age', '');
+                    setValue('length_of_service', '');
+                    setEmployeeDateHired(null);
                     setEmployeeSearch('');
                     setEmployeeSelected(false);
                   }

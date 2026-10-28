@@ -1,6 +1,9 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentIllnessReportDetails';
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
 import PersonalInformation from './tabs/PersonalInformation';
@@ -24,6 +27,8 @@ export default function UpdateWorkAccidentIllnessReportModal({
   setEmployeeSearch,
   employeeSelected,
   setEmployeeSelected,
+  employeeDateHired,
+  setEmployeeDateHired,
 }: {
   refetch: any;
   isOpen: T_ModalData;
@@ -33,13 +38,18 @@ export default function UpdateWorkAccidentIllnessReportModal({
   setEmployeeSearch: (value: string) => void;
   employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
+  employeeDateHired: string | null;
+  setEmployeeDateHired: (value: string | null) => void;
 }) {
     const cancelButtonRef = useRef(null);
     const {
         data: workAccidentIllnessReportData,
         refetch: refetchWorkAccidentIllnessReport,
         remove: removeWorkAccidentIllnessReport,
+        isFetching: isWorkAccidentIllnessReportFetching,
   } = useGetWorkAccidentIllnessReportDetails(isOpen.id);
+  const isWorkAccidentIllnessReportReady =
+    !isOpen.open || (!isWorkAccidentIllnessReportFetching && workAccidentIllnessReportData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -98,6 +108,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
     reset();
     setEmployeeSearch('');
     setEmployeeSelected(false);
+    setEmployeeDateHired(null);
     removeWorkAccidentIllnessReport();
     setIsOpen(null);
   }
@@ -106,22 +117,26 @@ export default function UpdateWorkAccidentIllnessReportModal({
     data.disabling_injury = data.disabling_injury === 'yes';
     const callbackReq = {
       onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message='Updated successfully.' type='success' />, { duration: 4000 });
         customCloseModal();
         refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
     mutate({ work_accident_illness_report_id: isOpen.id, data: data }, callbackReq);
   });
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={() => {customCloseModal()}}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -131,11 +146,11 @@ export default function UpdateWorkAccidentIllnessReportModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -144,7 +159,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
+              <DialogPanel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
                     Edit Work Accident/Illness Report
@@ -154,52 +169,62 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     onClick={() => customCloseModal()}
                   />
                 </div>
-                {selectedTab === 1 && (
-                  <PersonalInformation
-                    control={control}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    setValue={setValue}
-                    employeeSearch={employeeSearch}
-                    setEmployeeSearch={setEmployeeSearch}
-                    employeeSelected={employeeSelected}
-                    setEmployeeSelected={setEmployeeSelected}
-                    employeeName={workAccidentIllnessReportData?.employee_name}
-                    errors={errors}
-                  />
+                {!isWorkAccidentIllnessReportReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading work accident/illness report..." />
+                  </div>
+                ) : (
+                  <div className="min-h-[560px]">
+                    {selectedTab === 1 && (
+                      <PersonalInformation
+                        control={control}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        setValue={setValue}
+                        employeeSearch={employeeSearch}
+                        setEmployeeSearch={setEmployeeSearch}
+                        employeeSelected={employeeSelected}
+                        setEmployeeSelected={setEmployeeSelected}
+                        employeeDateHired={employeeDateHired}
+                        setEmployeeDateHired={setEmployeeDateHired}
+                        employeeName={workAccidentIllnessReportData?.employee_name}
+                        errors={errors}
+                      />
+                    )}
+                    {selectedTab === 2 && (
+                      <EmploymentDetails
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                        errors={errors}
+                      />
+                    )}
+                    {selectedTab === 3 && (
+                      <IllnessDetails
+                        control={control}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        setSelectedTab={setSelectedTab}
+                      />
+                    )}
+                    {selectedTab === 4 && (
+                      <InjuryDetails
+                        control={control}
+                        register={register}
+                        onSubmit={onSubmit}
+                        isLoading={isLoadingUpdateWorkAccidentIllnessReport}
+                        setSelectedTab={setSelectedTab}
+                      />
+                    )}
+                  </div>
                 )}
-                {selectedTab === 2 && (
-                  <EmploymentDetails
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    errors={errors}
-                  />
-                )}
-                {selectedTab === 3 && (
-                  <IllnessDetails
-                    control={control}
-                    register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                  />
-                )}
-                {selectedTab === 4 && (
-                  <InjuryDetails
-                    control={control}
-                    register={register}
-                    onSubmit={onSubmit}
-                    isLoading={isLoadingUpdateWorkAccidentIllnessReport}
-                    setSelectedTab={setSelectedTab}
-                  />
-                )}
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }
 

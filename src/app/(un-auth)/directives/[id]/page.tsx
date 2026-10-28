@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 async function fetchDirective(
@@ -44,7 +44,8 @@ async function fetchDirective(
 }
 
 const DirectivePage = async ({ params }: Props) => {
-  const { directive, error } = await fetchDirective(params.id);
+  const { id } = await params;
+  const { directive, error } = await fetchDirective(id);
   return <Content initialDirective={directive} initialError={error} />;
 };
 

@@ -254,7 +254,7 @@ const Tabs = ({
                         isJobView ? 'lg:w-[36%]' : 'lg:w-full'
                       )}
                     >
-                      <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
+                      <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                         {!isGetJobsLoading
                           ? filteredJobs.map((job: any) => (
                               <JobCard
@@ -367,7 +367,7 @@ const Tabs = ({
                         isGigView ? 'lg:w-[36%]' : 'lg:w-full'
                       )}
                     >
-                      <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
+                      <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                         {filteredGigs.slice(0, displayCountGig).map((gig: GigOpportunity) => (
                           <GigCard
                             key={gig.id}
@@ -457,7 +457,7 @@ const Tabs = ({
                         isTalentView ? 'lg:w-[36%]' : 'lg:w-full'
                       )}
                     >
-                      <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
+                      <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                         {filteredTalents.slice(0, displayCountTalent).map((talent: Talent) => (
                           <TalentCard
                             key={talent.id}

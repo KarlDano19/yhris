@@ -8,6 +8,9 @@ interface OrgStructure {
   description: string;
   position_name: string;
   position: number; // position ID from positions table
+  department?: number | null;
+  department_name?: string | null;
+  node_type?: 'position' | 'department' | 'unassigned';
   parent?: number | null;
   parent_position_name?: string;
   order: number;
@@ -168,18 +171,21 @@ const OrgNode: React.FC<OrgNodeProps> = ({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Main Position Node - Adaptive Width */}
-      <div className={`bg-white border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out min-w-36 max-w-52 text-center mx-2 ${
+      {/* Main Node - Adaptive Width. Department nodes get a dashed border to
+          visually distinguish them from Position boxes. */}
+      <div className={`bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out min-w-36 max-w-52 text-center mx-2 ${
+        data.node_type === 'department' ? 'border-2 border-dashed' : 'border-2'
+      } ${
         isDragOver
           ? 'border-blue-500 bg-blue-100 shadow-lg ring-4 ring-blue-400 ring-opacity-75 scale-105'
           : isDragging
           ? 'opacity-50 scale-95'
           : 'border-gray-200'
       }`}>
-        {/* Position Name Only */}
+        {/* Position/Department Name */}
         <div className="flex flex-col items-center justify-center h-full">
-          <h3 className="font-semibold text-sm leading-tight px-2 text-gray-800">
-            {data.position_name}
+          <h3 className={`font-semibold text-sm leading-tight px-2 ${data.node_type === 'department' ? 'uppercase tracking-wide text-gray-600' : 'text-gray-800'}`}>
+            {data.node_type === 'department' ? data.department_name : data.position_name}
           </h3>
           {isDragOver && (
             <span className="text-xs text-blue-600 mt-1">Drop here</span>

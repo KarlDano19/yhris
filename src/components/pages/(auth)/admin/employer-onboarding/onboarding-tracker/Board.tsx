@@ -9,6 +9,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 import EmployerCard from './EmployerCard';
+import MarkCompleteModal from './modal/MarkCompleteModal';
 import useGetOnboardingList from './hooks/useGetOnboardingList';
 
 type BoardProps = {
@@ -18,6 +19,7 @@ type BoardProps = {
 const Board = ({ onSelect }: BoardProps) => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [markCompleteTarget, setMarkCompleteTarget] = useState<any>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -86,11 +88,17 @@ const Board = ({ onSelect }: BoardProps) => {
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             {records.map((record) => (
-              <EmployerCard key={record.id} record={record} onSelect={onSelect} />
+              <EmployerCard key={record.id} record={record} onSelect={onSelect} onMarkComplete={setMarkCompleteTarget} />
             ))}
           </div>
         )}
       </div>
+
+      <MarkCompleteModal
+        isOpen={!!markCompleteTarget}
+        onClose={() => setMarkCompleteTarget(null)}
+        record={markCompleteTarget}
+      />
     </div>
   );
 };

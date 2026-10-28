@@ -7,6 +7,7 @@ type T_CreateClientData = {
   mobile_number?: string;
   client_source: string;
   partner?: string;
+  account_manager?: string;
   plan_id: number;
   is_trial: boolean;
 };

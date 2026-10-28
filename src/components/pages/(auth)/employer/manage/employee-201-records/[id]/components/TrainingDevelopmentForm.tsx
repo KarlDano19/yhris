@@ -4,16 +4,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 // 2. Third-party library imports
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
 
 // 3. Internal component imports
 import ConfirmModal from "../modals/ConfirmModal";
 import Section from "../common/Section";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import Pagination from "@/components/Pagination";
+import FilePreviewModal from "@/components/FilePreviewModal";
 
 // 4. Internal hook imports
 import { useGetTrainingRecordsList } from "../hooks/useGetTrainingRecordsList";
+import useGetFilePreviewUrl from "../hooks/useGetFilePreviewUrl";
 
 // 5. Type imports
 import { TrainingRecord } from "../types/trainingRecords";
@@ -215,6 +217,7 @@ export default function TrainingDevelopmentForm({
     control,
     watch,
     setValue,
+    getValues,
     formState: { errors },
     trigger,
   } = useForm<{ rows: Row[] }>({
@@ -237,6 +240,12 @@ export default function TrainingDevelopmentForm({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmRowId, setConfirmRowId] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
+
+  /** Proof of completion preview modal */
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewFileUrl, setPreviewFileUrl] = useState<string | null>(null);
+  const { data: resolvedPreviewUrl = "", isFetching: isPreviewLoading } =
+    useGetFilePreviewUrl(previewFileUrl ?? "");
 
   // seed from backend
   useEffect(() => {
@@ -269,32 +278,38 @@ export default function TrainingDevelopmentForm({
     onDirtyChange?.(false);
   }, [listData, setValue, onDirtyChange]);
 
+  // reactive subscription to row changes (watch() alone doesn't retrigger memos)
+  const watchedRows = useWatch({ control, name: "rows" }) as Row[];
+
   // errors aggregate
   const hasErrors = useMemo(() => {
-    const rowsValue = watch('rows');
-    return rowsValue.some((row: Row) => {
+    return (watchedRows || []).some((row: Row) => {
       const errs = validateRow(row);
       return !!(errs.title || errs.dateCompleted || errs.provider || errs.fileError);
     });
-  }, [watch]);
+  }, [watchedRows]);
 
   useEffect(() => onErrorsChange?.(hasErrors), [hasErrors, onErrorsChange]);
 
   // dirty aggregate
   const dirty = useMemo(() => {
-    const rowsValue = watch('rows');
-    return rowsValue.some((r: Row) => r.isDirty || r.isNew) || deletedServerIds.length > 0;
-  }, [watch, deletedServerIds]);
+    return (
+      (watchedRows || []).some((r: Row) => r.isDirty || r.isNew) ||
+      deletedServerIds.length > 0
+    );
+  }, [watchedRows, deletedServerIds]);
 
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
 
   /* -------------------------- Row operations -------------------------- */
   const updateRow = useCallback(
     (index: number, patch: Partial<Row>) => {
-      const current = fields[index];
+      // `fields` is a snapshot that doesn't reflect values typed via register()
+      // (title/provider), so read the live values or they'd be overwritten/lost.
+      const current = getValues(`rows.${index}`) ?? fields[index];
       update(index, { ...current, ...patch, isDirty: true });
     },
-    [fields, update]
+    [fields, update, getValues]
   );
 
   const addRow = useCallback(() => {
@@ -516,6 +531,7 @@ export default function TrainingDevelopmentForm({
                             inputOnChange={(d: Date | null) =>
                               field.onChange(d ? toISODateInput(d) : "")
                             }
+                            maxDate={new Date()}
                             placeholder="MM/DD/YYYY"
                             className={[
                               "w-full rounded-md bg-white px-3 py-2 text-sm",
@@ -572,28 +588,17 @@ export default function TrainingDevelopmentForm({
 
                     {hasServerFile && (
                       <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-                        <a
-                          href={row.existingFileUrl!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="truncate underline"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPreviewFileUrl(row.existingFileUrl!);
+                            setIsPreviewOpen(true);
+                          }}
+                          className="truncate text-left underline"
                         >
                           View current file
-                        </a>
+                        </button>
                         <div className="flex items-center gap-2">
-                          <button
-                            data-testid="remove-file-btn"
-                            type="button"
-                            onClick={() => {
-                              updateRow(index, {
-                                fileAction: "clear",
-                                file: null,
-                              });
-                            }}
-                            className="text-xs text-red-600 hover:underline"
-                          >
-                            Remove
-                          </button>
                           <label
                             data-testid="replace-file-btn"
                             className="text-xs text-blue-600 hover:underline cursor-pointer"
@@ -698,6 +703,18 @@ export default function TrainingDevelopmentForm({
         onPageSizeChange={(size: number) => setPageSize(size)}
         onPageChange={({ selected }) => setCurrentPage(selected + 1)}
         pageType="standard"
+      />
+
+      {/* Proof of completion preview */}
+      <FilePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setTimeout(() => setPreviewFileUrl(null), 300);
+        }}
+        fileUrl={resolvedPreviewUrl}
+        fileName={previewFileUrl?.split("?")[0].split("/").pop() ?? ""}
+        isLoadingUrl={isPreviewLoading}
       />
 
       {/* Confirm modal */}

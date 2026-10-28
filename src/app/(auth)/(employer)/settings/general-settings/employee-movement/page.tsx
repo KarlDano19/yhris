@@ -7,7 +7,8 @@ import Content from "@/components/pages/(auth)/employer/settings/general-setting
 import { SessionData, sessionOptions } from "@/lib/session";
 
 async function getSession() {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions)
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions)
     return session
 }
 

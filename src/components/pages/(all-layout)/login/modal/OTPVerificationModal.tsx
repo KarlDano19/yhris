@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useState, useEffect, useRef } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogBackdrop, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
@@ -242,13 +242,13 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   const isOtpComplete = otpCode.join('').length === 6;
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog
         as='div'
         className='fixed inset-0 z-50 overflow-y-auto flex items-center justify-center'
         onClose={onClose}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -257,10 +257,10 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
           leaveFrom='opacity-100'
           leaveTo='opacity-0'
         >
-          <Dialog.Overlay className='fixed inset-0 bg-black bg-opacity-50' />
-        </Transition.Child>
+          <DialogBackdrop className='fixed inset-0 bg-black bg-opacity-50' />
+        </TransitionChild>
 
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0 scale-95'
@@ -276,9 +276,9 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                   <EnvelopeIcon className='h-6 w-6 text-blue-600' aria-hidden='true' />
                 </div>
                 <div className='ml-3'>
-                  <Dialog.Title as='h3' className='text-lg leading-6 font-medium text-gray-900'>
+                  <DialogTitle as='h3' className='text-lg leading-6 font-medium text-gray-900'>
                     Enter Verification Code
-                  </Dialog.Title>
+                  </DialogTitle>
                   <p className='text-sm text-gray-500'>We sent a code to {email}</p>
                 </div>
               </div>
@@ -428,9 +428,9 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
               </div>
             </div>
           </div>
-        </Transition.Child>
+        </TransitionChild>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

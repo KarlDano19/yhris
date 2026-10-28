@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { normalizeNbsp } from '@/helpers/linkify';
+
+import { formatWorkExperienceDateRange } from '@/helpers/date';
 
 interface WorkExperienceItem {
   id?: number;
@@ -48,17 +51,7 @@ function WorkExperience({ workExperience }: WorkExperienceProps) {
                 {experience.companyOrg}
               </p>
               <p className="text-sm text-gray-500">
-                {new Date(experience.dateFrom).toLocaleDateString('en-US', {
-                  month: 'long',
-                  year: 'numeric',
-                })}{' '}
-                -{' '}
-                {experience.dateTo === 'Present' || experience.dateTo === 'present' || experience.dateTo === ''
-                  ? 'Present'
-                  : new Date(experience.dateTo).toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                {formatWorkExperienceDateRange(experience.dateFrom, experience.dateTo)}
               </p>
             </div>
             
@@ -73,9 +66,9 @@ function WorkExperience({ workExperience }: WorkExperienceProps) {
             {experience.responsibilities && (
               <div>
                 <h5 className="font-medium text-gray-800 mb-2">Key Responsibilities:</h5>
-                <div 
-                  className="text-sm text-gray-700 [&>ul]:list-disc [&>ul]:list-inside [&>ul]:space-y-1 [&>ul>li]:text-gray-700"
-                  dangerouslySetInnerHTML={{ __html: experience.responsibilities }}
+                <div
+                  className="ql-editor !p-0 text-sm text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: normalizeNbsp(experience.responsibilities) }}
                 />
               </div>
             )}

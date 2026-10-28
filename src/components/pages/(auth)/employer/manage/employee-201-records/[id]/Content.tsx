@@ -10,6 +10,7 @@ import React, {
 
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { canSyncWithPayroll } from "@/helpers/payrollSync";
 import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -53,6 +54,7 @@ export interface ContentProps {
   emp?: Partial<Employee>;
   hasActiveSubscription: boolean;
   loginType: string;
+  hasYpIntegration?: boolean;
 }
 
 export default function Employee201Content({
@@ -60,6 +62,7 @@ export default function Employee201Content({
   emp,
   hasActiveSubscription,
   loginType,
+  hasYpIntegration,
 }: ContentProps) {
   const router = useRouter();
 
@@ -134,9 +137,9 @@ export default function Employee201Content({
   const { save: saveEmployment } = useEmploymentDetailsPatch(params?.id);
 
   // Training hooks (actual API calls from parent on save)
-  const { create: createTraining } = useCreateTrainingRecord();
-  const { update: updateTraining } = usePatchTrainingRecord();
-  const { remove: deleteTraining } = useDeleteTrainingRecord();
+  const { mutateAsync: createTraining } = useCreateTrainingRecord();
+  const { mutateAsync: updateTraining } = usePatchTrainingRecord();
+  const { mutateAsync: deleteTraining } = useDeleteTrainingRecord();
 
   // Section loader with race guard
   const { loadSection } = useSectionLoader(setSections);
@@ -358,26 +361,33 @@ export default function Employee201Content({
 
     // Run creates → updates → deletes
     for (const c of creates) {
-      await createTraining(params.id, {
-        training_title: c.training_title,
-        date_completed: c.date_completed,
-        training_provider: c.training_provider,
-        proof_of_completion: c.proof_of_completion || null,
+      await createTraining({
+        employeeId: params.id,
+        input: {
+          training_title: c.training_title,
+          date_completed: c.date_completed,
+          training_provider: c.training_provider,
+          proof_of_completion: c.proof_of_completion || null,
+        },
       });
     }
     for (const u of updates) {
-      await updateTraining(params.id, u.id, {
-        training_title: u.training_title,
-        date_completed: u.date_completed,
-        training_provider: u.training_provider,
-        ...(u.proof_of_completion !== undefined
-          ? { proof_of_completion: u.proof_of_completion }
-          : {}),
-        clear_file: !!u.clear_file,
+      await updateTraining({
+        employeeId: params.id,
+        recordId: u.id,
+        input: {
+          training_title: u.training_title,
+          date_completed: u.date_completed,
+          training_provider: u.training_provider,
+          ...(u.proof_of_completion !== undefined
+            ? { proof_of_completion: u.proof_of_completion }
+            : {}),
+          clear_file: !!u.clear_file,
+        },
       });
     }
     for (const id of deletes) {
-      await deleteTraining(params.id, id);
+      await deleteTraining({ employeeId: params.id, recordId: id });
     }
 
     // On success, tell the form to refetch its list
@@ -577,6 +587,7 @@ export default function Employee201Content({
           emergency_contact_number: employeeDetails?.emergency_contact?.phone ?? employeeDetails?.emergency_contact?.contact_number,
           gender: employeeDetails?.gender,
           birthdate: employeeDetails?.birthdate,
+          date_hired: employeeDetails?.date_hired,
           system_id: employeeDetails?.system_id,
           location: employeeDetails?.location,
           position: employeeDetails?.position,
@@ -730,7 +741,7 @@ export default function Employee201Content({
                 ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
                 : (saving ? "Saving…" : "Save")}
             </SmartButton>
-            {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
+            {canSyncWithPayroll(loginType, hasYpIntegration) && (
             <button
               id="sync-to-yp-btn"
               disabled={isUpdating}

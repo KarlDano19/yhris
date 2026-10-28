@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
-import { headers } from 'next/headers';
 
 async function getUserRights() {
     try {

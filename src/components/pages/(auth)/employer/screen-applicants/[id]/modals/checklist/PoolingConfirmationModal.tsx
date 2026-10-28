@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { ArchiveBoxIcon } from '@heroicons/react/24/outline';
 
 type Props = {
@@ -12,9 +12,9 @@ type Props = {
 
 export default function PoolingConfirmationModal({ isOpen, onCancel, onConfirm }: Props) {
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-50' onClose={onCancel}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -24,10 +24,10 @@ export default function PoolingConfirmationModal({ isOpen, onCancel, onConfirm }
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-center justify-center p-4'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -36,14 +36,14 @@ export default function PoolingConfirmationModal({ isOpen, onCancel, onConfirm }
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white px-6 pb-6 pt-6 shadow-xl transition-all sm:w-full sm:max-w-md'>
+              <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white px-6 pb-6 pt-6 shadow-xl transition-all sm:w-full sm:max-w-md'>
                 <div className='flex flex-col items-center text-center'>
                   <div className='flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 mb-4'>
                     <ArchiveBoxIcon className='h-8 w-8 text-blue-600' />
                   </div>
-                  <Dialog.Title as='h3' className='text-lg font-semibold text-gray-900 mb-2'>
+                  <DialogTitle as='h3' className='text-lg font-semibold text-gray-900 mb-2'>
                     Move Applicant to Pool?
-                  </Dialog.Title>
+                  </DialogTitle>
                   <p className='text-sm text-gray-600 mb-6'>
                     This will move the applicant to the talent pool for future openings. They will not continue in the current stage of the hiring process.
                   </p>
@@ -64,11 +64,11 @@ export default function PoolingConfirmationModal({ isOpen, onCancel, onConfirm }
                     </button>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

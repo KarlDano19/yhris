@@ -2,6 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 import { DirectiveData, DirectiveAttachment } from '@/types/directives';
+import { appendLetterhead } from '@/helpers/letterhead';
+import { extractInlineImageFiles } from './extractInlineImageFiles';
 
 async function addDirective(directive: DirectiveData) {
   try {
@@ -11,6 +13,14 @@ async function addDirective(directive: DirectiveData) {
     data.append('title', directive.title);
     data.append('to', JSON.stringify(directive.to));
     data.append('company_name', directive.company_name || '');
+
+    // Multi-signatory assignment (optional) — send only the user ids; each user signs later.
+    if (Array.isArray(directive.signatories) && directive.signatories.length > 0) {
+      const userIds = directive.signatories.map((signatory: any) =>
+        typeof signatory === 'object' ? signatory.user_id : signatory
+      );
+      data.append('signatories', JSON.stringify(userIds));
+    }
 
     // Handle attachments as multiple FileField
     if (directive.attachments) {
@@ -29,11 +39,26 @@ async function addDirective(directive: DirectiveData) {
       }
       // Skip string attachments (they are URLs from backend)
     }
-    
+
+    // Upload mode — the user's own PDF *is* the memo, so the backend stores it as-is and
+    // skips rendering one from the fields below.
+    if (directive.document instanceof File) {
+      data.append('document', directive.document);
+      data.append('document_source', 'uploaded');
+    }
+
     if (directive.directive_type === 'memo') {
       data.append('body', directive.body || '');
       data.append('name', directive.name || '');
       data.append('position', directive.position || '');
+
+      // Any images embedded (as base64) in the body get uploaded alongside this same
+      // request — the backend ties them to the directive and swaps the body's base64
+      // src for the resulting storage path.
+      if (directive.body) {
+        const inlineImageFiles = await extractInlineImageFiles(directive.body);
+        inlineImageFiles.forEach((file) => data.append('inline_images', file));
+      }
       if (directive.signature) {
         console.log('Signature type:', typeof directive.signature);
         console.log('Signature value:', directive.signature);
@@ -60,6 +85,9 @@ async function addDirective(directive: DirectiveData) {
       if (directive.qr_code) {
         data.append('qr_code', directive.qr_code as File);
       }
+      if (directive.signature_placement) {
+        data.append('signature_placement', directive.signature_placement);
+      }
     } else {
       // Add custom policy fields as JSON
       if (directive.custom_policy_fields && directive.custom_policy_fields.length > 0) {
@@ -72,6 +100,10 @@ async function addDirective(directive: DirectiveData) {
       data.append('coverage', directive.coverage || '');
       data.append('termination', directive.termination || '');
     }
+
+    // Both memos and policies print on the letterhead, so this sits outside the branch above.
+    appendLetterhead(data, directive.letterhead);
+
     const config = {
       method: 'POST',
       headers: {

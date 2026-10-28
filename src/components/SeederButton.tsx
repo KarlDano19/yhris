@@ -2,7 +2,7 @@
 
 import { useState, Fragment } from 'react';
 
-import { Dialog, Transition, Menu } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Menu, MenuButton, MenuItem, MenuItems, Transition, TransitionChild } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { BeakerIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -125,11 +125,11 @@ export default function SeederButton({
     <>
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button className="inline-flex items-center justify-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:opacity-50 disabled:cursor-not-allowed">
+          <MenuButton className="inline-flex items-center justify-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:opacity-50 disabled:cursor-not-allowed">
             <BeakerIcon className="h-5 w-5" aria-hidden="true" />
             SEEDER
             <ChevronDownIcon className="h-4 w-4" aria-hidden="true" />
-          </Menu.Button>
+          </MenuButton>
         </div>
 
         <Transition
@@ -141,48 +141,40 @@ export default function SeederButton({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    disabled={disabled || seedMutation.isLoading}
-                    className={`${
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                    } group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <BeakerIcon className="mr-3 h-5 w-5 text-purple-500" aria-hidden="true" />
-                    {seedMutation.isLoading ? 'Seeding...' : (showBudgetType ? 'Seed Jobs' : 'Seed Data')}
-                  </button>
-                )}
-              </Menu.Item>
+              <MenuItem>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  disabled={disabled || seedMutation.isLoading}
+                  className='text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <BeakerIcon className="mr-3 h-5 w-5 text-purple-500" aria-hidden="true" />
+                  {seedMutation.isLoading ? 'Seeding...' : (showBudgetType ? 'Seed Jobs' : 'Seed Data')}
+                </button>
+              </MenuItem>
 
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    onClick={() => setIsUnseedModalOpen(true)}
-                    disabled={disabled || unseedMutation.isLoading}
-                    className={`${
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                    } group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <svg className="mr-3 h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
-                    {unseedMutation.isLoading ? 'Unseeding...' : 'Unseed All'}
-                  </button>
-                )}
-              </Menu.Item>
+              <MenuItem>
+                <button
+                  onClick={() => setIsUnseedModalOpen(true)}
+                  disabled={disabled || unseedMutation.isLoading}
+                  className='text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <svg className="mr-3 h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                  {unseedMutation.isLoading ? 'Unseeding...' : 'Unseed All'}
+                </button>
+              </MenuItem>
             </div>
-          </Menu.Items>
+          </MenuItems>
         </Transition>
       </Menu>
 
       {/* Seed Modal */}
-      <Transition.Root show={isModalOpen} as={Fragment}>
+      <Transition show={isModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={setIsModalOpen}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -192,11 +184,11 @@ export default function SeederButton({
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -205,15 +197,15 @@ export default function SeederButton({
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                   <div>
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
                       <BeakerIcon className="h-6 w-6 text-purple-600" aria-hidden="true" />
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
-                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                      <DialogTitle as="h3" className="text-lg font-semibold leading-6 text-gray-900">
                         {showBudgetType ? 'Seed Business Jobs' : 'Seed Data'}
-                      </Dialog.Title>
+                      </DialogTitle>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
                           {showBudgetType
@@ -298,17 +290,17 @@ export default function SeederButton({
                       Cancel
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
 
       {/* Unseed Confirmation Modal */}
-      <Transition.Root show={isUnseedModalOpen} as={Fragment}>
+      <Transition show={isUnseedModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={setIsUnseedModalOpen}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -318,11 +310,11 @@ export default function SeederButton({
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -331,7 +323,7 @@ export default function SeederButton({
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                   <div>
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                       <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -339,9 +331,9 @@ export default function SeederButton({
                       </svg>
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
-                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                      <DialogTitle as="h3" className="text-lg font-semibold leading-6 text-gray-900">
                         {showBudgetType ? 'Delete All Seeded Jobs' : 'Delete All Data'}
-                      </Dialog.Title>
+                      </DialogTitle>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
                           {showBudgetType
@@ -377,12 +369,12 @@ export default function SeederButton({
                       )}
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 }

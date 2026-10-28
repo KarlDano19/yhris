@@ -1,6 +1,6 @@
-import { Dispatch, Fragment, useRef, useState, DragEvent, ChangeEvent } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState, DragEvent, ChangeEvent, FormEvent } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useAddInvestigationReportItems from '../hooks/useAddInvestigationReportItems';
 import { formatDateToLocal } from '@/helpers/date';
 
@@ -28,7 +29,17 @@ export default function InvestigationModal({
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
   const { mutate, isLoading } = useAddInvestigationReportItems();
-  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm<T_Investigation>();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm<T_Investigation>({
+    defaultValues: {
+      date: new Date() as unknown as string,
+    },
+  });
+  useEffect(() => {
+    if (isOpen) {
+      setValue('date', new Date() as unknown as string);
+    }
+  }, [isOpen]);
+
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toAddData, setToAddData] = useState<any>(null);
@@ -37,10 +48,18 @@ export default function InvestigationModal({
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [presiderSearch, setPresiderSearch] = useState('');
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   const cancelButtonRef = useRef(null);
+
+  // Auto-grow textareas as the user types
+  const autoGrowTextarea = (event: FormEvent<HTMLTextAreaElement>) => {
+    const el = event.currentTarget;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  };
 
   // Watch the decision field to conditionally show the custom decision input
   const selectedDecision = watch('decision');
@@ -84,6 +103,7 @@ export default function InvestigationModal({
     setToAddData(null);
     setFile(null);
     setIsDragActive(false);
+    setPresiderSearch('');
     setValue('attachments', undefined as unknown as T_Investigation['attachments']);
   };
 
@@ -196,7 +216,7 @@ export default function InvestigationModal({
   };
   return (
     <>
-      <Transition.Root show={isOpen ? true : false} as={Fragment}>
+      <Transition show={isOpen ? true : false} as={Fragment}>
         <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {
           // Don't close investigation modal if confirmation modal is open
           if (isConfirmModalOpen) {
@@ -207,7 +227,7 @@ export default function InvestigationModal({
             setIsOpen(null);
           });
         }}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300'
             enterFrom='opacity-0'
@@ -217,11 +237,11 @@ export default function InvestigationModal({
             leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300'
                 enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -230,7 +250,7 @@ export default function InvestigationModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Investigation Report Template</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
@@ -299,11 +319,18 @@ export default function InvestigationModal({
                           Presider<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
-                          <input
-                            id='presider'
-                            {...register('presider', { required: true })}
-                            type='name'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          <input type='hidden' {...register('presider', { required: true })} />
+                          <EmployeeSelect
+                            control={control}
+                            name='presiderId'
+                            isMulti={false}
+                            isClearable={true}
+                            placeholder='Select presider...'
+                            employeeSearch={presiderSearch}
+                            setEmployeeSearch={setPresiderSearch}
+                            onChange={(selectedOption: any) => {
+                              setValue('presider', selectedOption ? selectedOption.label : '', { shouldValidate: true });
+                            }}
                           />
                         </div>
                         {errors.presider && (
@@ -347,8 +374,9 @@ export default function InvestigationModal({
                             {...register('resultOfInvestigation', {
                               required: true,
                             })}
+                            onInput={autoGrowTextarea}
                             id='resultOfInvestigation'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                            className='block w-full max-h-96 overflow-y-auto rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 resize-none'
                           />
                         </div>
                         {errors.resultOfInvestigation && (
@@ -389,11 +417,12 @@ export default function InvestigationModal({
                             <span className='text-red-600'>*</span>
                           </label>
                           <div className='mt-2'>
-                            <input
+                            <textarea
                               id='other'
+                              rows={3}
                               {...register('other', { required: selectedDecision === 'Other...' })}
-                              type='name'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                              onInput={autoGrowTextarea}
+                              className='block w-full max-h-96 overflow-y-auto rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 resize-y'
                             />
                           </div>
                           {errors.other && (
@@ -489,12 +518,12 @@ export default function InvestigationModal({
                       </button>
                     </div>
                   </form>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
       
       <ConfirmModal
         message='Are you sure that you have investigated the reported incident?'

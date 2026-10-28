@@ -31,7 +31,14 @@ function useMoveApplicantToJob(appliedJobId: number) {
   return useMutation({
     mutationFn: (data: T_MoveApplicantData) => moveApplicantToJob(appliedJobId, data),
     onSuccess: () => {
+      // The applicant now belongs to a new posting — refresh every view that is
+      // scoped to the old posting/stages so the UI reflects the destination folder.
       queryClient.invalidateQueries(['appliedApplicantsCache']);
+      queryClient.invalidateQueries(['applicantDetailsCache']);
+      queryClient.invalidateQueries(['jobPostDetailsCache']);
+      queryClient.invalidateQueries(['stageAssignmentsCache']);
+      queryClient.invalidateQueries(['eaf']);
+      queryClient.invalidateQueries(['transferHistoryCache']);
     },
   });
 }

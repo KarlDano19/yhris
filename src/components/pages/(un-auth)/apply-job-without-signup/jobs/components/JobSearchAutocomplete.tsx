@@ -65,17 +65,19 @@ const JobSearchAutocomplete = ({
   // Extract unique job titles from job records
   const getUniqueSuggestions = () => {
     if (!autocompleteResults?.records) return [];
-    
+
     const displayItems = autocompleteResults.records.slice(0, limit);
     const suggestions = new Set<string>();
-    
+
     // Only extract job titles - backend already filters by keyword (company name, job title, etc.)
+    // Support both field names: job_title (serializer output) and title (legacy)
     displayItems.forEach((job: any) => {
-      if (job.title && typeof job.title === 'string' && job.title.trim()) {
-        suggestions.add(job.title.trim());
+      const jobTitle = job.job_title || job.title;
+      if (jobTitle && typeof jobTitle === 'string' && jobTitle.trim()) {
+        suggestions.add(jobTitle.trim());
       }
     });
-    
+
     // Return unique job titles - backend already filtered the results
     return Array.from(suggestions).slice(0, limit);
   };
@@ -85,9 +87,9 @@ const JobSearchAutocomplete = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       if (showAutocomplete && selectedIndex >= 0 && autocompleteResults?.records) {
         if (selectedIndex === uniqueSuggestions.length && hasMoreResults) {
-          e.preventDefault();
           onLimitChange(limit + 20);
           onSelectedIndexChange(uniqueSuggestions.length + 20);
         } else if (uniqueSuggestions[selectedIndex]) {

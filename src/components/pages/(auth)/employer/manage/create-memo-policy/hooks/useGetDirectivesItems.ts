@@ -7,6 +7,7 @@ interface DirectivesFiltersProps {
   to?: string;
   currentPage?: number;
   pageSize?: number;
+  directive_type?: string;
 }
 
 async function getDirectivesItems(filters: any) {
@@ -17,7 +18,8 @@ async function getDirectivesItems(filters: any) {
     if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
-    
+    if (filters.directiveType) newFilters.directive_type = filters.directiveType;
+
     const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie('token');
     const config = {
@@ -56,6 +58,7 @@ function useGetDirectivesItems(filters: any) {
       filters.search,
       filters.from,
       filters.to,
+      filters.directiveType,
     ],
     () => getDirectivesItems(filters),
     {

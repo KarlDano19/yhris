@@ -1,6 +1,3 @@
-import dynamic from "next/dynamic";
-import { useMemo } from "react";
-
 // Enhanced modules for ReactQuill to handle HTML content better
 export const ENHANCED_QUILL_MODULES = {
   toolbar: [
@@ -12,13 +9,12 @@ export const ENHANCED_QUILL_MODULES = {
     [{ color: [] }, { background: [] }],
     ['clean']
   ],
-  clipboard: {
-    // Make sure pasted content is properly formatted
-    matchVisual: false,
-  }
 };
 
 // Enhanced formats to better support HTML content
+// NOTE: 'bullet' is NOT a separate Quill format - bulleted lists are the 'list' format with
+// value 'bullet' (see the toolbar config above: { list: 'bullet' }). Listing 'bullet' here
+// causes Quill to log "Cannot register 'bullet' specified in 'formats' config" on every mount.
 export const ENHANCED_QUILL_FORMATS = [
   'header',
   'size',
@@ -27,7 +23,6 @@ export const ENHANCED_QUILL_FORMATS = [
   'underline',
   'strike',
   'list',
-  'bullet',
   'indent',
   'color',
   'background'

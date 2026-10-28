@@ -1,12 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-
-import dynamic from "next/dynamic";
-
 import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
+import ReactQuill from "@/components/ReactQuillDynamic";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
@@ -27,11 +24,6 @@ export default function ComplianceAndCost({
   validationMessage?: string;
   missingFields?: string[];
 }) {
-
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
-    []
-  );
 
   // Helper function to check if a field is missing
   const isMissingField = (fieldName: string) => {

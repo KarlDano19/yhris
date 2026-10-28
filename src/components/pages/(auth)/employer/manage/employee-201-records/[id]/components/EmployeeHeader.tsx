@@ -74,10 +74,14 @@ export default function EmployeeHeader({
     ? "Update profile photo"
     : "Upload profile photo";
 
+  const isResigned = !!empPartial?.is_resigned;
+
   return (
     <div
       data-testid="employee-profile-header"
-      className="relative rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm"
+      className={`relative rounded-[40px] px-2 py-4 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm ${
+        isResigned ? "border border-red-300 bg-red-50" : "bg-[#355fd0]/5"
+      }`}
     >
       <div className="flex min-w-0 flex-col gap-6 md:flex-row md:items-center">
         {/* Avatar */}
@@ -136,7 +140,15 @@ export default function EmployeeHeader({
           </div>
 
           <div data-testid="employee-details">
-            <div className="font-semibold text-indigo-dye">{employee.name}</div>
+            <div className="flex items-center justify-center gap-2 md:justify-start">
+              <span className="font-semibold text-indigo-dye">{employee.name}</span>
+              {isResigned && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700 ring-1 ring-inset ring-red-200">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
+                  Resigned
+                </span>
+              )}
+            </div>
             <div className="text-sm text-gray-500">{employee.role}</div>
             <div className="mt-2 flex items-center justify-center gap-3 md:justify-start">
               <div

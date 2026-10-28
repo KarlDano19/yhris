@@ -1,10 +1,11 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import EmployeeProfile from "./tabs/EmployeeProfile";
 import Recommendation from "./tabs/Recommendation";
 import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
@@ -34,13 +35,19 @@ function PrintPersonelMovementModal({
   const [newPosition, setNewPosition] = useState('');
   const [currentEmploymentStatus, setCurrentEmploymentStatus] = useState('');
   const [newEmploymentStatus, setNewEmploymentStatus] = useState('');
+  const [movementType, setMovementType] = useState('change_in_position');
+  const [currentLocation, setCurrentLocation] = useState('');
+  const [newLocation, setNewLocation] = useState('');
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
-  const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
+  const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement, isFetching: isFetchingPersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
   const { mutate: editPersonelMovement, isLoading: isLoadingEditPersonelMovement } = useEditPersonelMovementDetails();
-  const { approvals, currentUserApproval, refetch: refetchApprovals } = useGetPersonnelMovementApprovals(isOpen.id);
+  const { approvals, currentUserApproval, refetch: refetchApprovals, isFetching: isFetchingApprovals } = useGetPersonnelMovementApprovals(isOpen.id);
   const { mutate: submitApproval, isLoading: isLoadingSubmitApproval } = useSubmitApproval();
+
+  const isPersonelMovementDetailsReady =
+    !isOpen.open || (!isFetchingPersonelMovement && !isFetchingApprovals && personelMovementData?.id === isOpen.id);
 
   const isEditable = !approvals.some((a: any) => a.status === 'approved' || a.status === 'rejected') && !currentUserApproval;
 
@@ -73,6 +80,14 @@ function PrintPersonelMovementModal({
       setValue("start_date", personelMovementData.start_date);
       setValue("proposed_rate", personelMovementData.proposed_rate);
       setValue("percentage_increase", personelMovementData.percentage_increase);
+      setValue("amount_increase", personelMovementData.amount_increase);
+      const mt = personelMovementData.movement_type || "change_in_position";
+      setValue("movement_type", mt);
+      setMovementType(mt);
+      setValue("new_location", personelMovementData.new_location);
+      if (personelMovementData.new_location) {
+        setNewLocation(String(personelMovementData.new_location));
+      }
     }
   }, [personelMovementData]);
 
@@ -150,22 +165,32 @@ const onSubmit = handleSubmit((data) => {
         );
       }
     } else {
-      const percentageIncrease = data.proposed_rate === 'Apply Increase'
-        ? (data.percentage_increase !== '' ? parseInt(data.percentage_increase, 10) : null)
-        : null;
+      const isReassignment = data.movement_type === 'reassignment';
+      let percentageIncrease = null;
+      let amountIncrease = null;
+      if (!isReassignment) {
+        if (data.proposed_rate === 'Apply Increase') {
+          percentageIncrease = data.percentage_increase !== '' ? parseInt(data.percentage_increase, 10) : null;
+        } else if (data.proposed_rate === 'Apply Amount Increase') {
+          amountIncrease = data.amount_increase !== '' ? parseFloat(data.amount_increase) : null;
+        }
+      }
       editPersonelMovement(
         {
           personel_movement_id: isOpen.id,
           data: {
             employee: data.employee,
             current_position: data.current_position,
-            new_position: data.new_position,
-            current_employment_status: data.current_employment_status,
-            new_employment_status: data.new_employment_status,
+            new_position: isReassignment ? undefined : data.new_position,
+            current_employment_status: isReassignment ? undefined : data.current_employment_status,
+            new_employment_status: isReassignment ? undefined : data.new_employment_status,
             reason: data.reason,
             start_date: data.start_date,
-            proposed_rate: data.proposed_rate,
-            percentage_increase: percentageIncrease,
+            proposed_rate: isReassignment ? undefined : data.proposed_rate,
+            percentage_increase: isReassignment ? null : percentageIncrease,
+            amount_increase: isReassignment ? null : amountIncrease,
+            movement_type: data.movement_type,
+            new_location: isReassignment ? data.new_location : undefined,
           }
         },
         callbackReq
@@ -174,14 +199,14 @@ const onSubmit = handleSubmit((data) => {
   });
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={() => customCloseModal()}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -191,11 +216,11 @@ const onSubmit = handleSubmit((data) => {
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -204,7 +229,7 @@ const onSubmit = handleSubmit((data) => {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     {isEditable ? 'Edit Personnel Movement Form (PMF)' : 'View Personnel Movement Form (PMF)'}
@@ -214,6 +239,12 @@ const onSubmit = handleSubmit((data) => {
                     onClick={() => customCloseModal()}
                   />
                 </div>
+                {!isPersonelMovementDetailsReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading personnel movement details..." />
+                  </div>
+                ) : (
+                <>
                 {selectedTab === 1 && (
                   <EmployeeProfile
                     control={control}
@@ -234,6 +265,12 @@ const onSubmit = handleSubmit((data) => {
                     setCurrentEmploymentStatus={setCurrentEmploymentStatus}
                     newEmploymentStatus={newEmploymentStatus}
                     setNewEmploymentStatus={setNewEmploymentStatus}
+                    movementType={movementType}
+                    setMovementType={setMovementType}
+                    currentLocation={currentLocation}
+                    setCurrentLocation={setCurrentLocation}
+                    newLocation={newLocation}
+                    setNewLocation={setNewLocation}
                     employeeName={personelMovementData?.employee_name}
                     errors={errors}
                   />
@@ -254,12 +291,14 @@ const onSubmit = handleSubmit((data) => {
                     clearErrors={clearErrors}
                   />
                 )}
-              </Dialog.Panel>
-            </Transition.Child>
+                </>
+                )}
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }
 

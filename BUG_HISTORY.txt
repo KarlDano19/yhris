@@ -109,6 +109,2503 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-049
+DATE FILED: 2026-10-02
+DATE FIXED: 2026-10-02
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+  In Manage > Document Generator, a company that has no acceptance memo could not
+  generate one. The "Acceptance Memo" document type was only offered when the
+  company already had a memo (showAcceptanceMemo = isMemoLoading || !!existingMemo),
+  and an effect forced the selection back to Employee Certificate whenever no memo
+  existed. The memo form (and its Submit button) was therefore only reachable from
+  the onboarding checklist.
+
+DESIRED OUTCOME:
+  If the company has no acceptance memo, the Document Generator lets the user
+  fill in and submit one. Once a memo exists, the form is read-only (fields
+  disabled, "View PDF" instead of Submit).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/document-generator/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ TypeScript types verified (no errors in the document-generator files)
+
+Integration & E2E:
+☐ Manual: company with no memo -> Acceptance Memo is in the type dropdown, form is
+  editable and prefilled (company name, dates), Submit creates the memo
+☐ Manual: company with a memo -> form is read-only, "View PDF" opens the saved memo
+☐ Manual: submitting from here marks the company onboarded (Employer.has_onboarded)
+☐ Manual: opening the page from the onboarding checklist (from=checklist) still
+  locks the type to Acceptance Memo
+
+FIX EXPLANATION:
+  document-generator/Content.tsx
+  1. Removed showAcceptanceMemo and stopped passing it down, so the type
+     selector (DocumentTypeField, which defaults to showing it) always offers
+     Acceptance Memo.
+  2. Deleted the effect that switched an acceptance-memo selection back to
+     employee-certificate when no memo existed.
+  3. In the existing-memo effect, the no-memo branch now also calls
+     setIsViewMode(false), so a company without a memo always gets the editable
+     form. The existing-memo branch is unchanged: it already set view mode,
+     which disables the inputs and swaps Submit for View PDF.
+
+  Not changed: the backend memo POST is still an upsert (update_or_create), so a
+  direct call can overwrite an existing memo and re-send the HR email. The
+  read-only behaviour is enforced in the UI only.
+
+================================================================================
+
+BUG ID: HRIS-2026-048
+DATE FILED: 2026-10-02
+DATE FIXED: 2026-10-02
+CLIENT/REPORTER: Internal
+COMPANION: Backend BUG_HISTORY HRIS-2026-043 (has_onboarded logic for YP SSO +
+           backfill migration)
+
+ISSUE DESCRIPTION:
+  New employer accounts created through Yahshua Payroll SSO never went through
+  the onboarding checklist. The middleware onboarding gate skipped anyone with
+  loginType "yahshua-payroll" / "yg-payroll" (added in HRIS-2026-013), and the
+  SSO callback never set hasCompletedOnboarding in the iron-session, so the gate
+  had no real onboarding state to check for SSO users.
+
+DESIRED OUTCOME:
+  The YP user whose first SSO login creates the HRIS company is redirected to
+  /setup-employer-profile/onboarding-checklist. Existing YP accounts and YP
+  users joining an existing company go straight to the dashboard. yg-payroll
+  stays exempt (unchanged).
+
+FILES CHANGED:
+Frontend:
+- src/middleware.ts
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/Content.tsx
+- src/app/api/refresh-onboarding-session/route.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ TypeScript types verified (no new errors in changed files; a pre-existing
+  TS2345 at sso/oauth/Content.tsx mutate(data, ...) is unrelated)
+
+Integration & E2E:
+☐ Manual: first-time YP SSO login on a new YP company -> onboarding checklist
+☐ Manual: existing YP account SSO login -> /dashboard
+☐ Manual: YP user with a pre-change session (no hasCompletedOnboarding) is
+  not redirected to the checklist
+☐ Manual: onboarding disabled globally -> SSO users go to /dashboard
+☐ Manual: Google SSO employer login still works (same callback)
+
+FIX EXPLANATION:
+  1. sso/oauth/Content.tsx - finishLogin: for employer accounts, after
+     updateSession, POST /api/refresh-onboarding-session so hasCompletedOnboarding
+     / hasOnboarded are set from the backend (update-session intentionally
+     refuses those keys). Also benefits Google SSO employers, whose sessions
+     previously had no onboarding flag either.
+  2. middleware.ts - removed the blanket yahshua-payroll exemption from the
+     onboarding gate. yg-payroll is still exempt. A yahshua-payroll session
+     where hasCompletedOnboarding is undefined (created before this change,
+     when SSO never set it) is still let through until the user logs in again.
+  3. refresh-onboarding-session/route.ts - hasOnboarded is now
+       data.is_onboarding_enabled === false || (data.has_onboarded ?? false)
+     so the global "onboarding disabled" switch is respected, matching the
+     login endpoints. Without this, SSO users would be gated even when
+     onboarding is turned off.
+
+================================================================================
+
+BUG ID: HRIS-2026-047
+DATE FILED: 2026-09-25
+DATE FIXED: 2026-09-25
+CLIENT/REPORTER: Client - Galam
+
+ISSUE DESCRIPTION:
+  On Document Generator > Certificate of Employment, the "This certificate is
+  issued for ..." (Purpose) paragraph had two problems in both the preview and
+  the generated/printed certificate:
+  1. Words were cut in the middle when a line wrapped (e.g. "W&W Galam Gro / up
+     of Companies", "Mr. Ricci Cha / d G. Raagas").
+  2. Spacing typed into the Purpose textarea was not respected - extra spaces
+     collapsed into one and line breaks (Enter) were turned into spaces.
+
+DESIRED OUTCOME:
+  The Purpose paragraph wraps between whole words (only breaking inside a word
+  if a single word/string is too long to fit on a line), and it keeps the
+  spaces and line breaks exactly as the user typed them.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/document-generator/form-previews/EmployeeCertificatePreview.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Components tested (pending QA - regenerate a certificate with a long
+  Purpose, extra spaces between words, and a line break)
+☑ TypeScript types verified (style-only change, no type changes)
+
+Integration & E2E:
+☐ Manual regression testing completed (pending QA re-test)
+☑ Blast-radius check: the other generator documents (Notice to Explain,
+  Employment Agreement, Acceptance Memo) were reviewed - none use
+  break-all, and Notice to Explain's textarea fields already use
+  white-space: pre-wrap. No other changes needed.
+
+FIX EXPLANATION:
+  The Purpose paragraph had an inline style of `wordBreak: 'break-all'`, which
+  lets the browser break a line at any character, so ordinary words were split
+  mid-word. It also had no `white-space` rule, so default HTML whitespace
+  collapsing dropped the user's extra spaces and line breaks.
+  Changed the paragraph style from
+    { wordBreak: 'break-all', overflowWrap: 'anywhere' }
+  to
+    { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }
+  - Removing break-all restores normal word wrapping; `overflowWrap: 'anywhere'`
+    is kept so a very long unbroken string still cannot overflow the page.
+  - `whiteSpace: 'pre-wrap'` preserves typed spaces/line breaks while still
+    wrapping at the page edge (same pattern Notice to Explain already uses).
+  The printed certificate (print/documents/EmployeeCertificate.tsx) clones the
+  preview DOM into an iframe and its print CSS does not override these
+  properties, so the fix applies to the generated document as well.
+
+  Note: in the reported case the Purpose field itself contained a full
+  sentence ending in a period, which the template wraps with "This certificate
+  is issued for ..." and its own period - producing "issued for This is to
+  certify ..." and ". .". That is input content, not part of this fix.
+
+================================================================================
+
+BUG ID: HRIS-2026-046
+DATE FILED: 2026-09-18
+DATE FIXED: 2026-09-18
+CLIENT/REPORTER: Charmaine - Manyu Marketing Corporation (raised via Payroll team)
+COMPANION: Backend BUG_HISTORY HRIS-2026-042 (root cause) + Payroll GLOBAL BUG-183
+           (location/department/position/employment-type trail preservation)
+
+ISSUE DESCRIPTION:
+  Employees' location history/effectivity trails in Payroll (YP) went missing or
+  got corrupted after syncing from HRIS: some lost their entire location trail,
+  others were left with only the most recent entry stamped with a wrong start
+  date. Root-cause tracing showed the damage was triggered when Location,
+  Department, Position, or Employment Status were changed on the 201 Records
+  (employee detail) screen and then pushed to YP. Those 201 edits carry NO real
+  per-change effectivity date, so YP dated the appended trail line to the wrong
+  date (latest salary date, or the hire date) - and for Location this could
+  produce an inverted date range (date_to before date_from) that scrambled the
+  chronological trail. The correct place to change these fields is the Personnel
+  Movement (PMF), which carries a proper effective date.
+
+DESIRED OUTCOME:
+  On the 201 Records employment-details screen, Location, Department, Position,
+  and Employment Status must be read-only even in edit mode, so users cannot make
+  effectivity-less changes that mis-date the YP history trail. Only Date Hired
+  stays editable. Those org changes must go through the Personnel Movement (PMF).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - mounted EmploymentDetailsForm with editing=true;
+  confirmed in live DOM that Employment Status/Location/Position/Department are
+  disabled=true and Date Hired is disabled=false)
+☑ Form validation tested (locked-but-empty fields do not block Save - "missing"
+  messages are non-blocking per isBlockingError)
+☑ AddableSelect verified to honor disabled (dropdown disabled, onChange ignored,
+  "+ Add new" affordance hidden)
+☑ TypeScript types verified (no new type errors; FE dev server compiled clean)
+
+Integration & E2E:
+☑ Manual regression testing completed (edit mode renders the four fields locked,
+  Date Hired editable, System ID read-only as before)
+
+FIX EXPLANATION:
+  Introduced a single self-documenting flag `editingOrgFields = false` in
+  EmploymentDetailsForm and pointed the four org fields' `disabled` and
+  `showErrors` props at it instead of the form's `editing` flag. The result:
+  Employment Status, Location, Position, and Department render greyed-out and
+  non-interactive even while the rest of the row is in edit mode; Date Hired
+  continues to key off `editing` and stays editable. Because the shared
+  AddableSelect fully honors `disabled` (disables the select, ignores changes,
+  hides the "+ Add new" button), no handler rewiring was needed. Empty locked
+  fields still do not block Save. Flag is a one-line revert if inline editing is
+  ever re-enabled. This is the frontend guard that closes the workflow the client
+  actually used; the trail-preservation fix itself lives on the Payroll side
+  (see Payroll GLOBAL BUG-183 / I-654/I-657/I-658).
+
+================================================================================
+
+BUG ID: HRIS-2026-045
+DATE FILED: 2026-09-03
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Internal request - Module > Onboarding > Orient (position applicants list)
+
+ISSUE DESCRIPTION:
+  The Onboarding list (Onboarding > open a position) had no way to remove an
+  applicant entry. Mistaken, seeded, or no-longer-needed onboarding records
+  could not be cleaned up because the list only supported Send Contract,
+  Orient, assign Location/Department, Introduce, and Enroll - never delete.
+
+DESIRED OUTCOME:
+  Users should be able to remove an onboarding entry from the list, with a
+  confirmation prompt before it is deleted.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+- src/components/pages/(auth)/employer/onboarding/orient/hooks/useDeleteApplicantOrient.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - delete button, confirmation modal, list refresh)
+☑ Custom hooks tested (useDeleteApplicantOrient manual verification)
+☑ React Query hooks tested (list refetch + employee-select cache invalidation)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (delete removes row, persists on reload)
+☑ Edge cases tested (delete of enrolled applicant removes only the onboarding row)
+
+FIX EXPLANATION:
+  Added an Action column to the onboarding table with a red trash button per
+  row. Clicking it opens the shared DeleteModal (showing the applicant name)
+  for confirmation. On confirm, a new useDeleteApplicantOrient hook calls
+  DELETE /api/applicant-orientations/{id}/ (see backend companion). On success
+  the list refetches, the employee-select cache is invalidated, and a success
+  toast is shown. COMPANION: Backend BUG_HISTORY HRIS-2026-041.
+
+================================================================================
+
+BUG ID: HRIS-2026-044
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-645) - Employee 201 Records > Disciplinary Records
+
+ISSUE DESCRIPTION:
+  Under an employee's 201 file > Disciplinary Records tab, users could see that
+  an incident exists (Type, Place, Status) but could not open the record to
+  view its full details. The rows were not clickable and there was no detail
+  view, so description, NTE/decision progress, and attachments were unreachable
+  from the 201 file.
+
+DESIRED OUTCOME:
+  Users should be able to open an incident from the 201 file and view its full
+  details (brief background, status, dates, response, attachments, etc.).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/DisciplinaryRecordsForm.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/modals/ViewIncidentModal.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useGetDisciplinaryRecordDetail.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - clickable rows, View button, detail modal)
+☑ Custom hooks tested (useGetDisciplinaryRecordDetail manual verification)
+☑ React Query hooks tested (detail fetch on open, loading/error states)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (open record shows full details + attachments)
+☑ Edge cases tested (loading state, fetch error state, missing attachments)
+
+FIX EXPLANATION:
+  Added a read-only ViewIncidentModal that fetches the full incident via a new
+  useGetDisciplinaryRecordDetail hook (GET /api/employee-issues/attachments/{id}/,
+  an existing endpoint - no backend change). DisciplinaryRecordsForm now has an
+  Actions column with a View (eye) button and clickable rows that open the modal.
+  The modal shows employee/position/department, incident date and place, issue
+  type, status, full brief background, NTE/decision progress and dates, prepared
+  by, investigation decision, employee response, and NTE/Decision attachments.
+
+================================================================================
+
+BUG ID: HRIS-2026-043
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-644) - Employee 201 Records > Employment Details
+
+ISSUE DESCRIPTION:
+  The "Date Hired" field in Employment Details rejected future dates. Entering a
+  future start date (e.g. next week) and saving showed "Date Hired cannot be in
+  the future" and blocked the save, so HR could not onboard an employee ahead of
+  their actual start date.
+
+DESIRED OUTCOME:
+  The system should accept a future Date Hired so HR can complete onboarding in
+  advance.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - future Date Hired saves without error)
+☑ Form validation tested (presence/validity still enforced; future no longer blocked)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (future date saves; empty/invalid still flagged)
+☑ Edge cases tested (date picker had no maxDate; validator was the only block)
+
+FIX EXPLANATION:
+  Removed the future-date guard in the date_hired validator in
+  EmploymentDetailsForm.tsx. The validator still flags a missing or invalid
+  date, but no longer returns "Date Hired cannot be in the future," so future
+  hire dates save normally. Note: the same "cannot be in the future" pattern in
+  Training & Development and the DOLE accident report is intentional and was left
+  unchanged.
+
+================================================================================
+
+BUG ID: HRIS-2026-042
+DATE FILED: 2026-08-27
+DATE FIXED: 2026-08-27
+CLIENT/REPORTER: Internal (Linear I-643), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Opening the "View current file" preview for a Completed Training's Proof of
+  Completion showed the full signed AWS S3 URL - including
+  AWSAccessKeyId=..., Signature=..., and Expires=... query parameters - in the
+  File Preview modal's title bar. The Document Repository tab's file preview
+  (same underlying upload mechanism) was unaffected.
+
+  Root cause: TrainingDevelopmentForm.tsx derived the modal's `fileName` prop
+  directly from the raw file URL via `previewFileUrl.split("/").pop()`.
+  `previewFileUrl` is `row.existingFileUrl`, which is the pre-signed S3 URL
+  itself (useGetFilePreviewUrl returns non-relative URLs unchanged rather than
+  proxying them), so `.split("/").pop()` returned everything after the last
+  "/" - including the un-stripped query string - and FilePreviewModal's title
+  renders as `${base} - ${fileName}`. DocumentRepositoryForm.tsx does not have
+  this bug because it passes a real stored `file_name` field from the document
+  record instead of deriving a name from the URL.
+
+DESIRED OUTCOME:
+  The Training & Development file preview title should show only the file's
+  name (e.g. "KHP__EI_-_08262026_1787812050.pdf"), with no AWS query
+  parameters, matching the Document Repository preview.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - `fileName` passed to `<FilePreviewModal>` now strips the query string
+      before extracting the filename: changed
+      `previewFileUrl?.split("/").pop() ?? ""` to
+      `previewFileUrl?.split("?")[0].split("/").pop() ?? ""`.
+
+Backend:
+- N/A - frontend-only fix; the signed URL itself is unchanged, only how its
+  filename is displayed.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual reasoning verified against the reported repro URL
+  ("KHP__EI_-_08262026_1787812050.pdf?AWSAccessKeyId=...&Signature=...&Expires=...")
+  - fix yields "KHP__EI_-_08262026_1787812050.pdf" as the displayed name
+☐ Manual browser verification completed (recommended before shipping): open
+  a Completed Training's "View current file" and confirm the modal title
+  shows only the filename
+
+Integration & E2E:
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (blob: URLs from a freshly-attached, not-yet-saved
+  file never reach this code path - `hasServerFile`/`existingFileUrl` gate
+  this button to server-stored files only, which are the ones with signed
+  query strings)
+☐ Cross-browser testing completed (not performed)
+
+KNOWN REMAINING ISSUE:
+  The same `url.split('/').pop()` pattern (without stripping a query string)
+  exists in several unrelated components - SendEmailModal.tsx,
+  ViewAuditLogDetails.tsx, AddCertificationModal.tsx (both yahshua-connect
+  variants), AddProjectModal.tsx, FloatingMenuBar.tsx, DocumentPageFourteen.tsx,
+  DocumentPageFifteen.tsx, and offboarding/[id]/Content.tsx. None were changed
+  here - out of scope for this Linear issue - but any of them could leak
+  query-string credentials the same way if they ever render a signed URL.
+
+FIX EXPLANATION:
+  FilePreviewModal already strips the query string internally when detecting
+  file type (`source.split('?')[0]`), but it trusts whatever `fileName` its
+  caller passes for the title. TrainingDevelopmentForm was the one caller
+  building that name from the raw pre-signed URL instead of a clean stored
+  filename, so the fix mirrors FilePreviewModal's own `split('?')[0]` pattern
+  at the point the prop is built, before falling back to `split('/').pop()`
+  to isolate the last path segment.
+
+================================================================================
+
+BUG ID: HRIS-2026-041
+DATE FILED: 2026-08-19
+DATE FIXED: 2026-08-19
+CLIENT/REPORTER: Internal (User), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Three compounding bugs made it impossible to save Completed Trainings on the
+  Employee 201 Records > Training & Development tab:
+
+  1. Save button never became enabled after adding/editing a training row.
+     Root cause: TrainingDevelopmentForm's `hasErrors`/`dirty` were computed in
+     `useMemo(() => {...watch('rows')...}, [watch])`. `watch` is a stable
+     function reference from useForm, so the memo never recomputed when rows
+     were added, edited, or deleted - `onDirtyChange`/`onErrorsChange` kept
+     firing their initial (empty-array) values forever, so the parent's
+     `sections.training.dirty` never became true and the Save button's
+     `canSave` check stayed false permanently.
+
+  2. Attaching a Proof of Completion file silently cleared the Training Title
+     and Training Provider fields already typed into that row.
+     Root cause: `updateRow()` built its patch from `fields[index]` -
+     `useFieldArray`'s structural snapshot, which does NOT reflect values
+     typed into `register()`-bound inputs (title/provider). Calling
+     `update(index, { ...fields[index], ...filePatch })` on file select
+     overwrote the row with the stale snapshot's original (empty) title/
+     provider, discarding what the user had typed.
+
+  3. Even with 1 and 2 fixed, clicking Save/Confirm threw a runtime error
+     "createTraining is not a function" and the save never happened.
+     Root cause: `useCreateTrainingRecord`, `usePatchTrainingRecord`, and
+     `useDeleteTrainingRecord` each return a standard TanStack Query
+     `useMutation` object (`mutate`/`mutateAsync`/etc.), but Content.tsx
+     destructured them as `{ create }`, `{ update }`, `{ remove }` -
+     properties that don't exist on a mutation object - and called them with
+     positional args (`createTraining(id, input)`) instead of the single
+     params object each mutation function actually expects.
+
+  A fourth, smaller issue was found in the same investigation: the Date
+  Completed picker allowed choosing a future date in the calendar UI itself
+  (only caught after the fact by a "cannot be in the future" validation
+  message), instead of disabling future dates up front.
+
+DESIRED OUTCOME:
+  A user can add a training row, fill in all fields, attach a file, and Save
+  successfully - with the Save button enabling as soon as the form has valid,
+  unsaved changes, typed fields surviving a file attach, and the future-dated
+  Date Completed being unselectable in the calendar rather than only rejected
+  after submit.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - Imported `useWatch` from react-hook-form; replaced the `[watch]`-keyed
+      `hasErrors`/`dirty` useMemo blocks with a `useWatch({ control, name:
+      "rows" })` subscription (`watchedRows`) so both recompute reactively on
+      every row change.
+    - `updateRow()` now reads the row's live values via `getValues(\`rows.${index}\`)`
+      (falling back to `fields[index]`) before merging in the patch, so a file
+      attach no longer clobbers already-typed Title/Provider values.
+    - Added `maxDate={new Date()}` to the Date Completed `CustomDatePicker` so
+      future dates are disabled in the calendar itself.
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+    - Changed `const { create: createTraining } = useCreateTrainingRecord()`
+      (and the matching update/remove destructures) to
+      `const { mutateAsync: createTraining } = useCreateTrainingRecord()` etc.
+    - Updated the three call sites in `saveTrainingTab()` to pass a single
+      `{ employeeId, input }` / `{ employeeId, recordId, input }` /
+      `{ employeeId, recordId }` object, matching each mutation function's
+      actual signature, instead of positional arguments.
+
+Backend:
+- N/A - frontend-only fix; no backend endpoint or contract changes required.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: added a training row, typed Title/Provider,
+  attached a file, confirmed values persisted; Save button enabled once the
+  row was valid and dirty; Save/Confirm completed without the
+  "createTraining is not a function" error
+☑ TypeScript types verified for the changed call sites (CreateTrainingInput /
+  UpdateTrainingInput shapes match what's now passed)
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (create -> update -> delete flow via
+  Save exercised against the real training-records endpoints)
+☑ Edge cases considered (attaching a file after typing other fields; future
+  date selection blocked in the picker in addition to the existing
+  post-submit validation message)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Bug 1 was a stale-dependency problem: `useMemo` only recomputes when an
+  item in its dependency array changes by reference, and `watch` (the
+  function) never changes - only its *return value* does, and only if you
+  subscribe to it via `useWatch`. Switching to `useWatch({ control, name:
+  "rows" })` gives a value that actually changes reference on every row
+  edit, so the `hasErrors`/`dirty` memos - and therefore the parent's Save
+  button - now update live.
+
+  Bug 2 was a data-source mismatch: `useFieldArray`'s `fields` array is a
+  structural snapshot (correct for add/remove/reorder) but is NOT kept in
+  sync with values from `register()`-bound inputs on every keystroke. Basing
+  the file-attach patch on `getValues()` instead reads the form's actual
+  current values, so title/provider survive.
+
+  Bug 3 was an API-shape mismatch introduced when the hooks were written
+  against the standard `useMutation` return shape but the call site was
+  written as if they returned custom `{ create/update/remove }` helpers.
+  Destructuring `mutateAsync` under the same aliases and passing the single
+  params object each hook's mutation function expects resolves the runtime
+  error with no changes to the hooks themselves.
+
+  The date picker fix simply passes `maxDate={new Date()}` through to
+  `CustomDatePicker`, which already supported the prop - disabling future
+  dates in the calendar UI is a strict improvement over relying solely on
+  the post-submit "cannot be in the future" error message.
+
+================================================================================
+
+BUG ID: HRIS-2026-040
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - QA (Jam recording) - Module > Onboarding > Orient > Enroll to Payroll
+COMPANION: Backend BUG_HISTORY HRIS-2026-040 (Repair Rate Statuses proxy endpoint)
+
+ISSUE DESCRIPTION:
+Enrolling an onboarded applicant into Yahshua Payroll (YP) failed, and the affected
+employee's YP profile then showed the error: "'NoneType' object has no attribute
+'dayspermonth'".
+
+Root cause: the onboarding "Enroll" action did not send a hire date to YP. The employee
+was created in YP with no hire date, so YP bootstrapped a rate status with a NULL
+effectivity date. YP cannot resolve a "current rate" from a NULL-dated row, so every YP
+read path that touches the rate crashed. Employees who had already crashed were left with
+orphaned NULL-dated rate rows in YP.
+
+DESIRED OUTCOME:
+- Enrollment sends a valid hire date so YP builds a usable rate status and the flow no
+  longer errors.
+- Admins can repair employees already broken (NULL-dated rate rows) from the UI, without a
+  manual DB script.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+    - Enroll-to-Payroll payload now sends `date_hired: new Date().toLocaleDateString('en-CA')`
+      (today, YYYY-MM-DD). Set explicitly at the source so YP persists it, rather than
+      relying on any sync-time default (the 201 side no longer rewrites hire dates to today).
+- src/components/hooks/useRepairRateStatus.ts (NEW)
+    - Mutation hook: POST /api/employees/repair-rate-status/ (triggers YP rate-status cleanup).
+- src/components/FloatingSyncButton.tsx
+    - Added "Repair Rate Statuses (YP)" as the FIRST Master Sync step, NON-BLOCKING (a
+      failure marks only that step and the sync continues). Subsequent step indices bumped.
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: enroll no longer errors; Master Sync shows the Repair step
+  first and a broken employee's YP profile loads afterward
+☑ React Query hooks tested: useRepairRateStatus verified via Master Sync run
+☐ Cross-browser testing completed (Chrome verified)
+☐ Mobile responsiveness verified (N/A - desktop admin flow)
+
+Integration & E2E:
+☑ API integration tests completed (repair step round-trips through HRIS BE to YP)
+☐ Cypress/Playwright e2e tests updated (not added)
+☑ Manual regression testing completed (existing Master Sync steps still run in order)
+
+FIX EXPLANATION:
+Two-part frontend fix. (1) The Enroll-to-Payroll payload now carries today's date as
+`date_hired`, so YP creates newly enrolled employees with a valid hire date and bootstraps a
+usable rate status - preventing any new breakage. (2) A new, non-blocking "Repair Rate
+Statuses (YP)" step was added to the top of the Master Sync (FloatingSyncButton) via the new
+useRepairRateStatus hook; it calls an HRIS proxy that asks YP to backfill the NULL-dated rate
+rows for the current company (see companion BE entry). This heals employees already broken by
+the bug without touching the YP shared model. It runs first and is non-blocking so a repair
+failure never aborts the rest of the sync.
+
+================================================================================
+
+BUG ID: HRIS-2026-039
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - Consultant (Christen Daayata, via #team-hris Slack)
+MODULE: Admin > Client Monitoring > Send Advisory (shared SendEmailModal)
+
+ISSUE DESCRIPTION:
+  An advisory composed in the Send Advisory modal arrived in Gmail formatted
+  differently from how it was written. Three symptoms, all originating from Quill's
+  saved HTML but via three different mechanisms:
+
+  1. Words split mid-word. "YAHSHUA HRIS" arrived as "Y" / "AHSHUA HRIS" across two
+     lines, "August 17, 2026" as "Augu" / "st 17, 2026". Cause: ReactQuill
+     (react-quill-new / Quill 2.0) serializes every ordinary space as a NON-BREAKING
+     space (\u00A0 / &nbsp;). A real nbsp never offers a line-break opportunity, so a
+     whole sentence becomes one unbreakable token and the email client is forced to
+     break at an arbitrary character instead of between words. No CSS can fix this -
+     nbsp's non-breaking behavior cannot be overridden by any stylesheet rule.
+
+  2. Blank lines disappeared. Deliberate spacing between sections rendered as a plain
+     next line with no gap ("displays it just next line no spacing"). Cause:
+     getSemanticHTML() saves a deliberate blank line as a truly empty <p></p> with no
+     <br> inside, which has zero height. In-app previews are unaffected because
+     globals.css carries ".ql-editor p:empty { min-height: 1em }" - an email client has
+     no access to that stylesheet.
+
+  3. Extra spaces compressed. The reporter added several spaces while editing and they
+     came out collapsed to one. Cause: once nbsp is normalized to a regular space, the
+     HTML renderer collapses consecutive whitespace as usual.
+
+  Why prior fixes did not cover this: HRIS-2026-034 (normalizeNbsp) targets in-app
+  display only - all 46 of its call sites are dangerouslySetInnerHTML on pages and
+  modals. HRIS-2026-033 targets the WeasyPrint PDF generators. HRIS-2026-032 (backend)
+  was email-related but concerned paragraph MARGINS, not nbsp or empty paragraphs. The
+  email path had therefore never been treated for either issue: no email template has
+  wrap CSS and no email-sending view normalizes nbsp.
+
+DESIRED OUTCOME:
+  An email composed in the Send Email modal should arrive reading the way it was
+  written - wrapping at real word boundaries, keeping the blank lines the composer
+  typed, and keeping deliberate multi-space runs - without a backend or template change.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/linkify.ts
+    (added and exported prepareRichTextForEmail() - normalizes Quill's nbsp runs and
+     restores blank lines; placed alongside the existing normalizeNbsp so all nbsp
+     logic stays in one file, per the developer feedback recorded in HRIS-2026-034)
+- src/components/SendEmailModal.tsx
+    (one call at the point the payload is built:
+     message: prepareRichTextForEmail(data.message), so every module using the modal is
+     covered by a single change)
+
+Backend:
+- N/A - deliberately none. Editing without_attachment_email.tpl was considered and
+  rejected: it is shared by 10 backend views (advisory, applicant, employee_issue,
+  screen_applicant x2, separation x3, and 4 DOLE reports), so a template edit silently
+  changes every module. Same reasoning as HRIS-2026-034's rejection of the backend
+  normalization + data migration approach.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+[x] Helper verified against the real failing cases: <p></p> and <p>&nbsp;</p> both
+    become <p><br></p>; nbsp-joined text gains real break points;
+    "Note:&nbsp;&nbsp;&nbsp;" keeps its width; plain paragraphs and class attributes on
+    an empty <p> are left untouched; empty input returns unchanged
+[ ] Jest/RTL tests (N/A - no frontend test harness in this repo)
+[x] Manual verification completed: advisory re-sent and confirmed in Gmail - blank
+    lines between sections restored, "YAHSHUA HRIS" no longer split mid-word
+
+Integration & E2E:
+[x] Manual regression testing completed (advisory flow, Gmail web)
+[ ] Regression pass still needed on the other 9 modules that use SendEmailModal:
+    offboarding, orientation, screen-applicants, address-employee-issue, and the 5 DOLE
+    pages. All shared the same defect, so this is a fix rather than a behavior change,
+    but the call site is shared code
+[x] Edge cases considered (nbsp-only blank paragraphs; empty <p> carrying Quill class
+    attributes such as ql-align-center; multi-space runs; content with no nbsp at all)
+[ ] Cross-browser/client testing completed (verified in Gmail web only)
+
+KNOWN REMAINING ISSUE:
+  A long URL still splits mid-address in the sent email (e.g. "https://canva.link/" /
+  "qu3nl2z7jjqr9fn") instead of moving to the next line whole. This is NOT the nbsp bug
+  - the URL genuinely has no internal break opportunity to restore - and cannot be fixed
+  from the content side. It needs overflow-wrap plus an atomic-link rule
+  (display:inline-block; max-width:100%) in the email template, which is shared by the
+  10 views listed above. Deliberately left unfixed to keep this change frontend-only.
+
+FIX EXPLANATION:
+  The defect is content, not layout: what Quill saves is not what an email client can
+  render faithfully, and the app's own stylesheet (which papers over both problems on
+  screen) does not travel with the email. prepareRichTextForEmail() therefore repairs
+  the HTML before it leaves the app:
+
+    .replace(/&nbsp;/gi, '\u00A0')
+    .replace(/[ \u00A0]*\u00A0[ \u00A0]*/g, (run) => ' ' + '&nbsp;'.repeat(run.length - 1))
+    .replace(/<p([^>]*)>(?:\s|&nbsp;)*<\/p>/gi, '<p$1><br></p>');
+
+  The middle line is the part that resolves symptoms 1 and 3 together: rather than
+  swapping every nbsp for a plain space (which restores wrapping but lets the renderer
+  collapse deliberate multi-space runs), each run keeps its full width while its FIRST
+  space becomes a real, breakable space. One legal break point per run is all the client
+  needs to wrap between words. The third line puts back the <br> that getSemanticHTML()
+  strips, giving blank paragraphs height in any client without relying on a stylesheet
+  the recipient will never load.
+
+  The call sits in SendEmailModal where the payload is assembled rather than in the
+  advisory hook, so all 10 modules that send Quill content through this modal are fixed
+  by one change instead of the advisory alone.
+
+================================================================================
+
+BUG ID: HRIS-2026-038
+DATE FILED: 2026-08-12
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: HR (raised in group chat, w/ screenshot) - Module > Manage > Memo/Policy > Policy
+LINEAR: I-635
+COMPANION: Backend BUG_HISTORY HRIS-2026-038 (duplicate memo/policy endpoint)
+
+ISSUE DESCRIPTION:
+  The Policy form's content boxes (Purpose / Policy / Procedure, plus the Provisions:
+  Eligibility, Application, Coverage, Termination) were plain <textarea> fields, so
+  nothing recorded where the writer pressed Enter. The public policy page recipients
+  open from the emailed link renders those values as HTML, so every line break was
+  lost and numbered items ran together into one solid block:
+    "Policy 1. National Holidays ... 2. Local Holidays ... 3. Business Requirements ..."
+  all on one line. HR asked for "the same content array/layout ... like what we did sa
+  email content" - i.e. numbering should reflect the spacing as written.
+
+  Two further requests came in while fixing it:
+  - Start with the Evaluation Template's editor (no toolbar), then ADD the toolbar
+    after seeing it (formatting options were wanted after all).
+  - Make the boxes draggable/taller like the Create Memo body, so long content is
+    readable while typing.
+
+DESIRED OUTCOME:
+  Policy content reads exactly as typed - each numbered item on its own line, spacing
+  between paragraphs preserved - in the form, the View Policy screen, and the public
+  page. Writers get formatting options and can drag each box taller.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/richText.ts (new - isRichTextEmpty(); Quill serializes an empty editor
+  as "<p><br></p>", so the old !value.trim() required-checks passed on blank input)
+- src/components/pages/(auth)/employer/manage/create-memo-policy/modals/
+  CreatePolicyModal.tsx (custom_policy_fields[].inputName + the 4 provisions:
+  <textarea> -> ReactQuillDynamic with QUILL_FORMATS + QUILL_MODULES; required-validation
+  and the clear-error-on-type watcher use isRichTextEmpty; invalid-field focus now
+  targets the .ql-editor surface, not the hidden backing input)
+- .../modals/EditPolicyModal.tsx (same conversions; the view-only pane rendered values
+  in a disabled <textarea>, which would have shown raw HTML tags - now a read-only
+  ql-editor block via linkify)
+- src/components/pages/(un-auth)/directives/Content.tsx (policy fields, provisions and
+  the legacy-field fallback were wrapped in <p dangerouslySetInnerHTML>; block markup
+  inside a <p> is invalid so the browser hoists it out - now <div class="ql-editor !p-0">,
+  matching how the memo body already renders)
+- src/app/globals.css (renamed .memo-quill-resize-clip -> .quill-resize-clip and shared
+  it with the policy editors; rules unchanged)
+- .../modals/CreateMemoModal.tsx, EditMemoModal.tsx (class rename only)
+- .../DirectiveList.tsx (Duplicate action - see backend HRIS-2026-038: DuplicateIcon
+  button with bordered box + tooltip, ConfirmModal, toast, back to page 1 + refetch)
+- .../hooks/useDuplicateDirective.ts (new - POST /api/directives/<id>/duplicate/)
+
+Backend:
+- See backend BUG_HISTORY HRIS-2026-038 (duplicate endpoint only; the formatting fix
+  needed no backend change - Directive.custom_policy_fields is a JSONField and the
+  values now simply carry HTML).
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☑ TypeScript types verified - npx tsc --noEmit clean on all changed files
+☑ Form validation tested (React Hook Form): empty editor still flagged as required via
+  isRichTextEmpty; error clears once real text is typed
+☐ Jest/RTL component tests (N/A - no frontend test harness in this repo)
+☑ Custom hook follows the existing useSendDirectiveEmail fetch/mutation pattern
+
+Integration & E2E:
+☑ Backend regression suite green (tests.views.test_directive - 50 tests OK)
+☐ Manual QA still needed: create a policy with numbered items, send it, open the
+  emailed public link and confirm it renders line by line
+☑ Edge cases considered:
+  - Policies saved before this fix still open normally; they keep showing as one
+    paragraph until re-typed (no data migration performed)
+  - Toolbar + fixed-height box: quill.snow's .ql-container{height:100%} is measured
+    against the .quill wrapper, so toolbar + editor overflow the box and the bottom of
+    the typing area is cut off. Reused the memo's flex-column fix (.quill-resize-clip)
+  - The public page and View Policy render saved HTML, so the ql-editor styles in
+    globals.css (list markers, empty-paragraph height) apply to policies too
+
+FIX EXPLANATION:
+  Replaced the plain textareas in both policy modals with the same React Quill editor
+  the rest of the app uses (ReactQuillDynamic + QUILL_FORMATS + QUILL_MODULES), so the
+  saved value carries real paragraph markup instead of bare text. Display surfaces that
+  already treated the value as HTML were corrected to use a <div class="ql-editor">
+  wrapper - a <p> cannot legally contain <p>/<ol>, and the browser silently hoisted the
+  content out, which is what flattened the layout. Required-field checks moved to
+  isRichTextEmpty because Quill never returns an empty string once focused. Each editor
+  sits in a resize-y box sharing the memo's .quill-resize-clip rule, which lays the
+  wrapper out as a flex column so the toolbar keeps its natural height and the editor
+  fills exactly the remaining space at any dragged height.
+
+================================================================================
+
+BUG ID: HRIS-2026-037
+DATE FILED: 2026-08-05
+DATE FIXED: 2026-08-05
+CLIENT/REPORTER: Internal (Michael Ian Labos, dev), Settings / Third-Party Integration
+COMPANION: Backend BUG_HISTORY HRIS-2026-036 | PRs fe#716, be#538
+
+ISSUE DESCRIPTION:
+  Companies that registered in HRIS the normal way (email/password) instead of via
+  "Login with Yahshua Payroll" SSO had no in-app way to connect their existing
+  company to Yahshua Payroll, so payroll sync could not work for them. The
+  Third-Party Platform settings page listed connected integrations (Google Meet,
+  Zoom) but had no "Yahshua Payroll" option, and the OAuth callback only handled the
+  login/verify path (which, for an existing company, would create a duplicate).
+
+  Follow-on during testing:
+  - First shipped as a full-page redirect (to mirror the YP login page and dodge the
+    production popup/COOP issue), then switched back to a POPUP per request so the
+    settings page stays open (matching how Google Meet/Zoom connect on the same page).
+  - A retained YP browser session made the OAuth silently reuse the previously
+    logged-in YP account (jumping straight to the "Authorize HRIS" consent screen), so
+    the connect ran with the wrong YP email and the backend email-match guard rejected
+    it. Clearing the app cookies forced a fresh YP login and it connected smoothly.
+
+DESIRED OUTCOME:
+  From Settings -> Third-Party Platform -> Create, an owner can pick "Yahshua Payroll",
+  authenticate once in a popup, and have their existing company connected — the
+  integration then appears in the list without creating a duplicate company.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/settings/general-settings/third-party-platform/
+  modals/CreateThirdPartyIntegrationModal.tsx (added Yahshua Payroll to the provider
+  list; sets a localStorage "yp_oauth_mode=connect" flag then opens the OAuth popup)
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/Content.tsx (when the callback
+  provider is yahshua-payroll AND the connect flag is set, calls the new connect hook
+  instead of the login/verify path, broadcasts on settings-integration-channel, and
+  closes the popup; error state shows a "Back to integrations" link)
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/hooks/useConnectYahshuaPayroll.ts
+  (new — POST /api/sso/connect/yahshua-payroll-oauth/ with the auth token)
+
+Backend (companion be#538):
+- app/views/yahshua_payroll.py (new YahshuaPayrollConnectAPIView)
+- app/urls.py (POST /api/sso/connect/yahshua-payroll-oauth/)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☑ Type-check clean for the changed files (npx tsc --noEmit — no new errors)
+☑ Reuses existing OAuth popup + /sso/[provider] callback pattern (same as Zoom/Google)
+☐ Automated component tests (N/A — UI wiring)
+☑ State management: connect flag via localStorage (shared across opener + popup tabs;
+  sessionStorage would NOT be shared and was intentionally avoided)
+
+Backend (Django REST Framework):
+☑ Covered by companion be#538 — 5 unit tests on YahshuaPayrollConnectAPIView.
+
+Integration & E2E:
+☑ Manual: owner -> Settings -> Third-Party Platform -> Create -> Yahshua Payroll
+  (popup) -> YP sign-in with the matching email -> popup closes -> integration appears.
+☑ Edge cases considered:
+  - Stale YP session reuses the wrong account -> caught by the backend email-match
+    guard; clear cookies / use incognito to force a fresh YP login.
+  - Google Meet / Zoom connect flows are unchanged (still use the popup path).
+
+FIX EXPLANATION:
+  Added "Yahshua Payroll" to the Third-Party Platform provider list. Selecting it sets
+  a localStorage "connect" flag and opens the existing YP OAuth authorize endpoint in a
+  popup. The shared /sso/yahshua-payroll callback detects the flag and calls the new
+  useConnectYahshuaPayroll hook (POST /api/sso/connect/yahshua-payroll-oauth/) instead
+  of the login/verify path, so the CURRENT company is linked rather than a new one
+  created. On success it broadcasts { isGranted: true } on the
+  settings-integration-channel (the settings page refetches its list) and closes the
+  popup; on failure it shows the backend error with a "Back to integrations" link.
+
+================================================================================
+
+BUG ID: HRIS-2026-036
+DATE FILED: 2026-08-03
+DATE FIXED: 2026-08-03
+REPORTER: Internal (Brylle - QA), Employer Profile / Onboarding Tour
+
+ISSUE DESCRIPTION:
+  On the My Profile page (/employer-profile), the onboarding tour tooltip
+  "Review your account settings, then click Save to complete your company
+  profile..." kept appearing on the Account Settings step even for employers
+  who had already finished the setup tour. The tooltip highlighted the SAVE
+  button and showed a "Do it Later" link on every single visit, so it could
+  never be permanently dismissed.
+
+  Steps to reproduce:
+    1. Complete the onboarding tour (header segment) so is_header_tour_done
+       is true on the backend.
+    2. Go to Dashboard > My Profile (/employer-profile).
+    3. Fill/keep the Employer Details form and click "Next".
+    4. The Account Settings step loads and the tour tooltip pops up again.
+
+  Root cause: In Details.tsx, the "Next" handler checked ONLY whether a tour
+  was currently running. If no tour was running it unconditionally fired
+  startTour([PROFILE_SAVE_STEP]) as a fallback — a deliberate feature meant
+  for users who dismissed the tour partway through onboarding, so they'd still
+  get guidance on the Save step. That fallback never consulted the persisted
+  tour progress, so for employers who had already completed the header segment
+  the "not running" branch was always taken and the tooltip re-appeared
+  forever. Dismissing it via "Do it Later" does not write to the backend by
+  design, so there was no way for the user to stop it.
+
+DESIRED OUTCOME:
+  The Save-step tooltip should only appear for employers who have not yet
+  completed the header tour segment. Once is_header_tour_done is true on the
+  backend, navigating to Account Settings should show no tour tooltip at all.
+  Users who dismissed the tour mid-onboarding should still get the fallback
+  guidance.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/employer-profile/Details.tsx
+    (import useGetTourProgress; read tour progress in the component; gate the
+     fallback startTour call behind !tourProgress?.is_header_tour_done)
+
+Backend:
+- None (no backend change required — /api/tour-progress/ already exposes
+  is_header_tour_done and the value was being written correctly on save)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ N/A - no backend changes
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript types verified (TourProgressData already exposes
+  is_header_tour_done)
+☑ Existing behavior preserved (active tour still advances via the
+  'profile-form-next' completeTrigger; fallback still fires for users who
+  dismissed the tour before completing the header segment)
+☑ Edge case considered: tourProgress undefined while the query is in flight —
+  optional chaining means the fallback still fires, matching the pre-fix
+  behavior for genuinely-incomplete onboarding
+☐ Manual browser verification (recommended): with a completed tour, open
+  /employer-profile, click Next, confirm no tooltip appears
+☐ Manual browser verification (recommended): with a fresh employer, dismiss
+  the tour then click Next, confirm the Save tooltip still appears
+
+FIX EXPLANATION:
+  Added the useGetTourProgress hook to Details.tsx and changed the fallback
+  branch from a bare `else` to `else if (!tourProgress?.is_header_tour_done)`.
+  The fallback now only runs when the header tour segment has not been marked
+  complete on the backend, so employers who finished onboarding never see the
+  Save tooltip again, while the mid-onboarding guidance the fallback was built
+  for is left intact.
+
+================================================================================
+
+BUG ID: HRIS-2026-035
+DATE FILED: 2026-07-24
+DATE FIXED: 2026-07-24
+REPORTER: Internal (Linear I-619), Offboarding module
+
+ISSUE DESCRIPTION:
+  Two related rich-text rendering issues:
+
+  1. Separation letters — Text in generated offboarding letters (Letter of
+     Acceptance of Resignation / Letter of Separation) ran off the right edge
+     of the PDF page instead of wrapping. Body paragraphs were clipped at the
+     page boundary and one even broke mid-word ("endea/vors"), while the
+     manually typed signer line wrapped fine. It looked correct in the editor
+     and only broke in the generated PDF, and only after the letter content had
+     been edited in the rich-text editor.
+
+     Root cause: ReactQuill (react-quill-new / Quill 2.0) serializes every
+     regular space in its content as a NON-BREAKING space (U+00A0 / &nbsp;).
+     The letter template contains zero &nbsp; — Quill injects them on
+     load/re-serialize. WeasyPrint (backend PDF renderer) cannot break a line
+     at a non-breaking space, so each paragraph became one unbreakable token
+     that overflowed the fixed page width. The freshly typed signer line used
+     real spaces, which is why it alone wrapped.
+
+  2. Safety & Health Policy editor — Bulleted and numbered lists rendered two
+     markers per item (e.g. "• •" or a doubled number). Quill 2.0 renders its
+     list markers via the .ql-ui span (li > .ql-ui::before), whereas the
+     existing CSS hid the Quill 1.x marker (ul > li::before). Since we render
+     our own native list-style markers, Quill's own markers were no longer
+     hidden and showed on top of ours.
+
+DESIRED OUTCOME:
+  Separation letter body text should wrap within the PDF page margins
+  regardless of how the content was authored/edited in Quill. Policy editor
+  lists should show exactly one marker per item.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/offboarding/modals/CreateSeparationLetterModal.tsx
+    (normalize U+00A0 and &nbsp; back to regular spaces in onSubmit before
+     sending the message to the backend)
+- src/components/pages/(auth)/employer/dole/safety-and-health-policy/styles.css
+    (updated the hidden-marker selector from ul > li::before to
+     li > .ql-ui::before for Quill 2.0, so native markers aren't doubled)
+
+Backend (see backend BUG_HISTORY HRIS-2026-033):
+- utils/separation_letter.py (render-time nbsp normalization safety-net)
+- utils/safety_and_health_policy.py (same nbsp normalization + wrap CSS)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Verified in backend BUG_HISTORY HRIS-2026-033 (re-rendered PDF, all lines
+  within page width, no mid-word breaks)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Edge cases considered (Quill-injected nbsp runs; Quill 2.0 vs 1.x list
+  marker markup)
+☐ Manual browser verification (recommended): generate an Acceptance and a
+  Separation letter after editing content in Quill; confirm PDF wraps
+☐ Manual browser verification (recommended): create bulleted and numbered
+  lists in the Safety & Health Policy editor; confirm a single marker per item
+
+FIX EXPLANATION:
+  For the letter overflow, the real defect is content, not layout: Quill emits
+  non-breaking spaces where normal spaces belong, leaving paragraphs with no
+  legal break points for the renderer. The frontend normalizes U+00A0 and the
+  &nbsp; entity back to regular spaces at submit time so newly saved content is
+  clean; the backend does the same at render time so already-saved letters
+  render correctly without a data migration. For the doubled list markers, the
+  hidden-marker CSS selector was updated to target Quill 2.0's .ql-ui span so
+  our native list markers are the only ones shown.
+
+================================================================================
+
+BUG ID: HRIS-2026-034
+DATE FILED: 2026-07-17
+DATE FIXED: 2026-07-17
+REPORTER: Internal (Ian Brylle, YAHSHUA)
+
+ISSUE DESCRIPTION:
+  In the Talent Search "Profile Details" modal, under Work Experience → Key
+  Responsibilities, long entries rendered on a single unbroken line and ran
+  off the right edge of the modal/viewport instead of wrapping — trailing
+  text was only reachable by horizontal scroll. Shorter entries displayed
+  fine, and some longer entries wrapped correctly while others didn't,
+  pointing to a missing CSS safety net rather than a universal "never
+  wraps" bug (some stored rich-text content likely contains long
+  unbreakable runs, e.g. non-breaking spaces from copy-pasted text, that
+  the browser won't break at normal word boundaries without
+  `overflow-wrap` allowing it). Seen across multiple candidates (e.g. Rica
+  Agno, Johanna Cebuan).
+
+  Root cause: the Key Responsibilities `dangerouslySetInnerHTML` container
+  in WorkExperience.tsx had no `overflow-wrap`/`word-break` rule. Because
+  the modal's DialogPanel (ApplicantProfileModal.tsx) uses
+  `overflow-visible`, the overflow wasn't clipped or scrolled within the
+  modal — it spilled out past the modal's right edge onto the page.
+
+DESIRED OUTCOME:
+  Key Responsibilities text should always wrap within the modal's column,
+  regardless of content length or whether it contains long unbreakable
+  runs.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+
+Backend:
+- N/A — frontend-only, CSS-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only, CSS-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS fix)
+☑ TypeScript types verified (tsc --noEmit run across project; no new errors
+  introduced by the edited file)
+☐ Manual browser verification completed (not yet performed — recommended
+  before shipping)
+
+Integration & E2E:
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (long single-line responsibility text with no
+  natural break points)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added `break-words` (`overflow-wrap: break-word`) to the Key
+  Responsibilities container's className in WorkExperience.tsx. This is
+  the same Tailwind utility already used for every other potentially-long
+  text field in this same modal's sibling component, ApplicantProfile.tsx
+  (location, nationality, contact number, email) — this component had
+  simply missed applying the existing convention. `break-words` also
+  shrinks the element's flex-item min-content width, so it doesn't force
+  the parent flex column wider than its allotted width either.
+
+================================================================================
+
+BUG ID: HRIS-2026-033
+DATE FILED: 2026-07-17
+DATE FIXED: 2026-07-17
+REPORTER: Internal
+
+ISSUE DESCRIPTION:
+  Saving a Work Experience entry on /profile with no Start Date — including
+  when "I currently work here" was checked — stored the start date as null.
+  Every place that later displayed the entry (Talent Search Profile Details
+  modal, Compare Applicants modal, Screen Applicants candidate view)
+  rendered it as "January 1970" (e.g. candidate Johainna Cebuan's entry
+  showed "January 1970 - January 1970"), since `new Date(null)` resolves to
+  the Unix epoch.
+
+  Root cause (three gaps):
+  1. AddWorkExperienceModal.tsx required Job Title/Company but had no
+     `required` rule on Start Date at all, and "I currently work here" only
+     nulled End Date — it never required Start Date.
+  2. The backend accepted work_experience as an unvalidated JSONField with
+     no check for a missing dateFrom.
+  3. Four separate display components each inlined `new Date(exp.dateFrom)`
+     with no null guard, and three inconsistent checks for whether dateTo
+     meant "Present".
+
+DESIRED OUTCOME:
+  Start Date should be required to save a Work Experience entry (even when
+  marked as current). Missing/invalid dates should render as "Not
+  specified" instead of blank or the Unix epoch. The backend should reject
+  work_experience entries missing a start date as defense-in-depth.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/yahshua-connect/profile/modals/AddWorkExperienceModal.tsx
+    (Start Date, Job Title, Company all required with visible RHF error
+     messages; Start Date required unconditionally, even when "I currently
+     work here" is checked)
+- src/helpers/date.ts
+    (added formatMonthYear, isWorkExperienceOngoing,
+     formatWorkExperienceDateRange — null-safe date-range formatting,
+     unifying three previously-inconsistent "is this ongoing" checks)
+- src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+- src/components/pages/(auth)/employer/talent-search/profile/ApplicantProfile.tsx
+- src/components/pages/(auth)/employer/talent-search/modal/CompareApplicantsModal.tsx
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/ApplicantForm.tsx
+    (all four: replaced inline unguarded new Date(...) formatting with
+     formatWorkExperienceDateRange)
+
+Backend (see backend BUG_HISTORY HRIS-2026-031):
+- app/views/applicant.py
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Manual verification completed (see backend BUG_HISTORY entry)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript types verified (tsc --noEmit run across project; the six
+  edited files introduced no new type errors)
+☑ Form validation tested (React Hook Form required rules added and
+  reasoned through; not yet exercised in a live browser)
+☐ Manual browser verification completed (not yet performed — recommended
+  before shipping: Add/Edit Work Experience form, Talent Search / Compare
+  Applicants / Screen Applicants displays)
+
+Integration & E2E:
+☐ API integration tests completed (frontend ↔ backend) — not performed
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (empty Start Date, "I currently work here" checked
+  with no Start Date, pre-existing null dateFrom legacy records rendering
+  as "Not specified")
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  1. AddWorkExperienceModal.tsx: added `required` validation (with visible
+     error messages via formState.errors) to Start Date, Job Title, and
+     Company. Start Date is required unconditionally — an ongoing role
+     still needs a start date.
+  2. src/helpers/date.ts: added formatWorkExperienceDateRange (and its two
+     helpers formatMonthYear / isWorkExperienceOngoing) as the single
+     source of truth for formatting a work-experience date range, replacing
+     four near-duplicate, inconsistent inline implementations. Missing/
+     invalid dates render as "Not specified"; ongoing roles render as
+     "Present".
+  3. The four display components were switched to call
+     formatWorkExperienceDateRange instead of inlining `new Date(...)` —
+     pure JSX substitutions, no prop/interface changes.
+  4. Backend defense-in-depth: a required-dateFrom check was added directly
+     in ApplicantProfileAPIView.patch() (app/views/applicant.py) — see
+     backend BUG_HISTORY HRIS-2026-031 for details. (Note: this was
+     initially implemented as a serializer-level validator on
+     ApplicantCreateUpdateSerializer, then moved to the view layer per team
+     convention — the serializer was reverted to its original, unvalidated
+     state.)
+  5. No data migration was performed for existing bad records (e.g.
+     Cebuan's dateFrom: null) — the display fix (#2/#3) renders them as
+     "Not specified" going forward with no data change. Because the whole
+     work_experience array is resent on every save from that modal, the
+     backend validation (#4) means an applicant with a legacy null
+     dateFrom entry will be required to fix/remove it the next time they
+     save any change to their Work Experience section.
+
+================================================================================
+
+BUG ID: HRIS-2026-034
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Consultant (Christen Daayata)
+
+ISSUE DESCRIPTION:
+  After HRIS-2026-033 fixed the missing `.ql-editor` CSS load, long
+  descriptions on the Evaluation Form no longer overflowed the page, but
+  reported a new, related problem: words were splitting awkwardly mid-word
+  instead of wrapping cleanly between words (e.g. "important" rendering as
+  "importan" / "t" on two lines, "success" as "succe" / "ss"). The same
+  pattern was independently found on the public job listing page (/jobs),
+  in the "Role Summary" / "What You'll Do" section of a job's details —
+  e.g. "Administrative" splitting as "Admini" / "strative".
+
+  Root cause: content pasted into a Quill editor from Word/Google Docs
+  commonly saves every space as a non-breaking space (`&nbsp;`, i.e.
+  U+00A0) instead of a regular space — confirmed via the client's repro
+  HTML:
+
+    <p>This&nbsp;evaluation&nbsp;form&nbsp;lists&nbsp;the&nbsp;criteria...</p>
+
+  A real nbsp is defined (by Unicode and the CSS Text spec) to NEVER
+  provide a line-break opportunity — that is its entire purpose, not a
+  rendering bug. `.ql-editor`'s `overflow-wrap: break-word` rule (loaded
+  correctly since HRIS-2026-033) therefore has no real word boundary to
+  wrap at, and is forced to prevent overflow the only way it can: breaking
+  at an arbitrary character position instead of between words. No CSS
+  property can fix this — nbsp's non-breaking behavior can't be overridden
+  by any stylesheet rule without contradicting what the character means.
+  The only fix is to replace the nbsp character with a real space before
+  the browser ever sees it.
+
+  A backend fix (normalize on save in ~10 serializers, across job
+  postings, evaluation templates, applicant work experience, directives,
+  benefits, OSH program, positions, and offboarding letters, plus a data
+  migration to clean existing rows) was evaluated and explicitly rejected
+  for this hotfix branch: it only fixes NEW saves without a migration, the
+  migration itself is a one-way, irreversible bulk mutation across many
+  live tables with real locking/runtime risk, and it touches 8+ unrelated
+  features in one change — disproportionate risk for what is fundamentally
+  a display/rendering problem, not a data-correctness problem.
+
+DESIRED OUTCOME:
+  Every read-only preview of Quill-authored rich text should wrap at real
+  word boundaries, regardless of whether the saved content happens to be
+  nbsp-joined, matching how the text looks in a normal document — no
+  mid-word splitting, on both new and already-existing records, with no
+  database migration required.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/linkify.ts
+    (added and exported `normalizeNbsp()` — replaces `&nbsp;` and the
+     literal U+00A0 character with a regular space; `linkify()` now calls
+     it on its input before doing anything else, so every existing
+     `linkify()` call site gets the fix for free)
+- src/components/pages/(un-auth)/(forms)/evaluation-form/Content.tsx,
+  src/components/pages/(auth)/employer/evaluation/evaluation-template/tabs/PreviewTab.tsx,
+  src/components/pages/(auth)/employer/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal.tsx,
+  src/components/pages/(un-auth)/directives/Content.tsx
+    (no changes needed — already render their Quill content through
+     `linkify()`, so they inherited the fix automatically)
+- The following 16 files render saved Quill HTML directly via
+  `dangerouslySetInnerHTML` without going through `linkify()`, and were
+  each updated to wrap their HTML value with `normalizeNbsp()` before
+  rendering:
+  - src/components/pages/(auth)/applicant/apply-for-job/JobDetails.tsx
+  - src/components/pages/(auth)/employer/audit-logs/modals/ViewAuditLogDetails.tsx
+  - src/components/pages/(auth)/employer/dole/safety-and-health-policy/modals/SafetyAndHealthPolicyModal.tsx
+  - src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/EvaluationDetails.tsx
+  - src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+  - src/components/pages/(auth)/employer/job-postings/job-posting-history/modals/JobPreviewModal.tsx
+  - src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPagePreview.tsx
+  - src/components/pages/(auth)/employer/manage/org-structure/modals/PositionDetailsModal.tsx
+  - src/components/pages/(auth)/employer/screen-applicants/[id]/modals/ApplicantForm.tsx
+  - src/components/pages/(auth)/employer/settings/general-settings/employees/modals/DescriptionModal.tsx
+  - src/components/pages/(auth)/employer/settings/org-structure/modals/PositionModal.tsx
+  - src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+  - src/components/pages/(auth)/yahshua-connect/tabs/personal-mode/modals/JobDetailsModal.tsx
+  - src/components/pages/(un-auth)/apply-job-without-signup/job-detail/Content.tsx
+    (this + JobDetails.tsx below are the likely source of the /jobs
+     "Role Summary" repro)
+  - src/components/pages/(un-auth)/apply-job-without-signup/jobs/components/tabs/company-jobs/JobDetails.tsx
+  - src/components/pages/(un-auth)/offboarding-public/Content.tsx
+- Explicitly investigated and left unchanged (not Quill/rich-text content):
+  - src/components/pages/(auth)/employer/manage/create-memo-policy/modals/ResponsesModal.tsx
+    (`read.read_at` is a plain ISO datetime string per
+    `T_ReadData`/`DirectiveReadSerializer`, not saved rich text — using
+    `dangerouslySetInnerHTML` on it is a pre-existing, unrelated code
+    smell, not a source of nbsp)
+  - src/components/tour/TourTooltip.tsx
+    (`step.description` is hardcoded static tour copy authored directly in
+    TypeScript config files like `dashboardTourSteps.ts`, never passes
+    through a Quill editor, so it can never contain nbsp)
+  - src/app/(un-auth)/(landing-page)/blog/*/page.tsx
+    (`dangerouslySetInnerHTML` there renders `JSON.stringify(jsonLd)` for
+    SEO structured data, not user content)
+
+Backend:
+- N/A - frontend-only fix (backend normalization was considered and
+  explicitly deferred; see ISSUE DESCRIPTION)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — text
+  normalization + call-site wiring, no component logic changed)
+☑ TypeScript types verified: `npx tsc --noEmit` run before and after; byte-
+  for-byte identical error output both times (same pre-existing, unrelated
+  errors only) — confirms zero new errors across all 17 changed files
+☑ Manual verification completed: reproduced the exact `&nbsp;`-joined
+  repro data from the client screenshot and confirmed words now wrap
+  cleanly between words instead of splitting mid-word
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (verified via `git diff` that every
+  edit is a minimal, additive wrap around existing `dangerouslySetInnerHTML`
+  values — no unrelated logic touched)
+☑ Edge cases considered (confirmed via grep that no file still imports the
+  fix from an intermediate `richText.ts` helper that was tried and then
+  consolidated back into `linkify.ts` for a single source of truth)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added `normalizeNbsp()` to `linkify.ts` — a plain string `.replace()`
+  swapping `&nbsp;`/U+00A0 for a regular space (visually identical,
+  restores real word-break opportunities). `linkify()` calls it
+  internally on its input before doing any URL-detection work, so the 4
+  files already calling `linkify()` for their Quill content got the fix
+  with zero additional changes.
+
+  For the 16 files that render saved Quill HTML directly via
+  `dangerouslySetInnerHTML` without going through `linkify()` (mostly
+  job-posting/job-detail description renderers using a local
+  `const markup = { __html: ... }` pattern, plus evaluation history,
+  work experience, audit logs, position descriptions, and the offboarding
+  letter), each call site was updated to wrap its HTML value with
+  `normalizeNbsp(...)` directly.
+
+  An intermediate version of this fix put `normalizeNbsp` in a new,
+  separate `src/helpers/richText.ts` file (reasoning: `linkify.ts`'s name
+  is specifically about URL-linking, not nbsp cleanup) and had `linkify.ts`
+  import it. Per developer feedback, this was consolidated back into a
+  single `normalizeNbsp` export inside `linkify.ts` — one file, one source
+  of truth, rather than splitting one small helper's logic and its
+  wrapper across two files.
+
+  Two render sites using `dangerouslySetInnerHTML` were explicitly checked
+  and left alone because they never contain Quill-authored content:
+  `ResponsesModal.tsx`'s `read.read_at` (a plain date string) and
+  `TourTooltip.tsx`'s `step.description` (hardcoded tour copy, never
+  passes through a Quill editor).
+
+  A backend-only fix (normalize on save + a one-time data migration to
+  clean existing rows across ~10 models) was designed and prototyped, then
+  explicitly reverted in favor of this frontend fix: the backend approach
+  needs a migration to fix any already-existing data (the actual bug
+  reports were all about existing records), that migration is a one-way,
+  irreversible change across many live production tables, and the fix
+  would touch 8+ unrelated features (job postings, evaluations,
+  applicants, directives, benefits, OSH program, positions, offboarding)
+  in a single hotfix change. The frontend fix has none of that risk: it is
+  purely additive display-layer logic, fixes both old and new data
+  immediately with no migration, and is trivially revertible as a single
+  commit if anything is wrong.
+
+================================================================================
+
+BUG ID: HRIS-2026-033
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Consultant
+
+ISSUE DESCRIPTION:
+  The evaluator-facing Evaluation Form's first page ("Details" tab, showing
+  the template name + description above Employee Name / Date of Evaluation)
+  still displayed unwrapped, overflowing text, even though HRIS-2026-031 had
+  already added the `ql-editor` class to this exact element to fix wrapping.
+  Repro data:
+
+    <p>This&nbsp;evaluation&nbsp;form&nbsp;lists&nbsp;the&nbsp;criteria...</p>
+
+  Root cause: `.ql-editor`'s wrapping rule (`white-space: pre-wrap;
+  word-wrap: break-word;`) only exists because `react-quill-new/dist/
+  quill.snow.css` is imported somewhere in the page's component tree — the
+  class name alone does nothing without that stylesheet. HRIS-2026-031 added
+  the `ql-editor` className to this file but never imported the stylesheet
+  in it. The public evaluation-form route never mounts a live Quill editor
+  anywhere, so nothing else on that route pulled the CSS in either — the
+  class was present in the markup with no matching rule, and an
+  `&nbsp;`-joined description (pasted content with no real spaces = no
+  legal wrap point without `word-wrap: break-word`) overflowed the box
+  exactly as in the client's original HRIS-2026-031 report.
+
+  Auditing every other file touched by HRIS-2026-031's `ql-editor` className
+  fix found the same gap in all of them: `EvaluationDetails.tsx`,
+  `QuestionsTab.tsx`, `WorkExperience.tsx`, `ViewEvaluationTemplateModal.tsx`,
+  `PreviewTab.tsx`, and `ApplicantForm.tsx` also lacked the stylesheet
+  import. Those happened to render fine in production only because they
+  share an authenticated app bundle with some other component elsewhere
+  that imports the Quill CSS — a fragile, incidental dependency, not a
+  guarantee.
+
+DESIRED OUTCOME:
+  Every read-only preview of Quill-authored HTML must reliably load
+  `.ql-editor`'s wrapping CSS regardless of what else is or isn't on its
+  page, instead of accidentally depending on unrelated components sharing
+  its bundle.
+
+FILES CHANGED:
+Frontend:
+- src/app/layout.tsx
+    (added `import 'react-quill-new/dist/quill.snow.css';` once, at the
+     root layout that wraps every route in the app)
+- Removed the now-redundant per-file `import 'react-quill-new/dist/
+  quill.snow.css';` from all 43 files that previously imported it
+  individually (editors and read-only previews alike), including the 6
+  files identified above plus
+  `src/components/pages/(un-auth)/(forms)/evaluation-form/Content.tsx`
+  (the file with the reported bug) — the global import in the root layout
+  makes every one of these redundant.
+
+Backend:
+- N/A - frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS
+  import relocation, no component logic changed)
+☑ TypeScript types verified: `npx tsc --noEmit` run before and after: same
+  pre-existing, unrelated errors only; none of the 44 changed files appear
+  in the error output
+☑ Manual verification completed: reproduced the exact `&nbsp;`-joined
+  repro data on the public evaluation-form page, confirmed it now wraps
+  correctly inside the bordered card
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (import removal spot-checked via
+  `git diff` on multiple files to confirm no stray blank lines/syntax
+  issues left behind)
+☑ Edge cases considered (verified via full-repo grep that no file still
+  references the per-file import except the new global one in
+  `layout.tsx`)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Moved the Quill stylesheet import from being scattered across 43
+  individual files to a single import in `src/app/layout.tsx`, the root
+  layout every route in the app renders through:
+
+    import 'react-quill-new/dist/quill.snow.css';
+    import './globals.css';
+
+  This guarantees `.ql-editor`'s base wrapping CSS is present on every
+  page — including standalone, unauthenticated routes like the public
+  evaluation form that never mount a live Quill editor — instead of
+  depending on whichever components happen to share that route's bundle.
+  All 43 previously-existing per-file imports (both single- and
+  double-quoted variants) were then removed as redundant duplicates; CSS
+  imports are deduplicated by the bundler, so removing them changes
+  nothing about what loads, only removes the now-unnecessary repetition.
+
+================================================================================
+
+BUG ID: HRIS-2026-032
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+  Two unrelated bugs found on the OSH Program page ("OSH Program and Policy"
+  tab) while validating the ql-editor fix from HRIS-2026-031:
+
+  1. On a hard refresh landing directly on /dole/osh-program (or any time it
+     was the first Quill-using page visited in the session), the React Quill
+     toolbar rendered its icon buttons as giant, unstyled black shapes (e.g. a
+     huge solid triangle) instead of small icons. The bug was NOT visible when
+     navigating in from another page via the app's normal in-app links (e.g.
+     DOLE -> OSH Program), only after a hard browser refresh.
+
+     Root cause: `ProgramAndPolicy.tsx`, `SafetyMeasures.tsx`, and
+     `ComplianceAndCost.tsx` (the three OSH Program tabs using
+     `ReactQuillDynamic`) were the only Quill-using components in the entire
+     codebase that did NOT `import 'react-quill-new/dist/quill.snow.css'`
+     directly in their own file — every other Quill usage across the app
+     does. That stylesheet is what sizes the toolbar's icon SVGs down to
+     their small, correct dimensions; without it the browser renders their
+     raw, unstyled path data at a huge default size. It "worked" when
+     navigating in from another page only because that other page's own
+     `quill.snow.css` import was already injected into the document, and
+     Next.js keeps client-side-navigation stylesheets in the page - a hard
+     refresh starts the document fresh, so if OSH Program is the first (or
+     only) Quill page loaded, the stylesheet never arrives.
+
+  2. The "< DOLE" back button on the OSH Program page required repeatedly
+     clicking ("spamming") it before it would actually navigate away.
+
+     Root cause: a `useEffect` installing a `popstate`/`beforeunload` guard
+     (to warn on unsaved changes) had `hasUnsavedChangesCallback` in its
+     dependency array. That callback itself depends on `watch`,
+     `selectedTab`, and `oshProgramDetails` - all of which change as the user
+     switches tabs or data refetches. Every time the effect re-ran (cleanup +
+     re-setup), it called `window.history.pushState(...)` again, permanently
+     adding another entry to the browser's session history stack - there is
+     no way to "unpush" a history entry, so these accumulated for the whole
+     time the user stayed on the page. The Back button's handler calls
+     `window.history.go(-2)`, a heuristic tuned for exactly ONE extra guard
+     entry (pushed once on mount) plus the real navigation step. As soon as
+     the user switched even one tab, more than one extra entry had
+     accumulated, so `go(-2)` undershot and the user had to click Back
+     multiple times to actually get past the leftover phantom entries.
+
+DESIRED OUTCOME:
+  The OSH Program editor's toolbar icons should render correctly at their
+  normal small size on a hard refresh, not just when navigating in from
+  another page. The "< DOLE" back button should navigate away in a single
+  click regardless of how many tabs the user has switched between or how
+  many times the underlying data has refetched.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/ProgramAndPolicy.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/SafetyMeasures.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/tabs/ComplianceAndCost.tsx
+- src/components/pages/(auth)/employer/dole/osh-program/Content.tsx
+
+Backend:
+- N/A - frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS
+  import + effect-dependency fix)
+☑ TypeScript types verified (no type errors on all edited files)
+☑ Manual verification completed:
+  - Hard refresh directly on /dole/osh-program, OSH Program and Policy tab:
+    toolbar icons render at correct small size ✓
+  - Hard refresh on Safety Measures and Compliance and Cost tabs: same ✓
+  - Navigating in from the DOLE page (already-warm session): unaffected,
+    still correct ✓
+  - Switch between multiple OSH Program tabs, then click "< DOLE" once:
+    navigates away immediately ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (cold hard-refresh landing directly on the page vs. warm
+  in-app navigation; multiple tab switches before attempting to go back)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Fix 1 — missing quill.snow.css import:
+  Added `import 'react-quill-new/dist/quill.snow.css';` to all three OSH
+  Program tab files that render a `ReactQuillDynamic` editor, matching the
+  same import already present in every other Quill-using component across
+  the codebase (SendEmailModal, job posting description editors, evaluation
+  criterion editors, etc.).
+
+  Fix 2 — Back button requiring multiple clicks:
+  Added a `hasUnsavedChangesRef` ref, kept current via a small separate
+  effect (`useEffect(() => { hasUnsavedChangesRef.current = ... }, [hasUnsavedChangesCallback])`).
+  Changed the popstate/beforeunload guard effect's dependency array to `[]`
+  so it only runs once on mount (and therefore only calls
+  `window.history.pushState` once as a result), with its `handleBeforeUnload`
+  and `handlePopState` closures reading `hasUnsavedChangesRef.current()`
+  instead of closing over the changing `hasUnsavedChangesCallback` directly.
+  The Back button's existing `window.history.go(-2)` heuristic now reliably
+  matches the actual history stack, since exactly one guard entry is ever
+  added regardless of tab switches or data refetches.
+
+================================================================================
+
+BUG ID: HRIS-2026-031
+DATE FILED: 2026-07-16
+DATE FIXED: 2026-07-16
+CLIENT/REPORTER: Client (Linear I-610) + Internal - Dev
+
+ISSUE DESCRIPTION:
+  Linear I-610 reported that Performance Evaluation form text was not wrapping
+  properly — long text ran off the edge of the container instead of moving to
+  the next line, in both the evaluator's and the recipient's view. The same
+  underlying pattern turned out to affect several other screens that render
+  saved React Quill rich-text HTML read-only via `dangerouslySetInnerHTML`:
+
+  1. Root cause: read-only previews of Quill-authored HTML (evaluation
+     section/criterion text, applicant work-experience "responsibilities",
+     employee-issue decision messages, etc.) were rendered as bare
+     `<div>`/`<span>` elements with NO `.ql-editor` class. Quill's own vendor
+     CSS (`.ql-editor { white-space: pre-wrap; word-wrap: break-word; }`)
+     only applies when that class is present — the live editor always gets it
+     automatically (react-quill-new wraps it in `.ql-container.ql-snow`), but
+     hand-rolled previews elsewhere in the app never added it. Content with a
+     non-breaking-space-joined phrase (common in Word/Quill-pasted text) has
+     no legal wrap point without `word-wrap: break-word`, so it overflowed the
+     modal instead of wrapping, and the modal's `overflow-hidden` clipped it —
+     matching the client's screenshot exactly.
+  2. A full codebase audit (grepping every `dangerouslySetInnerHTML` site and
+     cross-referencing against every field authored via a Quill editor) found
+     the bug present in: Evaluation History detail modal, Evaluation Questions
+     tab, Talent Search applicant profile (Work Experience), the View
+     Evaluation Template modal, the Evaluation Template Preview tab, the live
+     evaluator-facing evaluation form, and the Screen Applicants profile
+     modal's Job Experience tab.
+  3. Secondary bug found and fixed while validating the list-marker CSS: the
+     OSH Program editor showed ordered-list numbers overlapping the item text
+     (e.g. "10The company..." with no space), for TWO independent reasons:
+       a. `globals.css`'s custom marker-positioning rules for Quill's
+          `.ql-ui::before` pseudo-element (added in HRIS-2026-028 to restore
+          bullet/number markers in read-only previews) used `width: auto`,
+          which sizes the marker box to its own content. Quill draws the
+          marker with `text-align: right`, so a FIXED width is required to
+          keep the marker's right edge (where the item text starts) constant
+          regardless of digit count — `auto` let two-digit numbers ("10.",
+          "11.") push their right edge into the following text. The
+          equivalent fallback rule for semantic (non-editor) `<ol>` markup
+          had the same flaw via `left: <fixed>` instead of a fixed-width,
+          right-aligned box.
+       b. Separately, `utils/osh_program.py`'s `generate_basic_components()`
+          split every topic into TWO `<li>` elements in the same `<ol>` — one
+          for the heading-like title ("Safety and Health Policy") and one for
+          its explanation paragraph — so both got auto-numbered as if they
+          were sequential list items, producing a duplicated/confusing count
+          on top of the CSS overlap.
+  4. While auditing, also found `employee-issue-decision/Content.tsx`
+     rendering `decision_message` as raw Quill HTML in the web acknowledgment
+     page — but the authoritative decision document (the generated NTE PDF,
+     `utils/employee_issue.py: generate_nte_html_with_response()`) already
+     strips all HTML from `decision_message` via `convert_html_to_text()` and
+     renders it as plain text. The web-page HTML rendering was redundant and
+     removed instead of fixed.
+
+DESIRED OUTCOME:
+  All read-only previews of Quill-authored rich text should wrap correctly
+  within their containers, regardless of content length, matching the live
+  editor's own behavior. Ordered-list markers in the live editor (and in
+  semantic non-editor list markup) should stay clear of the item text for any
+  digit count, not just single digits. Newly created OSH Programs should
+  present each basic component as a single, correctly numbered list item.
+
+FILES CHANGED:
+Frontend:
+- src/app/globals.css
+    (`.ql-editor li[data-list] > .ql-ui::before`: `width: auto` -> a fixed
+     `width: 1.6em` with `margin-left: -2em`, recalculated so the marker's
+     right edge stays a constant ~0.4em before the text for any digit count;
+     `.ql-editor ol > li:not([data-list])::before`: switched from
+     `left: 1.2em` growing rightward with content, to a fixed `left: 0;
+     width: 2em; text-align: right;` box with the same guarantee)
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/EvaluationDetails.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+- src/components/pages/(auth)/employer/talent-search/profile/WorkExperience.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-template/tabs/PreviewTab.tsx
+- src/components/pages/(un-auth)/(forms)/evaluation-form/Content.tsx
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/ApplicantForm.tsx
+- src/components/pages/(un-auth)/(forms)/employee-issue/employee-issue-decision/Content.tsx
+    (removed the "Decision Message Display" block entirely — decision content
+     is already delivered via the NTE PDF attachment as plain text)
+
+Backend:
+- yahshua-hris-be/utils/osh_program.py
+    (`generate_basic_components()`: merged each topic's title + explanation
+     into a single `<li>` instead of two, and removed no-op `start="N"` HTML
+     attributes — Quill doesn't read the native `start` attribute; it tracks
+     ordered-list numbering internally and already continues the count across
+     intervening bullet lists on its own)
+- No data migration was applied for existing production OSH Program records.
+  A migration was drafted and tested locally to backfill only rows whose
+  `basic_components` exactly matched the old auto-generated default (leaving
+  any admin-edited content untouched), but was reverted per developer
+  decision — this generator only runs once per employer
+  (`create_osh_program`), so only newly created employers get the corrected
+  numbering; existing employers' OSH Program content is unaffected until
+  manually edited or a migration is deliberately reintroduced.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — content-generator change only, no schema/behavior change requiring
+Python tests
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS +
+  markup fix)
+☑ TypeScript types verified (no type errors on all edited files)
+☑ Manual verification completed:
+  - Evaluation History detail modal: long section/criterion text wraps ✓
+  - Evaluation Questions tab: criterion titles wrap ✓
+  - Talent Search applicant profile (Work Experience): responsibilities wrap,
+    bullets render ✓
+  - View Evaluation Template modal: description/section/criterion text wraps ✓
+  - Evaluation Template Preview tab: same ✓
+  - Live evaluator-facing evaluation form ("Details" tab): section
+    description and criterion titles wrap ✓
+  - Screen Applicants profile modal (Job Experience tab): responsibilities
+    wrap, bullets render ✓
+  - OSH Program editor: single-digit AND double-digit ordered-list items no
+    longer overlap the item text ✓
+  - Employee-issue decision acknowledgment page: no longer shows a redundant
+    HTML decision block ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (nbsp-joined long phrases forcing a mid-run break,
+  double-digit and single-digit ordered-list counters, flex rows with a
+  number/icon sibling needing `min-w-0`)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added the `ql-editor` class (matching the existing convention already used
+  for job-posting/public-page previews) to every read-only render of
+  Quill-authored HTML found missing it, restoring Quill's own
+  `white-space: pre-wrap; word-wrap: break-word` plus this app's centralized
+  heading-size, empty-paragraph-height, and list-marker rules in globals.css.
+  Where the rich-text container sat next to a sibling (a numbering `<span>` or
+  icon) inside a `flex` row, also added `min-w-0`/`shrink-0` as needed —
+  flex items default to `min-width: auto`, which lets a wide content item
+  overflow its row instead of wrapping when the row itself isn't wide enough.
+
+  Separately fixed the marker-positioning math in globals.css so it holds for
+  any digit count instead of only the single-digit case it was originally
+  eyeballed against, and fixed the OSH Program basic-components generator to
+  stop splitting one logical list item into two numbered fragments.
+
+================================================================================
+
+BUG ID: HRIS-2026-030
+DATE FILED: 2026-07-10
+DATE FIXED: 2026-07-10
+REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+  On the public jobs listing page (yahshuahris.com/jobs) on mobile, some job
+  cards displayed correctly at full screen width, but other cards (usually
+  ones with a longer company name or address) stretched wider than the
+  phone screen, cutting off text and adding horizontal scrolling. The same
+  card component was used for every job, so the inconsistency only showed
+  up depending on the length/breakability of that job's text content.
+
+  Root cause: the job/gig/talent card list (`Content.tsx` and the three
+  tabs in `Tabs.tsx`) used `grid md:grid-cols-2 lg:grid-cols-1 ...` with no
+  explicit column count at the base (mobile) breakpoint. Below `md`, the
+  grid had no `grid-template-columns` set, so CSS Grid's default
+  `min-width: auto` on grid items let a card's implicit column grow to fit
+  its widest unbreakable content (e.g. a long company name or address with
+  no natural break point), instead of staying constrained to the viewport
+  width. Cards with shorter text never hit this and looked fine.
+
+DESIRED OUTCOME:
+  Every job/gig/talent card on mobile should stay within the screen width
+  and wrap its text, regardless of how long the title, company name, or
+  location string is.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(un-auth)/apply-job-without-signup/jobs/Content.tsx
+- src/components/pages/(un-auth)/apply-job-without-signup/jobs/Tabs.tsx
+- src/components/pages/(un-auth)/apply-job-without-signup/jobs/components/tabs/company-jobs/JobCard.tsx
+
+Backend:
+- N/A — frontend-only fix
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only, CSS/layout-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — layout/CSS fix)
+☑ TypeScript types verified (no logic changes)
+☑ Manual verification completed:
+  - Public jobs listing page on mobile viewport (e.g. iPhone XR, 414px):
+    all cards, including ones with long company names/addresses, now stay
+    within screen width ✓
+  - md/lg breakpoints (2-column and single-column layouts) unchanged ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (long unbreakable company name/address strings)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added an explicit `grid-cols-1` at the base breakpoint (alongside the
+  existing `md:grid-cols-2 lg:grid-cols-1`) in the job/gig/talent card grid
+  containers in `Content.tsx` and `Tabs.tsx`, so mobile always renders a
+  single, screen-width column instead of an unconstrained implicit grid.
+  Also added `min-w-0` to `JobCard.tsx`'s card containers and `break-words`
+  to the title/company/location text, so long unbreakable strings wrap
+  inside the card instead of forcing the grid track wider.
+
+================================================================================
+
+BUG ID: HRIS-2026-029
+DATE FILED: 2026-07-10
+DATE FIXED: 2026-07-10
+REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+  Job posting descriptions displayed with broken formatting in read-only
+  previews (Job Posting Preview modal, public "apply without signup" job
+  details page, personal-mode Yahshua Connect job details modal) — headings
+  rendered at the same size as body text, and blank lines the author had
+  added between paragraphs disappeared, collapsing to zero height.
+
+  Root cause (two parts):
+  1. quill.snow.css sizes headings via
+     `.ql-snow .ql-editor h1/h2 { font-size: ... }`, which requires a
+     `.ql-snow` ancestor. The live editor always has one (react-quill-new
+     wraps it in `<div class="ql-container ql-snow">`), but read-only
+     previews render a bare `<span class="ql-editor">` with no `.ql-snow`
+     wrapper, so that rule never matched — Tailwind's Preflight reset
+     (`h1-h6 { font-size: inherit }`) won instead, collapsing headings to
+     body text size.
+  2. `getSemanticHTML()` (used to persist saved content) writes a
+     deliberate blank line as a truly empty `<p></p>` with no `<br>`,
+     unlike the live editor's own blank line which always has a
+     placeholder `<br>` giving it height. Quill's own CSS sets
+     margin/padding to 0 on `.ql-editor p`, so the childless `<p>`
+     collapsed to zero height in read-only previews.
+
+DESIRED OUTCOME:
+  Read-only previews of job descriptions should show headings at their
+  intended larger size and preserve blank-line spacing, matching how the
+  content looks in the live editor.
+
+FILES CHANGED:
+Frontend:
+- src/app/globals.css
+
+Backend:
+- N/A (companion backend fix in yahshua-hris-be, PR #501, which stopped
+  rewriting job_description HTML with a `p>` → `span>` substitution)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only, CSS-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS fix)
+☑ TypeScript types verified (no code changes, CSS only)
+☑ Manual verification completed:
+  - Job Posting Preview modal: headings show larger size, blank lines keep
+    spacing ✓
+  - Public "apply without signup" job details page: headings and blank
+    lines render correctly ✓
+  - Personal-mode (Yahshua Connect) job details modal: headings and blank
+    lines render correctly ✓
+  - Live editor appearance unchanged (still styled via its own `.ql-snow`
+    wrapper) ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (multiple consecutive blank paragraphs, h1 and h2 mixed
+  with body text)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added `.ql-editor h1 { font-size: 2em; }` and
+  `.ql-editor h2 { font-size: 1.5em; }` so heading sizes apply without
+  requiring a `.ql-snow` ancestor, restoring correct sizing in read-only
+  previews. Added `.ql-editor p:empty { min-height: 1em; }` so an empty
+  `<p></p>` (a deliberate blank line saved via `getSemanticHTML()`) is given
+  back a line's worth of height instead of collapsing. Paired with a
+  backend fix (yahshua-hris-be) that stopped mangling `job_description` HTML
+  with a `p>` → `span>` string substitution before these CSS rules ever had
+  a chance to apply to clean paragraph markup.
+
+================================================================================
+
+BUG ID: HRIS-2026-028
+DATE FILED: 2026-07-10
+DATE FIXED: 2026-07-10
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  Bulleted/numbered lists typed into any React Quill field (Job Description
+  "Role", "Qualifications", "Notes/Remarks", etc.) rendered correctly inside
+  the editor itself, but the bullet/number marker disappeared in every
+  read-only preview of that saved content — the Job Posting Preview modal,
+  the public "apply without signup" job details page, and the personal-mode
+  (Yahshua Connect) job details modal. The list text was still indented, but
+  with no "•" or "1." marker in front of it, making multi-item lists look
+  like unrelated indented lines.
+
+  Root cause: react-quill-new saves editor content via Quill's
+  getSemanticHTML() API (see react-quill-new/lib/index.js), which produces
+  clean semantic <ul>/<ol><li> markup. Quill's own editing DOM, by contrast,
+  always wraps every list type (bullet, ordered, checklist) in an <ol>
+  container with a data-list="bullet|ordered|checked" attribute on each <li>,
+  plus a runtime-only <span class="ql-ui"> child that quill.snow.css uses via
+  a `li[data-list=bullet] > .ql-ui::before { content: '•' }` rule to draw the
+  marker. Because getSemanticHTML() strips both the data-list attribute and
+  the .ql-ui span (they are editor-only UI aids, not semantic content), the
+  saved HTML has no attribute/element for quill.snow.css's marker rule to
+  match. Every preview page renders this saved HTML inside a
+  <span className="ql-editor" dangerouslySetInnerHTML=.../>, and
+  quill.snow.css's `.ql-editor li { list-style-type: none; }` rule strips the
+  browser's own default bullet too — leaving no marker at all.
+
+DESIRED OUTCOME:
+  Saved list content (bulleted or numbered) should display with a visible
+  bullet/number marker in every read-only preview, with spacing/indentation
+  visually consistent with how the same list looks while being typed in the
+  React Quill editor.
+
+FILES CHANGED:
+Frontend:
+- src/app/globals.css
+    (global stylesheet, loaded on every page via app/layout.tsx; no
+     component-level changes needed since every preview already reuses the
+     shared `.ql-editor` class)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only, CSS-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not applicable — CSS fix)
+☑ TypeScript types verified (no code changes, CSS only)
+☑ Manual verification completed:
+  - Create Job Posting → Role/Qualifications editor: bullets/numbers display
+    correctly while typing (unchanged, real editor markup) ✓
+  - Job Posting Preview modal: bullets now visible for Role and
+    Qualifications lists ✓
+  - Public "apply without signup" job details page: bullets now visible ✓
+  - Personal-mode (Yahshua Connect) job details modal: bullets now visible
+    for Role and Qualifications ✓
+  - Editor and preview list indentation/spacing adjusted to look visually
+    consistent with each other ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (multiple consecutive bullet items, ordered-list numbering
+  via CSS counters, nested/plain <li> without data-list)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Added CSS rules to globals.css targeting `<li>` elements that lack a
+  data-list attribute (i.e., saved/semantic HTML, not the live editor's own
+  markup) inside any `.ql-editor` container:
+
+  - `.ql-editor ul > li:not([data-list])` and
+    `.ql-editor ol > li:not([data-list])` — set `list-style: none` and
+    `position: relative`, with a fixed `padding-left` reserved for the marker.
+  - A `::before` pseudo-element positioned absolutely within that padding
+    draws the marker: a bullet character ('\2022') for unordered lists, or
+    a CSS counter (`counter-increment`/`counter-reset` on `ql-plain-ol`) for
+    ordered lists, formatted as "1.", "2.", etc.
+  - The existing `.ql-editor ol > li` real-editor-list rule was likewise
+    adjusted (targeting `.ql-editor ol:has(> li[data-list])`, since Quill
+    always wraps every list type in an <ol> container, differentiated only
+    by the data-list attribute — not by <ul> vs <ol>) so the editor's own
+    list indentation visually matches the preview's marker offset.
+
+  This leaves Quill's own `.ql-ui`-based marker rendering for the live,
+  interactive editor completely untouched, and only adds a fallback marker
+  for the semantic HTML that getSemanticHTML() produces for storage/preview.
+
+================================================================================
+
+BUG ID: HRIS-2026-027
+DATE FILED: 2026-07-10
+DATE FIXED: 2026-07-10
+REPORTER: Internal - Dev
+
+ISSUE DESCRIPTION:
+When an employer's session token expired (or was already invalid/missing on
+load), the "Session is expired." toast would appear while a dashboard product
+tour popup (e.g. "Your Company Profile" onboarding tour) was still showing or
+could still pop up on top of it, confusing the user right before they were
+redirected to /login.
+
+Root cause: MainHeader.tsx only dispatched the `session-expiring` window event
+from the 30-second warning branch of its expiration check. The immediate/hard
+expiry path (`remaining <= 0`), the missing-token-cookie check on mount, and
+the "Invalid token" API error path all called `logout(true)` directly without
+dispatching any event. `logout()` is asynchronous (waits for the logout API
+call before redirecting), so during that window Home.tsx's tour auto-start
+effect (a 600ms delayed timer, gated only on tour progress data) had no signal
+that the session was already dead and could start/continue showing a tour
+segment.
+
+DESIRED OUTCOME:
+No tour popup should appear (or remain visible) once the session is known to
+be expired/invalid — the user should only see the "Session is expired." toast
+before being redirected to /login.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/MainHeader.tsx
+    (dispatch `session-expiring` event in all three logout(true) paths:
+     immediate full expiry, missing token cookie on mount, invalid-token API error)
+- src/components/pages/(auth)/employer/Home.tsx
+    (listen for `session-expiring`; immediately stopTour() if a tour is running,
+     and block the tour auto-start / completion-modal effects via an
+     isSessionExpiring flag + ref so the 600ms delayed auto-start timer cannot
+     fire after the session has expired)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript types verified (no type errors)
+☑ Manual verification completed (forced expiry / cleared token cookie; tour no
+  longer appears alongside or after the "Session is expired." toast)
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (hard expiry while tour already running; hard expiry
+  during the 600ms auto-start delay before a tour has started; missing/cleared
+  token cookie on page load)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+Added a `session-expiring` event dispatch to every code path in MainHeader.tsx
+that calls `logout(true)`, not just the 30-second warning branch, so any
+listener is notified as soon as the session is known to be dead — even before
+the async logout API call resolves and the redirect happens. Home.tsx now
+subscribes to that event: it immediately calls the tour context's `stopTour()`
+to dismiss any currently-visible tour popup, and sets an `isSessionExpiring`
+flag (mirrored into a ref for the delayed timer callback) that short-circuits
+both the tour auto-start effect and the tour-completion-modal effect so
+neither can trigger once the session has started expiring.
+
+================================================================================
+
+BUG ID: HRIS-2026-026
+DATE FILED: 2026-07-08
+DATE FIXED: 2026-07-08
+REPORTER: Client
+
+ISSUE DESCRIPTION:
+On the Address Employee Issue investigation form, selecting "Other..." for the
+Decision and typing a custom decision failed to send the Notice of Decision.
+Longer custom decisions triggered a backend length error surfaced as the
+generic "Something went wrong. Please contact system administrator." toast.
+Additionally, in the Investigation Report viewing modal:
+  - The Custom Decision field displayed the literal string "null" when empty.
+  - When the decision was "Other...", both "Decision: Other..." and the custom
+    decision were shown (redundant/confusing).
+  - The custom decision / results fields did not grow with long content and the
+    modal used an internal scrollbar instead of growing like other modals.
+(Linear I-595)
+
+DESIRED OUTCOME:
+Long custom decisions should be enterable and sendable. The custom decision
+input should behave like the "Result of Investigation" textarea (multi-line,
+auto-growing). In the viewing modal: hide the custom decision when empty/null;
+when the decision is "Other...", show only the custom decision (labeled
+"Custom Decision") at full width; and let the modal grow with content so the
+page scrolls rather than an inner scrollbar.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/address-employee-issue/modals/InvestigationModal.tsx
+    (custom decision input -> auto-growing textarea; auto-grow for Result of Investigation)
+- src/components/pages/(auth)/employer/manage/address-employee-issue/modals/InvestigationReportDetailsModal.tsx
+    (hide null/empty custom decision; show custom decision in place of "Other...";
+     full-width custom decision labeled "Custom Decision"; auto-sizing read-only
+     textareas; modal grows so the page scrolls)
+
+Backend (see backend BUG_HISTORY HRIS-2026-026):
+- app/models/employee_issue.py (custom_decision CharField -> TextField)
+- app/migrations/0163_alter_investigationreport_custom_decision.py
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Components tested (manual: InvestigationModal + InvestigationReportDetailsModal)
+☑ TypeScript types verified (fixed FormEvent typing on the auto-grow handler)
+☑ Manual verification completed (long "Other..." decision now saves and sends;
+  viewing modal hides empty custom decision, labels it correctly, and grows)
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (empty custom decision, literal "null" string, very long text)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+The root cause was a backend CharField(max_length=100) on custom_decision
+(fixed in the backend as a TextField). On the frontend, the custom decision
+input was changed to an auto-growing multi-line textarea to match the Result
+of Investigation field. The viewing modal now normalizes the custom decision
+(treating null/"" and the literal "null" string as empty), renders the custom
+decision in place of the "Other..." option at full width under a
+"Custom Decision" label, and auto-sizes the read-only textareas so the modal
+lengthens naturally and the page (overlay) scrolls instead of an inner scrollbar.
+
+================================================================================
+
+BUG ID: HRIS-2026-025
+DATE FILED: 2026-07-03
+DATE FIXED: 2026-07-03
+REPORTER: Internal - QA (Jam recording: dd117576-ba7b-4345-88cb-3d978de7440d)
+
+ISSUE DESCRIPTION:
+  Opening "Employment History Analysis" from any Employee 201 Record modal failed with:
+
+    Unexpected token '<', "<!doctype "... is not valid JSON
+
+  Network tab confirmed the root cause: the API request was built with a literal
+  "undefined" employee ID segment:
+
+    GET https://api.yahshuahris.com/api/employee-201/employees/undefined/employment-history/analysis/
+
+  This returned a 404 HTML page from the server. The client then tried to parse that
+  HTML as JSON, throwing the SyntaxError that was displayed in the modal.
+
+  Root cause — two bugs combined:
+
+  1. EmploymentHistoryAnalysis.tsx called the hook with no arguments:
+       const { data, error, loading, fetchAnalysis } = useEmploymentHistoryAnalysis();
+     This meant `employeeId` inside the hook was `undefined`, and `enabled: !!employeeId`
+     was `false`, so no query was registered with a valid ID.
+
+  2. A useEffect then called `fetchAnalysis(employeeId, { include_details: true }, ...)`.
+     `fetchAnalysis` is TanStack Query's `queryResult.refetch`, which does NOT accept new
+     variables — it simply re-runs the original query with the same key/fetcher it was
+     instantiated with. So even though `employeeId` was passed in, it was silently
+     discarded, and the URL was always built as `.../undefined/...`.
+
+  Secondary issue: when the server returned a non-JSON 404 HTML body, the error handler
+  did `throw res.json()`, which rejected with a SyntaxError. The catch block surfaced the
+  raw parse exception message ("Unexpected token '<'...") instead of a friendly error.
+
+DESIRED OUTCOME:
+  The Employment History Analysis should load and display correctly for the selected
+  employee. If the request fails, the modal should show a clean error message rather than
+  a raw JSON parse exception.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/modals/EmploymentDetails/EmploymentHistoryAnalysis.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useEmploymentHistoryAnalysis.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Opening Employment History Analysis for a valid employee loads data correctly ✓
+  - Employee ID is no longer "undefined" in the request URL ✓
+  - API failure returns a clean error message (e.g. "Request failed with status 404") ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+
+  Fix 1 — EmploymentHistoryAnalysis.tsx (primary fix):
+  Replaced the broken no-argument hook call + useEffect pattern with a direct call that
+  passes employeeId and params:
+
+    Before:
+      const { data, error, loading, fetchAnalysis } = useEmploymentHistoryAnalysis();
+
+      useEffect(() => {
+        const abort = new AbortController();
+        fetchAnalysis(employeeId, { include_details: true }, abort.signal).catch(() => {});
+        return () => abort.abort();
+      }, [employeeId, fetchAnalysis]);
+
+    After:
+      const { data, error, loading } = useEmploymentHistoryAnalysis(employeeId, { include_details: true });
+
+  TanStack Query re-fetches automatically when `employeeId` changes, and the existing
+  `enabled: !!employeeId` guard already prevents the query from firing when the ID is
+  absent. The useEffect, the fetchAnalysis call, and the unused `useEffect` import were
+  all removed.
+
+  Fix 2 — useEmploymentHistoryAnalysis.ts (error handling):
+  Changed `throw res.json()` (which could reject with a SyntaxError on HTML responses)
+  to a safe pattern that falls back to a status-code message if the body is not JSON:
+
+    Before:
+      if (!res.ok) {
+        throw res.json();
+      }
+
+    After:
+      if (!res.ok) {
+        let errorBody: any;
+        try {
+          errorBody = await res.json();
+        } catch {
+          throw new Error(`Request failed with status ${res.status}`);
+        }
+        throw errorBody;
+      }
+
+================================================================================
+
+BUG ID: HRIS-2026-024
+DATE FILED: 2026-06-05
+DATE FIXED: 2026-06-05
+REPORTER: Internal - QA
+
+ISSUE DESCRIPTION:
+  On the Job Posting form — Step 3 (Salary & Benefits) — clicking any benefit button caused
+  a visual glitch where the button continuously and rapidly toggled between selected (✓) and
+  unselected (+) states, making it impossible to reliably select a benefit.
+
+  Root cause: Two `useEffect` hooks were creating a circular update loop:
+    - Effect 1 (form → local state): Watched `watchedBenefits` (react-hook-form `watch`) and
+      synced changes into `selectedBenefitOptions` local state. This was added to support
+      draft loading (pre-populating the benefit buttons from a loaded draft).
+    - Effect 2 (local state → form): Watched `selectedBenefitOptions` and called
+      `setValue('benefits', ...)` to keep the form value in sync.
+
+  Every click triggered: setSelectedBenefitOptions → Effect 2 → setValue → new watchedBenefits
+  reference → Effect 1 → setSelectedBenefitOptions → Effect 2 → ... repeating rapidly,
+  causing the glitch.
+
+  Affected component:
+    src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPageSalary.tsx
+
+DESIRED OUTCOME:
+  Clicking a benefit button should immediately and stably toggle its selected state with no
+  flickering or looping. Previously selected benefits should remain selected unless explicitly
+  clicked again.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPageSalary.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Clicking an unselected benefit selects it immediately with no glitch ✓
+  - Clicking a selected benefit deselects it immediately with no glitch ✓
+  - Multiple benefits can be selected/deselected without interference ✓
+  - "Other" benefit input still updates the form value correctly ✓
+  - Draft loading still pre-populates benefit buttons correctly via Effect 1 ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  Removed Effect 2 entirely (the local state → form sync effect). Instead, the benefit button
+  click handler now computes the next selection state and calls `setValue('benefits', next)`
+  directly inside the `setSelectedBenefitOptions` functional updater — updating both local
+  state and the form value atomically in a single click, with no effect needed.
+
+  Similarly, `handleInputChange` (the "Other" text input handler) now calls `setValue` directly
+  instead of relying on Effect 2 to propagate the change.
+
+  Effect 1 (form → local state, for draft loading) was kept unchanged. Because the form value
+  is now updated synchronously on click before Effect 1 can observe a mismatch, Effect 1 finds
+  them already in sync and returns `prev` with no state update — breaking the loop.
+
+================================================================================
+
+BUG ID: HRIS-2026-023
+DATE FILED: 2026-06-03
+DATE FIXED: 2026-06-03
+REPORTER: Internal
+
+ISSUE DESCRIPTION:
+  The ABBA Chat widget (FloatingHelpButton) was initializing with `companyName = undefined`,
+  causing the `clientId` passed to `AbbaChat.init()` to fall back to the string `'Unknown'`
+  even for authenticated employer users who have a company profile.
+
+  Root cause: `<FloatingHelpButton />` in `header.tsx` (line 96) was rendered with no
+  `companyName` prop. The `/api/get-session` endpoint only returns `email`, `accountType`,
+  and `isLoggedIn` — it does not include the employer's company name. The component had no
+  other mechanism to retrieve it, so `companyName` was always `undefined` at widget init time.
+
+  Console output confirming the bug:
+    [YAHSHUA HRIS Subscription - Main] Initializing ABBA Chat widget...
+    email mlabos03@gmail.com
+    company undefined
+
+DESIRED OUTCOME:
+  The ABBA Chat widget should initialize with the authenticated employer's company name
+  as `clientId` so that chat sessions are correctly associated with the right account
+  in the ABBA dashboard.
+
+FILES CHANGED:
+Frontend:
+- src/components/FloatingHelpButton.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Authenticated employer logs in → widget initializes with correct company name as clientId ✓
+  - Anonymous mode (job-app-form) → widget initializes normally with 'Unknown' as clientId ✓
+  - Widget does not initialize before both email and company name are resolved ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  The component already had `companyName` as an optional prop and a fallback to `'Unknown'`,
+  but the prop was never passed from `header.tsx`. Rather than adding a separate fetch inside
+  `FloatingHelpButton`, the fix reads from the existing `['employerProfileCache']` React Query
+  cache already populated by `useGetEmployerProfile` (used by MainHeader) — so no extra
+  network request is made when the cache is warm.
+
+  Changes to FloatingHelpButton.tsx:
+
+  1. Imported `useGetEmployerProfile` and called it at the top of the component:
+       const { data: profileData } = useGetEmployerProfile();
+
+  2. Derived `companyName` from the prop (for explicit overrides) or the cached profile:
+       const companyName = companyNameProp || profileData?.name || null;
+     `null` means "not yet resolved" — distinct from `'Unknown'` which means "resolved but absent".
+
+  3. Changed the widget init guard to wait for `companyName` to be non-null for logged-in
+     users (anonymousMode bypasses this since no profile exists):
+       if (!userEmail) return;
+       if (!anonymousMode && companyName === null) return;
+
+  This ensures the widget only fires `AbbaChat.init()` after both the user email (from
+  /api/get-session) and the company name (from the React Query cache) are available,
+  preventing the `clientId: 'Unknown'` race condition.
+
+================================================================================
+
+BUG ID: HRIS-2026-022
+DATE FILED: 2026-05-29
+DATE FIXED: 2026-05-29
+REPORTER: Internal - QA
+
+ISSUE DESCRIPTION:
+  Two related issues with the "Ask Hiyo" floating chat widget (FloatingHelpButton):
+
+  1. When an authenticated employer or applicant visited any public page (landing page,
+     /jobs, /pricing, etc.), the ABBA Chat widget was visible and initialized. This happened
+     because FloatingHelpButton was rendered in auth.tsx, which wraps ALL pages — it had no
+     route awareness and showed on every page as long as session.isLoggedIn was true.
+
+  2. The job-app-form page (/job-app-form/[id]) is a public page that unauthenticated users
+     visit to apply for jobs. There was no FloatingHelpButton support on this page at all —
+     unauthenticated visitors had no way to access the chat widget, and no anonymous user
+     identity was established for chat history continuity between visits.
+
+DESIRED OUTCOME:
+  - FloatingHelpButton is only visible on authenticated employer and applicant route pages
+    (employer dashboard/manage/etc., applicant personal-mode/profile/etc.).
+  - FloatingHelpButton is NOT visible on any public page (landing page, /jobs, /pricing,
+    etc.) even when the user is authenticated.
+  - The job-app-form page shows FloatingHelpButton for all visitors:
+    - Authenticated users: widget initializes with their real email as identity.
+    - Unauthenticated users: widget initializes with a persistent anonymous ID stored
+      in localStorage (anon_chat_id), so chat history is preserved across visits.
+  - Widget DOM elements are properly cleaned up when navigating away from job-app-form
+    to prevent the widget from persisting on unintended pages.
+
+FILES CHANGED:
+Frontend:
+- src/app/auth.tsx (removed FloatingHelpButton; passes isLoggedIn to Header)
+- src/app/header.tsx (renders FloatingHelpButton only on authenticated employer/applicant routes)
+- src/components/FloatingHelpButton.tsx (added anonymousMode prop + localStorage anon ID support + widget DOM cleanup on unmount)
+- src/components/pages/(un-auth)/apply-job-without-signup/job-app-form/Content.tsx (added FloatingHelpButton with anonymousMode=true)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Authenticated employer on /dashboard → widget visible ✓
+  - Authenticated applicant on /personal-mode → widget visible ✓
+  - Authenticated user on landing page (/) → widget NOT visible ✓
+  - Authenticated user on /jobs → widget NOT visible ✓
+  - Unauthenticated user on /job-app-form/[id] → widget visible with anon ID ✓
+  - Authenticated user on /job-app-form/[id] → widget visible with real email ✓
+  - Navigate away from /job-app-form → widget DOM removed ✓
+  - Return to /job-app-form → same anon_chat_id in localStorage (history preserved) ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  --- auth.tsx ---
+  Removed FloatingHelpButton import and rendering entirely. Replaced showHelpButton
+  logic with an isLoggedIn prop passed down to Header, so Header can use it alongside
+  its existing route awareness.
+
+  --- header.tsx ---
+  Imported FloatingHelpButton and added a single conditional render inside the
+  authenticated-route block:
+
+    {isLoggedIn && (
+      (type === 'employer' && employerRoutes.includes(firstRoute)) ||
+      (type === 'applicant' && isYahshuaConnectRoute)
+    ) && <FloatingHelpButton />}
+
+  This mirrors the exact same route conditions already used for MainHeader and
+  YahshuaConnectHeader, so the widget only appears where the authenticated headers
+  appear — never on public pages like the landing page, /jobs, or /pricing.
+
+  --- FloatingHelpButton.tsx ---
+  Added anonymousMode?: boolean prop. When anonymousMode=true:
+  - Fetches /api/get-session on mount.
+  - If logged in with email: uses real email as userId (same as normal mode).
+  - If not logged in: retrieves or generates a UUID stored in localStorage as
+    anon_chat_id, and uses anon-{uuid} as the userId.
+
+  Added widget DOM cleanup on unmount (only in anonymousMode): before AbbaChat.init()
+  is called, a Set snapshot of document.body.children is taken. After init resolves,
+  any newly added body elements are stored in a useRef. On component unmount, those
+  elements are removed from the DOM so the widget does not persist after navigating
+  away from the job-app-form page.
+
+  --- job-app-form/Content.tsx ---
+  Added <FloatingHelpButton anonymousMode={true} /> at the bottom of the JSX return,
+  ensuring the widget is always present on the job application form page for all users.
+
+================================================================================
+
 BUG ID: HRIS-2026-021
 DATE FILED: 2026-05-25
 DATE FIXED: 2026-05-25

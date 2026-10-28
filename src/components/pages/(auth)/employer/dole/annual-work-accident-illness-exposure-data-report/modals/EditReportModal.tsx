@@ -1,9 +1,10 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import ExposureData from './tabs/ExposureData';
 import InjurySummary from './tabs/InjurySummary';
 import useGetAnnualAccidentIllnessReportDetails from '../hooks/useGetAnnualAccidentIllnessReportDetails';
@@ -32,7 +33,10 @@ export default function EditReportModal({
     data: annualAccidentIllnessReportData,
     refetch: refetchAnnualAccidentIllnessReport,
     remove: removeAnnualAccidentIllnessReport,
+    isFetching: isAnnualAccidentIllnessReportFetching,
   } = useGetAnnualAccidentIllnessReportDetails(isOpen.id);
+  const isAnnualAccidentIllnessReportReady =
+    !isOpen.open || (!isAnnualAccidentIllnessReportFetching && annualAccidentIllnessReportData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = formMethods;
   const { mutate, isLoading: isLoadingUpdateAnnualAccidentIllnessReport } = useUpdateAnnualAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -111,14 +115,14 @@ export default function EditReportModal({
   });
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={() => customCloseModal()}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -128,11 +132,11 @@ export default function EditReportModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -141,7 +145,7 @@ export default function EditReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Edit Annual Work Accident/ Illness Exposure Data Report
@@ -151,6 +155,12 @@ export default function EditReportModal({
                     onClick={() => customCloseModal()}
                   />
                 </div>
+                {!isAnnualAccidentIllnessReportReady ? (
+                  <div className="flex min-h-[400px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading report details..." />
+                  </div>
+                ) : (
+                <div className="min-h-[400px]">
                 {selectedTab === 1 && (
                   <ExposureData
                     control={control}
@@ -175,11 +185,13 @@ export default function EditReportModal({
                     errors={errors}
                   />
                 )}
-              </Dialog.Panel>
-            </Transition.Child>
+                </div>
+                )}
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 } 

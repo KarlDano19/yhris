@@ -8,7 +8,6 @@ export const QUILL_FORMATS = [
   'strike',
   'blockquote',
   'list',
-  'bullet',
   'indent',
   'link',
 ];
@@ -21,15 +20,9 @@ export const QUILL_MODULES = {
     ['link'],
     ['clean'],
   ],
-  clipboard: {
-    matchVisual: false,
-  },
 };
 export const QUILL_MODULES_NO_TOOLBAR = {
   toolbar: false,
-  clipboard: {
-    matchVisual: false,
-  },
 };
 export const CREATEJOB_TEMPLATE = ['<p>Ensuring the accounts of the company are accurate and free of error.</p>'];
 export const QUALIFICATION_TEMPLATE = [

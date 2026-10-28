@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import toast from "react-hot-toast";
 
 import classNames from "@/helpers/classNames";
@@ -15,6 +15,7 @@ import WorkplaceWelfare from "./tabs/WorkplaceWelfare";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import CustomToast from "@/components/CustomToast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import useGetAnnualMedicalReportDetails from "../hooks/useGetAnnualMedicalReportDetails";
 import useUpdateAnnualMedicalReport from "../hooks/useUpdateAnnualMedicalReport";
 
@@ -39,7 +40,10 @@ function EditAnnualMedicalReportModal({
     data: annualMedicalReportData,
     refetch: refetchAnnualMedicalReport,
     remove: removeAnnualMedicalReport,
+    isFetching: isAnnualMedicalReportFetching,
   } = useGetAnnualMedicalReportDetails(isOpen.id);
+  const isAnnualMedicalReportReady =
+    !isOpen.open || (!isAnnualMedicalReportFetching && annualMedicalReportData?.id === isOpen.id);
   const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: updateAnnualMedicalReport,
@@ -671,14 +675,14 @@ function EditAnnualMedicalReportModal({
   });
 
   return (
-    <Transition.Root show={isOpen.open} as={Fragment}>
+    <Transition show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={() => customCloseModal()}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -688,11 +692,11 @@ function EditAnnualMedicalReportModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -701,7 +705,7 @@ function EditAnnualMedicalReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-0 md:my-8 w-full md:max-w-5xl">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-0 md:my-8 w-full md:max-w-5xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Edit Work Accident/Illness Report
@@ -711,7 +715,12 @@ function EditAnnualMedicalReportModal({
                     onClick={customCloseModal}
                   />
                 </div>
-                <div>
+                {!isAnnualMedicalReportReady ? (
+                  <div className="flex min-h-[560px] items-center justify-center">
+                    <LoadingSpinner size="xl" showText text="Loading annual medical report..." />
+                  </div>
+                ) : (
+                <div className="min-h-[560px]">
                   <div className="pt-4 pb-2 pl-4 pr-4 flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide">
                     <div 
                       className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
@@ -773,7 +782,6 @@ function EditAnnualMedicalReportModal({
                   <div className="pl-4">
                     <h1 className="text-sm font-semibold text-gray-500">Step {selectedTab} out of 8</h1>
                   </div>
-                </div>
                 {selectedTab === 1 && (
                   <GeneralInfo
                     control={control}
@@ -864,12 +872,14 @@ function EditAnnualMedicalReportModal({
                     clearErrors={clearErrors}
                   />
                 )}
-              </Dialog.Panel>
-            </Transition.Child>
+                </div>
+                )}
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }
 

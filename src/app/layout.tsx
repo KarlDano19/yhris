@@ -1,7 +1,5 @@
 import { Golos_Text } from 'next/font/google';
 import Script from 'next/script';
-import 'react-quill/dist/quill.snow.css';
-
 import { Toaster } from 'react-hot-toast';
 
 import { PostHogProvider } from '@/components/PostHogProvider';
@@ -9,14 +7,17 @@ import GlobalErrorHandler from '@/components/GlobalErrorHandler';
 import ReactQueryWrapper from '@/app/reactQueryWrapper';
 import GlobalLoadingSpinner from '@/components/GlobalLoadingSpinner';
 import Auth from '@/app/auth';
+import GlobalPixelTracker from '@/components/GlobalPixelTracker';
+import NetworkStatusWatcher from '@/components/NetworkStatusWatcher';
+import TourProvider from '@/components/tour/TourProvider';
 
-import './quill-tooltips.css';
+import 'react-quill-new/dist/quill.snow.css';
 import './globals.css';
 import './dark-theme.css';
   
 export const metadata = {
   title: 'Yahshua HRIS',
-  description: 'HRIS',
+  description: 'YAHSHUA HRIS is an all-in-one HR and payroll platform for Philippine businesses. Manage employees, DOLE compliance, 201 files, and more.',
 };
 
 const golos_text = Golos_Text({ subsets: ['latin'], display: 'swap', adjustFontFallback: false });
@@ -35,9 +36,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PostHogProvider>
           <GlobalErrorHandler />
           <ReactQueryWrapper>
-            <GlobalLoadingSpinner />
-            <Auth>{children}</Auth>
+            <TourProvider>
+              <GlobalLoadingSpinner />
+              <Auth>{children}</Auth>
+            </TourProvider>
           </ReactQueryWrapper>
+          <GlobalPixelTracker />
+          <NetworkStatusWatcher />
           <Toaster position='top-right' />
           
           {/* Google Tag Manager */}
@@ -62,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
               gtag('config', 'G-WJXTBQ5XYH');
+              gtag('config', 'G-0B8QK4ZCEJ');
             `}
           </Script>
           
@@ -76,7 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '2144124972722813');
+              fbq('init', '${process.env.META_PIXEL_ID}');
               fbq('track', 'PageView');
             `}
           </Script>
@@ -102,7 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </noscript>
           
           <noscript>
-            <img height="1" width="1" style={{display:'none'}} alt="" src="https://www.facebook.com/tr?id=2144124972722813&ev=PageView&noscript=1" />
+            <img height="1" width="1" style={{display:'none'}} alt="" src={`https://www.facebook.com/tr?id=${process.env.META_PIXEL_ID}&ev=PageView&noscript=1`} />
           </noscript>
           
           <noscript>

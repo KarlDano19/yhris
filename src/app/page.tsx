@@ -1,28 +1,129 @@
 import { Metadata } from 'next';
+import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import Content from "@/components/pages/(un-auth)/(landing-page)/landing-page/Content";
+import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
+import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
+import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA HRIS - Complete Employee Data Management & Job Posting System | YAHSHUA HRIS Features, Use Cases & Sync Employee Data',
-  description: 'YAHSHUA HRIS offers comprehensive employee data management, job posting automation, and complete HR solutions. Discover YAHSHUA HRIS features, use cases, and seamlessly sync employee data with our DOLE-compliant HRIS platform for Philippine businesses.',
+  title: 'YAHSHUA HRIS: All-in-One HR Software for the Philippines',
+  description: 'YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses. Manage employees, 201 files, DOLE compliance, and payroll. Try it free.',
   keywords: 'yahshua hris, yahshua payroll, employee data, job posting, sync employee data, yahshua payroll features, use cases, use cases docs, HRIS Philippines, payroll management, employee management, DOLE compliance',
   openGraph: {
-    title: 'YAHSHUA HRIS - Complete HR & Employee Data Management System',
-    description: 'Transform your HR operations with YAHSHUA HRIS. Manage employee data, job posting, and achieve DOLE compliance with our comprehensive HRIS solution.',
+    title: 'YAHSHUA HRIS - All-in-One HR Software for Philippine Businesses',
+    description: 'YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses. Manage employees, 201 files, DOLE compliance, performance, and integrate with your payroll.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'YAHSHUA HRIS - Complete HRIS Management',
-    description: 'Complete HRIS solution for employee data management, and job posting automation.',
+    title: 'YAHSHUA HRIS - All-in-One HR Software for Philippine Businesses',
+    description: 'YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses. Manage employees, 201 files, DOLE compliance, and more.',
   },
   alternates: {
     canonical: 'https://yahshuahris.com'
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://yahshuahris.com/#organization",
+      "name": "YAHSHUA HRIS",
+      "legalName": "The ABBA Initiative (OPC)",
+      "url": "https://yahshuahris.com",
+      "sameAs": [
+        "https://www.theabbainitiative.com/#organization"
+      ],
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://yahshuahris.com/logo.png"
+      },
+      "description": "Philippine all-in-one HR and payroll platform for small and mid-sized businesses. Covers DOLE compliance automation, employee onboarding, 201 files, attendance, leave, performance evaluation, and real-time payroll integration.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Cagayan de Oro City",
+        "addressRegion": "Misamis Oriental",
+        "addressCountry": "PH"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+63-917-306-2539",
+        "email": "clientrelations@abba.works",
+        "contactType": "customer service",
+        "areaServed": "PH",
+        "availableLanguage": "English"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Philippines"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://yahshuahris.com/#website",
+      "name": "YAHSHUA HRIS",
+      "url": "https://yahshuahris.com",
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://yahshuahris.com/#software",
+      "name": "YAHSHUA HRIS",
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "Human Resource Management",
+      "operatingSystem": "Web",
+      "url": "https://yahshuahris.com",
+      "description": `All-in-one HR management system for Philippine businesses, with YAHSHUA Payroll included. Flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.`,
+      "offers": {
+        "@type": "Offer",
+        "price": String(YAHSHUA_PRICING.basePrice),
+        "priceCurrency": YAHSHUA_PRICING.currency,
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": String(YAHSHUA_PRICING.basePrice),
+          "priceCurrency": YAHSHUA_PRICING.currency,
+          "unitText": "month",
+          "valueAddedTaxIncluded": false
+        },
+        "description": `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month. One-time ${PRICING_LABELS.setup} setup fee covering implementation, data migration, and training. VAT excluded. YAHSHUA Payroll included. No long-term contracts.`,
+        "url": "https://yahshuahris.com/pricing"
+      },
+      "publisher": {
+        "@id": "https://yahshuahris.com/#organization"
+      },
+      "featureList": [
+        "DOLE compliance automation (no add-on required)",
+        "Employee onboarding and 201 document management",
+        "Multi-platform job posting and applicant tracking",
+        "Attendance and leave management",
+        "Overtime, undertime, and rest day tracking",
+        "Performance evaluation with custom forms",
+        "Real-time two-way sync with YAHSHUA Payroll",
+        "Employee self-service portal",
+        "Memos and Notice-to-Explain distribution"
+      ]
+    }
+  ]
+};
+
 const LandingPage = () => {
-  return <Content />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Navigation />
+      <Content />
+      <LpFooter />
+      <ScrollToTop />
+    </>
+  );
 };
 
 export default LandingPage;

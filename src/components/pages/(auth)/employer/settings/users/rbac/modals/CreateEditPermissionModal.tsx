@@ -1,10 +1,11 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useCreatePermission from '../hooks/useCreatePermission';
 import useUpdatePermission from '../hooks/useUpdatePermission';
 import useGetPermissionDetails from '../hooks/useGetPermissionDetails';
@@ -29,13 +30,19 @@ export default function CreateEditPermissionModal({
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm();
-  const { data: permissionDetailsData, refetch: refetchPermissionDetails } = useGetPermissionDetails(isOpen.id);
+  const {
+    data: permissionDetailsData,
+    refetch: refetchPermissionDetails,
+    isFetching: isFetchingPermissionDetails,
+  } = useGetPermissionDetails(isOpen.id);
   const { data: categoriesData } = useGetPermissionCategories();
   const { mutate: createPermission, isLoading: isLoadingCreatePermission } = useCreatePermission();
   const { mutate: updatePermission, isLoading: isLoadingUpdatePermission } = useUpdatePermission();
 
   const isEditing = isOpen.mode === 'edit';
   const isLoading = isLoadingCreatePermission || isLoadingUpdatePermission;
+  const isPermissionDetailsReady =
+    !isOpen.open || !isEditing || !isOpen.id || (!isFetchingPermissionDetails && permissionDetailsData?.id === isOpen.id);
 
   useEffect(() => {
     if (isOpen.open && isEditing && isOpen.id !== null) {
@@ -82,9 +89,9 @@ export default function CreateEditPermissionModal({
 
   return (
     <>
-      <Transition.Root show={isOpen.open} as={Fragment}>
+      <Transition show={isOpen.open} as={Fragment}>
         <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300'
             enterFrom='opacity-0'
@@ -94,11 +101,11 @@ export default function CreateEditPermissionModal({
             leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300'
                 enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -107,13 +114,18 @@ export default function CreateEditPermissionModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-2xl'>
+                <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-2xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
                       {isEditing ? 'Edit Permission' : 'Create Permission'}
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
+                  {!isPermissionDetailsReady ? (
+                    <div className='flex min-h-[300px] items-center justify-center'>
+                      <LoadingSpinner size='xl' showText text='Loading permission details...' />
+                    </div>
+                  ) : (
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
                       <div className='px-4 pt-4 pb-6'>
@@ -258,12 +270,13 @@ export default function CreateEditPermissionModal({
                       </div>
                     </form>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                  )}
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 }

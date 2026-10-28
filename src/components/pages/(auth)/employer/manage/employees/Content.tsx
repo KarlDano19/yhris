@@ -5,17 +5,19 @@ import React, { useEffect, useState, Fragment, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
+import { canSyncWithPayroll } from '@/helpers/payrollSync';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import { formatDateToLocal } from '@/helpers/date';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -34,16 +36,22 @@ import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 import useDeleteEmployee from './hooks/useDeleteEmployee';
+import useEditEmployeeDetails from './hooks/useEditEmployeeDetails';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
+import useBulkMarkResigned from './hooks/useBulkMarkResigned';
 import FloatingProgress from '@/components/FloatingProgress';
+import { useTour } from '@/components/tour/useTour';
+import { MANAGE_STEPS_SYNCED } from '@/components/tour/dashboardTourSteps';
+import useGetTourProgress from '@/components/hooks/useGetTourProgress';
 
 import { MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import ResignIcon from '@/svg/ResignIcon';
 import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 
@@ -74,9 +82,49 @@ const columnDefinitions = [
   { key: 'address', label: 'Address' },
 ];
 
-const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
+const PAYROLL_LOGIN_TYPES = ['yahshua-payroll', 'yg-payroll'];
+
+const Content = ({ loginType, hasActiveSubscription, hasYpIntegration }: { loginType: string, hasActiveSubscription: boolean, hasYpIntegration?: boolean }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const { isRunning, hideOverlay } = useTour();
+
+  const { data: tourProgress, isLoading: isTourProgressLoading } = useGetTourProgress();
+
+  // Only applies to YP users who have COMPLETED the sync tour.
+  // Patches stale localStorage (non-YP 4-step manage flow) with the correct 2-step synced
+  // flow before TourProvider's 600ms auto-resume timer fires. Also auto-fires the
+  // completeTrigger as a safety net if the wrong step is already running.
+  useEffect(() => {
+    if (!PAYROLL_LOGIN_TYPES.includes(loginType)) return;
+    if (isTourProgressLoading || !tourProgress) return;
+    if (!tourProgress.is_sync_tour_done) return;
+
+    // Patch stale localStorage before TourProvider's 600ms auto-resume timer reads it
+    try {
+      const raw = localStorage.getItem('hris_tour_pending_state');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const isStaleManageFlow = parsed.segmentKey === 'manage' &&
+          parsed.steps?.some((s: any) => s.completeTrigger === 'employee-data-added');
+        if (isStaleManageFlow) {
+          localStorage.setItem('hris_tour_pending_state', JSON.stringify({
+            segmentKey: 'manage',
+            nextStepIndex: 1,
+            steps: MANAGE_STEPS_SYNCED,
+          }));
+        }
+      }
+    } catch { /* ignore */ }
+
+    // Safety net: if the tour is already running with the stale step, auto-advance it
+    if (!isRunning) return;
+    const id = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('tour-action-complete', { detail: { action: 'employee-data-added' } }));
+    }, 800);
+    return () => clearTimeout(id);
+  }, [isRunning, loginType, isTourProgressLoading, tourProgress]);
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState<boolean>(false);
@@ -86,6 +134,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
   const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
+  const [isMarkResignedModalOpen, setIsMarkResignedModalOpen] = useState<T_ModalData | null>(null);
   
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,7 +220,9 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
   const { mutate: deleteEmployee, isLoading: isDeleteEmployeeLoading } = useDeleteEmployee();
+  const { mutate: editEmployeeDetails, isLoading: isMarkResignedLoading } = useEditEmployeeDetails();
   const bulkDeleteMutation = useBulkDeleteEmployees();
+  const bulkMarkResignedMutation = useBulkMarkResigned();
   const [emailInput, setEmailInput] = useState('');
 
   // Combined refetch function to refresh both main list and autocomplete data
@@ -190,6 +241,9 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
   const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false);
   const [bulkDeleteCount, setBulkDeleteCount] = useState<number>(0);
+  const [isBulkResignConfirmModalOpen, setIsBulkResignConfirmModalOpen] = useState<boolean>(false);
+  const [isBulkResignModalOpen, setIsBulkResignModalOpen] = useState<boolean>(false);
+  const [bulkResignCount, setBulkResignCount] = useState<number>(0);
 
   // Define filter groups for the Filter component
   const filterGroups: FilterGroup[] = [
@@ -472,6 +526,43 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
     toast.custom(() => <CustomToast message={`${bulkDeleteCount} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
   };
 
+  // Handle bulk mark as resigned
+  const handleBulkMarkResigned = () => {
+    if (selectedEmployees.size === 0) return;
+    setBulkResignCount(selectedEmployees.size);
+    setIsBulkResignConfirmModalOpen(true);
+  };
+
+  const confirmBulkResignWarning = () => {
+    setIsBulkResignConfirmModalOpen(false);
+    setIsBulkResignModalOpen(true);
+  };
+
+  const confirmBulkResign = async () => {
+    try {
+      const employeeIds = Array.from(selectedEmployees);
+      await bulkMarkResignedMutation.mutateAsync(employeeIds);
+
+      // Invalidate employee paginated select cache to ensure separation page gets updated data
+      queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+
+      // Don't show toast here - let the progress modal handle the success state
+      setSelectedEmployees(new Set());
+      setSelectAll(false);
+
+      // Refetch data after successful update
+      refetchAllEmployeeData();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mark employees as resigned';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkResignModalOpen(false);
+    }
+  };
+
+  const handleBulkResignSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkResignCount} employee(s) marked as resigned.`} type="success" />, { duration: 3000 });
+  };
+
   // Update select all state when employees change
   useEffect(() => {
     if (employeeItems) {
@@ -509,9 +600,11 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
     }
     
     if (employeeItems && employeeItems.length > 0) {
-      return employeeItems.map((item: any) => (
+      return employeeItems.map((item: any) => {
+        const tdClass = `whitespace-nowrap px-3 py-5 text-sm ${item.is_resigned ? 'text-red-500' : 'text-gray-500'}`;
+        return (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+          <td className={tdClass}>
             <input
               type="checkbox"
               checked={selectedEmployees.has(item.id)}
@@ -520,50 +613,50 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
             />
           </td>
           {visibleColumns.date_hired && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
+            <td className={tdClass}>{item.date_hired}</td>
           )}
           {visibleColumns.system_id && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.system_id}</td>
+            <td className={tdClass}>{item.system_id}</td>
           )}
           {visibleColumns.employee_id && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_id}</td>
+            <td className={tdClass}>{item.employee_id}</td>
           )}
           {visibleColumns.firstname && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
+            <td className={tdClass}>{item.firstname}</td>
           )}
           {visibleColumns.middlename && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
+            <td className={tdClass}>{item.middlename}</td>
           )}
           {visibleColumns.lastname && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
+            <td className={tdClass}>{item.lastname}</td>
           )}
           {visibleColumns.location && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
+            <td className={tdClass}>{item.location}</td>
           )}
           {visibleColumns.position && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position || 'N/A'}</td>
+            <td className={tdClass}>{item.position || 'N/A'}</td>
           )}
           {visibleColumns.department && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
+            <td className={tdClass}>{item.department || 'N/A'}</td>
           )}
           {visibleColumns.employment_status && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employment_status || 'N/A'}</td>
+            <td className={tdClass}>{item.employment_status || 'N/A'}</td>
           )}
           {visibleColumns.email && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
+            <td className={tdClass}>{item.email}</td>
           )}
           {visibleColumns.mobile && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
+            <td className={tdClass}>{item.mobile}</td>
           )}
           {visibleColumns.gender && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
+            <td className={tdClass}>{item.gender}</td>
           )}
           {visibleColumns.address && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
+            <td className={`${tdClass} overflow-hidden text-ellipsis max-w-xs`}>
               {item.address}
             </td>
           )}
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+          <td className={`${tdClass} text-center`}>
             <div className='flex space-x-2'>
               <SmartButton
                 id="edit-employee-btn"
@@ -579,10 +672,27 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
               >
                 <DeleteIcon />
               </SmartButton>
+              {!item.is_resigned && (
+                <SmartButton
+                  id="mark-resigned-employee-btn"
+                  onClick={() => setIsMarkResignedModalOpen({ id: item.id, open: true })}
+                  disabled={selectedEmployees.size > 1}
+                  className={selectedEmployees.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+                >
+                  <span
+                    data-tooltip-id='mark-resigned-tooltip'
+                    data-tooltip-content='Mark as Resigned'
+                    data-tooltip-place='bottom'
+                  >
+                    <ResignIcon />
+                  </span>
+                </SmartButton>
+              )}
             </div>
           </td>
         </tr>
-      ));
+        );
+      });
     } else {
       // Calculate total number of visible columns + checkbox + actions column
       const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length;
@@ -612,7 +722,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
   };
   return (
     <>
-      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
+      {canSyncWithPayroll(loginType, hasYpIntegration) && <FloatingProgress />}
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <BackButton label="Manage" href="/manage" />
@@ -1033,7 +1143,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   );
                 }}
               />
-              <div className='flex'>
+              <div className='flex' data-tour-id='tour-employee-guide'>
                 <SmartButton
                   id="create-employee-btn"
                   onClick={() => setIsAddEmployeeModalOpen(true)}
@@ -1042,12 +1152,12 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   CREATE
                 </SmartButton>
                 <Menu as='div' className='relative'>
-                  <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                  <MenuButton className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50' onClick={() => { if (isRunning) hideOverlay(); }}>
                     <span className='sr-only'>Open options</span>
                     <div className='flex gap-4'>
                       <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
                     </div>
-                  </Menu.Button>
+                  </MenuButton>
                   <Transition
                     as={Fragment}
                     enter='transition ease-out duration-100'
@@ -1057,10 +1167,10 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                     leaveFrom='transform opacity-100 scale-100'
                     leaveTo='transform opacity-0 scale-95'
                   >
-                    <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                    <MenuItems className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                       <div className='py-1'>
                         {smartMenuOptions.map((item) => (
-                          <Menu.Item key={item.name}>
+                          <MenuItem key={item.name}>
                             {({ active }) => (
                               <span
                                 id={item.id}
@@ -1076,10 +1186,10 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                                 {item.name}
                               </span>
                             )}
-                          </Menu.Item>
+                          </MenuItem>
                         ))}
                       </div>
-                    </Menu.Items>
+                    </MenuItems>
                   </Transition>
                 </Menu>
               </div>
@@ -1088,7 +1198,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   <Menu as='div' className='relative'>
                     {({ open }) => (
                       <>
-                        <Menu.Button 
+                        <MenuButton 
                           className='bg-savoy-blue rounded-l-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'
                           data-tooltip-id={!open ? 'column-filter-tooltip' : undefined}
                           data-tooltip-content={!open ? 'Column Filter' : undefined}
@@ -1096,7 +1206,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                           data-tooltip-delay-show={300}
                         >
                           <Cog6ToothIcon className='h-5 w-5' />
-                        </Menu.Button>
+                        </MenuButton>
                     <Transition
                       as={Fragment}
                       enter='transition ease-out duration-100'
@@ -1106,7 +1216,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                       leaveFrom='transform opacity-100 scale-100'
                       leaveTo='transform opacity-0 scale-95'
                     >
-                      <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                      <MenuItems className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                         <div className='p-4'>
                           <div className='mb-4'>
                             <h3 className='text-sm font-semibold text-gray-900 mb-2'>
@@ -1146,7 +1256,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                             </button>
                           </div>
                         </div>
-                      </Menu.Items>
+                      </MenuItems>
                     </Transition>
                       </>
                     )}
@@ -1183,6 +1293,21 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                     </div>
                   ) : (
                     'Delete Selected'
+                  )}
+                </SmartButton>
+                <SmartButton
+                  id="mark-resigned-employee-btn"
+                  onClick={handleBulkMarkResigned}
+                  disabled={bulkMarkResignedMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-md hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkMarkResignedMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Marking as Resigned...
+                    </div>
+                  ) : (
+                    'Mark as Resigned'
                   )}
                 </SmartButton>
                 <span className="text-sm text-gray-700 font-medium">
@@ -1351,6 +1476,36 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
           isLoading={isDeleteEmployeeLoading}
         />
       )}
+      {isMarkResignedModalOpen?.open && (
+        <ConfirmModal
+          isOpen={isMarkResignedModalOpen.open}
+          setIsOpen={() => setIsMarkResignedModalOpen(null)}
+          message={
+            <>
+              Are you sure you want to mark this employee as resigned?
+              <br />
+              This skips the full offboarding process.
+            </>
+          }
+          isLoading={isMarkResignedLoading}
+          confirmAction={() => {
+            editEmployeeDetails(
+              { employee_id: isMarkResignedModalOpen.id, data: { is_resigned: true } },
+              {
+                onSuccess: (data: any) => {
+                  toast.custom(() => <CustomToast message={data.message || 'Employee marked as resigned.'} type='success' />, { duration: 4000 });
+                  queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+                  setIsMarkResignedModalOpen(null);
+                  refetchAllEmployeeData();
+                },
+                onError: (err: any) => {
+                  toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+                },
+              }
+            );
+          }}
+        />
+      )}
       {isEmployeesEditModalOpen && (
         <EditEmployeeDetailsModal
           isOpen={isEmployeesEditModalOpen}
@@ -1398,8 +1553,39 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
         />
       )}
 
+      {/* Bulk Mark as Resigned Confirmation Modal */}
+      {isBulkResignConfirmModalOpen && (
+        <ConfirmModal
+          isOpen={isBulkResignConfirmModalOpen}
+          setIsOpen={setIsBulkResignConfirmModalOpen}
+          confirmAction={confirmBulkResignWarning}
+          message={
+            <>
+              Are you sure you want to mark {bulkResignCount} selected employee{bulkResignCount > 1 ? 's' : ''} as resigned?
+              <br />
+              This skips the full offboarding process.
+            </>
+          }
+          isLoading={false}
+        />
+      )}
+
+      {/* Bulk Mark as Resigned Progress Modal */}
+      {isBulkResignModalOpen && (
+        <ProgressModal
+          isOpen={isBulkResignModalOpen}
+          setIsOpen={setIsBulkResignModalOpen}
+          onConfirm={confirmBulkResign}
+          title={`Marking ${bulkResignCount} employee${bulkResignCount > 1 ? 's' : ''} as resigned...`}
+          isProcessing={bulkMarkResignedMutation.isLoading}
+          onSuccess={handleBulkResignSuccess}
+          progressColor="#D97706"
+        />
+      )}
+
       <Tooltip id='search-tooltip' />
       <Tooltip id='column-filter-tooltip' />
+      <Tooltip id='mark-resigned-tooltip' />
     </>
   );
 };

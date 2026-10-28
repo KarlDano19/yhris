@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import SignatureCanvas from 'react-signature-canvas';
 
@@ -9,20 +9,47 @@ interface SignatureModalProps {
   onClose: () => void;
   onSave: (signatureData: string | File) => void;
   onTransparencyCheck?: (result: {hasTransparency: boolean, message: string, type: 'success' | 'warning' | 'error'}) => void;
+  currentSignature?: string | File | null;
 }
 
-export default function SignatureModal({ isOpen, onClose, onSave, onTransparencyCheck }: SignatureModalProps) {
+export default function SignatureModal({ isOpen, onClose, onSave, onTransparencyCheck, currentSignature }: SignatureModalProps) {
   const [signatureMode, setSignatureMode] = useState<'draw' | 'upload'>('draw');
   const [uploadedSignature, setUploadedSignature] = useState<File | null>(null);
   const signatureRef = useRef<SignatureCanvas | null>(null);
   const cancelButtonRef = useRef(null);
   
-  // Clear signature canvas when opening modal
+  // Open on the tab matching however the existing signature was created,
+  // so "Change Signature" amends it instead of starting over
   useEffect(() => {
-    if (isOpen && signatureRef.current) {
+    if (!isOpen) return;
+
+    if (currentSignature instanceof File) {
+      setSignatureMode('upload');
+      setUploadedSignature(currentSignature);
+    } else {
+      setSignatureMode('draw');
+      setUploadedSignature(null);
+    }
+  }, [isOpen, currentSignature]);
+
+  // Repaint the saved drawing onto the canvas whenever the draw tab is mounted
+  useEffect(() => {
+    if (!isOpen || signatureMode !== 'draw' || !signatureRef.current) return;
+
+    const canvas = signatureRef.current.getCanvas();
+
+    if (typeof currentSignature === 'string' && currentSignature && canvas) {
+      // signature_pad defaults ratio to devicePixelRatio, which shrinks the
+      // restored image on HiDPI screens — the canvas is a fixed size, so draw 1:1
+      signatureRef.current.fromDataURL(currentSignature, {
+        ratio: 1,
+        width: canvas.width,
+        height: canvas.height,
+      });
+    } else {
       signatureRef.current.clear();
     }
-  }, [isOpen]);
+  }, [isOpen, currentSignature, signatureMode]);
   
   // Add body class to prevent scrolling when modal is open
   useEffect(() => {
@@ -221,14 +248,14 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
   };
   
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-20"
         initialFocus={cancelButtonRef}
         onClose={onClose}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -238,11 +265,11 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -251,7 +278,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:max-w-lg w-full">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:max-w-lg w-full">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     {signatureMode === 'draw' ? 'Draw Signature' : 'Upload Signature'}
@@ -385,11 +412,11 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                     Close
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 } 

@@ -75,9 +75,10 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
 
   // Fetch job list (always enabled: needed for filter + print)
   const { data: jobPostData } = useGetAnalyticsJobPostItems({}, true);
-  const jobPostRecords: any[] = Array.isArray(jobPostData)
-    ? jobPostData
-    : (jobPostData as any)?.records || [];
+  const jobPostRecords: any[] = useMemo(
+    () => (Array.isArray(jobPostData) ? jobPostData : (jobPostData as any)?.records || []),
+    [jobPostData]
+  );
   const selectedJobId: number | undefined =
     selectedJobFilter !== 'All Jobs'
       ? jobPostRecords.find((j: any) => j.job_title === selectedJobFilter)?.id
@@ -260,6 +261,19 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
     totalPages: rolePipelineData?.total_pages || 1,
   }), [rolePipelineData]);
 
+  // Transform job post records for the allJobPostsForPrint payload (stable reference)
+  const allJobPostsForPrint = useMemo(() =>
+    jobPostRecords.map((r: any) => ({
+      id: r.id,
+      role: r.job_title,
+      number_of_applicants: r.applicant_applied_no || 0,
+      status: r.is_active ? 'Ongoing' : 'Closed',
+      date_job_opened: r.created_at,
+      date_job_closed: null,
+    })),
+    [jobPostRecords]
+  );
+
   // Transform job post records (view_type=select, all records) for print
   const rolePipelineDataForPrint = useMemo(() => {
     return jobPostRecords.map((record: any) => {
@@ -294,19 +308,12 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
       rolePipelineData: rolePipelineDataForPrint,
       rolePipelineCurrentPage,
       rolePipelinePageSize,
-      allJobPostsForPrint: jobPostRecords.map((r: any) => ({
-        id: r.id,
-        role: r.job_title,
-        number_of_applicants: r.applicant_applied_no || 0,
-        status: r.is_active ? 'Ongoing' : 'Closed',
-        date_job_opened: r.created_at,
-        date_job_closed: null,
-      })),
+      allJobPostsForPrint,
       analyticsKPIs: kpisData || null,
       analyticsApplicantVsHired: applicantVsHiredData || null,
       analyticsAttrition: attritionDataForPrint || null,
     });
-  }, [activeSubTab, applicantVsHiredData, jobPostRecords, rolePipelineDataForPrint, rolePipelineCurrentPage, rolePipelinePageSize, kpisData, attritionDataForPrint, onDataReady]);
+  }, [activeSubTab, applicantVsHiredData, allJobPostsForPrint, rolePipelineDataForPrint, rolePipelineCurrentPage, rolePipelinePageSize, kpisData, attritionDataForPrint]);
 
   // Sub Tab Navigation
   const subTabs = [

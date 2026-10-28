@@ -30,6 +30,8 @@ const FloatingProgress = () => {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         setShowProgress(false);
+        queryClient.invalidateQueries(['employeesListItemsCache']);
+        queryClient.invalidateQueries(['employeePaginatedSelectCache']);
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {

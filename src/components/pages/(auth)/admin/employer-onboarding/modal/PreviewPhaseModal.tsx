@@ -2,7 +2,7 @@
 
 import { Fragment } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { T_ChecklistItem } from './PhaseModal';
@@ -31,9 +31,9 @@ type PreviewPhaseModalProps = {
 
 const PreviewPhaseModal = ({ previewItem, onClose }: PreviewPhaseModalProps) => {
   return (
-    <Transition.Root show={previewItem !== null} as={Fragment}>
+    <Transition show={previewItem !== null} as={Fragment}>
       <Dialog as='div' className='relative z-40' onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-200'
           enterFrom='opacity-0'
@@ -43,11 +43,11 @@ const PreviewPhaseModal = ({ previewItem, onClose }: PreviewPhaseModalProps) => 
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-black/50' />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-center justify-center p-4'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-200'
               enterFrom='opacity-0 scale-95'
@@ -56,7 +56,7 @@ const PreviewPhaseModal = ({ previewItem, onClose }: PreviewPhaseModalProps) => 
               leaveFrom='opacity-100 scale-100'
               leaveTo='opacity-0 scale-95'
             >
-              <Dialog.Panel className='relative w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden'>
+              <DialogPanel className='relative w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden'>
                 {/* Header */}
                 <div className='flex items-center gap-4 bg-savoy-blue p-3'>
                   <h3 className='flex-1 text-white font-semibold ml-2 truncate'>
@@ -90,12 +90,12 @@ const PreviewPhaseModal = ({ previewItem, onClose }: PreviewPhaseModalProps) => 
                     </p>
                   )}
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.LOOPS_API_KEY;
+    const apiKey = process.env.LOOPS_BOOKDEMO_API;
     
     if (!apiKey) {
       return NextResponse.json(

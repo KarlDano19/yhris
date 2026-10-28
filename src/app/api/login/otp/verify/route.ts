@@ -7,7 +7,8 @@ import { sessionOptions, sleep, SessionData, ACCESS_TOKEN_LIFETIME_SECONDS } fro
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
     const payload = await request.json();
     
     const config = {
@@ -41,7 +42,9 @@ export async function POST(request: NextRequest) {
     session['hasProfile'] = data.has_profile;
     session['hasCompletedOnboarding'] = data.has_onboarded;
     session['loginType'] = data.login_type || 'password';
-    
+    // Employer-level YP sync capability (see helpers/payrollSync).
+    session['hasYpIntegration'] = data.has_yp_integration === true;
+
     await session.save();
     await sleep(250);
     

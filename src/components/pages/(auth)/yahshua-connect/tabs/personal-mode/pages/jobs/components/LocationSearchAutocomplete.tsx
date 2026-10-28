@@ -99,13 +99,12 @@ const LocationSearchAutocomplete = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       if (showAutocomplete && selectedIndex >= 0 && autocompleteResults?.records) {
         if (selectedIndex === uniqueSuggestions.length && hasMoreResults) {
-          e.preventDefault();
           onLimitChange(limit + 20);
           onSelectedIndexChange(uniqueSuggestions.length);
         } else if (uniqueSuggestions[selectedIndex]) {
-          e.preventDefault();
           toggleSelection(uniqueSuggestions[selectedIndex]);
         }
       } else {

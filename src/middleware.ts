@@ -5,8 +5,9 @@ import { getIronSession } from 'iron-session';
 
 import { sessionOptions, SessionData } from './lib/session';
 
-export async function middleware(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+async function appMiddleware(request: NextRequest) {
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   const listPathname = request.nextUrl.pathname.split('/');
   const slicePaths = listPathname.slice(1);
   const firstRoute = slicePaths[0];
@@ -20,7 +21,7 @@ export async function middleware(request: NextRequest) {
   const hasActiveSubscription = session.hasActiveSubscription;
   const loginType = session.loginType;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation', 'privacy-notice', 'blog'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'offboarding-public', 'privacy-notice', 'blog', 'form-response', 'process-flows'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
   const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
@@ -32,7 +33,7 @@ export async function middleware(request: NextRequest) {
     'screening-question-guideline',
     'onboarding',
     'manage',
-    'employee-separation',
+    'offboarding',
     'employer-profile',
     'setup-employer-profile',
     'evaluation',
@@ -69,7 +70,7 @@ export async function middleware(request: NextRequest) {
       if (employerRoutes.includes(firstRoute)) {
         if (
           firstRoute === 'dashboard' ||
-          firstRoute === 'employee-separation' ||
+          firstRoute === 'offboarding' ||
           firstRoute === 'manage' ||
           firstRoute === 'post-job' ||
           firstRoute === 'screen-applicants' ||
@@ -101,7 +102,15 @@ export async function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/dashboard', request.url));
               }
               // Allow access to other sub-routes (onboarding-checklist, etc.)
-            } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications' && loginType !== 'yahshua-payroll' && loginType !== 'yg-payroll') {
+            } else if (
+              !hasCompletedOnboarding &&
+              firstRoute !== 'settings' &&
+              firstRoute !== 'notifications' &&
+              loginType !== 'yg-payroll' &&
+              // YP sessions created before SSO started syncing the onboarding flag
+              // have no hasCompletedOnboarding at all — let those through.
+              !(loginType === 'yahshua-payroll' && hasCompletedOnboarding === undefined)
+            ) {
               // Onboarding gate: block employer routes until checklist is complete.
               // settings and notifications are exempt so users can't get trapped.
               return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
@@ -176,6 +185,43 @@ export async function middleware(request: NextRequest) {
     }
   }
   return NextResponse.next();
+}
+
+// Staging (s1.yahshuahris.com) must never be indexed, archived, or quoted by search or AI crawlers.
+// Detected at request time, so it works whichever image or env the staging deployment uses:
+//   1. the Host header (or X-Forwarded-Host / X-Original-Host when a proxy such as CloudFront rewrites Host), or
+//   2. STAGING_NOINDEX=true (or 1) in the staging deployment's runtime environment.
+// Production hosts match neither, so production responses are unchanged.
+const STAGING_HOSTS = ['s1.yahshuahris.com'];
+const STAGING_ROBOTS_TAG = 'noindex, nofollow, noarchive, nosnippet';
+
+const isStagingRequest = (request: NextRequest) => {
+  const flag = process.env.STAGING_NOINDEX;
+  if (flag === 'true' || flag === '1') return true;
+  return ['host', 'x-forwarded-host', 'x-original-host'].some((name) => {
+    const value = request.headers.get(name);
+    if (!value) return false;
+    const host = value.split(',')[0].trim().toLowerCase().replace(/:\d+$/, '');
+    return STAGING_HOSTS.includes(host);
+  });
+};
+
+export async function middleware(request: NextRequest) {
+  const staging = isStagingRequest(request);
+
+  if (staging && request.nextUrl.pathname === '/robots.txt') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/robots-staging.txt';
+    const response = NextResponse.rewrite(url);
+    response.headers.set('X-Robots-Tag', STAGING_ROBOTS_TAG);
+    return response;
+  }
+
+  const response = await appMiddleware(request);
+  if (staging) {
+    response.headers.set('X-Robots-Tag', STAGING_ROBOTS_TAG);
+  }
+  return response;
 }
 
 export const config = {

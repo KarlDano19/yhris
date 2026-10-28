@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect, useRef } from 'react';
 
 
 import Link from 'next/link';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon, PaperAirplaneIcon, ArrowTopRightOnSquareIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -332,7 +332,7 @@ const ChatMessagesModal = ({
     <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[70]" onClose={handleClose}>
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -342,12 +342,12 @@ const ChatMessagesModal = ({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/50" />
-        </Transition.Child>
+        </TransitionChild>
 
         {/* Modal Container */}
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-start justify-center p-4 pt-16">
-            <Transition.Child
+            <TransitionChild
               as="div"
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95"
@@ -357,7 +357,7 @@ const ChatMessagesModal = ({
               leaveTo="opacity-0 scale-95"
               className="w-full max-w-2xl"
             >
-              <Dialog.Panel className="w-full transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
+              <DialogPanel className="w-full transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-gray-200 p-5">
                   <div className="flex items-center gap-3">
@@ -494,8 +494,8 @@ const ChatMessagesModal = ({
                     </button>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>

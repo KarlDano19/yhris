@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
+import { Tooltip } from "react-tooltip";
 
 import { useGetDisciplinaryRecords } from "../hooks/useGetDisciplinaryRecords";
 import Section from "../common/Section";
@@ -10,8 +11,10 @@ import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomToast from "@/components/CustomToast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Filter, { FilterGroup, FilterValues } from "@/components/common/Filter";
+import ViewIncidentModal from "./modals/ViewIncidentModal";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { EyeIcon } from "@heroicons/react/24/outline";
 
 export default function DisciplinaryRecordsForm({
   employeeId,
@@ -44,6 +47,18 @@ export default function DisciplinaryRecordsForm({
   const [filters, setFilters] = useState<FilterValues>({});
   const [isSearching, setIsSearching] = useState(false);
   const [hasClickedFilter, setHasClickedFilter] = useState(false);
+  const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+
+  const handleViewRecord = (recordId: number) => {
+    setSelectedRecordId(recordId);
+    setIsViewOpen(true);
+  };
+
+  const handleCloseView = () => {
+    setIsViewOpen(false);
+    setSelectedRecordId(null);
+  };
 
   // Fetch filters when user clicks to open the filter dropdown
   const handleFilterClick = () => {
@@ -260,12 +275,15 @@ export default function DisciplinaryRecordsForm({
                   <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
                     NTE Status
                   </th>
+                  <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {(isLoading || isSearching) ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <div className="py-5">
                         <LoadingSpinner size="lg" color="yellow" />
                       </div>
@@ -273,7 +291,11 @@ export default function DisciplinaryRecordsForm({
                   </tr>
                 ) : records.length > 0 ? (
                   records.map((record) => (
-                    <tr key={record.id}>
+                    <tr
+                      key={record.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleViewRecord(record.id)}
+                    >
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 font-mono">
                         {record.nte_id || "NTE-000"}
                       </td>
@@ -310,11 +332,26 @@ export default function DisciplinaryRecordsForm({
                           ? "Sent"
                           : "Not Sent"}
                       </td>
+                      <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewRecord(record.id);
+                          }}
+                          className="inline-flex items-center justify-center rounded-md p-1.5 text-savoy-blue hover:bg-savoy-blue/10"
+                          data-tooltip-id="disciplinary-view-tooltip"
+                          data-tooltip-content="View Incident Details"
+                          data-tooltip-place="left"
+                        >
+                          <EyeIcon className="h-5 w-5" />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <h4 className="text-center text-gray-300 text-sm mt-4">
                         There&apos;s no data yet.
                       </h4>
@@ -342,6 +379,14 @@ export default function DisciplinaryRecordsForm({
           pageType="standard"
         />
       </div>
+
+      <Tooltip id="disciplinary-view-tooltip" />
+
+      <ViewIncidentModal
+        isOpen={isViewOpen}
+        onClose={handleCloseView}
+        recordId={selectedRecordId}
+      />
     </Section>
   );
 }
