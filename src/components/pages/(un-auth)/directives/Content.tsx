@@ -10,6 +10,7 @@ import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useSendVerification } from './hooks/useSendVerification';
 import useVerifyDirective from './hooks/useVerifyDirective';
+import useAcknowledgeDirective from './hooks/useAcknowledgeDirective';
 import EmailSelectionModal from './modals/EmailSelectionModal';
 import VerificationCodeModal from './modals/VerificationCodeModal';
 import FilePreviewModal from '@/components/FilePreviewModal';
@@ -17,19 +18,35 @@ import FilePreviewModal from '@/components/FilePreviewModal';
 import DropDownArrow from '@/svg/DropDownArrow';
 import { linkify } from '@/helpers/linkify';
 
-import { DirectiveAttachment, DirectiveData, MaskedEmail } from '@/types/directives';
+import { DirectiveAckLink, DirectiveAttachment, DirectiveData, MaskedEmail } from '@/types/directives';
 
 
 interface ContentProps {
   initialDirective: Omit<DirectiveData, 'to'> | null;
   initialError?: string;
+  ackLink?: DirectiveAckLink | null;
+  ackToken?: string | null;
 }
 
-const Content = ({ initialDirective, initialError }: ContentProps) => {
+// Mutation errors arrive as either a plain string or an object with a message
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error === 'string' && error) return error;
+  if (error && typeof error === 'object' && 'message' in error && (error as any).message) {
+    return String((error as any).message);
+  }
+  return fallback;
+};
+
+const Content = ({ initialDirective, initialError, ackLink, ackToken }: ContentProps) => {
   const params = useParams();
   const directiveId = params.id as string;
 
   const directive = initialDirective;
+
+  // A valid signed link from the memo email acknowledges in one click — no verification code
+  const [linkStatus, setLinkStatus] = useState(ackLink?.status ?? null);
+  const canAcknowledgeByLink = linkStatus === 'valid' && !!ackToken;
+  const isAlreadyAcknowledged = linkStatus === 'acknowledged';
 
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -65,6 +82,8 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
   } = useSendVerification(directiveId);
 
   const { mutate: verifyDirective, isLoading: isVerifying } = useVerifyDirective();
+
+  const { mutate: acknowledgeDirective, isLoading: isAcknowledging } = useAcknowledgeDirective();
 
   // Render HTML formatted body content with linkified URLs
   const renderBodyContent = (bodyContent: any) => {
@@ -115,7 +134,43 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
     }
   };
 
+  const handleConfirmed = (message: string) => {
+    setIsConfirmed(true);
+    toast.custom(
+      () => <CustomToast message={message} type='success' />,
+      { duration: 5000 }
+    );
+
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
+  };
+
+  const handleAcknowledgeByLink = () => {
+    if (!ackToken) return;
+
+    acknowledgeDirective(
+      { directiveId: Number(directiveId), token: ackToken },
+      {
+        onSuccess: () => handleConfirmed('Successfully acknowledged!'),
+        onError: (error) => {
+          // Expired or invalid link — fall back to verifying by email
+          setLinkStatus(error.status === 410 ? 'expired' : 'invalid');
+          toast.custom(
+            () => <CustomToast message={getErrorMessage(error, 'Unable to acknowledge using this link. Please verify using your email.')} type='error' />,
+            { duration: 5000 }
+          );
+        },
+      }
+    );
+  };
+
   const handleConfirm = async () => {
+    if (canAcknowledgeByLink) {
+      handleAcknowledgeByLink();
+      return;
+    }
+
     setIsLoadingEmails(true);
     try {
       const res = await fetch(`/api/directives/${directiveId}/emails`);
@@ -162,7 +217,7 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
         onError: (error) => {
           setShowVerificationModal(false);
           toast.custom(
-            () => <CustomToast message={error.message || 'Failed to send verification code.'} type='error' />,
+            () => <CustomToast message={getErrorMessage(error, 'Failed to send verification code.')} type='error' />,
             { duration: 5000 }
           );
           setShowEmailModal(true);
@@ -189,7 +244,7 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
                 reject({ cooldown_remaining: error.cooldown_remaining });
               } else {
                 toast.custom(
-                  () => <CustomToast message={error.message || 'Failed to resend verification code.'} type='error' />,
+                  () => <CustomToast message={getErrorMessage(error, 'Failed to resend verification code.')} type='error' />,
                   { duration: 5000 }
                 );
                 reject({ cooldown_remaining: 5 });
@@ -213,19 +268,12 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
       {
         onSuccess: () => {
           setShowVerificationModal(false);
-          setIsConfirmed(true);
-          toast.custom(
-            () => <CustomToast message="Successfully verified and confirmed!" type='success' />,
-            { duration: 5000 }
-          );
-
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 2000);
+          handleConfirmed('Successfully verified and confirmed!');
         },
-        onError: () => {
+        onError: (error) => {
+          // Covers wrong code, expired code, and too many attempts
           toast.custom(
-            () => <CustomToast message="Invalid verification code." type='error' />,
+            () => <CustomToast message={getErrorMessage(error, 'Invalid verification code.')} type='error' />,
             { duration: 5000 }
           );
         },
@@ -531,18 +579,33 @@ const Content = ({ initialDirective, initialError }: ContentProps) => {
             )}
 
             <div className="mt-20">
+              {canAcknowledgeByLink && ackLink?.masked_email && !isConfirmed && (
+                <p className="mb-3 text-sm text-gray-600 text-center">
+                  Acknowledging as <span className="font-semibold">{ackLink.masked_email}</span>
+                </p>
+              )}
+              {(linkStatus === 'expired' || linkStatus === 'invalid') && !isConfirmed && (
+                <p className="mb-3 text-sm text-gray-600 text-center">
+                  {linkStatus === 'expired'
+                    ? 'Your acknowledgment link has expired.'
+                    : 'Your acknowledgment link could not be used.'}{' '}
+                  Please verify using your email instead.
+                </p>
+              )}
               <button
                 onClick={handleConfirm}
-                disabled={isConfirmed || isLoadingEmails}
+                disabled={isConfirmed || isAlreadyAcknowledged || isLoadingEmails || isAcknowledging}
                 className={`py-4 px-6 rounded-md text-white font-medium transition-all duration-300 w-full ${
-                  isConfirmed
+                  isConfirmed || isAlreadyAcknowledged
                     ? 'bg-green-500 cursor-not-allowed'
                     : 'bg-[#355FD0] hover:bg-[#2347B2] disabled:opacity-70'
                 }`}
               >
                 {isConfirmed
                   ? 'Thank you for confirming!'
-                  : isLoadingEmails
+                  : isAlreadyAcknowledged
+                  ? 'You have already acknowledged this Memo/Policy'
+                  : isLoadingEmails || isAcknowledging
                   ? 'Loading...'
                   : 'I have read & understood the Memo/Policy'}
               </button>

@@ -93,6 +93,17 @@ export interface VerifyDirectiveParams {
   code: string;
 }
 
+// Status of the signed per-recipient link (?t=<token>) from the memo email
+export interface DirectiveAckLink {
+  status: 'valid' | 'acknowledged' | 'expired' | 'invalid';
+  masked_email: string | null;
+}
+
+export interface AcknowledgeDirectiveParams {
+  directiveId: number;
+  token: string;
+}
+
 export interface ReadData {
   id: number;
   email: string;
