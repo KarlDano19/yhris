@@ -109,6 +109,209 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-054
+DATE FILED: 2026-10-30
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Client (relayed by QA) - Linear Y1HRIS-184
+
+ISSUE DESCRIPTION:
+  On an existing job posting (Post a Job > Update Job Form > step 5 Job Settings
+  > Custom Question), a new custom screening question disappeared right after
+  "Save Questions", with no message. The list stayed the same and the Custom
+  Question count did not go up. QA could not reproduce it on their account.
+  Cause: the duplicate check on the screening questions matched on the question
+  text. A custom question containing "education", "degree", "driver's license",
+  "background check" or "drug test" (any case, also inside longer words) was
+  treated as that preset question. It was removed when the preset was already on
+  the job. When the preset was not on the job, the question was kept but its
+  presetId was rewritten to the preset's, so it stopped counting as custom (this
+  second case was read from the code, not run). The keyword check came in on
+  2025-07-19 and custom questions on 2025-08-07; custom questions were never
+  exempted from it. QA's test questions did not use those words.
+
+DESIRED OUTCOME:
+  A custom question is always kept, whatever words it contains.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPageJobSettings.tsx
+
+E2E (YAHSHUA/e2e, shared folder):
+- tests/job-postings/custom-question.spec.ts
+- helpers/job-postings.ts
+- helpers/py/hris_job_posting_seed.py
+- helpers/py/hris_job_posting_cleanup.py
+- playwright.config.ts (job-postings project)
+- package.json (test:job-postings, watch:job-postings)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ TypeScript types verified (type check not run)
+☑ Playwright regression test written: npm run test:job-postings (khp-live-hotfix-2
+  stack). Before the fix the "degree" and "education" cases failed and the plain
+  wording case passed. After the fix all four cases get past the list check
+  (plain, degree, education, driver's license).
+☐ Playwright "save, reload, question still there" step is NOT passing yet: Save
+  on step 5 sent no request in the test. Not yet found why (a validation on
+  another step or the seeded posting is missing data). Persistence after the
+  final Save is unverified.
+☐ Create (new job) flow not tested (same component, probably affected)
+☐ Drug Test / Background Check wording not tested in the browser
+
+FIX EXPLANATION:
+  In the duplicate check in CreateJobPageJobSettings.tsx, a question whose
+  presetId starts with "custom-question" now gets its own key (its id) before the
+  keyword checks run, so the keywords no longer apply to custom questions.
+  Not committed or merged yet. Not yet confirmed that the client's own question
+  used one of those words (their wording was redacted in the recording). Separate
+  and not fixed: reopening a job turns a blank ideal answer into "Yes"
+  (UpdateJobModal.tsx normalization uses `|| 'Yes'`).
+
+================================================================================
+
+BUG ID: HRIS-2026-053
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-188
+
+ISSUE DESCRIPTION:
+  On a phone-sized screen (375px) the main employer header had too many buttons.
+  The logo, info (onboarding checklist), User Guide (process flow), chat, bell and
+  menu buttons did not fit, so the bell and menu button were pushed past the
+  screen edge. The User Guide button (added 2026-08-12) was shown at every size.
+
+DESIRED OUTCOME:
+  The header fits on a phone. The buttons that are hidden there are still
+  reachable from the hamburger menu.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/MainHeader.tsx
+- src/components/common/ProcessFlowButton.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ TypeScript types verified (type check not run)
+☑ Mobile responsiveness checked in browser device mode (first fix, 375px, still
+  overflowed; second fix not yet re-checked)
+
+FIX EXPLANATION:
+  The User Guide and info buttons are hidden below the sm breakpoint in the
+  header. Two rows were added at the top of the mobile menu: "Onboarding
+  Checklist" and "User Guide". ProcessFlowButton got an optional label prop that
+  renders the full-width menu row version. If the header still overflows on
+  narrower phones, the logo is the next item to shrink.
+
+================================================================================
+
+BUG ID: HRIS-2026-052
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-187
+
+ISSUE DESCRIPTION:
+  The "Add Custom Screening Questions" pop-up sat about 7px to the right of the
+  Update Job Form pop-up behind it. The Update Job Form is taller than the screen
+  and has a scrollbar, which narrows its centering area; the front pop-up had no
+  scrollbar and centered on the wider area.
+
+DESIRED OUTCOME:
+  The two pop-ups line up horizontally.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/CustomQuestionsModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Browser check of the alignment (not yet done)
+
+FIX EXPLANATION:
+  Added [scrollbar-gutter:stable] to the fixed overflow container of the front
+  pop-up so it reserves the same scrollbar width. Known limit: if the pop-up
+  behind has no scrollbar, the front one will be about 7px left instead.
+  Vertical centering is unchanged (centered on the screen).
+
+================================================================================
+
+BUG ID: HRIS-2026-051
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-186
+
+ISSUE DESCRIPTION:
+  Several edit pop-ups showed a large empty space below their buttons, even on
+  short steps (e.g. Update Job Form steps 6 and 8). Commit b5b15f3f1 (2026-07-10,
+  loading spinners) put min-h-[420px]/[560px] on the loaded form wrappers as well
+  as on the spinner.
+
+DESIRED OUTCOME:
+  The pop-up is only as tall as its content once loaded.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/job-posting-history/modals/UpdateJobModal.tsx
+- src/components/pages/(auth)/employer/dole/annual-medical-report/modals/EditAnnualMedicalReportModal.tsx
+- src/components/pages/(auth)/employer/dole/annual-work-accident-illness-exposure-data-report/modals/EditReportModal.tsx
+- src/components/pages/(auth)/employer/dole/health-and-safety-organization-report/modals/EditHealthAndSafetyReportModal.tsx
+- src/components/pages/(auth)/employer/dole/work-accident-illness-report/modals/UpdateWorkAccidentIllnessReportModal.tsx
+- src/components/pages/(auth)/employer/dole/work-environment-measurement-request/modals/EditWemRequestModal.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-scheduler/modals/EditEvaluationSchedulerModal.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-template/modals/EditEvaluationTemplateModal.tsx
+- src/components/pages/(auth)/employer/manage/employees/modals/EditEmployeeDetailsModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Browser check of each of the 9 pop-ups (not yet done)
+
+FIX EXPLANATION:
+  Removed the min-height from the loaded-content wrapper in the 9 pop-ups above.
+  The min-height stays on the loading spinner branch only.
+
+================================================================================
+
+BUG ID: HRIS-2026-050
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-185
+
+ISSUE DESCRIPTION:
+  Deleting a custom screening question showed a hand-built confirmation box whose
+  No and Yes buttons were wider than the box and were cut off at the edges, with
+  blank space below. Seen on live (Job Posting History > Update Job Form > Add
+  Custom Screening Questions). Likely exposed by the Headless UI v2 upgrade
+  (785cabd84); not fully confirmed.
+
+DESIRED OUTCOME:
+  The same delete confirmation used elsewhere in HRIS, with both buttons fully
+  visible.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/CustomQuestionsModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ TypeScript types verified (type check not run)
+☐ Browser check of the delete flow (not yet done)
+
+FIX EXPLANATION:
+  Replaced the inline overlay with the shared DeleteModal (customText "this
+  question"), rendered inside the Dialog. The quoted question text under the
+  message is no longer shown.
+
+================================================================================
+
 BUG ID: HRIS-2026-049
 DATE FILED: 2026-10-02
 DATE FIXED: 2026-10-02

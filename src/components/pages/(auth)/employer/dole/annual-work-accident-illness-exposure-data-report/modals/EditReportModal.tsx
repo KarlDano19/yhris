@@ -160,7 +160,7 @@ export default function EditReportModal({
                     <LoadingSpinner size="xl" showText text="Loading report details..." />
                   </div>
                 ) : (
-                <div className="min-h-[400px]">
+                <div>
                 {selectedTab === 1 && (
                   <ExposureData
                     control={control}

@@ -203,7 +203,7 @@ function EditHealthAndSafetyReportModal({
                     <LoadingSpinner size="xl" showText text="Loading health and safety report..." />
                   </div>
                 ) : (
-                  <div className="min-h-[560px]">
+                  <div>
                     {selectedTab === 1 && (
                       <ReportInformation
                         control={control}
