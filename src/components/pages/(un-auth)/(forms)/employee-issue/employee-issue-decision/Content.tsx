@@ -177,6 +177,20 @@ function Content() {
     );
   }
 
+  // HR already recorded this step from the employee's signed paper copy
+  if (employeeIssueDetails.is_decision_recorded_by_hr && !employeeIssueDetails.employee_signature) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">This Decision Has Already Been Recorded by HR</h1>
+          <p className="text-gray-600">
+            HR has already received your signed copy, so no further action is needed here.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {isAcknowledged ? (

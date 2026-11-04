@@ -80,6 +80,49 @@ function NTEAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIsOpen:
                             ))}
                           </div>
                         </div>
+                        {employeeIssueData?.is_nte_received && (
+                          <div>
+                            <label className='block text-sm font-bold text-gray-700 mb-1'>Received:</label>
+                            {employeeIssueData?.nte_receipt_type && employeeIssueData.nte_receipt_type !== 'signed_copy' ? (
+                              <div className='text-sm text-gray-700 space-y-1'>
+                                <p>
+                                  Proceeded without a signed NTE:{' '}
+                                  <span className='font-semibold'>{employeeIssueData.nte_receipt_type_label}</span>
+                                </p>
+                                {employeeIssueData?.nte_receipt_remarks && (
+                                  <p className='whitespace-pre-line'>Remarks: {employeeIssueData.nte_receipt_remarks}</p>
+                                )}
+                                {employeeIssueData?.nte_received_attachment && (
+                                  <a
+                                    href={employeeIssueData.nte_received_attachment}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='text-savoy-blue underline'
+                                  >
+                                    View proof of service
+                                  </a>
+                                )}
+                                {employeeIssueData?.is_responded && <p>The employee later responded online.</p>}
+                              </div>
+                            ) : employeeIssueData?.nte_received_attachment ? (
+                              <p className='text-sm text-gray-700'>
+                                Uploaded by HR —{' '}
+                                <a
+                                  href={employeeIssueData.nte_received_attachment}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  className='text-savoy-blue underline'
+                                >
+                                  View signed NTE
+                                </a>
+                              </p>
+                            ) : employeeIssueData?.is_responded ? (
+                              <p className='text-sm text-gray-700'>Submitted by employee online</p>
+                            ) : (
+                              <p className='text-sm text-gray-700'>Marked as received by HR (no document uploaded)</p>
+                            )}
+                          </div>
+                        )}
                         
                         {employeeIssueData?.nte_attachment && (
                           <div className='flex-1'>

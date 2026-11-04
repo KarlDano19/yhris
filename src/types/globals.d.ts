@@ -82,6 +82,19 @@ export type T_DecisionAttachmentViewModal = {
   id: number;
 };
 
+export type T_ReceiveOptionModal = {
+  isOpen: boolean;
+  id: number;
+  type: 'nte' | 'decision';
+};
+
+export type T_ManualReceivePayload = {
+  receiptType: string;
+  receiptRemarks?: string;
+  receiptOtherReason?: string;
+  file?: File;
+};
+
 export type T_DesignBenefitsModal = {
   isOpen: boolean;
   id: number;
