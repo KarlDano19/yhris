@@ -5,6 +5,7 @@ import { saveAs } from 'file-saver';
 import CustomToast from '@/components/CustomToast';
 
 import { formatDate } from '@/helpers/date';
+import { isRichText, richTextHtml } from '@/helpers/richText';
 
 import { NoticeToExplainFormData, PrintOptions } from '@/types/document-generator/documents';
 
@@ -248,7 +249,9 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       <div class="section">
         <div class="background-section">
           <div class="detail-label">Brief background :</div>
-          <div style="white-space: pre-wrap; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>
+          ${isRichText(data.briefBackground)
+            ? `<div class="rich-text" style="word-wrap: break-word;">${richTextHtml(data.briefBackground)}</div>`
+            : `<div style="white-space: pre-wrap; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>`}
         </div>
         
         <div class="signatures-grid">
@@ -472,6 +475,19 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           color: #000;
           font-size: 12px;
         }
+
+        /* Brief background rich text (Quill) — same rules as the backend NTE */
+        .rich-text p { margin: 0; }
+        .rich-text table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+        .rich-text td, .rich-text th { border: 1px solid #999; padding: 3px 6px; vertical-align: top; text-align: left; }
+        .rich-text ul, .rich-text ol { margin: 4px 0; padding-left: 1.5em; }
+        .rich-text .ql-align-center { text-align: center; }
+        .rich-text .ql-align-right { text-align: right; }
+        .rich-text .ql-align-justify { text-align: justify; }
+        ${Array.from({ length: 8 }, (_, i) => `.rich-text .ql-indent-${i + 1} { padding-left: ${(i + 1) * 3}em; }`).join(' ')}
+        .rich-text .ql-size-small { font-size: 0.75em; }
+        .rich-text .ql-size-large { font-size: 1.5em; }
+        .rich-text .ql-size-huge { font-size: 2.5em; }
         
         .signatures-grid {
           display: grid;

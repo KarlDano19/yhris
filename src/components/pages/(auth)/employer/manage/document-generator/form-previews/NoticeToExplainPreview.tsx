@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 
 import Image from 'next/image';
 
+import { RichTextView } from '@/components/common/RichTextEditor';
+
 import { formatDate } from '@/helpers/date';
+import { isRichText } from '@/helpers/richText';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
@@ -115,9 +118,13 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       
       <div className="mb-4 text-black text-xs">
         <div className="font-bold">Brief background :</div>
+        {isRichText(content) ? (
+          <RichTextView value={content} className="mt-1" textClassName="text-xs text-black" />
+        ) : (
         <div className="mt-1" style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
           {content || '[Brief description of the incident...]'}
         </div>
+        )}
       </div>
       
       <div className="grid grid-cols-3 gap-3 mb-6 text-black text-xs">
