@@ -90,6 +90,7 @@ const nextConfig = {
       '/blog/retirement-pay-law-ra-7641-philippines',
       '/blog/probationary-to-regular-employee-philippines',
       '/blog/employee-vs-independent-contractor-philippines',
+      '/blog/new-hire-onboarding-checklist-philippines',
       '/blog/employee-201-file-philippines',
       '/blog/employee-offboarding-checklist-philippines',
       '/blog/de-minimis-benefits-2026-philippines',
