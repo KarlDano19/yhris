@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import ModalLayout from '@/components/ModalLayout';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { PlusIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 
@@ -30,6 +31,17 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  // Per-task pending flags, so a slow request shows progress and cannot be fired twice
+  const [uploadingIds, setUploadingIds] = useState<Set<number>>(new Set());
+  const [togglingIds, setTogglingIds] = useState<Set<number>>(new Set());
+
+  const setPending = (setter: typeof setUploadingIds, taskId: number, pending: boolean) =>
+    setter((prev) => {
+      const next = new Set(prev);
+      if (pending) next.add(taskId);
+      else next.delete(taskId);
+      return next;
+    });
 
   const { data: tasks = [], isLoading } = useGetStageTasks(separationId, stage);
   const { mutate: createTask, isLoading: isCreating } = useCreateStageTask(separationId, stage);
@@ -53,9 +65,14 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
   const handleCloseModal = () => { setIsModalOpen(false); setInput(''); };
 
   const handleFileChange = (taskId: number, file: File) => {
+    if (uploadingIds.has(taskId)) return;
+    setPending(setUploadingIds, taskId, true);
     uploadAttachment(
       { separationId, taskId, attachment: file },
-      { onError: (err: any) => toast.custom(() => <CustomToast message={err.message} type='error' />, { duration: 4000 }) }
+      {
+        onError: (err: any) => toast.custom(() => <CustomToast message={err.message} type='error' />, { duration: 4000 }),
+        onSettled: () => setPending(setUploadingIds, taskId, false),
+      }
     );
   };
 
@@ -72,9 +89,14 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
   };
 
   const handleToggle = (taskId: number, currentChecked: boolean) => {
+    if (togglingIds.has(taskId)) return;
+    setPending(setTogglingIds, taskId, true);
     updateTask(
       { separationId, taskId, is_checked: !currentChecked },
-      { onError: (err: any) => toast.custom(() => <CustomToast message={err.message} type='error' />, { duration: 4000 }) }
+      {
+        onError: (err: any) => toast.custom(() => <CustomToast message={err.message} type='error' />, { duration: 4000 }),
+        onSettled: () => setPending(setTogglingIds, taskId, false),
+      }
     );
   };
 
@@ -124,7 +146,11 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
                 key={task.id}
                 className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${task.is_checked ? 'bg-gray-50 border-gray-100' : 'bg-white border-gray-200'}`}
               >
-                <button onClick={() => handleToggle(task.id, task.is_checked)} className='flex-shrink-0'>
+                <button
+                  onClick={() => handleToggle(task.id, task.is_checked)}
+                  disabled={togglingIds.has(task.id)}
+                  className='flex-shrink-0 disabled:cursor-wait disabled:opacity-60'
+                >
                   {task.is_checked ? (
                     <CheckCircleIcon className='h-5 w-5 text-green-500' />
                   ) : (
@@ -144,6 +170,8 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
                   >
                     View file
                   </a>
+                ) : uploadingIds.has(task.id) ? (
+                  <LoadingSpinner size='xs' className='flex-shrink-0' text='Uploading...' />
                 ) : (
                   <>
                     <input

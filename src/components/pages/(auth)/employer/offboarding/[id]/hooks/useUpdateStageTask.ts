@@ -23,11 +23,25 @@ async function updateStageTask(data: { separationId: number | string; taskId: nu
 
 function useUpdateStageTask(separationId: number | string, stage: string) {
   const queryClient = useQueryClient();
+  const cacheKey = ['stageTasksCache', separationId, stage];
+
   return useMutation(
     (data: { separationId: number | string; taskId: number; is_checked: boolean }) => updateStageTask(data),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['stageTasksCache', separationId, stage]);
+      // Flip the checkbox right away so a slow connection does not look frozen
+      onMutate: async (data) => {
+        await queryClient.cancelQueries(cacheKey);
+        const previousTasks = queryClient.getQueryData<any[]>(cacheKey);
+        queryClient.setQueryData<any[]>(cacheKey, (tasks = []) =>
+          tasks.map((t) => (t.id === data.taskId ? { ...t, is_checked: data.is_checked } : t))
+        );
+        return { previousTasks };
+      },
+      onError: (_err, _data, context) => {
+        if (context?.previousTasks) queryClient.setQueryData(cacheKey, context.previousTasks);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(cacheKey);
         queryClient.invalidateQueries(['separationCaseCache', String(separationId)]);
       },
     }

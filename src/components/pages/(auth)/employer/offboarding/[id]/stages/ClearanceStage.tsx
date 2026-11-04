@@ -16,9 +16,10 @@ type Props = {
   onMarkReceived: (id: string, type: string) => void;
   isLoading: boolean;
   onTasksChange?: (hasAny: boolean, allComplete: boolean) => void;
+  pendingAttachmentNames?: string[];
 };
 
-const ClearanceStage = ({ separation, onOpenDocumentsModal, onMarkReceived, isLoading, onTasksChange }: Props) => {
+const ClearanceStage = ({ separation, onOpenDocumentsModal, onMarkReceived, isLoading, onTasksChange, pendingAttachmentNames }: Props) => {
   const docsSent = !!separation.is_documents_sent;
   const docsReceived = !!separation.is_documents_received;
 
@@ -74,7 +75,7 @@ const ClearanceStage = ({ separation, onOpenDocumentsModal, onMarkReceived, isLo
           </p>
         )}
 
-        <AttachmentCard attachments={separation.document_attachments || []} label="Document Attachments" />
+        <AttachmentCard attachments={separation.document_attachments || []} label="Document Attachments" pendingNames={pendingAttachmentNames} />
         <Tooltip id='clearance-tooltip' />
       </div>
 

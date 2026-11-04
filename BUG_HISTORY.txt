@@ -109,6 +109,111 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-055
+DATE FILED: 2026-11-04
+DATE FIXED: 2026-11-04
+CLIENT/REPORTER: Internal (Khen Harold Paler, dev) - Offboarding > View Case
+RELATED: Backend BUG_HISTORY HRIS-2026-050 (Linear Y1HRIS-189, expired attachment
+         links) - found while testing the same module
+
+ISSUE DESCRIPTION:
+  Four problems on the offboarding case page, mostly seen on a slow connection:
+  1. Uploading a file to a stage task did not show "View file" for a while. The
+     screen waited for the upload AND a full reload of the task list, with no
+     sign that anything was happening.
+  2. Marking a task complete looked frozen. The checkbox only changed after the
+     save and the list reload both finished. Clicking again sent another request.
+  3. Some tabs did not move to the next tab after the current one was finished:
+     a) After the user clicked any tab in the stepper, the page kept showing that
+        tab (displayStage = activeStage ?? currentPhase, activeStage never reset).
+     b) On load the case was copied into localCase and the page kept reading that
+        copy. Fresh data from task changes, the exit interview send and "Mark as
+        Received" was ignored until another action cleared the copy, so the phase
+        was worked out from old data.
+  4. After sending an email with an attachment, or adding a task, nothing showed
+     for 1-2 seconds on a slow connection. SendEmailModal closes itself the moment
+     Send is pressed, so its own button spinner never shows, and the new attachment
+     only appears once the case reloads. A new task only appeared after the list
+     reloaded.
+
+DESIRED OUTCOME:
+  Every action on the case page gives immediate feedback, cannot be sent twice by
+  repeat clicks, and the page moves to the next tab as soon as a stage is done.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/offboarding/components/StageTaskChecklist.tsx
+  (per-task uploading/toggling flags; LoadingSpinner while uploading; checkbox
+  disabled while its request runs)
+- src/components/pages/(auth)/employer/offboarding/[id]/hooks/useUploadStageTaskAttachment.ts
+  (puts the returned task into the list cache right away)
+- src/components/pages/(auth)/employer/offboarding/[id]/hooks/useUpdateStageTask.ts
+  (optimistic check/uncheck, rolled back on error)
+- src/components/pages/(auth)/employer/offboarding/[id]/hooks/useCreateStageTask.ts
+  (adds the returned task to the list cache right away)
+- src/components/pages/(auth)/employer/offboarding/[id]/Content.tsx
+  (activeStage reset when currentPhase changes; removed the copy-on-load of
+  localCase; "Mark as Received" hands back to fresh data after refetch;
+  pendingAttachments state: file names of an email being sent, cleared after
+  the refetch or on error; "Updating..." row with LoadingSpinner while
+  isMutating or isFetching and no attachment is pending)
+- src/components/pages/(auth)/employer/offboarding/components/AttachmentCard.tsx
+  (new pendingNames prop: greyed "Sending..." rows with LoadingSpinner)
+- src/components/pages/(auth)/employer/offboarding/[id]/stages/InitiationStage.tsx,
+  ClearanceStage.tsx, FinalPayStage.tsx, LegalDocsStage.tsx
+  (pass pendingAttachmentNames to their AttachmentCard)
+
+Backend:
+- none (the PATCH/POST stage-task endpoints already return the updated task)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript: npx tsc --noEmit shows no errors in the changed files. The one
+  offboarding error (ExitInterviewStage.tsx line 63, T_SeparationEmail) is
+  pre-existing and not touched.
+☐ Manual check in the browser NOT done yet. To do, with DevTools > Network >
+  "Slow 4G":
+  - upload a task file: spinner shows, then "View file"
+  - tick a task: checkmark appears at once; a failed request flips it back
+  - add a task: it appears as soon as the server answers
+  - send a letter email with an attachment: "Updating..." shows until the
+    attachment appears
+  - click a past tab, then finish the current stage: page moves to the next tab
+☐ Cypress/Playwright e2e tests not updated
+
+FIX EXPLANATION:
+  - The stage-task PATCH and POST already return the task, so the hooks write it
+    straight into the ['stageTasksCache', id, stage] cache instead of waiting for
+    the refetch. The refetch still runs in the background.
+  - Checking a task is optimistic (onMutate/onError rollback) and the checkbox is
+    disabled per task until its request settles, so repeat clicks cannot send
+    conflicting requests.
+  - Loading uses the existing house component LoadingSpinner (size 'xs', default
+    yellow), the same one used across the site. No new loading style was added.
+    SendEmailModal is shared by other screens and was not changed. Instead, the
+    moment Send is pressed the picked files appear in that tab's attachment list
+    as greyed "Sending..." rows (Letters, Sign Documents, Last Pay, Legal Docs).
+    They are replaced by the real attachments once the case reloads, and removed
+    if the send fails. A first version showed only an "Updating..." row at the top
+    of the stage panel; on a slow connection that was out of view of the
+    attachment list, so the delay still looked unhandled.
+  - The stepper follows the case again: a clicked tab is cleared whenever the
+    current phase changes, and the page reads the fresh case data instead of a
+    copy taken on load.
+
+NOTE (not changed here):
+  - Rendering, Clearance, Legal Docs and Final Pay only advance when the stage has
+    at least one task and all are checked (!hasAny || !allComplete). A stage with
+    no tasks never advances on its own. Existing rule, pending a decision.
+  - No request timeout: a request that hangs keeps the spinner until the browser
+    gives up.
+  - StageTaskChecklist still uses the HTML title attribute for "View attachment"
+    and "Upload file" (should be react-tooltip per frontend rules).
+
+================================================================================
+
 BUG ID: HRIS-2026-054
 DATE FILED: 2026-10-30
 DATE FIXED: 2026-10-31
