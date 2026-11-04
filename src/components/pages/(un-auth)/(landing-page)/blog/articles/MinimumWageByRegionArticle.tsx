@@ -311,6 +311,11 @@ const MinimumWageByRegionArticle = () => {
                     Philippine Holiday Pay Computation Guide →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/dole-compliance-requirements-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    DOLE Compliance Requirements Every Philippine Employer Must Know in 2026 →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

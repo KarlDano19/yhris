@@ -470,6 +470,11 @@ const SssContributionTable2026Article = () => {
                     Philippine Payroll Registration Checklist →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/dole-compliance-requirements-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    DOLE Compliance Requirements Every Philippine Employer Must Know in 2026 →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
