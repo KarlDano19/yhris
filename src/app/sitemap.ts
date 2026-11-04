@@ -237,6 +237,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/blog/new-hire-onboarding-checklist-philippines`,
+      lastModified: new Date('2026-11-04'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/blog/employee-offboarding-checklist-philippines`,
       lastModified: new Date('2026-11-04'),
       changeFrequency: 'monthly',
