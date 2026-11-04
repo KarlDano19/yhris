@@ -11,6 +11,7 @@ const posts: BlogPost[] = [
   {
     slug: "new-hire-onboarding-checklist-philippines",
     category: "Operations Playbook",
+    image: "/blog/new-hire-onboarding-checklist-philippines.png",
     title: "New Hire Onboarding Checklist for Philippine Employers: Government IDs and Documents",
     excerpt: "SSS and PhilHealth within 30 days of hiring, a TIN within 10 days, and Pag-IBIG enrollment. The onboarding checklist with the required steps marked, the documents to collect, and the Data Privacy Act limits.",
     date: "November 2026",
