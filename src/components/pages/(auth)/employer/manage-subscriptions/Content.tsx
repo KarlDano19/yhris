@@ -172,7 +172,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               className={classNames(
                 'cursor-pointer w-[12rem] text-center py-3 font-semibold list-none flex flex-col items-center',
                 currentTab === '#active-plans'
-                  ? 'text-[#2d4faf] border-b-2 border-b-[#355FD0] hover:text-[#3a66e0] hoverfocus:border-b-[#3a66e0]'
+                  ? 'text-[#2d4faf] border-b-2 border-b-savoy-blue hover:text-[#3a66e0] hoverfocus:border-b-[#3a66e0]'
                   : 'text-gray-500'
               )}
               onClick={() => {
@@ -186,7 +186,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               className={classNames(
                 'cursor-pointer w-[12rem] text-center py-3 font-semibold list-none flex flex-col items-center',
                 currentTab === '#transactions-history'
-                  ? 'text-[#2d4faf] border-b-2 border-b-[#355FD0] hover:text-[#3a66e0] hoverfocus:border-b-[#3a66e0]'
+                  ? 'text-[#2d4faf] border-b-2 border-b-savoy-blue hover:text-[#3a66e0] hoverfocus:border-b-[#3a66e0]'
                   : 'text-gray-500'
               )}
               onClick={() => {

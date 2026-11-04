@@ -465,7 +465,7 @@ export default function EmailProfileModal({
                                 {tagsTo.map((tagTo) => (
                                   <div
                                     key={tagTo}
-                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                    className='bg-hris-line rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                   >
                                     <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
                                       <XMarkIcon className='w-4 h-4' />
@@ -559,7 +559,7 @@ export default function EmailProfileModal({
                               {tagsCc.map((tag) => (
                                 <div
                                   key={tag}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                  className='bg-hris-line rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => handleRemoveTag(tag)}>
                                     <XMarkIcon className='w-4 h-4' />
@@ -603,7 +603,7 @@ export default function EmailProfileModal({
                               {tagsBcc.map((tagBcc) => (
                                 <div
                                   key={tagBcc}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                  className='bg-hris-line rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
                                     <XMarkIcon className='w-4 h-4' />
@@ -648,7 +648,7 @@ export default function EmailProfileModal({
                               {(followUpCcTags[activeTab] || []).map((tag) => (
                                 <div
                                   key={tag}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                  className='bg-hris-line rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => removeFollowUpCcTag(activeTab, tag)}>
                                     <XMarkIcon className='w-4 h-4' />
@@ -694,7 +694,7 @@ export default function EmailProfileModal({
                               {(followUpBccTags[activeTab] || []).map((tag) => (
                                 <div
                                   key={tag}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                  className='bg-hris-line rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => removeFollowUpBccTag(activeTab, tag)}>
                                     <XMarkIcon className='w-4 h-4' />

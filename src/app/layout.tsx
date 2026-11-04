@@ -10,6 +10,8 @@ import Auth from '@/app/auth';
 import GlobalPixelTracker from '@/components/GlobalPixelTracker';
 import NetworkStatusWatcher from '@/components/NetworkStatusWatcher';
 import TourProvider from '@/components/tour/TourProvider';
+import ThemeController from '@/components/ThemeController';
+import { THEME_INIT_SCRIPT } from '@/helpers/theme';
 
 import 'react-quill-new/dist/quill.snow.css';
 import './globals.css';
@@ -24,16 +26,17 @@ const golos_text = Golos_Text({ subsets: ['latin'], display: 'swap', adjustFontF
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else if(t==='system'){if(window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark')}}}catch(e){}})();`,
+            __html: THEME_INIT_SCRIPT,
           }}
         />
       </head>
       <body className={`${golos_text.className}`}>  
         <PostHogProvider>
+          <ThemeController />
           <GlobalErrorHandler />
           <ReactQueryWrapper>
             <TourProvider>

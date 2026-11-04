@@ -102,14 +102,14 @@ export default function PrivacyModaPagelFive({
           </div>
         </div>
       </div>
-      <div className={classNames('text-center py-3 bg-[#ACB9CB]', !atBottom ? 'bg-[#EBF3FF]' : 'bg-[#EBF3FF]')}>
+      <div className={classNames('text-center py-3 bg-hris-line', !atBottom ? 'bg-hris-tint' : 'bg-hris-tint')}>
         <button
           type='button'
           disabled={!atBottom}
           className={classNames(
             'inline-flex w-1/2 justify-center rounded-md px-3 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
             !atBottom
-              ? 'bg-[#EBF3FF] border=[#ACB9CB] border text-[#ACB9CB]'
+              ? 'bg-hris-tint border=[#ACB9CB] border text-hris-line'
               : 'bg-savoy-blue hover:bg-indigo-500 focus-visible:outline-indigo-600 text-white'
           )}
           onClick={handleNext}
@@ -118,7 +118,7 @@ export default function PrivacyModaPagelFive({
         </button>
       </div>
       {!atBottom && (
-        <div className='text-center font-semibold text-base bg-[#B8C7F0] py-3 text-[#2C3F58]'>
+        <div className='text-center font-semibold text-base bg-[#B8C7F0] py-3 text-indigo-dye'>
           Please scroll down to Agree
         </div>
       )}

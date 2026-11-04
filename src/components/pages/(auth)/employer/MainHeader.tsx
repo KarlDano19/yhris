@@ -27,10 +27,11 @@ import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/mo
 import TourCompletionModal from './modals/TourCompletionModal';
 import { useTour } from '@/components/tour/useTour';
 import ProcessFlowButton from '@/components/common/ProcessFlowButton';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 import { Tooltip } from 'react-tooltip';
-import { AdjustmentsHorizontalIcon, BellIcon, MoonIcon, SunIcon, XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon, ComputerDesktopIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { AdjustmentsHorizontalIcon, BellIcon, XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
 import ChatIcon from '@/svg/ChatIcon';
 import InfoIcon from '@/svg/InfoIcon';
@@ -56,8 +57,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isThemeOpen, setIsThemeOpen] = useState(false);
-  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>('light');
   const {
     data,
     isLoading: isProfileLoading,
@@ -479,7 +478,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                     <ProcessFlowButton />
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
-                    <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
+                    <Link href='/landing-page/pricing' className='bg-blue-300 text-savoy-blue px-8 py-2 rounded-md'>
                       <p className='text-sm font-bold'>Upgrade Now!</p>
                     </Link>
                   </div>
@@ -588,6 +587,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                             <p className='text-xs text-gray-600 font-medium truncate'>{userDetails.email}</p>
                           </div>
                         )}
+                        <ThemeSwitcher className='border-b border-gray-100' />
                         {userNavigation.map((item: any, index: any) => (
                           <UserMenuItemLink key={index} item={item} />
                         ))}
@@ -614,6 +614,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                     <p className='text-xs text-gray-600 font-medium truncate'>{userDetails.email}</p>
                   </div>
                 )}
+                <ThemeSwitcher className='mb-1' />
                 {userNavigation.map((item: any, index: any) => (
                   <PopOverItems key={index} item={item} />
                 ))}
@@ -654,60 +655,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
         />
       )}
 
-      <Transition.Root show={isThemeOpen} as={Fragment}>
-        <Dialog as='div' className='relative z-30' onClose={() => setIsThemeOpen(false)}>
-          <Transition.Child
-            as={Fragment}
-            enter='ease-out duration-300'
-            enterFrom='opacity-0'
-            enterTo='opacity-100'
-            leave='ease-in duration-200'
-            leaveFrom='opacity-100'
-            leaveTo='opacity-0'
-          >
-            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-black dark:bg-opacity-60 transition-opacity' />
-          </Transition.Child>
-          <div className='fixed inset-0 z-10 overflow-y-auto'>
-            <div className='flex min-h-full items-start justify-center p-4 pt-20'>
-              <Transition.Child
-                as={Fragment}
-                enter='ease-out duration-300'
-                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-                enterTo='opacity-100 translate-y-0 sm:scale-100'
-                leave='ease-in duration-200'
-                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white dark:bg-[var(--card-bg)] text-left shadow-xl transition-all w-auto'>
-                  <div className='flex bg-savoy-blue p-2 items-center gap-4'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Theme</h3>
-                    <XCircleIcon
-                      className='w-8 h-8 text-white cursor-pointer self-start'
-                      onClick={() => setIsThemeOpen(false)}
-                    />
-                  </div>
-                  <div className='p-6 flex gap-4'>
-                    {([
-                      { mode: 'light' as const, label: 'Light', icon: <SunIcon className='h-7 w-7' /> },
-                      { mode: 'dark' as const, label: 'Dark', icon: <MoonIcon className='h-7 w-7' /> },
-                      { mode: 'system' as const, label: 'System', icon: <ComputerDesktopIcon className='h-7 w-7' /> },
-                    ]).map(({ mode, label, icon }) => (
-                      <button
-                        key={mode}
-                        onClick={() => { applyTheme(mode); setIsThemeOpen(false); }}
-                        className={`flex flex-col items-center justify-center gap-2 w-24 h-24 rounded-lg border-2 transition-colors ${themeMode === mode ? 'border-savoy-blue' : 'border-gray-200 hover:border-gray-300'}`}
-                      >
-                        {icon}
-                        <span className='text-sm font-medium'>{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition.Root>
       <SessionExpirationModal
         isOpen={isExpiring}
         onRenew={handleRenewSession}

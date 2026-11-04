@@ -440,7 +440,7 @@ export default function InvestigationModal({
                             onDragLeave={handleDrag}
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
-                            className={`block w-full rounded-md border-0 py-14 px-3 text-center text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 ${
+                            className={`block w-full rounded-md border-0 py-14 px-3 text-center text-hris-line shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 ${
                               isDragActive ? 'bg-blue-50 text-savoy-blue ring-savoy-blue' : ''
                             }`}
                           >

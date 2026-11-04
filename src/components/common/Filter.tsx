@@ -186,7 +186,7 @@ export default function Filter({
                     <select
                       value={draftFilters[group.id]?.[0] || group.options[0]?.value}
                       onChange={(e) => handleOptionChange(group.id, e.target.value)}
-                      className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 dark:bg-[var(--subtle-bg)] px-3 py-2.5 pr-9 text-sm text-gray-700 dark:text-[var(--body-text)] focus:border-[#355fd0] outline-none truncate"
+                      className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 dark:bg-[var(--subtle-bg)] px-3 py-2.5 pr-9 text-sm text-gray-700 dark:text-[var(--body-text)] focus:border-savoy-blue outline-none truncate"
                       title={group.options.find(opt => opt.value === draftFilters[group.id]?.[0])?.label || group.options[0]?.label}
                     >
                       {group.options.map((option) => (
@@ -224,7 +224,7 @@ export default function Filter({
               {showResetButton && (
                 <button
                   onClick={handleReset}
-                  className="rounded-lg border border-[#355fd0] bg-white px-4 py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/10"
+                  className="rounded-lg border border-savoy-blue bg-white px-4 py-2 text-sm font-medium text-savoy-blue hover:bg-savoy-blue/10"
                 >
                   Reset
                 </button>
@@ -232,7 +232,7 @@ export default function Filter({
               {showApplyButton && (
                 <button
                   onClick={handleApply}
-                  className="rounded-lg bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90"
+                  className="rounded-lg bg-savoy-blue px-5 py-2 text-sm font-semibold text-white hover:bg-savoy-blue/90"
                 >
                   Apply
                 </button>

@@ -10,7 +10,7 @@ import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuO
 
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
+import html2canvas from '@/helpers/captureLight';
 import { Tooltip } from 'react-tooltip';
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useForm } from 'react-hook-form';

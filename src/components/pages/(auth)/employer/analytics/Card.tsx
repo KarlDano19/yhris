@@ -14,7 +14,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ value, trend, isPositive = true, showSeeMore = false }) => {
   return (
-    <div className="bg-white rounded-2xl p-5 mt-2 border border-[#A8B5C7] shadow-lg shadow-gray-300">
+    <div className="bg-white rounded-2xl p-5 mt-2 border border-hris-line-alt shadow-lg shadow-gray-300">
       <div className="flex items-center justify-center gap-2 mb-2">
         <span className="text-4xl font-bold text-gray-900">{value}</span>
         <span className="-mt-1">

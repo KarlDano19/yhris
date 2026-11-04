@@ -382,7 +382,7 @@ const Content = () => {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       // Capture the chart as canvas with high quality
-      const html2canvas = (await import('html2canvas')).default;
+      const html2canvas = (await import('@/helpers/captureLight')).default;
       const canvas = await html2canvas(chartContainer, {
         backgroundColor: '#ffffff',
         scale: 3, // Higher resolution

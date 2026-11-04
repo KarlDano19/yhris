@@ -112,7 +112,7 @@ export default function EmploymentHistoryEditForm({
           onClick={onBack}
           disabled={isSaving}
           className={`flex items-center gap-2 text-sm font-medium ${
-            isSaving ? "text-gray-400" : "text-[#355fd0] hover:underline"
+            isSaving ? "text-gray-400" : "text-savoy-blue hover:underline"
           }`}
         >
           <span aria-hidden>←</span> Back
@@ -183,7 +183,7 @@ export default function EmploymentHistoryEditForm({
                 "w-full rounded-md bg-white px-3 py-2 text-sm",
                 (showErr("date_from", "date_from") || showErr("range"))
                   ? "border border-red-500 focus:border-red-500"
-                  : "border border-gray-300 focus:border-[#355fd0]",
+                  : "border border-gray-300 focus:border-savoy-blue",
               ].join(" ")}
               disabled={isSaving}
             />
@@ -227,7 +227,7 @@ export default function EmploymentHistoryEditForm({
                 "w-full rounded-md bg-white px-3 py-2 text-sm",
                 (showErr("date_to", "date_to") || showErr("range"))
                   ? "border border-red-500 focus:border-red-500"
-                  : "border border-gray-300 focus:border-[#355fd0]",
+                  : "border border-gray-300 focus:border-savoy-blue",
               ].join(" ")}
               disabled={isSaving}
             />
@@ -251,7 +251,7 @@ export default function EmploymentHistoryEditForm({
                 "w-full rounded-md bg-white px-3 py-2 text-sm outline-none",
                 showErr("description", "description")
                   ? "border border-red-500 focus:border-red-500"
-                  : "border border-gray-300 focus:border-[#355fd0]",
+                  : "border border-gray-300 focus:border-savoy-blue",
               ].join(" ")}
               defaultValue={form.description ?? ""}
               onChange={(e) => {
@@ -278,7 +278,7 @@ export default function EmploymentHistoryEditForm({
           type="button"
           onClick={onBack}
           disabled={isSaving}
-          className="rounded-md border border-[#355fd0] px-4 py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/5 disabled:opacity-50"
+          className="rounded-md border border-savoy-blue px-4 py-2 text-sm font-medium text-savoy-blue hover:bg-savoy-blue/5 disabled:opacity-50"
         >
           Back
         </button>
@@ -287,7 +287,7 @@ export default function EmploymentHistoryEditForm({
           type="button"
           disabled={!canSave}
           onClick={handleSave}
-          className="rounded-md bg-[#355fd0] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded-md bg-savoy-blue px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           title={isSaving ? "Saving…" : undefined}
         >
           {isSaving ? "Saving…" : "Save"}

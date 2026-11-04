@@ -72,7 +72,7 @@ export default function AddableSelect({
               ? "bg-stone-50 text-opacity-100 ring-gray-200 cursor-not-allowed focus:outline-none focus:ring-0"
               : hasError
               ? "ring-red-500 focus:ring-red-500"
-              : "ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#355fd0]",
+              : "ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-savoy-blue",
           ].join(" ")}
         >
           <option value="" disabled hidden>
@@ -98,7 +98,7 @@ export default function AddableSelect({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="text-[#355fd0] hover:underline"
+            className="text-savoy-blue hover:underline"
           >
             + Add new {label.toLowerCase()}
           </button>
@@ -112,12 +112,12 @@ export default function AddableSelect({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={`New ${label.toLowerCase()}…`}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-[#355fd0]"
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-savoy-blue"
           />
           <button
             type="button"
             onClick={handleAdd}
-            className="rounded-md bg-[#355fd0] px-3 py-1.5 text-xs text-white"
+            className="rounded-md bg-savoy-blue px-3 py-1.5 text-xs text-white"
           >
             Add
           </button>

@@ -41,7 +41,7 @@ const CardRecentApp = () => {
             >
               Status: {recentApplication.job_stages_title}
             </button>
-            <p className='text-[#ACB9CB] text-[11px] text-center mt-1 mb-5'>
+            <p className='text-hris-line text-[11px] text-center mt-1 mb-5'>
               Status as of {formatDateTimeToLocal(recentApplication.updated_at, true)}
             </p>
           </div>

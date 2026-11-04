@@ -54,8 +54,8 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
-        <div className="px-6 py-4 border-[#A8B5C7]">
+      <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
+        <div className="px-6 py-4 border-hris-line-alt">
           <h3 className="text-lg font-semibold text-gray-900">Employee Performance</h3>
         </div>
         <div className="p-6">
@@ -69,8 +69,8 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
-        <div className="px-6 py-4 border-[#A8B5C7]">
+      <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
+        <div className="px-6 py-4 border-hris-line-alt">
           <h3 className="text-lg font-semibold text-gray-900">Employee Performance</h3>
         </div>
         <div className="p-6">
@@ -83,8 +83,8 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
-      <div className="px-6 py-4 border-[#A8B5C7]">
+    <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
+      <div className="px-6 py-4 border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900">Employee Performance</h3>
       </div>
       <div className="p-6">
@@ -92,7 +92,7 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
           <div className='min-w-full py-2 sm:px-6 lg:px-8'>
             <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead>
-              <tr className="border-b-2 border-[#ACB9CB]">
+              <tr className="border-b-2 border-hris-line">
                 <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
                   Name
                 </th>

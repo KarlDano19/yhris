@@ -139,7 +139,7 @@ export default function FilterPopover({
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, location: e.target.value }))
                   }
-                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60"
                   disabled={anyLoading}
                   aria-busy={isLocLoading}
                   aria-invalid={isLocError || undefined}
@@ -175,7 +175,7 @@ export default function FilterPopover({
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, department: e.target.value }))
                   }
-                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60"
                   disabled={anyLoading}
                   aria-busy={isDeptLoading}
                   aria-invalid={isDeptError || undefined}
@@ -211,7 +211,7 @@ export default function FilterPopover({
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, position: e.target.value }))
                   }
-                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60"
                   disabled={anyLoading}
                   aria-busy={isPosLoading}
                   aria-invalid={isPosError || undefined}
@@ -250,7 +250,7 @@ export default function FilterPopover({
                       recordStatus: e.target.value as FilterValues["recordStatus"],
                     }))
                   }
-                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60"
                   disabled={anyLoading}
                 >
                   {recordStatusOptions.map((opt) => (
@@ -284,7 +284,7 @@ export default function FilterPopover({
                         return { ...d, isActive: newIsActive };
                       });
                     }}
-                    className="h-4 w-4 text-[#355fd0] focus:ring-[#355fd0] border-gray-300 rounded"
+                    className="h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded"
                   />
                   <span className="text-sm text-gray-700">Active</span>
                 </label>
@@ -301,7 +301,7 @@ export default function FilterPopover({
                         return { ...d, isActive: newIsActive };
                       });
                     }}
-                    className="h-4 w-4 text-[#355fd0] focus:ring-[#355fd0] border-gray-300 rounded"
+                    className="h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded"
                   />
                   <span className="text-sm text-gray-700">Inactive</span>
                 </label>
@@ -321,7 +321,7 @@ export default function FilterPopover({
                     isActive: ["true"],
                   })
                 }
-                className="rounded-lg border border-[#355fd0] bg-white px-4 py-1.5 sm:px-5 sm:py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/10"
+                className="rounded-lg border border-savoy-blue bg-white px-4 py-1.5 sm:px-5 sm:py-2 text-sm font-medium text-savoy-blue hover:bg-savoy-blue/10"
               >
                 Reset
               </button>
@@ -331,7 +331,7 @@ export default function FilterPopover({
                   onApply(draft);
                   onOpenChange(false);
                 }}
-                className="rounded-lg bg-[#355fd0] px-5 py-1.5 sm:px-6 sm:py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-60"
+                className="rounded-lg bg-savoy-blue px-5 py-1.5 sm:px-6 sm:py-2 text-sm font-semibold text-white hover:bg-savoy-blue/90 disabled:opacity-60"
                 disabled={anyLoading}
               >
                 Search

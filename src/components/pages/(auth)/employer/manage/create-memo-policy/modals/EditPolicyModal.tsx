@@ -393,7 +393,7 @@ export default function EditPolicyModal({
                       <div className='sm:col-span-4 mt-4'>
                         <label className='block text-sm font-medium leading-6 text-gray-900'>Attachments</label>
                         <div className='mt-2'>
-                          <div className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 text-center'>
+                          <div className='block w-full rounded-md border-0 py-8 px-3 text-hris-line shadow-sm ring-1 ring-inset ring-gray-300 text-center'>
                             {existingAttachments.length > 0 ? (
                               <div>
                                 <p className='text-xs text-gray-600 mb-2'>Attachments:</p>
@@ -664,7 +664,7 @@ export default function EditPolicyModal({
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>Attachments</label>
                         <div className='mt-2'>
-                          <div onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 text-center'>
+                          <div onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} className='block w-full rounded-md border-0 py-8 px-3 text-hris-line shadow-sm ring-1 ring-inset ring-gray-300 text-center'>
                             {existingAttachments.length > 0 && (
                               <div className='mb-4'>
                                 <p className='text-xs text-gray-600 mb-2'>Existing Attachments:</p>

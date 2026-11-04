@@ -200,7 +200,7 @@ const FloatingHelpButton = ({
             <p className='text-xs text-gray-600 mt-2'>Choose an option below to get support or share your thoughts.</p>
             <div className='w-full h-[6rem] md:h-[9rem] overflow-hidden hover:pr-0 mt-3'>
               <button
-                className='my-2 border shadow-sm bg-[#FFC107] font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-3 w-full rounded-md hover:bg-[#e0b532]'
+                className='my-2 border shadow-sm bg-hris-yellow font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-3 w-full rounded-md hover:bg-[#e0b532]'
                 onClick={() => {
                   window.open(
                     'https://yahshua.notion.site/173c8ec44231803a94e5ec947a3546e2?pvs=105',
@@ -211,7 +211,7 @@ const FloatingHelpButton = ({
                 Report a bug
               </button>
               <button
-                className='my-2 border shadow-sm bg-[#FFC107] font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-3 w-full rounded-md hover:bg-[#e0b532]'
+                className='my-2 border shadow-sm bg-hris-yellow font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-3 w-full rounded-md hover:bg-[#e0b532]'
                 onClick={() => {
                   window.open(
                     'https://docs.google.com/forms/d/e/1FAIpQLSfshLBcafYQvTgAjcmYu_0AyC8IuuoyXrA5LJtME_kD1oDLww/viewform',

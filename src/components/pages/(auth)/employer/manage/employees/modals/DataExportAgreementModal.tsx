@@ -59,10 +59,10 @@ export default function DataAgreementModal({
               <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='text-center px-4 pt-4 pb-4'>
                   <div className='flex justify-end'>
-                    <XCircleIcon className='w-[19px] h-[19px] text-[#ACB9CB] cursor-pointer mt-1' onClick={()=>setIsOpen(false)} />
+                    <XCircleIcon className='w-[19px] h-[19px] text-hris-line cursor-pointer mt-1' onClick={()=>setIsOpen(false)} />
                   </div>
                     <div className='flex p-2'>
-                      <h3 className='flex-1 text-[#2C3F58] text-xl px-4 font-semibold text-center'>Export Agreement</h3>
+                      <h3 className='flex-1 text-indigo-dye text-xl px-4 font-semibold text-center'>Export Agreement</h3>
                     </div>
                   <div className='mt-3 text-left sm:mt-3 px-6 h-[450px] overflow-auto'>
                     <ul className='list-decimal nested-decimal'>

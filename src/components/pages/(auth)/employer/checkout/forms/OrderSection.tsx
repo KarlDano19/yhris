@@ -102,7 +102,7 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
       <div className='flex mb-8'>
         <input
           type='text'
-          className='w-full border border-[#acb9cb] rounded-md text-[15px] p-2 mr-6'
+          className='w-full border border-hris-line rounded-md text-[15px] p-2 mr-6'
           placeholder='Enter Discount Code'
           value={inputtedCode}
           onChange={({ target }: any) => {

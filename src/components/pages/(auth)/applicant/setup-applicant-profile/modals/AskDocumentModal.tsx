@@ -57,7 +57,7 @@ const AskDocumentModal = ({
                 <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-md sm:p-6">
                   <div>
                     <div className="mx-auto flex items-center justify-center rounded-full">
-                      <ExclamationCircleIcon className="h-24 w-24 text-[#FFC107]" />
+                      <ExclamationCircleIcon className="h-24 w-24 text-hris-yellow" />
                     </div>
                     <div className="mt-1 text-center sm:mt-3">
                       <DialogTitle

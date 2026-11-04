@@ -5,6 +5,7 @@ delete colors["warmGray"];
 delete colors["trueGray"];
 delete colors["coolGray"];
 delete colors["blueGray"];
+const { surfaceColors, textColors, themePalettePlugin } = require("./tailwind.theme");
 module.exports = {
   darkMode: 'class',
   content: [
@@ -25,8 +26,9 @@ module.exports = {
       },
       colors: {
         ...colors,
-        "indigo-dye": "#2C3F58",
-        "savoy-blue": "#355FD0",
+        // Palette, brand and `hris-*` colors resolve to CSS variables so they
+        // switch with dark mode. See tailwind.theme.js.
+        ...surfaceColors,
         // Semantic theme tokens — auto-switch with dark mode via CSS variables.
         // Usage: bg-theme-bg, text-theme-body, border-theme-border, etc.
         theme: {
@@ -64,11 +66,20 @@ module.exports = {
       borderRadius: {
         lp: "0.625rem",
       },
+      // Tailwind can't derive the default focus ring from a CSS variable, so pin its original value.
+      ringColor: { DEFAULT: "#3b82f6" },
+      // Foreground utilities use the text role of the palette (lighter shades in dark mode).
+      textColor: textColors,
+      placeholderColor: textColors,
+      caretColor: textColors,
+      textDecorationColor: textColors,
+      fill: textColors,
+      stroke: textColors,
     },
   },
   safelist: [
     'text-red-600',
     'border-red-600',
   ],
-  plugins: [],
+  plugins: [themePalettePlugin],
 };

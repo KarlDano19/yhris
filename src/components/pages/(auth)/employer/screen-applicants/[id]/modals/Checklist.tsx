@@ -1141,7 +1141,7 @@ export default function Checklist({
             <button
               onClick={handleClose}
               type='button'
-              className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+              className='border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]'
             >
               Close
             </button>
@@ -1159,7 +1159,7 @@ export default function Checklist({
                     <button
                       type='submit'
                       disabled={approveStage.isLoading || updateStageNotesMutation.isLoading || isSaveDisabled}
-                      className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd] disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2'
+                      className='rounded-lg py-2 px-6 bg-savoy-blue text-white hover:bg-[#3156bd] disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2'
                     >
                       {(approveStage.isLoading || updateStageNotesMutation.isLoading) && (
                         <LoadingSpinner size='sm' color='blue' />

@@ -21,6 +21,26 @@
   --lp-surface-2: 222 40% 10%;
 }
 
+/* ─── App theme tokens ───────────────────────────────────────── */
+/* Built on the palette variables from tailwind.theme.js, so they switch with
+   dark mode automatically. Usage: bg-theme-surface, text-theme-body, etc.
+   Re-declared on [data-theme="light"] so forced-light areas resolve light values. */
+:root,
+[data-theme="light"] {
+  --color-bg: rgb(var(--c-gray-50));
+  --color-surface: rgb(var(--c-white));
+  --color-surface-raised: rgb(var(--c-gray-100));
+  --color-text: rgb(var(--t-gray-900));
+  --color-text-muted: rgb(var(--t-gray-500));
+  --color-border: rgb(var(--c-gray-200));
+  --color-border-subtle: rgb(var(--c-gray-100));
+  --color-primary: rgb(var(--t-savoy-blue));
+  --color-primary-yellow: rgb(var(--c-hris-yellow));
+  --color-success: rgb(var(--t-green-600));
+  --color-error: rgb(var(--t-red-600));
+  --color-warning: rgb(var(--t-amber-500));
+}
+
 @layer components {
   /* Landing page layout */
   .lp-section-label {

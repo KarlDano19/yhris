@@ -677,7 +677,7 @@ export default function SendEmailModal({
                 <label className="block text-sm font-medium leading-6 text-gray-900">To</label>
                 <div className="mt-2 border border-gray-300 pl-2 pr-2 pt-1.5 pb-1.5 flex items-center gap-3 flex-wrap w-full rounded-md">
                   {(pendingFormData?.email || []).map((email: string, i: number) => (
-                    <div key={i} className="bg-[#ACB9CB] rounded-md flex items-center py-0 px-4 text-sm">
+                    <div key={i} className="bg-hris-line rounded-md flex items-center py-0 px-4 text-sm">
                       <p>{email}</p>
                     </div>
                   ))}
@@ -690,7 +690,7 @@ export default function SendEmailModal({
                   <label className="block text-sm font-medium leading-6 text-gray-900">CC</label>
                   <div className="mt-2 border border-gray-300 pl-2 pr-2 pt-1.5 pb-1.5 flex items-center gap-3 flex-wrap w-full rounded-md">
                     {pendingFormData.cc.map((email: string, i: number) => (
-                      <div key={i} className="bg-[#ACB9CB] rounded-md flex items-center py-0 px-4 text-sm">
+                      <div key={i} className="bg-hris-line rounded-md flex items-center py-0 px-4 text-sm">
                         <p>{email}</p>
                       </div>
                     ))}
@@ -704,7 +704,7 @@ export default function SendEmailModal({
                   <label className="block text-sm font-medium leading-6 text-gray-900">BCC</label>
                   <div className="mt-2 border border-gray-300 pl-2 pr-2 pt-1.5 pb-1.5 flex items-center gap-3 flex-wrap w-full rounded-md">
                     {pendingFormData.bcc.map((email: string, i: number) => (
-                      <div key={i} className="bg-[#ACB9CB] rounded-md flex items-center py-0 px-4 text-sm">
+                      <div key={i} className="bg-hris-line rounded-md flex items-center py-0 px-4 text-sm">
                         <p>{email}</p>
                       </div>
                     ))}
@@ -718,7 +718,7 @@ export default function SendEmailModal({
               <button
                 type="button"
                 onClick={() => setIsConfirmSendModalOpen(false)}
-                className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
+                className="border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]"
               >
                 Go Back
               </button>
@@ -726,7 +726,7 @@ export default function SendEmailModal({
                 type="button"
                 onClick={handleConfirmSend}
                 disabled={isLoading}
-                className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd] disabled:opacity-50"
+                className="rounded-lg py-2 px-6 bg-savoy-blue text-white hover:bg-[#3156bd] disabled:opacity-50"
               >
                 {isLoading ? (
                   <div
@@ -1178,7 +1178,7 @@ export default function SendEmailModal({
                         onDragLeave={handleDrag}
                         onDragOver={handleDrag}
                         onDrop={handleDrop}
-                        className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                        className='block w-full rounded-md border-0 py-8 px-3 text-hris-line shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                       >
                         <label
                           className={`${
@@ -1328,7 +1328,7 @@ export default function SendEmailModal({
                         onDragLeave={handleDrag}
                         onDragOver={handleDrag}
                         onDrop={handleDrop}
-                        className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                        className='block w-full rounded-md border-0 py-8 px-3 text-hris-line shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                       >
                         <label
                           className={`${
@@ -1480,13 +1480,13 @@ export default function SendEmailModal({
               <button
                 onClick={handleClose}
                 type="button"
-                className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
+                className="border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]"
               >
                 Close
               </button>
               <button
                 type="submit"
-                className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]"
+                className="rounded-lg py-2 px-6 bg-savoy-blue text-white hover:bg-[#3156bd]"
                 disabled={isLoading}
                 onClick={async (e) => {
                   // Trigger validation for all required fields

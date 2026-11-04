@@ -137,7 +137,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     <p className='text-[15px] mb-12 break-words text-pretty'>{item.placeAdvertise}</p>
                     <Link
                       href={`screen-applicants/${item.id}`}
-                      className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
+                      className='bg-[#EAC645] text-indigo-dye font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
                     >
                       {item.newApplicantsLast30Days} New Applicant/s
                     </Link>

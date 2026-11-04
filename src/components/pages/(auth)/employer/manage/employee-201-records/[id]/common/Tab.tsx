@@ -39,7 +39,7 @@ export default function Tab({
       <div
         className={`mb-1 ${
           active && !disabled
-            ? "text-[#355fd0]"
+            ? "text-savoy-blue"
             : "text-gray-500"
         }`}
       >
@@ -48,7 +48,7 @@ export default function Tab({
       <span
         className={`hidden md:block leading-tight break-words whitespace-normal w-18 md:w-18 text-[10px] ${
           active && !disabled
-            ? "font-semibold text-[#355fd0]"
+            ? "font-semibold text-savoy-blue"
             : "text-gray-500"
         }`}
       >

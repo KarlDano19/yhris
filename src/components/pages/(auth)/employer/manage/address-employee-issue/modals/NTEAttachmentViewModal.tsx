@@ -73,7 +73,7 @@ function NTEAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIsOpen:
                             {parseArrayField(employeeIssueData?.nte_to).map((email: string, idx: number) => (
                               <span
                                 key={idx}
-                                className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                className='bg-hris-line rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                               >
                                 {email}
                               </span>

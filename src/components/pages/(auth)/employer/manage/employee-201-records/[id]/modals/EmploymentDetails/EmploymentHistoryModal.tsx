@@ -98,7 +98,7 @@ export default function EmploymentHistoryModal({
     >
       <div className="mt-8 w-full max-w-3xl rounded-xl bg-white shadow-xl flex max-h-[90vh] flex-col">
         {/* Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between rounded-t-xl bg-[#355fd0] px-5 py-3 text-white">
+        <div className="sticky top-0 z-20 flex items-center justify-between rounded-t-xl bg-savoy-blue px-5 py-3 text-white">
           <h3 className="text-sm font-semibold">{headerTitle}</h3>
           <button
             data-testid="close-modal-btn"
@@ -127,7 +127,7 @@ export default function EmploymentHistoryModal({
                     className={`rounded-md border px-3 py-2 text-xs font-medium ${
                       error
                         ? "cursor-not-allowed border-gray-300 text-gray-400"
-                        : "border-[#355fd0] text-[#355fd0] hover:bg-[#355fd0]/5"
+                        : "border-savoy-blue text-savoy-blue hover:bg-savoy-blue/5"
                     }`}
                     title={error ? "Fix the error then try again." : undefined}
                   >
@@ -192,7 +192,7 @@ export default function EmploymentHistoryModal({
                   <div
                     data-testid="employment-item"
                     key={`${it.id ?? "tmp"}-${i}`}
-                    className="relative rounded-xl border p-4 shadow-sm bg-[#355fd0]/5"
+                    className="relative rounded-xl border p-4 shadow-sm bg-savoy-blue/5"
                   >
                     {/* actions */}
                     <div className="absolute right-3 top-3 flex gap-2">
@@ -204,7 +204,7 @@ export default function EmploymentHistoryModal({
                         aria-label="Edit employment"
                         title="Edit"
                       >
-                        <PencilSquareIcon className="h-5 w-5 text-[#355fd0]" />
+                        <PencilSquareIcon className="h-5 w-5 text-savoy-blue" />
                       </button>
                       <button
                         data-testid="delete-employment-btn"
@@ -255,7 +255,7 @@ export default function EmploymentHistoryModal({
                 data-testid="close-btn"
                 type="button"
                 onClick={onClose}
-                className="rounded-md border border-[#355fd0] px-4 py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/5"
+                className="rounded-md border border-savoy-blue px-4 py-2 text-sm font-medium text-savoy-blue hover:bg-savoy-blue/5"
               >
                 Close
               </button>
@@ -263,7 +263,7 @@ export default function EmploymentHistoryModal({
                 data-testid="employment-analysis-btn"
                 type="button"
                 onClick={() => setShowAnalysis(true)}
-                className="rounded-md bg-[#355fd0] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f54b8]"
+                className="rounded-md bg-savoy-blue px-4 py-2 text-sm font-medium text-white hover:bg-[#2f54b8]"
               >
                 Employment History Analysis
               </button>

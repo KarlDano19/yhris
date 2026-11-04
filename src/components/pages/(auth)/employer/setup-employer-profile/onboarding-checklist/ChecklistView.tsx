@@ -163,7 +163,7 @@ const ChecklistView = () => {
                     <button
                       type='button'
                       onClick={handleProceedToAcceptanceMemo}
-                      className='flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors bg-[#355FD0] text-white hover:bg-blue-700'
+                      className='flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors bg-savoy-blue text-white hover:bg-blue-700'
                     >
                       Proceed to Acceptance Memo
                       <ChevronRightIcon className='w-4 h-4' />
