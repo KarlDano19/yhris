@@ -357,7 +357,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
         data-tooltip-place='bottom'
       >
         <span className='sr-only'>View onboarding checklist</span>
-        <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
+        <InfoIcon className='h-6 w-6 text-blue-800' fill='currentColor' />
       </button>
       <Tooltip id='info-button-tooltip' />
     </>
@@ -493,10 +493,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   {/* Mobile Messages Button */}
                   <button
                     onClick={() => setShowMessagesModal(true)}
-                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                    className="relative flex gap-2 items-center rounded-full bg-white text-blue-800 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
                   >
                     <span className="sr-only">Open messages</span>
-                    <ChatIcon fill="#1e40af" />
+                    <ChatIcon fill="currentColor" />
                     {totalUnreadCount > 0 && (
                       <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
                         {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
@@ -519,10 +519,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   {/* Messages Button */}
                   <button
                     onClick={() => setShowMessagesModal(true)}
-                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                    className="relative flex gap-2 items-center rounded-full bg-white text-blue-800 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
                   >
                     <span className="sr-only">Open messages</span>
-                    <ChatIcon fill="#1e40af" />
+                    <ChatIcon fill="currentColor" />
                     {totalUnreadCount > 0 && (
                       <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
                         {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
@@ -627,7 +627,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                       onClick={() => setIsChecklistOpen(true)}
                       className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50'
                     >
-                      <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
                       <span>Onboarding Checklist</span>
                     </button>
                   )}
