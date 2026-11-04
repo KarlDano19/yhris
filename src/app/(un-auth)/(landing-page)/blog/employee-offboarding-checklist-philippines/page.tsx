@@ -57,6 +57,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/employee-offboarding-checklist-philippines#article",
       "headline": "Employee Offboarding Checklist for Philippine Employers: From Resignation to Final Pay",
       "description": "An offboarding checklist runs on three legal clocks: 30 days' written notice from a resigning employee, a Certificate of Employment within 3 days of request, and final pay within 30 days of separation. BIR Form 2316 is due on the day of the last payment of compensation.",
+      "image": "https://yahshuahris.com/blog/employee-offboarding-checklist-philippines.png",
       "datePublished": "2026-11-04T00:00:00.000Z",
       "dateModified": "2026-11-04T00:00:00.000Z",
       "author": {
