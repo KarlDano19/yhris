@@ -164,7 +164,7 @@ export default function EditWemRequestModal({
                     <LoadingSpinner size="xl" showText text="Loading work environment measurement request..." />
                   </div>
                 ) : (
-                  <div className="min-h-[560px]">
+                  <div>
                     {selectedTab === 1 && (
                       <BasicAndRiskInfo
                         name_of_safety_officer={

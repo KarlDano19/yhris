@@ -109,7 +109,10 @@ export default function CreateJobPageJobSettings({
         
         // Check if we have a similar question
         let key = '';
-        if (lowerQuestion.includes("driver's license")) {
+        if (question.presetId && question.presetId.startsWith('custom-question')) {
+          // Custom questions are never presets, whatever words they contain
+          key = question.id;
+        } else if (lowerQuestion.includes("driver's license")) {
           key = 'drivers-license';
         } else if (lowerQuestion.includes("background check")) {
           key = 'background-check';

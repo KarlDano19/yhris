@@ -24,7 +24,8 @@ import ViewDirectiveModal from './modals/ViewDirectiveModal';
 import EditPolicyModal from './modals/EditPolicyModal';
 import ConfirmModal from '@/components/ConfirmModal';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowDownTrayIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import ClipIcon from '@/svg/ClipIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import DuplicateIcon from '@/svg/DuplicateIcon';
@@ -32,6 +33,7 @@ import EditIcon from '@/svg/EditIcon';
 import EyePassword from '@/svg/EyePassword';
 import Image from 'next/image';
 import useSendDirectiveEmail from './hooks/useSendDirectiveEmail';
+import useDownloadDirectiveSummary from './hooks/useDownloadDirectiveSummary';
 
 import classNames from '@/helpers/classNames';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -107,6 +109,7 @@ const DirectiveList = ({
   });
   const sendMutation = useSendDirectiveEmail();
   const duplicateMutation = useDuplicateDirective();
+  const downloadSummaryMutation = useDownloadDirectiveSummary();
 
   useEffect(() => {
     if (dataDirectives) {
@@ -264,6 +267,25 @@ const DirectiveList = ({
     }
   };
 
+  // Download a CSV summary using the filters currently entered (date range is on Date Created)
+  const handleDownloadSummary = async () => {
+    const dateRangeError = getDateRangeError();
+    if (dateRangeError) {
+      return toast.custom(() => <CustomToast message={dateRangeError} type='error' />, { duration: 5000 });
+    }
+    try {
+      await downloadSummaryMutation.mutateAsync({
+        from: itemsFilter.from,
+        to: itemsFilter.to,
+        search: searchText,
+        directiveType,
+      });
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.custom(() => <CustomToast message={msg} type='error' />, { duration: 4000 });
+    }
+  };
+
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
@@ -274,20 +296,20 @@ const DirectiveList = ({
     setPageSize(value);
   };
 
-  const handleSearch = () => {
+  // Validate the From/To pickers; returns an error message, or null when the range is usable
+  const getDateRangeError = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
-    }
-    if (dateFrom && dateTo && dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        { duration: 5000 }
-      );
+    if (dateFrom && !dateTo) return 'Invalid date to.';
+    if (!dateFrom && dateTo) return 'Invalid date from.';
+    if (dateFrom && dateTo && dateFrom > dateTo) return 'You have entered an invalid date range. Please select again.';
+    return null;
+  };
+
+  const handleSearch = () => {
+    const dateRangeError = getDateRangeError();
+    if (dateRangeError) {
+      return toast.custom(() => <CustomToast message={dateRangeError} type='error' />, { duration: 5000 });
     }
     setIsSearching(true);
     setAppliedFilter({
@@ -374,11 +396,11 @@ const DirectiveList = ({
                         setDocViewDirectiveId(item.id);
                         setIsDocViewOpen(true);
                       }}
-                      className='cursor-pointer hover:opacity-75'
+                      className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-[5px] border border-[#ACB9CB] hover:opacity-75'
                       data-tooltip-id='view-document-tooltip'
                       data-tooltip-content='View document & signatories'
                     >
-                      <EyePassword visible />
+                      <DocumentMagnifyingGlassIcon className='h-6 w-6 text-[#2C3F58]' />
                     </button>
 
                     {/* Sign — shown only when the logged-in user is a pending signatory
@@ -560,7 +582,23 @@ const DirectiveList = ({
               </button>
             </div>
           </div>
-          <div className='flex-1 flex justify-start lg:justify-end'>
+          <div className='flex-1 flex justify-start lg:justify-end gap-2'>
+            <button
+              type='button'
+              onClick={handleDownloadSummary}
+              disabled={downloadSummaryMutation.isLoading}
+              data-tooltip-id='download-summary-tooltip'
+              data-tooltip-content={`Download a CSV summary of ${label.toLowerCase()}s created within the selected date range`}
+              data-tooltip-place='bottom'
+              className='flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md py-2 px-4 text-gray-700 text-sm font-semibold shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {downloadSummaryMutation.isLoading ? (
+                <LoadingSpinner size='xs' />
+              ) : (
+                <ArrowDownTrayIcon className='h-5 w-5' />
+              )}
+              DOWNLOAD SUMMARY
+            </button>
             <SmartButton
               id="create_directive_btn"
               onClick={() => setIsCreateModalOpen(true)}
@@ -789,6 +827,7 @@ The copy is unsent, so you can edit it before sending.`}
       <Tooltip id='send-pending-tooltip'/>
       <Tooltip id='sign-memo-tooltip'/>
       <Tooltip id='view-document-tooltip'/>
+      <Tooltip id='download-summary-tooltip'/>
     </>
   );
 };

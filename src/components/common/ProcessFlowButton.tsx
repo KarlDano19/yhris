@@ -8,7 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import ModalLayout from '@/components/ModalLayout';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-const ProcessFlowButton = () => {
+const ProcessFlowButton = ({ label }: { label?: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isIframeLoading, setIsIframeLoading] = useState(true);
 
@@ -21,13 +21,14 @@ const ProcessFlowButton = () => {
     <>
       <button
         onClick={handleOpen}
-        className='relative flex items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'
+        className={label ? 'flex w-full items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50' : 'relative flex items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'}
         data-tooltip-id='process-flow-button-tooltip'
         data-tooltip-content='View process flow documentation'
         data-tooltip-place='bottom'
       >
         <span className='sr-only'>View process flow documentation</span>
         <RectangleGroupIcon className='h-6 w-6 text-blue-800' aria-hidden='true' />
+        {label && <span>{label}</span>}
       </button>
       <Tooltip id='process-flow-button-tooltip' />
 

@@ -37,6 +37,10 @@ export default function ImportModal({
     "Email": 'email',
     "Gender": 'gender',
     "Address": 'address',
+    "Department": 'department',
+    "Location": 'location',
+    "Position": 'position',
+    "Employment Status": 'employment_status',
   };
   const importHeaders = {
     date_hired: 'Date Hired',
@@ -47,6 +51,10 @@ export default function ImportModal({
     email: 'Email',
     address: 'Address',
     gender: 'Gender',
+    department: 'Department',
+    location: 'Location',
+    position: 'Position',
+    employment_status: 'Employment Status',
   };
   const [importJSON, setImportJSON] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
@@ -83,7 +91,8 @@ export default function ImportModal({
           if (results.data) {
             const importData = [];
             for (const item of results.data) {
-              if (Object.keys(item).length <= Object.keys(importHeaders).length) {
+              // Skip rows that don't carry any recognised template column
+              if (!Object.keys(item).some((key) => allowHeaders[key])) {
                 continue;
               }
 

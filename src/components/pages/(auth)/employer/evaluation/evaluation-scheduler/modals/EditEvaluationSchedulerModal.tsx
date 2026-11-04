@@ -255,7 +255,7 @@ function EditEvaluationSchedulerModal({
                       <LoadingSpinner size='xl' showText text='Loading evaluation scheduler details...' />
                     </div>
                   ) : (
-                    <div className='min-h-[420px]'>
+                    <div>
                       {selectedTab === 1 && (
                         <SchedulerInfoTab
                           register={register}
