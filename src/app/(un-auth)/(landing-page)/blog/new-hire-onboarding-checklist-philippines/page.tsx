@@ -57,6 +57,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/new-hire-onboarding-checklist-philippines#article",
       "headline": "New Hire Onboarding Checklist for Philippine Employers: Government IDs and Documents",
       "description": "Onboarding a new hire means four government registrations: SSS and PhilHealth, each reported within 30 days of hiring, Pag-IBIG membership, and a BIR TIN within 10 days of employment if the employee has none. The checklist, the documents to collect, and the Data Privacy Act limits.",
+      "image": "https://yahshuahris.com/blog/new-hire-onboarding-checklist-philippines.png",
       "datePublished": "2026-11-04T00:00:00.000Z",
       "dateModified": "2026-11-04T00:00:00.000Z",
       "author": {
