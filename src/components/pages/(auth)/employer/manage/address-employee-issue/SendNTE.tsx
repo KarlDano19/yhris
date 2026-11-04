@@ -5,10 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
-import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
+import { T_NTEAttachmentViewModal, T_ReceiveOptionModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import { formatDateToLocal } from '@/helpers/date';
-import ConfirmModal from '@/components/ConfirmModal';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -21,7 +20,7 @@ const SendNTE = ({
   setIsSendNTEModalOpen,
   setIsUploadEmployeeIssueAttachmentModalOpen,
   setNTEAttachmentViewModalOpen,
-  setReleased,
+  setIsReceiveOptionModalOpen,
   loadingItemId,
   setIsRedirectingToDocumentGenerator,
   isInvestigated,
@@ -34,7 +33,7 @@ const SendNTE = ({
   setIsSendNTEModalOpen: Dispatch<T_SendNTEModal>;
   setIsUploadEmployeeIssueAttachmentModalOpen: Dispatch<T_UploadEmployeeIssueAttachmentModal>;
   setNTEAttachmentViewModalOpen: Dispatch<T_NTEAttachmentViewModal>;
-  setReleased: any;
+  setIsReceiveOptionModalOpen: Dispatch<T_ReceiveOptionModal>;
   loadingItemId: string | null;
   setIsRedirectingToDocumentGenerator: Dispatch<boolean>;
   isInvestigated?: boolean;
@@ -43,7 +42,6 @@ const SendNTE = ({
   const isLoading = loadingItemId === `${id}-nte`;
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   
   // const customOnclick = () => {
   //   setIsUploadEmployeeIssueAttachmentModalOpen({
@@ -76,10 +74,12 @@ const SendNTE = ({
     }
   };
 
-  const handleConfirmReceived = () => {
-    setReleased(id, 'nte');
-    setIsConfirmModalOpen(false);
-  };
+  // HR moved the case forward without a signed NTE and the employee has not responded since
+  const isProceededWithoutSignedCopy =
+    isNTEReceived &&
+    !!employeeIssueDetails?.nte_receipt_type &&
+    employeeIssueDetails.nte_receipt_type !== 'signed_copy' &&
+    !employeeIssueDetails?.is_responded;
 
   // Format incident_received_date as MM/DD/YYYY
   const formattedReceivedDate = formatDateToLocal(employeeIssueDetails?.incident_received_date);
@@ -113,20 +113,26 @@ const SendNTE = ({
       <div>
         <button
           className={classNames(
-            isNTEReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
+            isProceededWithoutSignedCopy
+              ? 'bg-amber-500 text-white'
+              : isNTEReceived
+              ? 'bg-savoy-blue text-white'
+              : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isNTESent || isNTEReceived}
           data-tooltip-id='nte-received-tooltip'
           data-tooltip-html={
-            isNTEReceived
+            isProceededWithoutSignedCopy
+              ? 'Proceeded without a signed NTE'
+              : isNTEReceived
               ? 'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span>'
               : !isNTESent
               ? 'NTE must be sent before marking as received'
-              : 'Click to manually mark as received if employee does not respond'
+              : 'Click to upload the signed NTE if the employee does not respond via email'
           }
           data-tooltip-place='bottom'
-          onClick={() => setIsConfirmModalOpen(true)}
+          onClick={() => setIsReceiveOptionModalOpen({ isOpen: true, id, type: 'nte' })}
         >
           {isLoading && (
             <div role='status'>
@@ -149,7 +155,7 @@ const SendNTE = ({
               <span className='sr-only'>Loading...</span>
             </div>
           )}
-          {!isLoading && (isNTEReceived ? 'Received' : 'Receive')}
+          {!isLoading && (isProceededWithoutSignedCopy ? 'Proceed' : isNTEReceived ? 'Received' : 'Receive')}
         </button>
       </div>
       {isNTEReceived && (
@@ -182,16 +188,6 @@ const SendNTE = ({
 
       <Tooltip id='nte-received-tooltip' />
       <Tooltip id='nte-clip-tooltip' />
-
-      <ConfirmModal
-        message={`Are you sure you want to manually mark this NTE as received?
-
-This will enable the Investigation and Send Decision features.`}
-        isOpen={isConfirmModalOpen}
-        setIsOpen={setIsConfirmModalOpen}
-        confirmAction={handleConfirmReceived}
-        isLoading={isLoading}
-      />
     </div>
   );
 };
