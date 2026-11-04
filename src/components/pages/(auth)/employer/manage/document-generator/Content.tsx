@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import Link from "next/link";
@@ -38,9 +38,17 @@ import { print } from './print/print';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './integrated-modules/handleProceedGenerateNTE';
 import useAddDocumentGeneratorAudit from './hooks/useAddDocumentGeneratorAudit';
+import CustomTemplatesTab from '../custom-document-generator/CustomTemplatesTab';
+import NteFormatPreview, { nteFormValues, useSignatureDataUrl } from '../custom-document-generator/components/NteFormatPreview';
+import FillForm from '../custom-document-generator/components/FillForm';
+import { DocumentTypeField } from './form-fields/Common';
+import useGetDocumentTemplates from '../custom-document-generator/hooks/useGetDocumentTemplates';
+import useGetDocumentTemplate from '../custom-document-generator/hooks/useGetDocumentTemplate';
+import { useRenderDocumentTemplate } from '../custom-document-generator/hooks/useRenderDocumentTemplate';
 
 
 import classNames from '@/helpers/classNames';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 
 export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { mutate: uploadAttachment } = useUploadEmployeeIssueAttachments();
@@ -54,6 +62,12 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const fromChecklist = searchParams.get('from') === 'checklist';
   const itemId = searchParams.get('itemId');
 
+  // Custom Templates tab — hidden in the checklist and NTE flows, which open one specific document
+  const showTabs = !fromChecklist && !employeeId;
+  const [activeTab, setActiveTab] = useState<'standard' | 'custom'>(
+    showTabs && searchParams.get('tab') === 'custom' ? 'custom' : 'standard'
+  );
+
   // Always default to employee certificate type, unless specified in URL
   const [documentType, setDocumentType] = useState<DocumentType>(
     urlDocType && ['employee-certificate', 'employment-agreement', 'notice-to-explain', 'acceptance-memo'].includes(urlDocType)
@@ -63,6 +77,23 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
   // Fetch employee issue details if employeeId is provided
   const { data: selectedEmployeeIssue, refetch: refetchEmployeeIssue } = useGetEmployeeIssueDetails(employeeId ? Number(employeeId) : null);
+
+  // A document a Custom Template replaces opens in the company's format unless Standard is picked here.
+  // An issue's NTE starts from the choice saved on the issue.
+  const { data: templateList } = useGetDocumentTemplates('');
+  const customFormatId = fromChecklist
+    ? null
+    : templateList?.records.find((template) => template.standard_type === documentType)?.id ?? null;
+  const { data: customFormat } = useGetDocumentTemplate(customFormatId);
+  const { mutateAsync: renderCustomFormat } = useRenderDocumentTemplate();
+  const [useStandard, setUseStandard] = useState(false);
+  useEffect(() => {
+    setUseStandard(!!selectedEmployeeIssue?.use_standard_nte);
+    // Keyed on the issue's id and saved choice, not the object: a refetch must not undo the user's pick
+  }, [selectedEmployeeIssue?.id, selectedEmployeeIssue?.use_standard_nte, documentType]);
+  const showCustomFormat = !!customFormat && !useStandard;
+  // The NTE keeps the standard form (its fields are the issue's); other documents use the template's own form
+  const showNteFormat = showCustomFormat && documentType === 'notice-to-explain';
 
   // Fetch existing acceptance memo (always called; only used when documentType === 'acceptance-memo')
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
@@ -347,6 +378,12 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   };
   
   const currentData = getCurrentData();
+
+  const nteSignature = useSignatureDataUrl(noticeToExplainData.signature);
+  const nteFormatValues = useMemo(
+    () => (showNteFormat && customFormat ? nteFormValues(customFormat, noticeToExplainData, nteSignature, !!employeeId) : {}),
+    [showNteFormat, customFormat, noticeToExplainData, nteSignature, employeeId]
+  );
   
   // Handle document type change
   const handleDocumentTypeChange = (type: DocumentType) => {
@@ -458,12 +495,27 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       toast,
       CustomToast,
       // Only provide updateEmployeeIssue function if coming from employee issues page
-      updateEmployeeIssue: employeeId ? true : undefined
+      updateEmployeeIssue: employeeId ? true : undefined,
+      useStandardNte: customFormat ? useStandard : undefined
     });
   };
   
   // Handle print
   const handlePrint = async () => {
+    // The NTE format prints from the backend, filled from the issue like the PDF sent at Proceed
+    if (showNteFormat && customFormat?.id) {
+      try {
+        const url = await renderCustomFormat({
+          id: customFormat.id,
+          employeeIssueId: employeeId ? Number(employeeId) : null,
+          values: nteFormatValues,
+        });
+        window.open(url, '_blank');
+      } catch (error: any) {
+        toast.custom(() => <CustomToast message={error.message || 'There was an error preparing your document. Please try again.'} type="error" />);
+      }
+      return;
+    }
     try {
       let options = {
         elementId: 'employee-certificate-preview',
@@ -655,6 +707,71 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           </div>
           <div className="px-2 md:px-8 lg:px-4">
             <h2 className="text-xl font-bold text-indigo-dye">Document Generator</h2>
+            {showTabs && (
+              <div className="mt-4 border-b border-gray-200">
+                <nav className="-mb-px flex gap-6">
+                  {([['standard', 'Standard Documents'], ['custom', 'Custom Templates']] as const).map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setActiveTab(key)}
+                      className={classNames(
+                        'pb-3 text-sm font-medium border-b-2 transition-colors',
+                        activeTab === key
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            )}
+            {activeTab === 'custom' ? (
+              <div className="mt-6">
+                <CustomTemplatesTab hasActiveSubscription={hasActiveSubscription} />
+              </div>
+            ) : (
+            <>
+            {customFormat && (
+              <div className={classNames("mt-6 max-w-xl", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+                <label htmlFor="document-format" className="block text-sm font-medium text-gray-700 mb-1">
+                  Format
+                </label>
+                <div className='relative'>
+                  <select
+                    id="document-format"
+                    value={useStandard ? 'standard' : 'custom'}
+                    onChange={(event) => setUseStandard(event.target.value === 'standard')}
+                    className="appearance-none pr-9 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="custom">{customFormat.title} (Custom Templates)</option>
+                    <option value="standard">Standard document</option>
+                  </select>
+                  <div className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2'>
+                    <SelectChevronDown />
+                  </div>
+                </div>
+                {showNteFormat && employeeId && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Filled from this employee issue. Edit the layout in Custom Templates.
+                  </p>
+                )}
+              </div>
+            )}
+            {showCustomFormat && !showNteFormat && customFormat?.id ? (
+              <div className={classNames("mt-6 space-y-6", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+                <div className="max-w-xl">
+                  <DocumentTypeField
+                    documentType={documentType}
+                    formData={currentData as EmployeeCertificateFormData}
+                    handleInputChange={(event) => handleDocumentTypeChange(event.target.value as DocumentType)}
+                  />
+                </div>
+                <FillForm key={customFormat.id} templateId={customFormat.id} onBack={() => setUseStandard(true)} />
+              </div>
+            ) : (
             <div className={classNames("grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
               <div className="transition-all duration-300">
                 <Forms
@@ -696,12 +813,23 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     />
                   </div>
                 ) : (
-                  <div id="notice-to-explain-preview">
-                    <NoticeToExplainPreview data={noticeToExplainData} />
-                  </div>
+                  showNteFormat && customFormat ? (
+                    <NteFormatPreview
+                      template={customFormat}
+                      employeeIssueId={employeeId ? Number(employeeId) : null}
+                      formValues={nteFormatValues}
+                    />
+                  ) : (
+                    <div id="notice-to-explain-preview">
+                      <NoticeToExplainPreview data={noticeToExplainData} />
+                    </div>
+                  )
                 )}
               </div>
             </div>
+            )}
+            </>
+            )}
           </div>
         </div>
       )}
