@@ -187,7 +187,7 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex items-center justify-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Monthly Issue Volume</h3>
         </div>
@@ -200,7 +200,7 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex items-center justify-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Monthly Issue Volume</h3>
         </div>
@@ -212,7 +212,7 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+    <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
       <div className="flex items-center justify-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
           Monthly Issue Volume ({getDateRangeLabel()})

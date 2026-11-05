@@ -21,6 +21,26 @@
   --lp-surface-2: 222 40% 10%;
 }
 
+/* ─── App theme tokens ───────────────────────────────────────── */
+/* Built on the palette variables from tailwind.theme.js, so they switch with
+   dark mode automatically. Usage: bg-theme-surface, text-theme-body, etc.
+   Re-declared on [data-theme="light"] so forced-light areas resolve light values. */
+:root,
+[data-theme="light"] {
+  --color-bg: rgb(var(--c-gray-50));
+  --color-surface: rgb(var(--c-white));
+  --color-surface-raised: rgb(var(--c-gray-100));
+  --color-text: rgb(var(--t-gray-900));
+  --color-text-muted: rgb(var(--t-gray-500));
+  --color-border: rgb(var(--c-gray-200));
+  --color-border-subtle: rgb(var(--c-gray-100));
+  --color-primary: rgb(var(--t-savoy-blue));
+  --color-primary-yellow: rgb(var(--c-hris-yellow));
+  --color-success: rgb(var(--t-green-600));
+  --color-error: rgb(var(--t-red-600));
+  --color-warning: rgb(var(--t-amber-500));
+}
+
 @layer components {
   /* Landing page layout */
   .lp-section-label {
@@ -243,6 +263,7 @@ div.inactive-toggle-periodicity {
   cursor: pointer;
   padding: 0.7rem 1.4rem !important;
 }
+
 div.active-toggle-periodicity {
   background: #4f80ff;
   box-shadow: 0px 5px 8px 3px rgba(39, 87, 237, 0.15);
@@ -257,12 +278,12 @@ div.active-toggle-periodicity {
   color: #ffffff;
   padding: 0.7rem 1.4rem !important;
 }
+
 div.remove-height {
   height: unset !important;
   overflow: unset !important;
 }
 
-/* Add this to your global styles or CSS module */
 .toggle-ios-label {
   width: 36px;
   height: 16px;
@@ -278,13 +299,9 @@ div.remove-height {
 
 .toggle-ios-handle {
   top: 1px;
-  /* Adjust according to the size of the handle */
   left: 1px;
-  /* Adjust according to the size of the handle */
   width: 10px;
-  /* Adjust according to the size of the handle */
   height: 10px;
-  /* Adjust according to the size of the handle */
   border-radius: 999px;
   position: absolute;
   transition: transform 0.2s;
@@ -416,37 +433,27 @@ div.remove-height {
 /* Style the scroll container */
 ::-webkit-scrollbar {
   width: 5px;
-  /* Width of the scrollbar */
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
-  /* Color of the track */
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb {
   background: #2C3F58;
-  /* Color of the scroll handle */
   border-radius: 6px;
-  /* Rounded corners */
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #2C3F58;
-  /* Color of the scroll handle on hover */
   padding-left: 1em !important;
 }
 
-/* Scrollbar styling */
 * {
   scrollbar-width: thin;
   scrollbar-color: #2d3e58 #f1f1f1;
 }
 
-/* Job content scrollbar - Hidden by default, shown on hover */
 .hide-scrollbar {
   scrollbar-color: transparent transparent;
 }
@@ -477,52 +484,44 @@ div.remove-height {
     align-items: baseline !important;
     overflow: visible !important;
   }
-  
+
   .safari-nav-container > * {
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
 }
 
-/* Force dropdowns to open downwards and control height */
+/* Force dropdowns to open downwards */
 select {
   direction: ltr;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 select option {
   direction: ltr;
 }
 
-/* Control dropdown height and ensure it opens downwards */
 select[size] {
   height: auto;
   max-height: 200px;
 }
 
-/* For the address dropdown specifically */
+select:focus {
+  direction: ltr;
+}
+
+select[size="1"] {
+  direction: ltr;
+}
+
 #address {
   direction: ltr;
 }
 
 #address option {
   direction: ltr;
-}
-
-/* Additional styling to force dropdown direction */
-select:focus {
-  direction: ltr;
-}
-
-/* Ensure dropdown opens downwards */
-select[size="1"] {
-  direction: ltr;
-}
-
-/* Override any browser-specific dropdown behavior */
-select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
 }
 
 .org-tree-container {

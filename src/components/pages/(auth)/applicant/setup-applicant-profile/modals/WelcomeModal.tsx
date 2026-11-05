@@ -56,7 +56,7 @@ const WelcomeModal = ({ open, onSuccess, onClose }: WelcomeModalProps) => {
       <>
         <div>
           <div className="mx-auto flex items-center justify-center rounded-full">
-            <ExclamationCircleIcon className="h-24 w-24 text-[#FFC107]" />
+            <ExclamationCircleIcon className="h-24 w-24 text-hris-yellow" />
           </div>
           <div className="mt-1 text-center sm:mt-3">
             <DialogTitle
@@ -65,7 +65,7 @@ const WelcomeModal = ({ open, onSuccess, onClose }: WelcomeModalProps) => {
             >
               Would you like to upload your Curriculum Vitae or Resume?
             </DialogTitle>
-            <p className="text-[#ACB9CB] text-md mt-6">
+            <p className="text-hris-line text-md mt-6">
               Details in your Curriculum Vitae or Resume will be automatically
               filled out in the fields available.
             </p>

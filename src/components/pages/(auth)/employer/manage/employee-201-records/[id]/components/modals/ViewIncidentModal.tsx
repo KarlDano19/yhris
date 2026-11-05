@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 
 import ModalLayout from "@/components/ModalLayout";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { RichTextView } from "@/components/common/RichTextEditor";
 import useGetDisciplinaryRecordDetail from "../../hooks/useGetDisciplinaryRecordDetail";
 
 import { DocumentArrowDownIcon } from "@heroicons/react/24/outline";
@@ -109,9 +110,11 @@ const ViewIncidentModal = ({
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                 Brief Background
               </p>
-              <p className="mt-1 whitespace-pre-line rounded-md bg-gray-50 p-3 text-sm text-gray-900">
-                {data.brief_background || "—"}
-              </p>
+              {data.brief_background ? (
+                <RichTextView value={data.brief_background} className="mt-1 rounded-md bg-gray-50 p-3" />
+              ) : (
+                <p className="mt-1 rounded-md bg-gray-50 p-3 text-sm text-gray-900">—</p>
+              )}
             </div>
 
             {/* NTE / Decision progress */}

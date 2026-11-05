@@ -235,7 +235,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           return (
             <div
               key={index}
-              className='w-[40px] h-[40px] border-2 border-[#fff] rounded-full relative flex-shrink-0'
+              className='w-[40px] h-[40px] border-2 border-white rounded-full relative flex-shrink-0'
               style={{ 
                 marginRight: '4px'
               }}

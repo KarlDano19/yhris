@@ -27,10 +27,11 @@ import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/mo
 import TourCompletionModal from './modals/TourCompletionModal';
 import { useTour } from '@/components/tour/useTour';
 import ProcessFlowButton from '@/components/common/ProcessFlowButton';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
 
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Tooltip } from 'react-tooltip';
+import { AdjustmentsHorizontalIcon, BellIcon, XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
 import ChatIcon from '@/svg/ChatIcon';
 import InfoIcon from '@/svg/InfoIcon';
@@ -356,7 +357,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
         data-tooltip-place='bottom'
       >
         <span className='sr-only'>View onboarding checklist</span>
-        <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
+        <InfoIcon className='h-6 w-6 text-blue-800' fill='currentColor' />
       </button>
       <Tooltip id='info-button-tooltip' />
     </>
@@ -371,7 +372,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
           <span className='sr-only'>Open notification menu</span>
           <BellIcon className='block h-6 w-6 text-blue-800' aria-hidden='true' />
           {unreadCount > 0 && (
-            <span className='absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center'>
+            <span className='notification-badge absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center'>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -466,18 +467,24 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
             <div className='mx-auto max-w-screen-2xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
               <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                 <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
-                  <div className='flex flex-shrink-0 items-center gap-2'>
+                  <div className='flex flex-shrink-0 items-center'>
                     <Link
                       href='/dashboard'
                       className={firstRoute === 'employer-profile' ? 'pointer-events-none' : ''}
                     >
                       <MainLogo />
                     </Link>
-                    {isOnboardingEnabled && lastRoute !== 'onboarding-checklist' && <InfoButton />}
-                    <ProcessFlowButton />
+                    {isOnboardingEnabled && lastRoute !== 'onboarding-checklist' && (
+                      <div className='hidden sm:block'>
+                        <InfoButton />
+                      </div>
+                    )}
+                    <div className='hidden sm:block'>
+                      <ProcessFlowButton />
+                    </div>
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
-                    <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
+                    <Link href='/landing-page/pricing' className='bg-blue-300 text-savoy-blue px-8 py-2 rounded-md'>
                       <p className='text-sm font-bold'>Upgrade Now!</p>
                     </Link>
                   </div>
@@ -486,10 +493,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   {/* Mobile Messages Button */}
                   <button
                     onClick={() => setShowMessagesModal(true)}
-                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                    className="relative flex gap-2 items-center rounded-full bg-white text-blue-800 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
                   >
                     <span className="sr-only">Open messages</span>
-                    <ChatIcon fill="#1e40af" />
+                    <ChatIcon fill="currentColor" />
                     {totalUnreadCount > 0 && (
                       <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
                         {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
@@ -512,10 +519,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   {/* Messages Button */}
                   <button
                     onClick={() => setShowMessagesModal(true)}
-                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                    className="relative flex gap-2 items-center rounded-full bg-white text-blue-800 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
                   >
                     <span className="sr-only">Open messages</span>
-                    <ChatIcon fill="#1e40af" />
+                    <ChatIcon fill="currentColor" />
                     {totalUnreadCount > 0 && (
                       <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
                         {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
@@ -586,6 +593,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                             <p className='text-xs text-gray-600 font-medium truncate'>{userDetails.email}</p>
                           </div>
                         )}
+                        <ThemeSwitcher className='border-b border-gray-100' />
                         {userNavigation.map((item: any, index: any) => (
                           <UserMenuItemLink key={index} item={item} />
                         ))}
@@ -612,6 +620,19 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                     <p className='text-xs text-gray-600 font-medium truncate'>{userDetails.email}</p>
                   </div>
                 )}
+                <div className='sm:hidden'>
+                  {isOnboardingEnabled && lastRoute !== 'onboarding-checklist' && (
+                    <button
+                      type='button'
+                      onClick={() => setIsChecklistOpen(true)}
+                      className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50'
+                    >
+                      <span>Onboarding Checklist</span>
+                    </button>
+                  )}
+                  <ProcessFlowButton label='User Guide' />
+                </div>
+                <ThemeSwitcher className='mb-1' />
                 {userNavigation.map((item: any, index: any) => (
                   <PopOverItems key={index} item={item} />
                 ))}

@@ -1219,7 +1219,7 @@ export default function SafetyMeasures({
           </label>
           <h1 className="text-sm text-gray-500 mt-2">
             Please refer to <span> </span>
-            <span className="text-[#355FD0] underline cursor-pointer font-medium"
+            <span className="text-savoy-blue underline cursor-pointer font-medium"
             >Accident/Incident/Injury investigation recording and reporting
             </span>
           </h1>
@@ -1233,7 +1233,7 @@ export default function SafetyMeasures({
           </label>
           <h1 className="text-sm text-gray-500 mt-2">
             Please Refer to accomplished to <span> </span>
-            <span className="text-[#355FD0] underline cursor-pointer font-medium"
+            <span className="text-savoy-blue underline cursor-pointer font-medium"
             >HIRAC
             </span>
           </h1>

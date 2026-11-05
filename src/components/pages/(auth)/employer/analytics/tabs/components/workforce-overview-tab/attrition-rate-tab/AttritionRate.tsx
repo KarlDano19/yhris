@@ -52,7 +52,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Attrition Rate</h3>
         <div className="flex items-center justify-center h-32">
           <LoadingSpinner size="lg" color="yellow" />
@@ -63,7 +63,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Attrition Rate</h3>
         <div className="flex items-center justify-center h-32">
           <div className="text-red-500">Error loading attrition data</div>
@@ -77,7 +77,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
     : 'Attrition Rate';
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+    <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
       <h3 className="text-lg font-semibold text-gray-900 mb-8">{title}</h3>
       
       {attritionData.length > 0 ? (
@@ -85,7 +85,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
           <div className="overflow-x-auto mb-6">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-[#ACB9CB]">
+                <tr className="border-b-2 border-hris-line">
                   <th className="text-center py-3 px-2 font-semibold text-gray-700">Month</th>
                   <th className="text-center py-3 px-2 font-semibold text-gray-700">Attrition Rate</th>
                   <th className="text-center py-3 px-2 font-semibold text-gray-700">Total Exits</th>

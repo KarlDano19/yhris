@@ -158,7 +158,7 @@ const AddProfModal = ({ open, onSave, onClose }: AddProfModalProps) => {
                   <div className="flex justify-end p-4 space-x-5">
                     <button
                       type="button"
-                      className="inline-flex w-full md:w-auto justify-center rounded-md bg-[#ACB9CB] px-7 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300"
+                      className="inline-flex w-full md:w-auto justify-center rounded-md bg-hris-line px-7 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300"
                       tabIndex={-1}
                       onClick={onClose}
                     >

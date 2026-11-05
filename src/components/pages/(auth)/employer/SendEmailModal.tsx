@@ -16,7 +16,7 @@ import { T_DocumentsModal } from '@/types/globals';
 import InfoIcon from '@/svg/InfoIcon';
 
 type FormValues = {
-  template: string;
+  template: string; 
   email: string;
   message: string;
   cc: string;

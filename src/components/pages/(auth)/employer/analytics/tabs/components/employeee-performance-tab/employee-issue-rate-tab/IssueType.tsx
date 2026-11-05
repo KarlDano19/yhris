@@ -208,7 +208,7 @@ const IssueType: React.FC<IssueTypeProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex items-center justify-center h-64">
           <LoadingSpinner size="lg" color="yellow" />
         </div>
@@ -218,7 +218,7 @@ const IssueType: React.FC<IssueTypeProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex items-center justify-center h-64">
           <div className="text-red-500">Error loading issue type data</div>
         </div>
@@ -229,7 +229,7 @@ const IssueType: React.FC<IssueTypeProps> = ({
   // Show fallback if no data
   if (totalIssues === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>
@@ -270,7 +270,7 @@ const IssueType: React.FC<IssueTypeProps> = ({
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+    <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>

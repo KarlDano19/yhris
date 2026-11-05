@@ -55,7 +55,7 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
               </div>
             </Tooltip>
           </div>
-          <div className='border border-[#ACB9CB] p-2 rounded-md flex items-center gap-3 flex-wrap'>
+          <div className='border border-hris-line p-2 rounded-md flex items-center gap-3 flex-wrap'>
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -73,7 +73,7 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
             <button
               type='button'
               onClick={onClickAdd}
-              className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'
+              className='rounded-lg py-2 px-6 bg-savoy-blue text-white hover:bg-[#3156bd]'
             >
               ADD
             </button>
@@ -82,7 +82,7 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
             {tags.map((tag: string) => (
               <div
                 key={tag}
-                className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-2 px-4 text-left justify-start'
+                className='bg-hris-line rounded-md flex items-center gap-2 py-2 px-4 text-left justify-start'
               >
                 <button type='button' onClick={() => handleRemoveTag(tag)}>
                   <XMarkIcon className='w-4 h-4' />
@@ -97,14 +97,14 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
           <button
             onClick={handleClose}
             type='button'
-            className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+            className='border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]'
           >
             Close
           </button>
           <button
             type='submit'
             onClick={onClickAdd}
-            className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'
+            className='rounded-lg py-2 px-6 bg-savoy-blue text-white hover:bg-[#3156bd]'
           >
             Save
           </button>

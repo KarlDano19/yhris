@@ -46,7 +46,7 @@ export default function SalaryHistoryModal({
         className="mt-8 w-full max-w-3xl rounded-xl bg-white shadow-xl flex max-h-[90vh] flex-col"
       >
         {/* Title Bar */}
-        <div className="sticky top-0 z-20 flex items-center justify-between rounded-t-xl bg-[#355fd0] px-4 py-3 text-white">
+        <div className="sticky top-0 z-20 flex items-center justify-between rounded-t-xl bg-savoy-blue px-4 py-3 text-white">
           <h3 id="salary-history-title" className="text-sm font-semibold">
             Salary History: {employeeName}
           </h3>
@@ -104,13 +104,13 @@ function TabButton({
     <button
       data-testid={dataTestid}
       className={`relative px-1 pb-3 text-sm font-medium ${
-        active ? "text-[#355fd0]" : "text-gray-500"
+        active ? "text-savoy-blue" : "text-gray-500"
       }`}
       onClick={onClick}
     >
       {children}
       {active && (
-        <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-[#355fd0]" />
+        <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-savoy-blue" />
       )}
     </button>
   );

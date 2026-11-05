@@ -228,7 +228,7 @@ export default function EditEvaluationModal({
                     <LoadingSpinner size='xl' showText text='Loading evaluation template details...' />
                   </div>
                 ) : (
-                  <div className='min-h-[420px]'>
+                  <div>
                     {selectedTab === 1 && (
                       <EvaluationInfoTab
                         {...{

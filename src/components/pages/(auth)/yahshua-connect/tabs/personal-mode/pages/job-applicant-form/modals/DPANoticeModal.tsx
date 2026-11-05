@@ -58,8 +58,8 @@ const DPANoticeModal = ({ open, onAgree, companyName }: DPANoticeModalProps) => 
                     Before you proceed any further, please read the following:
                   </p>
 
-                  <div className='bg-[#EBF3FF] rounded-lg p-4 space-y-3'>
-                    <p className='text-sm text-[#2C3F58]'>
+                  <div className='bg-hris-tint rounded-lg p-4 space-y-3'>
+                    <p className='text-sm text-indigo-dye'>
                       I hereby voluntarily give my consent to{' '}
                       <strong>{companyName || 'the company'}</strong> to collect, process, store,
                       and use my personal data, including the information and
@@ -69,13 +69,13 @@ const DPANoticeModal = ({ open, onAgree, companyName }: DPANoticeModalProps) => 
                       <strong>Data Privacy Act of 2012</strong>.
                     </p>
 
-                    <p className='text-sm text-[#2C3F58]'>
+                    <p className='text-sm text-indigo-dye'>
                       I understand that my personal data will be handled with
                       strict confidentiality and will only be accessed by
                       authorized personnel for the stated purposes.
                     </p>
 
-                    <p className='text-sm text-[#2C3F58]'>
+                    <p className='text-sm text-indigo-dye'>
                       By proceeding, I confirm that I have read, understood, and
                       agree to the processing of my personal data as stated
                       above.

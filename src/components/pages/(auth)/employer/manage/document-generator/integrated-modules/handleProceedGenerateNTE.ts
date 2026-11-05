@@ -17,7 +17,8 @@ export async function handleProceedUtil({
   router,
   toast,
   CustomToast,
-  updateEmployeeIssue
+  updateEmployeeIssue,
+  useStandardNte
 }: {
   documentType: string;
   employeeId: string;
@@ -27,6 +28,8 @@ export async function handleProceedUtil({
   toast: any;
   CustomToast: any;
   updateEmployeeIssue?: boolean;
+  // Only sent when the company has its own NTE format to choose against
+  useStandardNte?: boolean;
 }) {
   if (documentType === 'notice-to-explain' && employeeId) {
     try {
@@ -41,10 +44,11 @@ export async function handleProceedUtil({
         // Add form fields
         uploadData.border_color = currentData.borderColor;
         uploadData.company_name = currentData.companyName;
-        uploadData.date_issued = currentData.dateOfIssuance;
+        uploadData.date_issued = currentData.dateIssued || currentData.dateOfIssuance;
         uploadData.brief_background = currentData.briefBackground;
         uploadData.prepared_by = currentData.preparedBy;
         uploadData.reviewed_by = currentData.reviewedBy;
+        uploadData.use_standard_nte = useStandardNte;
         
         // Handle logo file conversion
         if (currentData.logoImage) {

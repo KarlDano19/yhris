@@ -420,7 +420,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               : 'ALL'
                           }
                           onChange={(e) => setFilterDraft((prev) => ({ ...prev, user: e.target.value }))}
-                          className='truncate w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          className='truncate w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60'
                           disabled={isEmailFilterFetching}
                         >
                           {userOptionsWithAll.map((option) => (
@@ -444,7 +444,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               : 'ALL'
                           }
                           onChange={(e) => setFilterDraft((prev) => ({ ...prev, module: e.target.value }))}
-                          className='truncate w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          className='truncate w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60'
                           disabled={isEmailFilterFetching}
                         >
                           {moduleOptionsWithAll.map((option) => (
@@ -461,7 +461,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     <div className='pt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
                       <button
                         onClick={() => setFilterDraft({ action: 'ALL', user: 'ALL', module: 'ALL' })}
-                        className='rounded-lg border border-[#355fd0] bg-white px-4 py-1.5 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/10'
+                        className='rounded-lg border border-savoy-blue bg-white px-4 py-1.5 text-sm font-medium text-savoy-blue hover:bg-savoy-blue/10'
                         disabled={isEmailFilterFetching}
                       >
                         Reset
@@ -471,7 +471,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           handleAdvancedFilterApply(filterDraft);
                           setIsFilterOpen(false);
                         }}
-                        className='rounded-lg bg-[#355fd0] px-5 py-1.5 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-60'
+                        className='rounded-lg bg-savoy-blue px-5 py-1.5 text-sm font-semibold text-white hover:bg-savoy-blue/90 disabled:opacity-60'
                         disabled={isEmailFilterFetching}
                       >
                         Apply Filters

@@ -47,7 +47,7 @@ const Content = () => {
             <MainIconOnly className='w-24 h-24' />
 
             <h1 className='text-[50px] font-bold text-white mt-4'>
-              YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
+              YAHSHUA <span className='text-hris-yellow'>HRIS</span>
             </h1>
             <h3 className='text-white text-3xl text-center w-96 mt-2'>
               Leading your employees in one place.

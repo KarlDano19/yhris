@@ -73,13 +73,54 @@ function DecisionAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIs
                             {parseArrayField(employeeIssueData?.decision_to).map((email: string, idx: number) => (
                               <span
                                 key={idx}
-                                className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                className='bg-hris-line rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                               >
                                 {email}
                               </span>
                             ))}
                           </div>
                         </div>
+                        {employeeIssueData?.is_decision_received && (
+                          <div>
+                            <label className='block text-sm font-bold text-gray-700 mb-1'>Received:</label>
+                            {employeeIssueData?.decision_receipt_type && employeeIssueData.decision_receipt_type !== 'signed_copy' ? (
+                              <div className='text-sm text-gray-700 space-y-1'>
+                                <p>
+                                  Proceeded without a signed decision:{' '}
+                                  <span className='font-semibold'>{employeeIssueData.decision_receipt_type_label}</span>
+                                </p>
+                                {employeeIssueData?.decision_receipt_remarks && (
+                                  <p className='whitespace-pre-line'>Remarks: {employeeIssueData.decision_receipt_remarks}</p>
+                                )}
+                                {employeeIssueData?.decision_received_attachment && (
+                                  <a
+                                    href={employeeIssueData.decision_received_attachment}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='text-savoy-blue underline'
+                                  >
+                                    View proof of service
+                                  </a>
+                                )}
+                                {employeeIssueData?.is_employee_signed && <p>The employee later signed online.</p>}
+                              </div>
+                            ) : employeeIssueData?.decision_received_attachment ? (
+                              <p className='text-sm text-gray-700'>
+                                Uploaded by HR —{' '}
+                                <a
+                                  href={employeeIssueData.decision_received_attachment}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  className='text-savoy-blue underline'
+                                >
+                                  View signed decision
+                                </a>
+                              </p>
+                            ) : (
+                              <p className='text-sm text-gray-700'>Signed by employee online</p>
+                            )}
+                          </div>
+                        )}
                         
                         {employeeIssueData?.nte_attachment && (
                           <div className='flex-1'>

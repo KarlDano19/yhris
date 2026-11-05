@@ -52,13 +52,13 @@ export default function SelectionModal({
                 <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
                   <div className='flex bg-white p-2 items-center pr-4'>
                     <h3 className='flex-1 text-white ml-2 font-semibold py-9'></h3>
-                    <XCircleIcon className='w-8 h-8 text-[#ACB9CB] cursor-pointer' onClick={() => setIsOpen(false)} />
+                    <XCircleIcon className='w-8 h-8 text-hris-line cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
                   <div>
                     <h3 className='flex-1 ml-2 font-bold text-2xl text-center pb-6'>What do you want to do?</h3>
                     <div className='flex flex-row justify-center space-x-10 px-10 pb-6'>
                       <div
-                        className='py-8 px-10 border-[#ACB9CB] border-2 rounded-2xl shadow-sm hover:border-[#355FD0] cursor-pointer'
+                        className='py-8 px-10 border-hris-line border-2 rounded-2xl shadow-sm hover:border-savoy-blue cursor-pointer'
                         onClick={() => setIsCreateEvaluationTemplateOpen(true)}
                       >
                         <div className='flex justify-center'>
@@ -69,7 +69,7 @@ export default function SelectionModal({
                           Begin with a blank page, or copy and paste a template you’ve written.
                         </h1>
                       </div>
-                      <div className='py-8 px-10 border-[#ACB9CB] border-2 rounded-2xl shadow-sm opacity-50'>
+                      <div className='py-8 px-10 border-hris-line border-2 rounded-2xl shadow-sm opacity-50'>
                         <div className='flex justify-center'>
                           <DescriptionLogo />
                         </div>

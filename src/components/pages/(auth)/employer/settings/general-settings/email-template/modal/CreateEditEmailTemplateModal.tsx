@@ -497,7 +497,7 @@ export default function CreateEditEmailTemplateModal({
                             onDragLeave={handleDrag}
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
-                            className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                            className='block w-full rounded-md border-0 py-8 px-3 text-hris-line shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                           >
                             <label
                               className={`${

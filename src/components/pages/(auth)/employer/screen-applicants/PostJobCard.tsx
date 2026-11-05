@@ -4,13 +4,13 @@ import Link from 'next/link';
 export default function PostJobCard({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   return (
     <>
-      {hasActiveSubscription && <Link href='/post-job' className='rounded-lg px-8 py-24 shadow text-[#CCE0FF] bg-[#EBF3FF] flex'>
+      {hasActiveSubscription && <Link href='/post-job' className='rounded-lg px-8 py-24 shadow text-[#CCE0FF] bg-hris-tint flex'>
         <div className='m-auto flex items-center gap-2'>
           <PlusIcon className='h-8 w-8 font-bold' />
           <p className='font-bold text-xl'>Post a Job</p>
         </div>
       </Link>}
-      {!hasActiveSubscription && <div className='rounded-lg px-8 py-24 shadow text-[#CCE0FF] bg-[#EBF3FF] flex opacity-50'>
+      {!hasActiveSubscription && <div className='rounded-lg px-8 py-24 shadow text-[#CCE0FF] bg-hris-tint flex opacity-50'>
         <div className='m-auto flex items-center gap-2'>
           <PlusIcon className='h-8 w-8 font-bold' />
           <p className='font-bold text-xl'>Post a Job</p>

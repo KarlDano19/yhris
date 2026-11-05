@@ -227,7 +227,7 @@ export default function Person({
   return (
     <div
       className={classNames(
-        'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg mb-2',
+        'border-b border-b-hris-line last:border-none flex items-center py-6 gap-2 relative rounded-lg mb-2',
         backgroundColorClass,
         !isPassedFinalInterview
           ? (meetsMustHaveAnswers

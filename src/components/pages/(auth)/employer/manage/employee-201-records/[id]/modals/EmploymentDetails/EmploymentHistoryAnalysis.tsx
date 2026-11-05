@@ -22,7 +22,7 @@ export default function EmploymentHistoryAnalysis({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 text-sm font-medium text-[#355fd0] hover:underline"
+          className="flex items-center gap-2 text-sm font-medium text-savoy-blue hover:underline"
         >
           <span aria-hidden>←</span> Back
         </button>
@@ -148,7 +148,7 @@ export default function EmploymentHistoryAnalysis({
           data-testid="close-btn"
           type="button"
           onClick={onClose}
-          className="rounded-md border border-[#355fd0] px-4 py-2 text-sm text-[#355fd0] hover:bg-[#355fd0]/5"
+          className="rounded-md border border-savoy-blue px-4 py-2 text-sm text-savoy-blue hover:bg-savoy-blue/5"
         >
           Close
         </button>
@@ -156,7 +156,7 @@ export default function EmploymentHistoryAnalysis({
           data-testid="back-btn"
           type="button"
           onClick={onBack}
-          className="rounded-md bg-[#355fd0] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f54b8]"
+          className="rounded-md bg-savoy-blue px-4 py-2 text-sm font-medium text-white hover:bg-[#2f54b8]"
         >
           Back
         </button>

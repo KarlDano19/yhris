@@ -55,7 +55,7 @@ export default function Field({
   } else if (error) {
     stateClasses = "border-red-500 focus:border-red-500";
   } else {
-    stateClasses = "border-gray-300 focus:border-[#355fd0]";
+    stateClasses = "border-gray-300 focus:border-savoy-blue";
   }
 
   return (

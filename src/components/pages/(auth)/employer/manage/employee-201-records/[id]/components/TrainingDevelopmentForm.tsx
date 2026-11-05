@@ -486,7 +486,7 @@ export default function TrainingDevelopmentForm({
                       className={`w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
                         errors.rows?.[index]?.title
                           ? "border-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:border-[#355fd0]"
+                          : "border-gray-300 focus:border-savoy-blue"
                       }`}
                     />
                     {errors.rows?.[index]?.title && (
@@ -537,7 +537,7 @@ export default function TrainingDevelopmentForm({
                               "w-full rounded-md bg-white px-3 py-2 text-sm",
                               fieldState.error
                                 ? "border border-red-500 focus:border-red-500"
-                                : "border border-gray-300 focus:border-[#355fd0]",
+                                : "border border-gray-300 focus:border-savoy-blue",
                             ].join(" ")}
                           />
                         </div>
@@ -570,7 +570,7 @@ export default function TrainingDevelopmentForm({
                       className={`w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
                         errors.rows?.[index]?.provider
                           ? "border-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:border-[#355fd0]"
+                          : "border-gray-300 focus:border-savoy-blue"
                       }`}
                     />
                     {errors.rows?.[index]?.provider && (

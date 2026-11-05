@@ -89,7 +89,7 @@ const BenefitFilterPopover = ({
                 <select
                   value={ensureValue(draft.department, departmentOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
-                  className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-2.5 py-1.5 pr-8 text-xs text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                  className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-2.5 py-1.5 pr-8 text-xs text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60'
                   disabled={anyLoading}
                 >
                   {departmentOptions.map((option) => (
@@ -109,7 +109,7 @@ const BenefitFilterPopover = ({
                 <select
                   value={ensureValue(draft.position, positionOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, position: e.target.value }))}
-                  className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-2.5 py-1.5 pr-8 text-xs text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                  className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-2.5 py-1.5 pr-8 text-xs text-gray-700 focus:border-savoy-blue outline-none disabled:opacity-60'
                   disabled={anyLoading}
                 >
                   {positionOptions.map((option) => (
@@ -126,13 +126,13 @@ const BenefitFilterPopover = ({
             <div className='pt-1 flex items-center justify-between gap-2'>
               <button
                 onClick={handleReset}
-                className='rounded-md border border-[#355fd0] bg-white px-3 py-1.5 text-xs font-medium text-[#355fd0] hover:bg-[#355fd0]/10'
+                className='rounded-md border border-savoy-blue bg-white px-3 py-1.5 text-xs font-medium text-savoy-blue hover:bg-savoy-blue/10'
               >
                 Reset
               </button>
               <button
                 onClick={handleSearch}
-                className='rounded-md bg-[#355fd0] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-60'
+                className='rounded-md bg-savoy-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-savoy-blue/90 disabled:opacity-60'
                 disabled={anyLoading}
               >
                 Search

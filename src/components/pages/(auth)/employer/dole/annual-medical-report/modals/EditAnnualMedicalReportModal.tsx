@@ -720,7 +720,7 @@ function EditAnnualMedicalReportModal({
                     <LoadingSpinner size="xl" showText text="Loading annual medical report..." />
                   </div>
                 ) : (
-                <div className="min-h-[560px]">
+                <div>
                   <div className="pt-4 pb-2 pl-4 pr-4 flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide">
                     <div 
                       className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"

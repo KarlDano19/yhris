@@ -492,7 +492,7 @@ export default function EmailField({
   return (
     <div 
       ref={containerRef}
-      className={`relative border border-gray-300 pl-2 pr-2 pt-1.5 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md ${className}`}
+      className={`relative border border-gray-300 dark:border-gray-600 dark:bg-[#1A1F26] pl-2 pr-2 pt-1.5 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md ${className}`}
       data-tooltip-id={tooltipId}
       data-tooltip-place='bottom'
       style={{ width: '100%' }}
@@ -521,7 +521,7 @@ export default function EmailField({
       {displayTags.map((tag: string) => (
         <div
           key={tag}
-          className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+          className='bg-savoy-blue text-white rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
         >
           <button
             type='button'
@@ -552,7 +552,7 @@ export default function EmailField({
         onFocus={handleInputFocus}
         onBlur={handleInputBlur}
         onPaste={handlePaste}
-        className='focus:none outline-none py-1 flex-1 min-w-0'
+        className='focus:none outline-none py-1 flex-1 min-w-0 dark:text-[#E8EAED] dark:placeholder-gray-500 bg-transparent'
         style={{ width: '100%' }}
         placeholder={placeholder}
         disabled={disabled}

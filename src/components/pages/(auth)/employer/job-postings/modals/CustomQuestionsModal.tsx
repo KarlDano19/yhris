@@ -6,7 +6,7 @@ import CustomScreeningForm from './CustomScreeningForm';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import WarningRed from '@/svg/WarningRed';
+import DeleteModal from '@/components/DeleteModal';
 
 interface CustomQuestionsModalProps {
   isOpen: boolean;
@@ -117,7 +117,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
           <div className="fixed inset-0 bg-black bg-opacity-25" />
         </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto">
+        <div className="fixed inset-0 overflow-y-auto [scrollbar-gutter:stable]">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as={Fragment}
@@ -244,51 +244,6 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                       />
                     </div>
                   )}
-
-                  {/* Simple Delete Confirmation Overlay - INSIDE the Dialog.Panel */}
-                  {deleteModal?.open && (
-                    <div className="absolute inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60] p-4">
-                      <div className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-sm sm:w-[500px]">
-                        <div className="flex justify-center py-6 sm:py-8 px-2">
-                          <WarningRed />
-                        </div>
-                        <div className="text-lg sm:text-xl px-4 sm:px-20 text-center">
-                          <p className="text-lg sm:text-xl text-gray-600 font-bold">
-                            Are you sure you want to <span className="text-red-500">delete</span> this question?
-                          </p>
-                          {deleteModal.question && (
-                            <p className="text-sm text-gray-500 mt-2 italic break-words">
-                              "{deleteModal.question}"
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex flex-col sm:flex-row justify-center w-full px-4 space-y-3 sm:space-y-0 sm:space-x-8 pt-6 sm:pt-10 pb-7">
-                          <span className="flex w-full rounded-md shadow-sm sm:w-auto">
-                            <button
-                              type="button"
-                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-8 sm:px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5"
-                              onClick={() => setDeleteModal(null)}
-                            >
-                              No
-                            </button>
-                          </span>
-                          <span className="flex w-full rounded-md shadow-sm sm:w-auto">
-                            <button
-                              type="button"
-                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-8 sm:px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5"
-                              onClick={() => {
-                                if (deleteModal) {
-                                  handleConfirmDelete(deleteModal.id);
-                                }
-                              }}
-                            >
-                              Yes
-                            </button>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Footer */}
@@ -310,6 +265,15 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
             </TransitionChild>
           </div>
         </div>
+
+        {deleteModal && (
+          <DeleteModal
+            isOpen={deleteModal}
+            setIsOpen={setDeleteModal}
+            onConfirm={(data) => handleConfirmDelete(data?.id)}
+            customText='this question'
+          />
+        )}
       </Dialog>
     </Transition>
   );

@@ -225,7 +225,7 @@ export default function SalaryHistoryHistory({
             className={`rounded-md border px-2 py-1 text-xs ${
               isLoading || loadError
                 ? "cursor-not-allowed border-gray-300 text-gray-400 bg-gray-100"
-                : "border-[#355fd0] text-[#355fd0] hover:bg-[#355fd0]/5"
+                : "border-savoy-blue text-savoy-blue hover:bg-savoy-blue/5"
             }`}
           >
             Add Salary
@@ -253,7 +253,7 @@ export default function SalaryHistoryHistory({
                     "bg-gray-100",
                     errors["position"]
                       ? "border border-red-500 focus:border-red-500"
-                      : "border border-gray-300 focus:border-[#355fd0]",
+                      : "border border-gray-300 focus:border-savoy-blue",
                   ].join(" ")}
                 />
                 <p
@@ -306,7 +306,7 @@ export default function SalaryHistoryHistory({
                     "w-full rounded-md bg-white px-3 py-2 text-sm",
                     errors.effDate
                       ? "border border-red-500 focus:border-red-500"
-                      : "border border-gray-300 focus:border-[#355fd0]",
+                      : "border border-gray-300 focus:border-savoy-blue",
                   ].join(" ")}
                 />
                 <p
@@ -337,7 +337,7 @@ export default function SalaryHistoryHistory({
                 onClick={handleSave}
                 disabled={isCreating}
                 className={`rounded-md px-3 py-1.5 text-xs text-white ${
-                  isCreating ? "bg-gray-400 cursor-not-allowed" : "bg-[#355fd0]"
+                  isCreating ? "bg-gray-400 cursor-not-allowed" : "bg-savoy-blue"
                 }`}
               >
                 {isCreating ? "Saving..." : "Save"}
@@ -414,7 +414,7 @@ export default function SalaryHistoryHistory({
                           if (!Number.isNaN(n) && n > 0) setEditSalary(n.toFixed(2));
                         }}
                         className={`h-[39px] w-32 rounded-md px-2 text-sm text-right border ${
-                          editErrors.salary ? "border-red-500" : "border-gray-300 focus:border-[#355fd0]"
+                          editErrors.salary ? "border-red-500" : "border-gray-300 focus:border-savoy-blue"
                         }`}
                       />
                       {editErrors.salary && (
@@ -436,7 +436,7 @@ export default function SalaryHistoryHistory({
                           }}
                           placeholder="MM/DD/YYYY"
                           className={`h-[39px] w-36 rounded-md px-2 text-sm border ${
-                            editErrors.effDate ? "border-red-500" : "border-gray-300 focus:border-[#355fd0]"
+                            editErrors.effDate ? "border-red-500" : "border-gray-300 focus:border-savoy-blue"
                           }`}
                         />
                         {editErrors.effDate && (
@@ -451,7 +451,7 @@ export default function SalaryHistoryHistory({
                           onClick={() => handleUpdate(e)}
                           disabled={isUpdating}
                           className={`h-[39px] rounded-md px-3 text-xs text-white ${
-                            isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-[#355fd0]"
+                            isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-savoy-blue"
                           }`}
                         >
                           {isUpdating ? "Saving..." : "Save"}

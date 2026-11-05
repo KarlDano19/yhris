@@ -222,7 +222,7 @@ function CritiriaSubItem({
                           <div className='py-4' {...providedOther.dragHandleProps}>
                             <MoveIcon />
                           </div>
-                          <div className='sm:col-span-4 w-full border rounded-xl border-[#ACB9CB] py-6 px-4 bg-white'>
+                          <div className='sm:col-span-4 w-full border rounded-xl border-hris-line py-6 px-4 bg-white'>
                             <div className='h-32'>
                               <input type='text' hidden {...register(`evaluation_criterion[${sectionIndex}].criterion[${index}].title`)} />
                               <ReactQuill
@@ -343,7 +343,7 @@ function CritiriaSubItem({
                                 className={`absolute mt-[1rem] right-[2rem] flex items-center h-fit border rounded-xl p-2 space-y-2 ${
                                   currentScoreSum >= totalScore 
                                     ? 'border-gray-300 bg-gray-100 cursor-not-allowed' 
-                                    : 'border-[#ACB9CB] cursor-pointer'
+                                    : 'border-hris-line cursor-pointer'
                                 }`}
                                 data-tooltip-id={`add-criteria-tooltip-${sectionIndex}-${index}`}
                                 data-tooltip-content={

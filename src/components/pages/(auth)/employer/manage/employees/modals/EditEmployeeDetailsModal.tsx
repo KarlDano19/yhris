@@ -164,7 +164,7 @@ export default function EditEmployeeDetailsModal({
                       <LoadingSpinner size='xl' showText text='Loading employee details...' />
                     </div>
                   ) : (
-                  <div className='mx-4 md:mx-6 my-4 min-h-[560px]'>
+                  <div className='mx-4 md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
                       <div className='px-2 sm:px-4 pt-4 pb-6'>
                         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>

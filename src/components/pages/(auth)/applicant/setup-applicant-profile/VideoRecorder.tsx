@@ -66,15 +66,15 @@ const VideoRecorder = ({ open, onClose }: VideoRecorderProps) => {
               >
                 <DialogPanel className="relative transform overflow-hidden rounded-lg bg-[#1E2836] text-left shadow-xl transition-all sm:my-8 w-full md:max-w-xl lg:max-w-5xl">
                   <div className="header bg-indigo-dye rounded-md flex justify-between px-4 py-2">
-                    <h6 className="text-[#ACB9CB] font-medium">
+                    <h6 className="text-hris-line font-medium">
                       Record Intro Video
                     </h6>
                     <button tabIndex={-1} onClick={onClose}>
-                      <XCircleIcon className="h-7 w-7 text-[#ACB9CB]" />
+                      <XCircleIcon className="h-7 w-7 text-hris-line" />
                     </button>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-5">
-                    <div className="lg:col-span-3 border-r border-[#ACB9CB] p-8">
+                    <div className="lg:col-span-3 border-r border-hris-line p-8">
                       <div className="video-container w-full h-56 lg:h-[55vh] bg-[#446085] rounded-md flex items-center">
                         {isCameraOpen ? (
                           <h5 className="text-white text-xl font-bold mx-auto">

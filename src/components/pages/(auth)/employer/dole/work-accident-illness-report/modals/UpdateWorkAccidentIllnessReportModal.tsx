@@ -174,7 +174,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     <LoadingSpinner size="xl" showText text="Loading work accident/illness report..." />
                   </div>
                 ) : (
-                  <div className="min-h-[560px]">
+                  <div>
                     {selectedTab === 1 && (
                       <PersonalInformation
                         control={control}

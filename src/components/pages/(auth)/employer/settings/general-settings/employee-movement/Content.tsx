@@ -282,7 +282,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           {approverTags.map((tag) => (
                             <div
                               key={tag.id}
-                              className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-1 px-3 text-left justify-start text-sm'
+                              className='bg-hris-line rounded-md flex items-center gap-2 py-1 px-3 text-left justify-start text-sm'
                             >
                               <button type='button' onClick={() => handleRemoveApprover(tag.id)}>
                                 <XMarkIcon className='w-4 h-4' />

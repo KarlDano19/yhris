@@ -1,9 +1,11 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 
 import Image from 'next/image';
+import { RichTextView } from '@/components/common/RichTextEditor';
 import { DatePickerField } from './DatePickerField';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
+import { isRichText } from '@/helpers/richText';
 
 interface FieldProps {
   formData: NoticeToExplainFormData;
@@ -161,6 +163,13 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
       <label htmlFor="briefBackground" className="block text-sm font-medium text-gray-700 mb-1">
         Brief Background <span className="text-red-500">*</span>
       </label>
+      {/* A background formatted in Address Employee Issue is html; a textarea would show its raw tags */}
+      {isRichText(formData.briefBackground) ? (
+        <>
+          <RichTextView value={formData.briefBackground} className="rounded-md border border-gray-300 bg-gray-100" />
+          <p className="text-xs text-gray-500 mt-1">This background has formatting. Edit it in Address Employee Issue.</p>
+        </>
+      ) : (
       <textarea
         id="briefBackground"
         name="briefBackground"
@@ -173,6 +182,7 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         } border-gray-300 focus:border-blue-500`}
         disabled={disabled}
       />
+      )}
       {showValidation && (
         <p className="text-red-500 text-xs mt-1">This field is required.</p>
       )}

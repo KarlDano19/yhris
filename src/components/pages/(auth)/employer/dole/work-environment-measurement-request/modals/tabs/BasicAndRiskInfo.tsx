@@ -394,7 +394,7 @@ function BasicAndRiskInfo({
                   {tagsOfficer.map((tagOfficer: string) => (
                     <div
                       key={tagOfficer}
-                      className='bg-[#ACB9CB] rounded-sm flex items-center gap-2 py-0 px-4 text-left justify-start text-sm mt-2 mb-2'
+                      className='bg-hris-line rounded-sm flex items-center gap-2 py-0 px-4 text-left justify-start text-sm mt-2 mb-2'
                     >
                       <button type='button' onClick={() => handleRemoveTagOfficer(tagOfficer)}>
                         <XMarkIcon className='w-4 h-4' />

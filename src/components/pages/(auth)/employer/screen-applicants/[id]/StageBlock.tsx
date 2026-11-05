@@ -93,7 +93,7 @@ export default function StageBlock({
   if (isDisabled && (!permissions.can_view || filteredApplicants.length === 0)) {
     return (
       <div className={`rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto ${
-        isDisabled ? 'bg-gray-100' : 'bg-[#EBF3FF]'
+        isDisabled ? 'bg-gray-100' : 'bg-blue-50'
       }`}>
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
           <div className="text-gray-500 text-sm font-medium mb-2">
@@ -130,9 +130,9 @@ export default function StageBlock({
   }
 
   return (
-    <div 
+    <div
       className={`rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto ${
-        isDisabled ? 'bg-gray-100 opacity-60' : 'bg-[#EBF3FF]'
+        isDisabled ? 'bg-gray-100 opacity-60' : 'bg-blue-50'
       }`}
     >
       {filteredApplicants.length ? (

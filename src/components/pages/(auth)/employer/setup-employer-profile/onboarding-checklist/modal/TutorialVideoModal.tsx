@@ -207,7 +207,7 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking, 
                 </div>
 
                 {/* Modal Footer */}
-                <div className='flex items-center justify-end gap-3 p-4 border-t border-[#355FD0]'>
+                <div className='flex items-center justify-end gap-3 p-4 border-t border-savoy-blue'>
                   {!viewOnly && (
                     <button
                       type='button'
@@ -216,7 +216,7 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking, 
                       className={`rounded-lg py-2 px-6 text-sm font-semibold transition-colors ${
                         markButtonDisabled
                           ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                          : 'bg-[#355FD0] text-white hover:bg-blue-700'
+                          : 'bg-savoy-blue text-white hover:bg-blue-700'
                       }`}
                     >
                       {item.is_completed ? 'Completed ✓' : isMarking ? 'Saving...' : 'Mark as Complete'}
@@ -226,7 +226,7 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking, 
                     ref={cancelButtonRef}
                     type='button'
                     onClick={onClose}
-                    className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] text-sm font-semibold hover:bg-[#355FD0]/[.15]'
+                    className='border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue text-sm font-semibold hover:bg-savoy-blue/[.15]'
                   >
                     Close
                   </button>

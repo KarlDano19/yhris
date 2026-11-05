@@ -148,7 +148,7 @@ export default function PersonalInfoForm({
                     ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                     : errors.email
                     ? "border-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:border-[#355fd0]"
+                    : "border-gray-300 focus:border-savoy-blue"
                 }`}
               />
               {editing && errors.email && (
@@ -171,7 +171,7 @@ export default function PersonalInfoForm({
                 className={`block w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
                   !editing
                     ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                    : "border-gray-300 focus:border-[#355fd0]"
+                    : "border-gray-300 focus:border-savoy-blue"
                 }`}
               />
               <p className="mt-1 text-xs text-gray-500">House/Unit, Street, Barangay, City, Province</p>
@@ -201,7 +201,7 @@ export default function PersonalInfoForm({
                     ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                     : errors.mobile
                     ? "border-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:border-[#355fd0]"
+                    : "border-gray-300 focus:border-savoy-blue"
                 }`}
               />
               {editing && errors.mobile ? (
@@ -228,7 +228,7 @@ export default function PersonalInfoForm({
                     className={`block w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
                       !editing
                         ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                        : "border-gray-300 focus:border-[#355fd0]"
+                        : "border-gray-300 focus:border-savoy-blue"
                     }`}
                     selected={field.value}
                     pickerOnChange={(date: Date | null) => field.onChange(date)}
@@ -258,7 +258,7 @@ export default function PersonalInfoForm({
                     className={`rounded-md appearance-none w-full border px-3 py-2 text-sm outline-none ${
                       !editing
                         ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                        : "border-gray-300 focus:border-[#355fd0]"
+                        : "border-gray-300 focus:border-savoy-blue"
                     }`}
                   >
                     <option value="">Select Gender</option>
@@ -307,7 +307,7 @@ export default function PersonalInfoForm({
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : fieldState.error
                       ? "border-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:border-[#355fd0]"
+                      : "border-gray-300 focus:border-savoy-blue"
                   }`}
                 />
                 {fieldState.error ? (
@@ -348,7 +348,7 @@ export default function PersonalInfoForm({
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : fieldState.error
                       ? "border-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:border-[#355fd0]"
+                      : "border-gray-300 focus:border-savoy-blue"
                   }`}
                 />
                 {fieldState.error ? (
@@ -389,7 +389,7 @@ export default function PersonalInfoForm({
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : fieldState.error
                       ? "border-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:border-[#355fd0]"
+                      : "border-gray-300 focus:border-savoy-blue"
                   }`}
                 />
                 {fieldState.error ? (
@@ -430,7 +430,7 @@ export default function PersonalInfoForm({
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : fieldState.error
                       ? "border-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:border-[#355fd0]"
+                      : "border-gray-300 focus:border-savoy-blue"
                   }`}
                 />
                 {fieldState.error ? (
@@ -465,7 +465,7 @@ export default function PersonalInfoForm({
                     ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                     : errors.emergency_contact_name
                     ? "border-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:border-[#355fd0]"
+                    : "border-gray-300 focus:border-savoy-blue"
                 }`}
               />
               {editing && errors.emergency_contact_name && (
@@ -487,7 +487,7 @@ export default function PersonalInfoForm({
                 className={`block w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
                   !editing
                     ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                    : "border-gray-300 focus:border-[#355fd0]"
+                    : "border-gray-300 focus:border-savoy-blue"
                 }`}
               />
             </div>
@@ -523,7 +523,7 @@ export default function PersonalInfoForm({
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : fieldState.error
                       ? "border-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:border-[#355fd0]"
+                      : "border-gray-300 focus:border-savoy-blue"
                   }`}
                 />
                 {fieldState.error ? (
@@ -548,7 +548,7 @@ export default function PersonalInfoForm({
                 className={`block w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
                   !editing
                     ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                    : "border-gray-300 focus:border-[#355fd0]"
+                    : "border-gray-300 focus:border-savoy-blue"
                 }`}
               />
             </div>
