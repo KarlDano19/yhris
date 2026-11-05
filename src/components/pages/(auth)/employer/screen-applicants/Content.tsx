@@ -12,6 +12,7 @@ import useGetJobPostItems from './hooks/job/useGetJobPostItems';
 import SkeletonGrid from '../../../../SkeletonGrid';
 import BackButton from '@/components/BackButton';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { UserPlusIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import Pagination from '@/components/Pagination';
 
 type PaginationProps = {
@@ -62,7 +63,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['hiredApplicant'] = jobPost['hired_count'];
-        jobPost['newApplicantsLast30Days'] = jobPost['new_applicants_last_30_days'] || 0;
+        jobPost['newApplicantsCount'] = jobPost['new_applicants_count'] || 0;
+        jobPost['activeApplicationsCount'] = jobPost['active_applications_count'] || 0;
       });
       setJobPostHistoryItems(dataJobPost.records);
       setPagination({
@@ -132,16 +134,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
               {jobPostHistoryItems.map((item: any) => {
                 return (
-                  <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
-                    <h2 className='font-semibold text-xl break-words '>{item.jobTitle}</h2>
-                    <p className='text-[15px] mb-12 break-words text-pretty'>{item.placeAdvertise}</p>
-                    <Link
-                      href={`screen-applicants/${item.id}`}
-                      className='bg-[#EAC645] text-indigo-dye font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
-                    >
-                      {item.newApplicantsLast30Days} New Applicant/s
-                    </Link>
-                  </div>
+                  <Link
+                    key={item.id}
+                    href={`screen-applicants/${item.id}`}
+                    className='flex flex-col justify-center rounded-lg px-6 py-10 shadow text-indigo-dye text-center bg-white hover:shadow-md transition-shadow'
+                  >
+                    <h2 className='font-semibold text-xl break-words'>{item.jobTitle}</h2>
+                    <p className='text-[15px] mb-8 break-words text-pretty text-slate-500'>{item.placeAdvertise}</p>
+                    <div className='grid grid-cols-2 gap-3 text-left'>
+                      {[
+                        { label: 'New Applicants', value: item.newApplicantsCount, Icon: UserPlusIcon, bg: 'bg-blue-50', fg: 'text-blue-600' },
+                        { label: 'Active Applications', value: item.activeApplicationsCount, Icon: UserGroupIcon, bg: 'bg-emerald-50', fg: 'text-emerald-600' },
+                      ].map(({ label, value, Icon, bg, fg }) => (
+                        // Stacked (icon + number, label below) until the card is wide enough for side-by-side
+                        <div key={label} className={`min-w-0 rounded-lg ${bg} px-3 py-3 2xl:flex 2xl:items-center 2xl:gap-3 2xl:px-4`}>
+                          <div className='flex items-center gap-2 2xl:contents'>
+                            <Icon className={`h-6 w-6 2xl:h-7 2xl:w-7 flex-none ${fg}`} />
+                            <p className='text-2xl font-bold leading-tight 2xl:hidden'>{value}</p>
+                          </div>
+                          <div className='min-w-0'>
+                            <p className='hidden 2xl:block text-2xl font-bold leading-tight'>{value}</p>
+                            <p className='mt-1 2xl:mt-0 text-sm leading-snug text-slate-600 break-words'>{label}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Link>
                 );
               })}
               {/* ensuring cards displayed are always six */}
