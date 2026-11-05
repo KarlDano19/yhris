@@ -263,7 +263,7 @@ export default function AddEmploymentForm({
           onClick={onBack}
           disabled={isSaving}
           className={`flex items-center gap-2 text-sm font-medium ${
-            isSaving ? "text-gray-400" : "text-[#355fd0] hover:underline"
+            isSaving ? "text-gray-400" : "text-savoy-blue hover:underline"
           }`}
         >
           <span aria-hidden>←</span> Back
@@ -329,7 +329,7 @@ export default function AddEmploymentForm({
                 "w-full rounded-md bg-white px-3 py-2 text-sm",
                 showDraftErr("date_from", "date_from") || showDraftErr("range")
                   ? "border border-red-500 focus:border-red-500"
-                  : "border border-gray-300 focus:border-[#355fd0]",
+                  : "border border-gray-300 focus:border-savoy-blue",
               ].join(" ")}
               disabled={isSaving}
             />
@@ -368,7 +368,7 @@ export default function AddEmploymentForm({
                 "w-full rounded-md bg-white px-3 py-2 text-sm",
                 showDraftErr("date_to", "date_to") || showDraftErr("range")
                   ? "border border-red-500 focus:border-red-500"
-                  : "border border-gray-300 focus:border-[#355fd0]",
+                  : "border border-gray-300 focus:border-savoy-blue",
               ].join(" ")}
               disabled={isSaving}
             />
@@ -394,7 +394,7 @@ export default function AddEmploymentForm({
                 "w-full rounded-md bg-white px-3 py-2 text-sm outline-none",
                 showDraftErr("description", "description")
                   ? "border border-red-500 focus:border-red-500"
-                  : "border border-gray-300 focus:border-[#355fd0]",
+                  : "border border-gray-300 focus:border-savoy-blue",
               ].join(" ")}
               defaultValue={draft.description ?? ""}
               onChange={(e) => {
@@ -420,7 +420,7 @@ export default function AddEmploymentForm({
             type="button"
             onClick={addDraftToList}
             disabled={isSaving || !canAddDraft}
-            className="rounded-md border border-[#355fd0] px-4 py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/5 disabled:opacity-50"
+            className="rounded-md border border-savoy-blue px-4 py-2 text-sm font-medium text-savoy-blue hover:bg-savoy-blue/5 disabled:opacity-50"
             title={errors.range ? errors.range : undefined}
           >
             Add Employment History
@@ -475,7 +475,7 @@ export default function AddEmploymentForm({
                       "w-full rounded-md bg-white px-3 py-2 text-sm",
                       (showItemErr("date_from") || showItemErr("range"))
                         ? "border border-red-500 focus:border-red-500"
-                        : "border border-gray-300 focus:border-[#355fd0]",
+                        : "border border-gray-300 focus:border-savoy-blue",
                     ].join(" ")}
                     disabled={isSaving}
                   />
@@ -505,7 +505,7 @@ export default function AddEmploymentForm({
                       "w-full rounded-md bg-white px-3 py-2 text-sm",
                       (showItemErr("date_to") || showItemErr("range"))
                         ? "border border-red-500 focus:border-red-500"
-                        : "border border-gray-300 focus:border-[#355fd0]",
+                        : "border border-gray-300 focus:border-savoy-blue",
                     ].join(" ")}
                     disabled={isSaving}
                   />
@@ -528,7 +528,7 @@ export default function AddEmploymentForm({
                       "w-full rounded-md bg-white px-3 py-2 text-sm outline-none",
                       showItemErr("description")
                         ? "border border-red-500 focus:border-red-500"
-                        : "border border-gray-300 focus:border-[#355fd0]",
+                        : "border border-gray-300 focus:border-savoy-blue",
                     ].join(" ")}
                     defaultValue={it.description ?? ""}
                     onChange={(ev) => updateItem(idx, { description: ev.target.value })}
@@ -564,7 +564,7 @@ export default function AddEmploymentForm({
           type="button"
           onClick={onBack}
           disabled={isSaving}
-          className="rounded-md border border-[#355fd0] px-4 py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/5 disabled:opacity-50"
+          className="rounded-md border border-savoy-blue px-4 py-2 text-sm font-medium text-savoy-blue hover:bg-savoy-blue/5 disabled:opacity-50"
         >
           Back
         </button>
@@ -577,7 +577,7 @@ export default function AddEmploymentForm({
             (items.length === 0 && !canAddDraft) ||
             hasAnyError
           }
-          className="rounded-md bg-[#355fd0] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded-md bg-savoy-blue px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           title={isSaving ? "Saving…" : undefined}
         >
           {isSaving ? "Saving…" : "Save"}

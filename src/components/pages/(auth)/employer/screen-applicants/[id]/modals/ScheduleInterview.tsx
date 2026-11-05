@@ -275,7 +275,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 <label htmlFor='date' className='block mb-2'>
                   Dates<span className='text-[#D65846]'>*</span>
                 </label>
-                <div className='border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative'>
+                <div className='border border-hris-line focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue rounded-md flex items-center justify-between py-2 px-4 relative'>
                   <input
                     onClick={() => dateRef.current?.showPicker()}
                     ref={dateRef}
@@ -293,7 +293,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   Start Time<span className='text-[#D65846]'>*</span>
                 </label>
 
-                <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <div className='border border-hris-line rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue'>
                   <input
                     onClick={() => timeRef.current?.showPicker()}
                     ref={timeRef}
@@ -310,7 +310,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   Duration<span className='text-[#D65846]'>*</span>
                 </label>
 
-                <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <div className='border border-hris-line rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue'>
                   <select
                     {...register('duration')}
                     id='duration'
@@ -334,7 +334,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 <label htmlFor='date' className='block mb-2'>
                   Dates<span className='text-[#D65846]'>*</span>
                 </label>
-                <div className='border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative'>
+                <div className='border border-hris-line focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue rounded-md flex items-center justify-between py-2 px-4 relative'>
                   <input
                     onClick={() => dateRef.current?.showPicker()}
                     ref={dateRef}
@@ -352,7 +352,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   Start Time<span className='text-[#D65846]'>*</span>
                 </label>
 
-                <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <div className='border border-hris-line rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue'>
                   <input
                     onClick={() => timeRef.current?.showPicker()}
                     ref={timeRef}
@@ -369,7 +369,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   Duration<span className='text-[#D65846]'>*</span>
                 </label>
 
-                <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <div className='border border-hris-line rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue'>
                   <select
                     {...register('duration')}
                     id='duration'
@@ -393,7 +393,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
               <label htmlFor='date' className='block mb-2'>
                 Dates<span className='text-[#D65846]'>*</span>
               </label>
-              <div className='border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative'>
+              <div className='border border-hris-line focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue rounded-md flex items-center justify-between py-2 px-4 relative'>
                 <input
                   onClick={() => dateRef.current?.showPicker()}
                   ref={dateRef}
@@ -411,7 +411,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 Start Time<span className='text-[#D65846]'>*</span>
               </label>
 
-              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+              <div className='border border-hris-line rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue'>
                 <input
                   onClick={() => timeRef.current?.showPicker()}
                   ref={timeRef}
@@ -428,7 +428,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 Duration<span className='text-[#D65846]'>*</span>
               </label>
 
-              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+              <div className='border border-hris-line rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue'>
                 <select
                   {...register('duration', { required: 'Duration is required' })}
                   id='duration'
@@ -460,8 +460,8 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 <div
                   key={index}
                   className={classNames(
-                    `${item.borderStyle} flex items-center gap-2 border grow px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]`,
-                    hasSelected ? 'bg-[#355FD0] text-white border-[#355FD0]' : 'border-[#ACB9CB]',
+                    `${item.borderStyle} flex items-center gap-2 border grow px-4 focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue`,
+                    hasSelected ? 'bg-savoy-blue text-white border-savoy-blue' : 'border-hris-line',
                     item.disabled ? 'opacity-50' : ''
                   )}
                 >
@@ -533,7 +533,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 type='tel'
                 id='phoneNumber'
                 {...register('phoneNumber')}
-                className='border border-[#ACB9CB] rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]'
+                className='border border-hris-line rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-savoy-blue'
               />
             </div>
           )}
@@ -548,7 +548,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   type='text'
                   id='address'
                   {...register('address')}
-                  className='border border-[#ACB9CB] rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]'
+                  className='border border-hris-line rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-savoy-blue'
                 />
               </div> */}
               {isLoaded && (
@@ -576,7 +576,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 Integrated Account
               </label>
 
-              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+              <div className='border border-hris-line rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-savoy-blue'>
                 <select
                   {...register('integrated_id', { required: 'Integrated account is required' })}
                   id='integrated_accounts'
@@ -622,7 +622,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
 
             <div
               className={classNames(
-                'border border-[#ACB9CB] p-2 rounded-md flex items-center gap-3 flex-wrap',
+                'border border-hris-line p-2 rounded-md flex items-center gap-3 flex-wrap',
                 noTags ? 'border-2 border-red-600' : ''
               )}
             >
@@ -630,7 +630,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 <div
                   key={tag}
                   className={classNames(
-                    'bg-[#ACB9CB] rounded-md flex items-center gap-2 py-1 px-4 text-left justify-start'
+                    'bg-hris-line rounded-md flex items-center gap-2 py-1 px-4 text-left justify-start'
                   )}
                 >
                   <button type='button' onClick={() => handleRemoveTag(tag)}>
@@ -657,13 +657,13 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
           <button
             onClick={handleClose}
             type='button'
-            className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+            className='border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]'
           >
             Cancel
           </button>
           <button
             type='submit'
-            className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'
+            className='rounded-lg py-2 px-6 bg-savoy-blue text-white hover:bg-[#3156bd]'
             disabled={isSendInterviewScheduleLoading}
           >
             {isSendInterviewScheduleLoading ? (

@@ -25,7 +25,7 @@ const ActionRecommendations: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg border-2 border-dashed border-[#A8B5C7]">
+    <div className="bg-white p-6 rounded-lg border-2 border-dashed border-hris-line-alt">
       <h3 className="text-lg font-bold text-gray-900 mb-4">Action Recommendations</h3>
       
       <ul className="space-y-3">

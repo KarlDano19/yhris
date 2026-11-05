@@ -106,7 +106,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+      <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
             <LoadingSpinner size="lg" color="yellow" />
@@ -118,7 +118,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+      <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
             <div className="text-red-500">Error loading role pipeline data</div>
@@ -130,7 +130,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
 
   return (
     <>
-      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+      <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -144,7 +144,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
             <div className='min-w-full px-6 sm:px-0'>
               <table className="min-w-full divide-y divide-gray-300 text-center">
               <thead>
-                <tr className="border-b-2 border-[#ACB9CB]">
+                <tr className="border-b-2 border-hris-line">
                   <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[120px]">
                     Role
                   </th>

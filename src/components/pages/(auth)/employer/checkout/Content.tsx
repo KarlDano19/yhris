@@ -132,8 +132,8 @@ const Content = () => {
     <div className='flex h-screen'>
       <div className='py-8 px-16 relative flex-1'>
         <div className='text-center mb-4'>
-          <h2 className='text-[30px] font-bold text-[#2C3F58]'>
-            YAHSHUA <span className='text-[30px] font-bold text-[#FFC107]'>HRIS</span>
+          <h2 className='text-[30px] font-bold text-indigo-dye'>
+            YAHSHUA <span className='text-[30px] font-bold text-hris-yellow'>HRIS</span>
           </h2>
         </div>
         <div className='flex justify-center align-center mb-4 font-semibold text-[15px] text-gray-500'>
@@ -163,11 +163,11 @@ const Content = () => {
         )}
         <div className='font-normal text-gray-500 leading-4 tracking-wider text-[15px]'>
           By continuing, you agree to our{' '}
-          <Link href='/terms-of-service' target='_blank' className='text-[#355FD0] text-sm underline'>
+          <Link href='/terms-of-service' target='_blank' className='text-savoy-blue text-sm underline'>
             Terms of Service
           </Link>
           , and{' '}
-          <Link href='/privacy-notice' target='_blank' className='text-[#355FD0] text-sm underline'>
+          <Link href='/privacy-notice' target='_blank' className='text-savoy-blue text-sm underline'>
             Privacy Notice
           </Link>
           .

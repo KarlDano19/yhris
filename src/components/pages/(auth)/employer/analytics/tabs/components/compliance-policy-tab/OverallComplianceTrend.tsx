@@ -128,7 +128,7 @@ const OverallComplianceTrend: React.FC<OverallComplianceTrendProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+    <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
       <div className="flex justify-between items-start mb-4">
         <div className="w-10 flex-shrink-0"></div>
         <h3 className="text-lg font-semibold text-gray-900 text-center flex-1 px-4">

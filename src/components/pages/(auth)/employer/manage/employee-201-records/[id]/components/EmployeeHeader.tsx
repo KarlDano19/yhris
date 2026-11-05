@@ -80,7 +80,7 @@ export default function EmployeeHeader({
     <div
       data-testid="employee-profile-header"
       className={`relative rounded-[40px] px-2 py-4 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm ${
-        isResigned ? "border border-red-300 bg-red-50" : "bg-[#355fd0]/5"
+        isResigned ? "border border-red-300 bg-red-50" : "bg-savoy-blue/5"
       }`}
     >
       <div className="flex min-w-0 flex-col gap-6 md:flex-row md:items-center">

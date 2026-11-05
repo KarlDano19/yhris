@@ -10,7 +10,7 @@ const SubscriptionHeader = () => {
         <div className='mx-auto max-w-screen-2xl px-2 py-2 sm:px-4 lg:px-6 flex justify-center items-center gap-4'>
           <h1 className='text-sm font-normal'>You’ve seen how easy it can be. Don’t stop now— <span className='font-bold'>stay with HRIS!</span></h1>
           <button
-            className='bg-white text-blue-500 px-4 py-2 rounded-full text-sm font-semibold border border-[#A8B5C7]'
+            className='bg-white text-blue-500 px-4 py-2 rounded-full text-sm font-semibold border border-hris-line-alt'
             onClick={() => {
               router.push('/landing-page/pricing');
             }}

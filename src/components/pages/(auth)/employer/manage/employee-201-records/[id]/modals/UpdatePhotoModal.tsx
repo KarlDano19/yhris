@@ -156,7 +156,7 @@ export default function UpdatePhotoModal({
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-[#355fd0] px-6 py-3 text-white flex items-center justify-between rounded-t-2xl">
+        <div className="bg-savoy-blue px-6 py-3 text-white flex items-center justify-between rounded-t-2xl">
           <div>
             <h2 id="update-photo-title" className="text-base font-semibold">
               {title}
@@ -269,7 +269,7 @@ export default function UpdatePhotoModal({
                 type="button"
                 onClick={handleConfirm}
                 disabled={!canUpdate || isProcessing}
-                className="rounded-md bg-[#355fd0] px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-savoy-blue px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Update Photo
               </button>

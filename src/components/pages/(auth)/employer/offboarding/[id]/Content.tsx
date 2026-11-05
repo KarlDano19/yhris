@@ -45,7 +45,7 @@ type Props = {
 const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: rawCase, isLoading, refetch } = useGetSeparationCase(id);
+  const { data: rawCase, isLoading, isFetching, refetch } = useGetSeparationCase(id);
   const { mutate, isLoading: isMutating } = usePatchSeparation();
 
   const [localCase, setLocalCase] = useState<any>(null);
@@ -62,6 +62,8 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
   const [finalPayTasksBlocked, setFinalPayTasksBlocked] = useState(true);
   const [legalDocsTasksBlocked, setLegalDocsTasksBlocked] = useState(true);
   const [freeNavigation, setFreeNavigation] = useState(false);
+  // Files of an email still being sent, shown in that tab's attachment list until the reload returns them
+  const [pendingAttachments, setPendingAttachments] = useState<{ emailType: string; names: string[] } | null>(null);
   const [photoError, setPhotoError] = useState(false);
   const { exportSeparation, isExporting } = useExportSeparation();
   const { data: usersData } = useGetUserDetails() as { data: any };
@@ -89,10 +91,22 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
   const phaseColor = PHASE_COLORS[currentPhase];
   const barColor = PHASE_BAR_COLORS[currentPhase];
 
-  // Sync localCase when rawCase arrives and no local override yet
+  // When a stage is finished and the case moves to a new phase, follow it instead of
+  // staying on a tab the user clicked earlier.
   React.useEffect(() => {
-    if (rawCase && !localCase) setLocalCase(rawCase);
-  }, [rawCase]);
+    setActiveStage(null);
+  }, [currentPhase]);
+
+  const startPendingAttachments = (emailType: string, attachments: any) => {
+    const list = Array.isArray(attachments) ? attachments : attachments ? [attachments] : [];
+    const names = list
+      .map((a: any) => (typeof a === 'string' ? decodeURIComponent(a.split('?')[0].split('/').pop() || '') : a?.name))
+      .filter(Boolean);
+    setPendingAttachments(names.length ? { emailType, names } : null);
+  };
+  const pendingNamesFor = (emailType: string) =>
+    pendingAttachments?.emailType === emailType ? pendingAttachments.names : [];
+  const finishSend = () => refetch().then(() => { setLocalCase(null); setPendingAttachments(null); });
 
   const setReceived = (caseId: string, emailType: string) => {
     const loadingKey = `${caseId}-${emailType}`;
@@ -106,11 +120,12 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
 
     mutate(copy, {
       onSuccess: (data: any) => {
+        // Show the received state right away, then hand back to the fresh server copy
         setLocalCase(copy);
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         if (emailType === 'quit claim') queryClient.invalidateQueries(['employeePaginatedSelectCache']);
-        refetch();
+        refetch().then(() => setLocalCase(null));
       },
       onError: (err: any) => {
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
@@ -123,13 +138,17 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     if (!isLetterModalOpen?.id || !separation) return;
     const items = [separation];
     const updatedItem = handleLetterSending(data, items, isLetterModalOpen.id, isLetterModalOpen.type);
+    startPendingAttachments('letters', data.attachments ?? data.attachment);
     mutate(updatedItem, {
       onSuccess: (res: any) => {
         setIsLetterModalOpen(null);
         toast.custom(() => <CustomToast message={res.message} type='success' />, { duration: 5000 });
-        refetch().then(() => setLocalCase(null));
+        finishSend();
       },
-      onError: (err: any) => toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 }),
+      onError: (err: any) => {
+        setPendingAttachments(null);
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 });
+      },
     });
   };
 
@@ -137,13 +156,17 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     if (!isDocumentModalOpen?.id || !separation) return;
     const items = [separation];
     const updatedItem = handleEmailSending(data, 'sign documents', items, isDocumentModalOpen.id);
+    startPendingAttachments('sign documents', data.attachments ?? data.attachment);
     mutate(updatedItem, {
       onSuccess: (res: any) => {
         setIsDocumentModalOpen(null);
         toast.custom(() => <CustomToast message={res.message} type='success' />, { duration: 5000 });
-        refetch().then(() => setLocalCase(null));
+        finishSend();
       },
-      onError: (err: any) => toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 }),
+      onError: (err: any) => {
+        setPendingAttachments(null);
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 });
+      },
     });
   };
 
@@ -151,15 +174,19 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     if (!isLastPayModalOpen?.id || !separation) return;
     const items = [separation];
     const updatedItem = handleEmailSending(data, 'last pay', items, isLastPayModalOpen.id);
+    startPendingAttachments('last pay', data.attachments ?? data.attachment);
     mutate(updatedItem, {
       onSuccess: (res: any) => {
         setIsLastPayModalOpen(null);
         toast.custom(() => <CustomToast message={res.message} type='success' />, { duration: 5000 });
         // Last pay released = offboarding complete. Employee is now resigned — remove from selects.
         queryClient.invalidateQueries(['employeePaginatedSelectCache']);
-        refetch().then(() => setLocalCase(null));
+        finishSend();
       },
-      onError: (err: any) => toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 }),
+      onError: (err: any) => {
+        setPendingAttachments(null);
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 });
+      },
     });
   };
 
@@ -172,13 +199,18 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     };
     const items = [separation];
     const updatedItem = handleEmailSending(mergedData, 'legal docs', items, isLegalDocsModalOpen.id);
+    // Only the newly picked files are pending; the merged existing URLs are already listed
+    startPendingAttachments('legal docs', data.attachments ?? data.attachment);
     mutate(updatedItem, {
       onSuccess: (res: any) => {
         setIsLegalDocsModalOpen(null);
         toast.custom(() => <CustomToast message={res.message} type='success' />, { duration: 5000 });
-        refetch().then(() => setLocalCase(null));
+        finishSend();
       },
-      onError: (err: any) => toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 }),
+      onError: (err: any) => {
+        setPendingAttachments(null);
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 });
+      },
     });
   };
 
@@ -323,6 +355,13 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-5'>
           {/* Stage Panel */}
           <div className='lg:col-span-2'>
+            {/* SendEmailModal closes on submit, so show progress here while the email sends and the case reloads */}
+            {(isMutating || isFetching) && !pendingAttachments && (
+              <div className='flex items-center gap-2 mb-3 text-sm text-gray-500'>
+                <LoadingSpinner size='xs' text='Updating...' />
+                <span>Updating...</span>
+              </div>
+            )}
             {displayStage === 'Initiation' && (
               <InitiationStage
                 separation={separation}
@@ -330,6 +369,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
                 onOpenSendLetterModal={(modal) => setIsLetterModalOpen(modal)}
                 onMarkReceived={setReceived}
                 isLoading={loadingStates[`${separation.id}-letters`] || false}
+                pendingAttachmentNames={pendingNamesFor('letters')}
               />
             )}
             {displayStage === 'Rendering' && (
@@ -347,6 +387,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
                 onOpenDocumentsModal={(modal) => setIsDocumentModalOpen(modal)}
                 onMarkReceived={setReceived}
                 isLoading={loadingStates[`${separation.id}-sign documents`] || false}
+                pendingAttachmentNames={pendingNamesFor('sign documents')}
                 onTasksChange={(hasAny, allComplete) => setClearanceTasksBlocked(!hasAny || !allComplete)}
               />
             )}
@@ -355,6 +396,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
                 separation={separation}
                 onOpenLastPayModal={(modal) => setIsLastPayModalOpen(modal)}
                 onTasksChange={(hasAny, allComplete) => setFinalPayTasksBlocked(!hasAny || !allComplete)}
+                pendingAttachmentNames={pendingNamesFor('last pay')}
               />
             )}
             {displayStage === 'Legal Docs' && (
@@ -364,6 +406,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
                 onOpenLegalDocsEmail={(modal) => setIsLegalDocsModalOpen(modal)}
                 onMarkReceived={setReceived}
                 isLoading={loadingStates[`${separation.id}-legal docs`] || false}
+                pendingAttachmentNames={pendingNamesFor('legal docs')}
               />
             )}
             {displayStage === 'Exit Interview' && (

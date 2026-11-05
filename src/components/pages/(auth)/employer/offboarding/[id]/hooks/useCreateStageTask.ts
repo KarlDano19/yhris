@@ -26,7 +26,11 @@ function useCreateStageTask(separationId: number | string, stage: string) {
   return useMutation(
     (data: { separationId: number | string; stage: string; label: string }) => createStageTask(data),
     {
-      onSuccess: () => {
+      onSuccess: (newTask) => {
+        // The POST returns the new task: show it now instead of waiting for the refetch
+        queryClient.setQueryData<any[]>(['stageTasksCache', separationId, stage], (tasks = []) =>
+          newTask?.id && !tasks.some((t) => t.id === newTask.id) ? [...tasks, newTask] : tasks
+        );
         queryClient.invalidateQueries(['stageTasksCache', separationId, stage]);
         queryClient.invalidateQueries(['separationCaseCache', String(separationId)]);
       },

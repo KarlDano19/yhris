@@ -47,7 +47,7 @@ const ConfirmModal = ({ open, onClose }: ConfirmModalProps) => {
                   <div>
                     <div className="mx-auto flex items-center justify-center rounded-full">
                       <ExclamationCircleIcon
-                        className="h-28 w-28 text-[#FFC107]"
+                        className="h-28 w-28 text-hris-yellow"
                         aria-hidden="true"
                       />
                     </div>

@@ -339,7 +339,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                 <MainIconOnly className='w-24 h-24' />
 
                 <h1 className='text-[50px] font-bold text-white mt-4'>
-                  YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
+                  YAHSHUA <span className='text-hris-yellow'>HRIS</span>
                 </h1>
                 <h3 className='text-white text-3xl text-center w-96 mt-2'>Leading your employees in one place.</h3>
               </div>
@@ -381,7 +381,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
               <MainIconOnly className='w-24 h-24' />
 
               <h1 className='text-[50px] font-bold text-white mt-4'>
-                YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
+                YAHSHUA <span className='text-hris-yellow'>HRIS</span>
               </h1>
               <h3 className='text-white text-3xl text-center w-96 mt-2'>Leading your employees in one place.</h3>
             </div>
@@ -581,11 +581,11 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                   </div>
                   <div className='text-sm'>
                     By continuing, you agree to our{' '}
-                    <Link id='terms-of-service-link' href='/terms-of-service' target='_blank' className='text-[#355FD0] underline'>
+                    <Link id='terms-of-service-link' href='/terms-of-service' target='_blank' className='text-savoy-blue underline'>
                       Terms of Service
                     </Link>
                     , and{' '}
-                    <Link id='privacy-notice-link' href='/privacy-notice' target='_blank' className='text-[#355FD0] underline'>
+                    <Link id='privacy-notice-link' href='/privacy-notice' target='_blank' className='text-savoy-blue underline'>
                       Privacy Notice
                     </Link>
                     .

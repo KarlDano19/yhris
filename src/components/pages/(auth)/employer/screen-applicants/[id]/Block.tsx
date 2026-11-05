@@ -27,7 +27,7 @@ export default function Block({
             snapshot.isDragging,
             provided.draggableProps.style
           )}
-          className="bg-[#EBF3FF] rounded-2xl px-7 py-2 h-[500px] relative"
+          className="bg-hris-tint rounded-2xl px-7 py-2 h-[500px] relative"
         >
           {applicants.length ? (
             applicants.map((applicant: ApplicantType) => {

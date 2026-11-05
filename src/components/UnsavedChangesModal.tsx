@@ -67,7 +67,7 @@ export default function UnsavedChangesModal({
                 <div className='flex flex-row justify-center w-full gap-3 md:gap-8 px-4 pt-8 md:pt-10 pb-5 md:pb-7'>
                   <button
                     type='button'
-                    className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-6 md:px-20 py-2 text-sm md:text-base bg-white leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150'
+                    className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-6 md:px-20 py-2 text-sm md:text-base bg-white dark:bg-[var(--subtle-bg)] dark:hover:bg-gray-700 leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150'
                     onClick={onClose}
                     ref={cancelButtonRef}
                     disabled={isLoading}

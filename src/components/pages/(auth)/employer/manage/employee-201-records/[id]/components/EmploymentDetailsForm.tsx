@@ -337,7 +337,7 @@ export default function EmploymentDetailsForm({
                 ? "bg-gray-100 border border-gray-200 cursor-not-allowed"
                 : showErr("date_hired")
                 ? "border border-red-500 focus:border-red-500"
-                : "bg-white border border-gray-300 focus:border-[#355fd0]",
+                : "bg-white border border-gray-300 focus:border-savoy-blue",
             ].join(" ")}
           />
           <p
@@ -523,7 +523,7 @@ export default function EmploymentDetailsForm({
                 setShowSalaryModal(true);
                 setSalaryModalParam(true);
               }}
-              className="w-full rounded-md border border-[#355fd0] text-[#355fd0] px-4 py-2 text-sm hover:bg-[#355fd0]/5"
+              className="w-full rounded-md border border-savoy-blue text-savoy-blue px-4 py-2 text-sm hover:bg-savoy-blue/5"
             >
               View Salary History
             </button>
@@ -538,7 +538,7 @@ export default function EmploymentDetailsForm({
             onClick={() => {
               setShowEmploymentModal(true);
             }}
-            className="w-full rounded-md border border-[#355fd0] text-[#355fd0] px-4 py-2 text-sm hover:bg-[#355fd0]/5"
+            className="w-full rounded-md border border-savoy-blue text-savoy-blue px-4 py-2 text-sm hover:bg-savoy-blue/5"
           >
             View Employment History
           </button>

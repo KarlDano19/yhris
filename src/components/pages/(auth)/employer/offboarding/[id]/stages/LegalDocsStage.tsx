@@ -15,9 +15,10 @@ type Props = {
   onOpenLegalDocsEmail?: (modal: { id: number }) => void;
   onMarkReceived: (id: string, type: string) => void;
   isLoading: boolean;
+  pendingAttachmentNames?: string[];
 };
 
-const LegalDocsStage = ({ separation, onTasksChange, onOpenLegalDocsEmail, onMarkReceived, isLoading }: Props) => {
+const LegalDocsStage = ({ separation, onTasksChange, onOpenLegalDocsEmail, onMarkReceived, isLoading, pendingAttachmentNames }: Props) => {
   const docsSent = !!separation.is_legal_docs_sent;
   const docsReceived = !!separation.is_legal_docs_received;
 
@@ -75,7 +76,7 @@ const LegalDocsStage = ({ separation, onTasksChange, onOpenLegalDocsEmail, onMar
           </p>
         )}
 
-        <AttachmentCard attachments={separation.legal_docs_attachments || []} label="Sent Attachments" />
+        <AttachmentCard attachments={separation.legal_docs_attachments || []} label="Sent Attachments" pendingNames={pendingAttachmentNames} />
         <Tooltip id='legal-docs-tooltip' />
       </div>
 

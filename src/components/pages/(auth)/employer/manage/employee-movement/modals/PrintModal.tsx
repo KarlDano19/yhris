@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect } from "react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from "react-hook-form";
-import html2canvas from 'html2canvas';
+import html2canvas from '@/helpers/captureLight';
 
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";

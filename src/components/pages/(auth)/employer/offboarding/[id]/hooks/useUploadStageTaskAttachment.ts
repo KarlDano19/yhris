@@ -25,12 +25,18 @@ async function uploadStageTaskAttachment(data: { separationId: number | string; 
 
 function useUploadStageTaskAttachment(separationId: number | string, stage: string) {
   const queryClient = useQueryClient();
+  const cacheKey = ['stageTasksCache', separationId, stage];
+
   return useMutation(
     (data: { separationId: number | string; taskId: number; attachment: File }) =>
       uploadStageTaskAttachment(data),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['stageTasksCache', separationId, stage]);
+      onSuccess: (updatedTask) => {
+        // The PATCH returns the updated task: show "View file" now instead of waiting for the refetch
+        queryClient.setQueryData<any[]>(cacheKey, (tasks = []) =>
+          tasks.map((t) => (t.id === updatedTask?.id ? { ...t, ...updatedTask } : t))
+        );
+        queryClient.invalidateQueries(cacheKey);
         queryClient.invalidateQueries(['separationCaseCache', String(separationId)]);
       },
     }

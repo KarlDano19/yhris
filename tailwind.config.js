@@ -5,11 +5,14 @@ delete colors["warmGray"];
 delete colors["trueGray"];
 delete colors["coolGray"];
 delete colors["blueGray"];
+const { surfaceColors, textColors, themePalettePlugin } = require("./tailwind.theme");
 module.exports = {
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx}",
     "./src/components/**/*.{js,ts,jsx,tsx}",
     "./src/app/**/*.{js,ts,jsx,tsx}",
+    "./src/components/pages/(auth)/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -23,8 +26,25 @@ module.exports = {
       },
       colors: {
         ...colors,
-        "indigo-dye": "#2C3F58",
-        "savoy-blue": "#355FD0",
+        // Palette, brand and `hris-*` colors resolve to CSS variables so they
+        // switch with dark mode. See tailwind.theme.js.
+        ...surfaceColors,
+        // Semantic theme tokens — auto-switch with dark mode via CSS variables.
+        // Usage: bg-theme-bg, text-theme-body, border-theme-border, etc.
+        theme: {
+          bg:             'var(--color-bg)',
+          surface:        'var(--color-surface)',
+          'surface-raised': 'var(--color-surface-raised)',
+          body:           'var(--color-text)',
+          muted:          'var(--color-text-muted)',
+          border:         'var(--color-border)',
+          'border-subtle':'var(--color-border-subtle)',
+          primary:        'var(--color-primary)',
+          'primary-yellow': 'var(--color-primary-yellow)',
+          success:        'var(--color-success)',
+          error:          'var(--color-error)',
+          warning:        'var(--color-warning)',
+        },
         // Landing page design system
         navy: "hsl(var(--lp-navy))",
         "lp-blue": "hsl(var(--lp-blue))",
@@ -46,7 +66,20 @@ module.exports = {
       borderRadius: {
         lp: "0.625rem",
       },
+      // Tailwind can't derive the default focus ring from a CSS variable, so pin its original value.
+      ringColor: { DEFAULT: "#3b82f6" },
+      // Foreground utilities use the text role of the palette (lighter shades in dark mode).
+      textColor: textColors,
+      placeholderColor: textColors,
+      caretColor: textColors,
+      textDecorationColor: textColors,
+      fill: textColors,
+      stroke: textColors,
     },
   },
-  plugins: [],
+  safelist: [
+    'text-red-600',
+    'border-red-600',
+  ],
+  plugins: [themePalettePlugin],
 };

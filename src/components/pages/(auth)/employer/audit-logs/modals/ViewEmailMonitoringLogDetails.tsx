@@ -273,7 +273,7 @@ export default function ViewEmailMonitoringLogDetails({
                         <label className='text-xs text-gray-500 uppercase'>To</label>
                         <div className='mt-2 flex flex-wrap gap-2'>
                           {toArray(emailRecord?.to, logDetails.email ? [logDetails.email] : []).map((addr: any) => (
-                            <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
+                            <div key={addr} className='bg-hris-line rounded-md py-0 px-4 text-sm'>
                               {addr}
                             </div>
                           ))}
@@ -284,7 +284,7 @@ export default function ViewEmailMonitoringLogDetails({
                         <label className='text-xs text-gray-500 uppercase'>Cc</label>
                         <div className='mt-2 flex flex-wrap gap-2'>
                           {toArray(emailRecord?.cc, []).map((addr: any) => (
-                            <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
+                            <div key={addr} className='bg-hris-line rounded-md py-0 px-4 text-sm'>
                               {addr}
                             </div>
                           ))}
@@ -295,7 +295,7 @@ export default function ViewEmailMonitoringLogDetails({
                         <label className='text-xs text-gray-500 uppercase'>Bcc</label>
                         <div className='mt-2 flex flex-wrap gap-2'>
                           {toArray(emailRecord?.bcc, []).map((addr: any) => (
-                            <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
+                            <div key={addr} className='bg-hris-line rounded-md py-0 px-4 text-sm'>
                               {addr}
                             </div>
                           ))}

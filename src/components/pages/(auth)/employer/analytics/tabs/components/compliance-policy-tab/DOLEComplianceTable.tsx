@@ -80,7 +80,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+      <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
         <div className="px-6 py-4">
           <h3 className="text-lg font-semibold text-gray-900">DOLE Compliance Status</h3>
         </div>
@@ -95,7 +95,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+      <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
         <div className="px-6 py-4">
           <h3 className="text-lg font-semibold text-gray-900">DOLE Compliance Status</h3>
         </div>
@@ -109,7 +109,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+    <div className="bg-white rounded-lg border border-hris-line-alt shadow-sm">
       <div className="px-6 py-4">
         <h3 className="text-lg font-semibold text-gray-900">DOLE Compliance Status</h3>
       </div>
@@ -118,7 +118,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead>
-              <tr className="border-b-2 border-[#ACB9CB]">
+              <tr className="border-b-2 border-hris-line">
                 <th className="pb-4 text-left text-sm font-semibold text-gray-900">
                   DOLE Requirements
                 </th>

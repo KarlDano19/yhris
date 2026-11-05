@@ -51,7 +51,7 @@ export default function ConfirmModal({
                 <div className='mt-2 px-6 mb-6 flex gap-6'>
                   <button
                     type='button'
-                    className='w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0'
+                    className='w-full justify-center rounded-md bg-white dark:bg-[var(--subtle-bg)] px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0'
                     onClick={() => {
                       if (cancelAction) {
                         cancelAction();
@@ -75,7 +75,7 @@ export default function ConfirmModal({
                       <div role='status'>
                         <svg
                           aria-hidden='true'
-                          className='inline w-6 h-6 mr-2 text-gray-200 animate-spin fill-blue-600'
+                          className='inline w-6 h-6 mr-2 text-gray-200 dark:text-gray-600 animate-spin fill-blue-600'
                           viewBox='0 0 100 101'
                           fill='none'
                           xmlns='http://www.w3.org/2000/svg'

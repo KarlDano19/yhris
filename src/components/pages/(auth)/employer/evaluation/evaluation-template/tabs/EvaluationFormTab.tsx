@@ -52,7 +52,7 @@ function EvaluationFormTab({
               <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
                 <div className='min-w-full py-2 sm:px-6 lg:px-8 space-y-6'>
                   <div
-                    className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'
+                    className='sm:col-span-4 mt-2 w-full border rounded-xl border-hris-line py-6 px-4'
                     data-tooltip-id='description-tooltip'
                     data-tooltip-content='A description or instructions for the evaluation template, explaining its purpose and how it should be used.'
                     data-tooltip-place='left'
@@ -74,7 +74,7 @@ function EvaluationFormTab({
                     {errors.description && <p className='text-xs text-red-600 mt-1'>Description is required.</p>}
                   </div>
                   {/* <div
-                    className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'
+                    className='sm:col-span-4 mt-2 w-full border rounded-xl border-hris-line py-6 px-4'
                     data-tooltip-id='scoring-tooltip'
                     data-tooltip-content='This field will not be shown on the employee’s end during the evaluation. The selected scoring/rating will be applied to ALL once this is selected.'
                     data-tooltip-place='left'
@@ -101,7 +101,7 @@ function EvaluationFormTab({
                     </div>
                   </div> */}
                   <div className='flex flex-row space-x-6'>
-                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
+                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-hris-line py-6 px-4'>
                       <div className='flex flex-col px-5'>
                         <label className='text-slate-700 mt-2 text-sm'>How much is the total score?</label>
                         <div className='flex gap-4 items-center mt-4 text-center whitespace-nowrap text-slate-500'>
@@ -153,7 +153,7 @@ function EvaluationFormTab({
                         {errors.total_score && <p className='text-xs text-red-600 mt-1'>{errors.total_score.message}</p>}
                       </div>
                     </div>
-                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
+                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-hris-line py-6 px-4'>
                       <div className='flex flex-col px-5'>
                         <label className='text-slate-700 mt-2 text-sm'>How much is the Passing score?</label>
                         <div className='flex gap-4 items-center mt-4 text-center whitespace-nowrap text-slate-500'>
@@ -218,7 +218,7 @@ function EvaluationFormTab({
                     </div>
                   </div>
                   <div className='flex flex-row space-x-6'>
-                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
+                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-hris-line py-6 px-4'>
                       <label htmlFor='remarks' className='block text-sm font-medium leading-6 text-gray-900'>
                         Do you want a remarks field?
                       </label>
@@ -229,7 +229,7 @@ function EvaluationFormTab({
                             'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
                             remarks === false
                               ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
-                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-hris-line  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                           )}
                           onClick={() => handleClickRemarks(false)}
                         >
@@ -241,7 +241,7 @@ function EvaluationFormTab({
                             'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
                             remarks === true
                               ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
-                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-hris-line  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                           )}
                           onClick={() => handleClickRemarks(true)}
                         >
@@ -249,7 +249,7 @@ function EvaluationFormTab({
                         </button>
                       </div>
                     </div>
-                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
+                    <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-hris-line py-6 px-4'>
                       <label htmlFor='criteria' className='block text-sm font-medium leading-6 text-gray-900'>
                         Do you want to add a comment field in criteria?
                       </label>
@@ -260,7 +260,7 @@ function EvaluationFormTab({
                             'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
                             commentCriteria === false
                               ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
-                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-hris-line  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                           )}
                           onClick={() => handleClickCommentCriteria(false)}
                         >
@@ -272,7 +272,7 @@ function EvaluationFormTab({
                             'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
                             commentCriteria === true
                               ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
-                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                              : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-hris-line  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                           )}
                           onClick={() => handleClickCommentCriteria(true)}
                         >

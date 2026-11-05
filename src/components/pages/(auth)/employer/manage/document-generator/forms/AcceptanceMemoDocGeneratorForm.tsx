@@ -183,7 +183,7 @@ export default function AcceptanceMemoDocGeneratorForm({
                 type='button'
                 onClick={handleSubmitClick}
                 disabled={isFormDisabled}
-                className='flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-[#355FD0] hover:bg-blue-700 text-white rounded-full w-full sm:w-auto mt-3 sm:mt-0 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                className='flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-savoy-blue hover:bg-blue-700 text-white rounded-full w-full sm:w-auto mt-3 sm:mt-0 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' className='sm:w-5 sm:h-5'>
                   <polyline points='20 6 9 17 4 12'></polyline>
