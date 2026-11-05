@@ -9,6 +9,24 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "new-hire-onboarding-checklist-philippines",
+    category: "Operations Playbook",
+    image: "/blog/new-hire-onboarding-checklist-philippines.png",
+    title: "New Hire Onboarding Checklist for Philippine Employers: Government IDs and Documents",
+    excerpt: "SSS and PhilHealth within 30 days of hiring, a TIN within 10 days, and Pag-IBIG enrollment. The onboarding checklist with the required steps marked, the documents to collect, and the Data Privacy Act limits.",
+    date: "November 2026",
+    readTime: "7 min read",
+  },
+  {
+    slug: "employee-offboarding-checklist-philippines",
+    category: "DOLE Compliance",
+    image: "/blog/employee-offboarding-checklist-philippines.png",
+    title: "Employee Offboarding Checklist for Philippine Employers: From Resignation to Final Pay",
+    excerpt: "Final pay in 30 days, a COE in 3 days, 30 days' written notice, and Form 2316 on the last payment. The offboarding checklist with each legal clock marked, so you know what is required and what is good practice.",
+    date: "November 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "employee-201-file-philippines",
     category: "DOLE Compliance",
     image: "/blog/employee-201-file-philippines.png",

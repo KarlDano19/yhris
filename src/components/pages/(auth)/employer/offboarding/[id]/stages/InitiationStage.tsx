@@ -16,9 +16,10 @@ type Props = {
   onOpenSendLetterModal: (modal: T_LetterModal) => void;
   onMarkReceived: (id: string, type: string) => void;
   isLoading: boolean;
+  pendingAttachmentNames?: string[];
 };
 
-const InitiationStage = ({ separation, onOpenLetterModal, onOpenSendLetterModal, onMarkReceived, isLoading }: Props) => {
+const InitiationStage = ({ separation, onOpenLetterModal, onOpenSendLetterModal, onMarkReceived, isLoading, pendingAttachmentNames }: Props) => {
   const hasLetter = !!separation.letter_attachment || (separation.letter_attachments?.length > 0);
   const letterSent = !!separation.is_letter_sent;
   const letterReceived = !!separation.is_letter_received;
@@ -166,6 +167,7 @@ const InitiationStage = ({ separation, onOpenLetterModal, onOpenSendLetterModal,
         <AttachmentCard
           attachments={enrichedAttachments}
           label="Attached Letters"
+          pendingNames={pendingAttachmentNames}
           onUploadSignedCopy={(attachmentId, idx) => setUploadSignedCopyModal({ attachmentId, idx })}
         />
       </div>

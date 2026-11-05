@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
+import LoadingSpinner from '@/components/LoadingSpinner';
+
 import ClipIcon from '@/svg/ClipIcon';
 import UploadIcon from '@/svg/UploadIcon';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
@@ -21,12 +23,14 @@ type Props = {
   label?: string;
   onUploadSignedCopy?: (attachmentId: number | undefined, idx: number) => void;
   limit?: number;
+  // Names of files just sent that the server has not returned yet (shown as "Sending..." rows)
+  pendingNames?: string[];
 };
 
-const AttachmentCard = ({ attachments, label, onUploadSignedCopy, limit = 3 }: Props) => {
+const AttachmentCard = ({ attachments, label, onUploadSignedCopy, limit = 3, pendingNames = [] }: Props) => {
   const [expanded, setExpanded] = useState(false);
 
-  if (!attachments || attachments.length === 0) return null;
+  if ((!attachments || attachments.length === 0) && pendingNames.length === 0) return null;
 
   const visible = expanded ? attachments : attachments.slice(0, limit);
   const hiddenCount = attachments.length - limit;
@@ -74,6 +78,16 @@ const AttachmentCard = ({ attachments, label, onUploadSignedCopy, limit = 3 }: P
             >
               <ArrowTopRightOnSquareIcon className='h-5 w-5 fill-indigo-600' />
             </button>
+          </div>
+        ))}
+        {pendingNames.map((name, idx) => (
+          <div
+            key={`pending-${idx}`}
+            className='flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg border border-dashed border-gray-300'
+          >
+            <LoadingSpinner size='xs' text='Sending...' />
+            <span className='text-base text-gray-400 flex-1 truncate'>{name}</span>
+            <span className='flex-shrink-0 text-sm text-gray-400'>Sending...</span>
           </div>
         ))}
       </div>
