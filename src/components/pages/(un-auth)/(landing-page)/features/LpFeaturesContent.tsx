@@ -53,7 +53,7 @@ const categories = [
       { title: "Work Accident and Illness Reports", body: "DOLE-format reports generated directly from incident records." },
       { title: "EC Logbooks", body: "Employee Compensation logbooks kept current and ready to submit." },
       { title: "OSH documentation", body: "Full suite of Occupational Safety and Health minutes and annual reports." },
-      { title: "International certifications", body: "GDPR, SOC2 Type 2, and ISO 27001 certified security." },
+      { title: "International certifications", body: "GDPR compliant, with SOC 2 Type 2 and ISO 27001 certified security." },
     ],
   },
 ];
@@ -105,7 +105,7 @@ const LpFeaturesContent = () => {
                 <span className="text-primary"> All in one system.</span>
               </h1>
               <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
-                From the first job posting to an employee&apos;s last day, with built-in DOLE compliance and payroll sync.
+                From the first job posting to an employee&apos;s last day, with built-in DOLE compliance and employee sync from YAHSHUA One Payroll.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2 px-8 py-3.5">
@@ -224,7 +224,7 @@ const LpFeaturesContent = () => {
                     Ready to see it in action?
                   </h2>
                   <p className="text-gray-500 text-base max-w-sm mx-auto mb-10">
-                    Book a free demo or start with the free plan. No credit card required.
+                    Book a free demo or start with the free plan.
                   </p>
                   <div className="flex flex-wrap gap-3 justify-center">
                     <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">

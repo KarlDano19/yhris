@@ -2,12 +2,12 @@ import { Check, X, AlertTriangle } from "lucide-react";
 import ScrollFadeIn from "./ScrollFadeIn";
 
 const rows = [
-  { feature: "Built-in recruitment / ATS", others: { text: "Separate tool required", icon: "x" }, yahshua: "Included" },
-  { feature: "Job posting to social media", others: { text: "Not available", icon: "x" }, yahshua: "Facebook, LinkedIn, YAHSHUA Jobs" },
-  { feature: "Payroll integration", others: { text: "Manual export or separate system", icon: "warn" }, yahshua: "Real-time auto-sync" },
-  { feature: "DOLE compliance reports", others: { text: "Limited or manual", icon: "warn" }, yahshua: "Full suite built-in" },
-  { feature: "GDPR / SOC2 / ISO 27001", others: { text: "Partial or none", icon: "warn" }, yahshua: "All three certified" },
-  { feature: "Unlimited users", others: { text: "Per-seat billing", icon: "x" }, yahshua: "All plans" },
+  { feature: "Recruitment and applicant tracking", others: { text: "A separate tool, or email threads", icon: "x" }, yahshua: "Built in: post jobs, screen, track stages" },
+  { feature: "Job posting to social media", others: { text: "Posted by hand, site by site", icon: "warn" }, yahshua: "Share to Facebook, LinkedIn, YAHSHUA Jobs" },
+  { feature: "Payroll connection", others: { text: "Re-typing employee data into payroll", icon: "x" }, yahshua: "Employee records sync from YAHSHUA One Payroll" },
+  { feature: "DOLE compliance reports", others: { text: "Built by hand in spreadsheets", icon: "warn" }, yahshua: "Ready for submission in a few clicks" },
+  { feature: "Security and data privacy", others: { text: "Files on laptops and shared drives", icon: "warn" }, yahshua: "SOC 2 Type 2, ISO 27001, GDPR compliant" },
+  { feature: "Pricing", others: { text: "A separate bill for each tool", icon: "warn" }, yahshua: "One published plan for every module" },
 ];
 
 const OtherIcon = ({ type }: { type: string }) => {
@@ -22,7 +22,7 @@ const LpComparisonTable = () => {
         <ScrollFadeIn className="text-center mb-16">
           <span className="lp-section-label justify-center mb-5">HOW WE COMPARE</span>
           <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-gray-900 tracking-tight">
-            Why settle for less when you can get it all?
+            Stop piecing HR together from spreadsheets and separate tools.
           </h2>
         </ScrollFadeIn>
 
@@ -46,7 +46,7 @@ const LpComparisonTable = () => {
                     Feature
                   </th>
                   <th className="text-left px-6 py-4 font-semibold text-gray-400 text-xs uppercase tracking-widest w-[30%]">
-                    Others
+                    Excel and separate tools
                   </th>
                   <th
                     className="text-left px-6 py-4 font-bold text-xs uppercase tracking-widest w-[35%]"

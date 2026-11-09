@@ -18,10 +18,10 @@ const LpComplianceTrust = () => {
         <ScrollFadeIn className="text-center mb-20">
           <span className="lp-section-label justify-center mb-5">SECURITY &amp; COMPLIANCE</span>
           <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-gray-900 tracking-tight">
-            Auditors and labor inspectors won&apos;t catch you off guard.
+            Be ready when DOLE asks for your records.
           </AnimatedHeadline>
           <p className="text-gray-500 text-base md:text-lg max-w-md mx-auto leading-relaxed">
-            YAHSHUA HRIS is built around Philippine labor law and international data security standards, so compliance is never an afterthought.
+            YAHSHUA HRIS builds DOLE reports from your own employee records. Our security is certified to SOC 2 Type 2 and ISO 27001, and we are GDPR compliant.
           </p>
         </ScrollFadeIn>
 

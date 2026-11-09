@@ -15,40 +15,40 @@ import MainLogo from "@/svg/MainLogo";
 const steps = [
   {
     step: "01",
-    title: "Employee is onboarded",
-    body: "Create the employee profile in YAHSHUA HRIS: employment details, salary, benefits, and documents all in one form.",
+    title: "Employees are set up in YAHSHUA One Payroll",
+    body: "Your employee records live in YAHSHUA One Payroll, the same place your payroll runs.",
   },
   {
     step: "02",
-    title: "Data syncs instantly, no action needed",
-    body: "The moment a record is created or updated in HRIS, it pushes to YAHSHUA Payroll automatically and in real time. No CSV, no manual re-entry, no delays.",
+    title: "Sign in to HRIS through Payroll",
+    body: "Log in to YAHSHUA HRIS through YAHSHUA One Payroll's single sign-on. The two systems connect and employee data syncs into HRIS. No CSV, no re-typing.",
   },
   {
     step: "03",
-    title: "Leave and attendance flow in automatically",
-    body: "Approved requests (leave, OT, undertime, rest day work) reflect in payroll the instant they're approved. No one needs to forward anything.",
+    title: "Run your HR work in HRIS",
+    body: "Post jobs, onboard hires, keep 201 files, send memos and notices to explain, and generate DOLE reports from the same employee records.",
   },
   {
     step: "04",
-    title: "Payroll runs cleanly every cutoff",
-    body: "Your payroll processor starts with accurate, real-time data every cutoff. No corrections, no chasing HR for numbers.",
+    title: "Payroll stays in Payroll",
+    body: "Payroll runs in YAHSHUA One Payroll as it does today. Ask us in a demo how attendance, leave, and overtime fit your own setup.",
   },
 ];
 
 const syncedData = [
-  { icon: Users, label: "Employee profiles", body: "Name, position, rate, and employment type sync automatically the moment a profile is created or updated." },
-  { icon: Clock, label: "Time and attendance", body: "Clock-in records from ABBA Timekeeper flow directly into payroll in real time. No manual imports." },
-  { icon: FileText, label: "Leave balances and requests", body: "Approved leave auto-deducts from payroll instantly. No manual tracking, no cutoff exports." },
-  { icon: Zap, label: "Overtime and adjustments", body: "OT approvals sync to payroll automatically the moment they're signed off." },
+  { icon: Users, label: "Employee profiles", body: "Employee data from YAHSHUA One Payroll syncs into HRIS, with no manual transfers." },
+  { icon: Zap, label: "Single sign-on", body: "One login connects YAHSHUA One Payroll and YAHSHUA HRIS." },
+  { icon: FileText, label: "Document generator", body: "Generate NTEs, certificates of employment, and employment agreements from employee records." },
   { icon: Bell, label: "Memos and NTEs", body: "Distribute disciplinary documents directly from HRIS via email." },
-  { icon: Shield, label: "Personnel movement forms", body: "Promotions, transfers, and regularization update payroll rates automatically, in real time." },
+  { icon: Shield, label: "Personnel movement forms", body: "Record promotions, transfers, and regularization with approver notes." },
+  { icon: Clock, label: "DOLE reports", body: "Generate reports ready for submission in a few clicks." },
 ];
 
 const problems = [
-  { before: "Export leave data to a spreadsheet every cutoff", after: "Leave reflects in payroll the moment it's approved" },
+  { before: "Export employee data to a spreadsheet to move it between systems", after: "Employee data syncs from YAHSHUA One Payroll into HRIS" },
   { before: "Re-enter employee details in two separate systems", after: "One profile, shared across HRIS and Payroll" },
-  { before: "Chase HR for OT totals before running payroll", after: "OT approvals sync to payroll automatically" },
-  { before: "Fix payroll errors caused by stale data", after: "Payroll always starts with current, accurate records" },
+  { before: "Dig through files and spreadsheets for DOLE reports", after: "DOLE reports generated from the same employee records" },
+  { before: "Log in separately to each system", after: "Sign in once through YAHSHUA One Payroll" },
 ];
 
 const LpPayrollIntegrationContent = () => {
@@ -63,14 +63,14 @@ const LpPayrollIntegrationContent = () => {
             <div className="lp-section-container relative z-10">
               <ScrollFadeIn>
                 <span className="lp-section-label mb-3">PAYROLL INTEGRATION</span>
-                <p className="text-[11px] text-gray-400 mb-6">Last reviewed: June 2026</p>
+                <p className="text-[11px] text-gray-400 mb-6">Last reviewed: November 2026</p>
                 <div className="max-w-3xl">
                   <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] text-gray-900 mb-6 tracking-tight">
                     Your HRIS and Payroll,<br />
-                    <span className="text-primary">finally in sync.</span>
+                    <span className="text-primary">on one sign-in.</span>
                   </h1>
                   <p className="text-lg text-gray-500 max-w-xl leading-relaxed mb-10">
-                    YAHSHUA HRIS and YAHSHUA Payroll share the same data, synced automatically and in real time. No exports, no re-entry, no payroll errors from stale records.
+                    YAHSHUA HRIS connects to YAHSHUA One Payroll through single sign-on, and your employee data syncs into HRIS. No exports, no re-typing.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
@@ -106,13 +106,13 @@ const LpPayrollIntegrationContent = () => {
                         <RefreshCw className="w-6 h-6 text-primary animate-[spin_4s_linear_infinite] group-hover:animate-[spin_1.5s_linear_infinite]" />
                       </div>
                       <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                        Live Sync
+                        Single Sign-On
                       </span>
                     </div>
                     <div className="w-full lg:w-[400px] h-[260px] rounded-xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.1)" }}>
                       <Image
                         src="/payroll-register.png"
-                        alt="YAHSHUA Payroll Register"
+                        alt="YAHSHUA One Payroll Register"
                         width={400}
                         height={260}
                         className="w-full h-full object-cover object-top"
@@ -177,10 +177,10 @@ const LpPayrollIntegrationContent = () => {
                   <div className="lg:sticky lg:top-36 self-start">
                     <span className="lp-section-label mb-5">HOW IT WORKS</span>
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight tracking-tight mb-5">
-                      Set it up once. Everything syncs automatically after that.
+                      Sign in through Payroll. Your employee records follow.
                     </h2>
                     <p className="text-gray-500 leading-relaxed">
-                      Connect YAHSHUA HRIS to YAHSHUA Payroll once during onboarding. From that point on, every change in HRIS pushes to Payroll automatically and in real time. No one on your team needs to do anything.
+                      Log in to YAHSHUA HRIS through YAHSHUA One Payroll's single sign-on and your employee data syncs into HRIS, with no manual transfers.
                     </p>
                   </div>
 
@@ -207,9 +207,9 @@ const LpPayrollIntegrationContent = () => {
             <div className="lp-section-container">
               <ScrollFadeIn>
                 <div className="max-w-xl mb-14">
-                  <span className="lp-section-label mb-5">WHAT SYNCS</span>
+                  <span className="lp-section-label mb-5">WHAT YOU GET</span>
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
-                    Everything HR touches, payroll reflects.
+                    One sign-in. One set of employee records.
                   </h2>
                 </div>
               </ScrollFadeIn>
@@ -245,17 +245,17 @@ const LpPayrollIntegrationContent = () => {
                     </div>
                     <div className="flex flex-col items-center gap-1.5">
                       <RefreshCw className="w-6 h-6 text-primary animate-[spin_4s_linear_infinite]" />
-                      <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Live Sync</span>
+                      <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Single Sign-On</span>
                     </div>
                     <div className="rounded-xl px-6 py-4 flex flex-col items-center gap-1.5 min-w-[160px]" style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
                       <span className="text-base font-bold text-gray-900">YAHSHUA</span>
-                      <span className="text-sm font-semibold text-primary">Payroll</span>
+                      <span className="text-sm font-semibold text-primary">One Payroll</span>
                     </div>
                   </div>
                   <div className="max-w-xs">
-                    <p className="text-gray-900 font-semibold mb-2">Two products. One source of truth.</p>
+                    <p className="text-gray-900 font-semibold mb-2">Two products. One sign-in.</p>
                     <p className="text-gray-500 text-sm leading-relaxed">
-                      Built by the same team to work together from day one. The sync is automatic and in real time. No third-party connectors, no delays, no data mismatches.
+                      Built by the same team to work together. Employee data syncs from YAHSHUA One Payroll into HRIS, with no third-party connectors.
                     </p>
                   </div>
                 </div>
@@ -273,7 +273,7 @@ const LpPayrollIntegrationContent = () => {
                       Ready to cut the manual work?
                     </h2>
                     <p className="text-gray-500 text-base max-w-sm">
-                      Start free or book a demo. No credit card required.
+                      Start your 30-day free trial or book a demo.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-3 shrink-0">
