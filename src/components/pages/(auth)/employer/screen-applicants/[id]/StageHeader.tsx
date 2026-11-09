@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { useParams } from 'next/navigation';
 
-import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -276,8 +275,6 @@ export default function StageHeader({
           </SmartButton>
         </div>
       )}
-
-      <Tooltip id='stage-header-tooltip' style={{ fontSize: '10px' }} />
     </div>
   );
 }

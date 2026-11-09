@@ -9,6 +9,9 @@ import UserLogo from '@/svg/UserIcon';
 import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
+import Checklist201Logo from '@/svg/Checklist201Logo';
+
+import { KeyIcon } from '@heroicons/react/24/outline';
 
 const menus = [
   {
@@ -34,6 +37,18 @@ const menus = [
     icon: <CreateMemoLogo />,
     text: 'Acceptance Form',
     link: '/settings/acceptance-form',
+    isAvailable: true,
+  },
+  {
+    icon: <KeyIcon className='h-12 w-12 text-savoy-blue' />,
+    text: <>AI Access<br/>Tokens</>,
+    link: '/settings/ai-access',
+    isAvailable: true,
+  },
+  {
+    icon: <Checklist201Logo />,
+    text: <>201 Checklist<br/>Templates</>,
+    link: '/settings/checklist-201-requirements',
     isAvailable: true,
   },
 ];

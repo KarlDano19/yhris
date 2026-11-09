@@ -26,6 +26,76 @@ Format: newest entries at the top. Each entry uses the template below.
 
 ---
 
+## [2026-08-18] — Mark Employees as Resigned (Single + Bulk)
+
+### Type
+Added
+
+### Description
+Added a shortcut for employees who won't undergo the full offboarding process: a per-row
+"Mark as Resigned" action in the Employee List that PATCHes `is_resigned: true` directly,
+plus a bulk "Mark as Resigned" action alongside "Delete Selected" for multi-select.
+
+### Files Changed
+- `src/svg/ResignIcon.tsx` — new icon (amber, matches Edit/Delete icon box style)
+- `src/components/pages/(auth)/employer/manage/employees/hooks/useBulkMarkResigned.ts` — new hook, calls the dedicated bulk `PATCH /api/employees/` endpoint
+- `src/components/pages/(auth)/employer/manage/employees/Content.tsx` — added single-row "Mark as Resigned" button (hidden once `is_resigned` is true) with `ConfirmModal`; added bulk "Mark as Resigned" button with `ConfirmModal` + `ProgressModal`, following the existing bulk-delete pattern
+
+### Notes
+- Related backend change: bulk `PATCH /api/employees/` endpoint — see `be/CHANGELOG.md`.
+
+---
+
+## [2026-08-18] — Document Repository Drag-and-Drop Reordering & Bulk Actions
+
+### Type
+Added
+
+### Description
+Enhanced the Employee 201 Document Repository: folders can now be reordered via
+drag-and-drop (backed by `@hello-pangea/dnd`), and documents support a bulk-selection mode
+for moving or deleting multiple documents at once. Added a dedicated modal for moving
+documents between folders, and a loading-spinner message for requests that are taking a
+while.
+
+### Files Changed
+- `src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/DocumentFolderList.tsx` — drag-and-drop folder reordering
+- `src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/DocumentList.tsx` — bulk-selection mode for move/delete actions
+- `src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/DocumentRepositoryForm.tsx` — wires up the new reordering and bulk-action state
+- `src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/modals/MoveDocumentModal.tsx` — new modal for moving documents between folders
+- `src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useReorderFolders.ts` — new hook calling the folder-reorder endpoint
+- `src/types/employee-201-records/document-repository.ts` — supporting type additions
+- `src/components/GlobalLoadingSpinner.tsx` — added a "this is taking longer than usual" message for slow requests
+
+### Notes
+- Related backend change: new folder-reorder endpoint — see `be/CHANGELOG.md`.
+
+---
+
+## [2026-08-17] — Collision-Safe Email Masking for Directives
+
+### Type
+Changed
+
+### Description
+Reworked directive email masking so it no longer always masks a fixed 4 characters. The mask
+length now scales with the local-part length, and masks the middle of the local part instead
+of the tail. If two emails on the same directive would mask down to an identical-looking
+string (common with standardized company email naming), progressively fewer characters are
+masked until they're distinguishable again; if they're still identical (true duplicates), a
+`(1)`, `(2)`, ... suffix is appended so no two options in the dropdown look the same.
+
+### Files Changed
+- `src/app/api/directives/[id]/emails/route.ts` — replaced the fixed `****` masking with
+  `buildMaskedEmails()`: scaled middle-masking via `getMaskLength()`/`maskLocalPart()`, plus
+  collision detection/resolution and de-duplication numbering
+- `docs/directive-email-privacy.md` — updated to describe the new masking behavior
+
+### Notes
+- None.
+
+---
+
 ## [2026-05-30] — Post a Job Page Consolidation
 
 ### Type

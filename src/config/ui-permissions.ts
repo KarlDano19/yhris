@@ -58,6 +58,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
 
   // Memo & Training
   { elementId: 'create_memo_btn', permission: 'create_memo', type: 'button', fallbackBehavior: 'hide' },
+  { elementId: 'regenerate-memo-summary-btn', permission: 'create_memo', type: 'button', fallbackBehavior: 'hide' },
   { elementId: 'edit-memo-btn', permission: 'edit_memo', type: 'button', fallbackBehavior: 'disable' },
 
   // Designed Benefits
@@ -72,6 +73,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   // Employee 201
   { elementId: 'view-employee-201-btn', permission: 'view_employee_201', type: 'button', fallbackBehavior: 'hide' },
   { elementId: 'edit-employee-201-btn', permission: 'edit_employee_201', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'view-salary-history-btn', permission: 'view_salary', type: 'section', fallbackBehavior: 'hide' },
 
   // Offboarding
   { elementId: 'create-offboarding-btn', permission: 'create_offboarding', type: 'button', fallbackBehavior: 'disable' },
@@ -172,6 +174,11 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'create-email-template-btn', permission: 'create_email_template', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'edit-email-template-btn', permission: 'edit_email_template', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'delete-email-template-btn', permission: 'delete_email_template', type: 'button', fallbackBehavior: 'disable' },
+
+  // General Settings - 201 Checklist Requirements
+  { elementId: 'create-checklist-201-requirement-btn', permission: 'create_checklist_201_requirement', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'edit-checklist-201-requirement-btn', permission: 'edit_checklist_201_requirement', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'delete-checklist-201-requirement-btn', permission: 'delete_checklist_201_requirement', type: 'button', fallbackBehavior: 'disable' },
 
 ];
 

@@ -109,6 +109,1387 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-055
+DATE FILED: 2026-11-04
+DATE FIXED: 2026-11-04
+CLIENT/REPORTER: Internal (Khen Harold Paler, dev) - Offboarding > View Case
+RELATED: Backend BUG_HISTORY HRIS-2026-050 (Linear Y1HRIS-189, expired attachment
+         links) - found while testing the same module
+
+ISSUE DESCRIPTION:
+  Four problems on the offboarding case page, mostly seen on a slow connection:
+  1. Uploading a file to a stage task did not show "View file" for a while. The
+     screen waited for the upload AND a full reload of the task list, with no
+     sign that anything was happening.
+  2. Marking a task complete looked frozen. The checkbox only changed after the
+     save and the list reload both finished. Clicking again sent another request.
+  3. Some tabs did not move to the next tab after the current one was finished:
+     a) After the user clicked any tab in the stepper, the page kept showing that
+        tab (displayStage = activeStage ?? currentPhase, activeStage never reset).
+     b) On load the case was copied into localCase and the page kept reading that
+        copy. Fresh data from task changes, the exit interview send and "Mark as
+        Received" was ignored until another action cleared the copy, so the phase
+        was worked out from old data.
+  4. After sending an email with an attachment, or adding a task, nothing showed
+     for 1-2 seconds on a slow connection. SendEmailModal closes itself the moment
+     Send is pressed, so its own button spinner never shows, and the new attachment
+     only appears once the case reloads. A new task only appeared after the list
+     reloaded.
+
+DESIRED OUTCOME:
+  Every action on the case page gives immediate feedback, cannot be sent twice by
+  repeat clicks, and the page moves to the next tab as soon as a stage is done.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/offboarding/components/StageTaskChecklist.tsx
+  (per-task uploading/toggling flags; LoadingSpinner while uploading; checkbox
+  disabled while its request runs)
+- src/components/pages/(auth)/employer/offboarding/[id]/hooks/useUploadStageTaskAttachment.ts
+  (puts the returned task into the list cache right away)
+- src/components/pages/(auth)/employer/offboarding/[id]/hooks/useUpdateStageTask.ts
+  (optimistic check/uncheck, rolled back on error)
+- src/components/pages/(auth)/employer/offboarding/[id]/hooks/useCreateStageTask.ts
+  (adds the returned task to the list cache right away)
+- src/components/pages/(auth)/employer/offboarding/[id]/Content.tsx
+  (activeStage reset when currentPhase changes; removed the copy-on-load of
+  localCase; "Mark as Received" hands back to fresh data after refetch;
+  pendingAttachments state: file names of an email being sent, cleared after
+  the refetch or on error; "Updating..." row with LoadingSpinner while
+  isMutating or isFetching and no attachment is pending)
+- src/components/pages/(auth)/employer/offboarding/components/AttachmentCard.tsx
+  (new pendingNames prop: greyed "Sending..." rows with LoadingSpinner)
+- src/components/pages/(auth)/employer/offboarding/[id]/stages/InitiationStage.tsx,
+  ClearanceStage.tsx, FinalPayStage.tsx, LegalDocsStage.tsx
+  (pass pendingAttachmentNames to their AttachmentCard)
+
+Backend:
+- none (the PATCH/POST stage-task endpoints already return the updated task)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript: npx tsc --noEmit shows no errors in the changed files. The one
+  offboarding error (ExitInterviewStage.tsx line 63, T_SeparationEmail) is
+  pre-existing and not touched.
+☐ Manual check in the browser NOT done yet. To do, with DevTools > Network >
+  "Slow 4G":
+  - upload a task file: spinner shows, then "View file"
+  - tick a task: checkmark appears at once; a failed request flips it back
+  - add a task: it appears as soon as the server answers
+  - send a letter email with an attachment: "Updating..." shows until the
+    attachment appears
+  - click a past tab, then finish the current stage: page moves to the next tab
+☐ Cypress/Playwright e2e tests not updated
+
+FIX EXPLANATION:
+  - The stage-task PATCH and POST already return the task, so the hooks write it
+    straight into the ['stageTasksCache', id, stage] cache instead of waiting for
+    the refetch. The refetch still runs in the background.
+  - Checking a task is optimistic (onMutate/onError rollback) and the checkbox is
+    disabled per task until its request settles, so repeat clicks cannot send
+    conflicting requests.
+  - Loading uses the existing house component LoadingSpinner (size 'xs', default
+    yellow), the same one used across the site. No new loading style was added.
+    SendEmailModal is shared by other screens and was not changed. Instead, the
+    moment Send is pressed the picked files appear in that tab's attachment list
+    as greyed "Sending..." rows (Letters, Sign Documents, Last Pay, Legal Docs).
+    They are replaced by the real attachments once the case reloads, and removed
+    if the send fails. A first version showed only an "Updating..." row at the top
+    of the stage panel; on a slow connection that was out of view of the
+    attachment list, so the delay still looked unhandled.
+  - The stepper follows the case again: a clicked tab is cleared whenever the
+    current phase changes, and the page reads the fresh case data instead of a
+    copy taken on load.
+
+NOTE (not changed here):
+  - Rendering, Clearance, Legal Docs and Final Pay only advance when the stage has
+    at least one task and all are checked (!hasAny || !allComplete). A stage with
+    no tasks never advances on its own. Existing rule, pending a decision.
+  - No request timeout: a request that hangs keeps the spinner until the browser
+    gives up.
+  - StageTaskChecklist still uses the HTML title attribute for "View attachment"
+    and "Upload file" (should be react-tooltip per frontend rules).
+
+================================================================================
+
+BUG ID: HRIS-2026-054
+DATE FILED: 2026-10-30
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Client (relayed by QA) - Linear Y1HRIS-184
+
+ISSUE DESCRIPTION:
+  On an existing job posting (Post a Job > Update Job Form > step 5 Job Settings
+  > Custom Question), a new custom screening question disappeared right after
+  "Save Questions", with no message. The list stayed the same and the Custom
+  Question count did not go up. QA could not reproduce it on their account.
+  Cause: the duplicate check on the screening questions matched on the question
+  text. A custom question containing "education", "degree", "driver's license",
+  "background check" or "drug test" (any case, also inside longer words) was
+  treated as that preset question. It was removed when the preset was already on
+  the job. When the preset was not on the job, the question was kept but its
+  presetId was rewritten to the preset's, so it stopped counting as custom (this
+  second case was read from the code, not run). The keyword check came in on
+  2025-07-19 and custom questions on 2025-08-07; custom questions were never
+  exempted from it. QA's test questions did not use those words.
+
+DESIRED OUTCOME:
+  A custom question is always kept, whatever words it contains.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPageJobSettings.tsx
+
+E2E (YAHSHUA/e2e, shared folder):
+- tests/job-postings/custom-question.spec.ts
+- helpers/job-postings.ts
+- helpers/py/hris_job_posting_seed.py
+- helpers/py/hris_job_posting_cleanup.py
+- playwright.config.ts (job-postings project)
+- package.json (test:job-postings, watch:job-postings)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ TypeScript types verified (type check not run)
+☑ Playwright regression test written: npm run test:job-postings (khp-live-hotfix-2
+  stack). Before the fix the "degree" and "education" cases failed and the plain
+  wording case passed. After the fix all four cases get past the list check
+  (plain, degree, education, driver's license).
+☐ Playwright "save, reload, question still there" step is NOT passing yet: Save
+  on step 5 sent no request in the test. Not yet found why (a validation on
+  another step or the seeded posting is missing data). Persistence after the
+  final Save is unverified.
+☐ Create (new job) flow not tested (same component, probably affected)
+☐ Drug Test / Background Check wording not tested in the browser
+
+FIX EXPLANATION:
+  In the duplicate check in CreateJobPageJobSettings.tsx, a question whose
+  presetId starts with "custom-question" now gets its own key (its id) before the
+  keyword checks run, so the keywords no longer apply to custom questions.
+  Not committed or merged yet. Not yet confirmed that the client's own question
+  used one of those words (their wording was redacted in the recording). Separate
+  and not fixed: reopening a job turns a blank ideal answer into "Yes"
+  (UpdateJobModal.tsx normalization uses `|| 'Yes'`).
+
+================================================================================
+
+BUG ID: HRIS-2026-053
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-188
+
+ISSUE DESCRIPTION:
+  On a phone-sized screen (375px) the main employer header had too many buttons.
+  The logo, info (onboarding checklist), User Guide (process flow), chat, bell and
+  menu buttons did not fit, so the bell and menu button were pushed past the
+  screen edge. The User Guide button (added 2026-08-12) was shown at every size.
+
+DESIRED OUTCOME:
+  The header fits on a phone. The buttons that are hidden there are still
+  reachable from the hamburger menu.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/MainHeader.tsx
+- src/components/common/ProcessFlowButton.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ TypeScript types verified (type check not run)
+☑ Mobile responsiveness checked in browser device mode (first fix, 375px, still
+  overflowed; second fix not yet re-checked)
+
+FIX EXPLANATION:
+  The User Guide and info buttons are hidden below the sm breakpoint in the
+  header. Two rows were added at the top of the mobile menu: "Onboarding
+  Checklist" and "User Guide". ProcessFlowButton got an optional label prop that
+  renders the full-width menu row version. If the header still overflows on
+  narrower phones, the logo is the next item to shrink.
+
+================================================================================
+
+BUG ID: HRIS-2026-052
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-187
+
+ISSUE DESCRIPTION:
+  The "Add Custom Screening Questions" pop-up sat about 7px to the right of the
+  Update Job Form pop-up behind it. The Update Job Form is taller than the screen
+  and has a scrollbar, which narrows its centering area; the front pop-up had no
+  scrollbar and centered on the wider area.
+
+DESIRED OUTCOME:
+  The two pop-ups line up horizontally.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/CustomQuestionsModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Browser check of the alignment (not yet done)
+
+FIX EXPLANATION:
+  Added [scrollbar-gutter:stable] to the fixed overflow container of the front
+  pop-up so it reserves the same scrollbar width. Known limit: if the pop-up
+  behind has no scrollbar, the front one will be about 7px left instead.
+  Vertical centering is unchanged (centered on the screen).
+
+================================================================================
+
+BUG ID: HRIS-2026-051
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-186
+
+ISSUE DESCRIPTION:
+  Several edit pop-ups showed a large empty space below their buttons, even on
+  short steps (e.g. Update Job Form steps 6 and 8). Commit b5b15f3f1 (2026-07-10,
+  loading spinners) put min-h-[420px]/[560px] on the loaded form wrappers as well
+  as on the spinner.
+
+DESIRED OUTCOME:
+  The pop-up is only as tall as its content once loaded.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/job-posting-history/modals/UpdateJobModal.tsx
+- src/components/pages/(auth)/employer/dole/annual-medical-report/modals/EditAnnualMedicalReportModal.tsx
+- src/components/pages/(auth)/employer/dole/annual-work-accident-illness-exposure-data-report/modals/EditReportModal.tsx
+- src/components/pages/(auth)/employer/dole/health-and-safety-organization-report/modals/EditHealthAndSafetyReportModal.tsx
+- src/components/pages/(auth)/employer/dole/work-accident-illness-report/modals/UpdateWorkAccidentIllnessReportModal.tsx
+- src/components/pages/(auth)/employer/dole/work-environment-measurement-request/modals/EditWemRequestModal.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-scheduler/modals/EditEvaluationSchedulerModal.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-template/modals/EditEvaluationTemplateModal.tsx
+- src/components/pages/(auth)/employer/manage/employees/modals/EditEmployeeDetailsModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Browser check of each of the 9 pop-ups (not yet done)
+
+FIX EXPLANATION:
+  Removed the min-height from the loaded-content wrapper in the 9 pop-ups above.
+  The min-height stays on the loading spinner branch only.
+
+================================================================================
+
+BUG ID: HRIS-2026-050
+DATE FILED: 2026-10-31
+DATE FIXED: 2026-10-31
+CLIENT/REPORTER: Internal (Khen) - Linear Y1HRIS-185
+
+ISSUE DESCRIPTION:
+  Deleting a custom screening question showed a hand-built confirmation box whose
+  No and Yes buttons were wider than the box and were cut off at the edges, with
+  blank space below. Seen on live (Job Posting History > Update Job Form > Add
+  Custom Screening Questions). Likely exposed by the Headless UI v2 upgrade
+  (785cabd84); not fully confirmed.
+
+DESIRED OUTCOME:
+  The same delete confirmation used elsewhere in HRIS, with both buttons fully
+  visible.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/CustomQuestionsModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ TypeScript types verified (type check not run)
+☐ Browser check of the delete flow (not yet done)
+
+FIX EXPLANATION:
+  Replaced the inline overlay with the shared DeleteModal (customText "this
+  question"), rendered inside the Dialog. The quoted question text under the
+  message is no longer shown.
+
+================================================================================
+
+BUG ID: HRIS-2026-049
+DATE FILED: 2026-10-02
+DATE FIXED: 2026-10-02
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+  In Manage > Document Generator, a company that has no acceptance memo could not
+  generate one. The "Acceptance Memo" document type was only offered when the
+  company already had a memo (showAcceptanceMemo = isMemoLoading || !!existingMemo),
+  and an effect forced the selection back to Employee Certificate whenever no memo
+  existed. The memo form (and its Submit button) was therefore only reachable from
+  the onboarding checklist.
+
+DESIRED OUTCOME:
+  If the company has no acceptance memo, the Document Generator lets the user
+  fill in and submit one. Once a memo exists, the form is read-only (fields
+  disabled, "View PDF" instead of Submit).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/document-generator/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ TypeScript types verified (no errors in the document-generator files)
+
+Integration & E2E:
+☐ Manual: company with no memo -> Acceptance Memo is in the type dropdown, form is
+  editable and prefilled (company name, dates), Submit creates the memo
+☐ Manual: company with a memo -> form is read-only, "View PDF" opens the saved memo
+☐ Manual: submitting from here marks the company onboarded (Employer.has_onboarded)
+☐ Manual: opening the page from the onboarding checklist (from=checklist) still
+  locks the type to Acceptance Memo
+
+FIX EXPLANATION:
+  document-generator/Content.tsx
+  1. Removed showAcceptanceMemo and stopped passing it down, so the type
+     selector (DocumentTypeField, which defaults to showing it) always offers
+     Acceptance Memo.
+  2. Deleted the effect that switched an acceptance-memo selection back to
+     employee-certificate when no memo existed.
+  3. In the existing-memo effect, the no-memo branch now also calls
+     setIsViewMode(false), so a company without a memo always gets the editable
+     form. The existing-memo branch is unchanged: it already set view mode,
+     which disables the inputs and swaps Submit for View PDF.
+
+  Not changed: the backend memo POST is still an upsert (update_or_create), so a
+  direct call can overwrite an existing memo and re-send the HR email. The
+  read-only behaviour is enforced in the UI only.
+
+================================================================================
+
+BUG ID: HRIS-2026-048
+DATE FILED: 2026-10-02
+DATE FIXED: 2026-10-02
+CLIENT/REPORTER: Internal
+COMPANION: Backend BUG_HISTORY HRIS-2026-043 (has_onboarded logic for YP SSO +
+           backfill migration)
+
+ISSUE DESCRIPTION:
+  New employer accounts created through Yahshua Payroll SSO never went through
+  the onboarding checklist. The middleware onboarding gate skipped anyone with
+  loginType "yahshua-payroll" / "yg-payroll" (added in HRIS-2026-013), and the
+  SSO callback never set hasCompletedOnboarding in the iron-session, so the gate
+  had no real onboarding state to check for SSO users.
+
+DESIRED OUTCOME:
+  The YP user whose first SSO login creates the HRIS company is redirected to
+  /setup-employer-profile/onboarding-checklist. Existing YP accounts and YP
+  users joining an existing company go straight to the dashboard. yg-payroll
+  stays exempt (unchanged).
+
+FILES CHANGED:
+Frontend:
+- src/middleware.ts
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/Content.tsx
+- src/app/api/refresh-onboarding-session/route.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ TypeScript types verified (no new errors in changed files; a pre-existing
+  TS2345 at sso/oauth/Content.tsx mutate(data, ...) is unrelated)
+
+Integration & E2E:
+☐ Manual: first-time YP SSO login on a new YP company -> onboarding checklist
+☐ Manual: existing YP account SSO login -> /dashboard
+☐ Manual: YP user with a pre-change session (no hasCompletedOnboarding) is
+  not redirected to the checklist
+☐ Manual: onboarding disabled globally -> SSO users go to /dashboard
+☐ Manual: Google SSO employer login still works (same callback)
+
+FIX EXPLANATION:
+  1. sso/oauth/Content.tsx - finishLogin: for employer accounts, after
+     updateSession, POST /api/refresh-onboarding-session so hasCompletedOnboarding
+     / hasOnboarded are set from the backend (update-session intentionally
+     refuses those keys). Also benefits Google SSO employers, whose sessions
+     previously had no onboarding flag either.
+  2. middleware.ts - removed the blanket yahshua-payroll exemption from the
+     onboarding gate. yg-payroll is still exempt. A yahshua-payroll session
+     where hasCompletedOnboarding is undefined (created before this change,
+     when SSO never set it) is still let through until the user logs in again.
+  3. refresh-onboarding-session/route.ts - hasOnboarded is now
+       data.is_onboarding_enabled === false || (data.has_onboarded ?? false)
+     so the global "onboarding disabled" switch is respected, matching the
+     login endpoints. Without this, SSO users would be gated even when
+     onboarding is turned off.
+
+================================================================================
+
+BUG ID: HRIS-2026-047
+DATE FILED: 2026-09-25
+DATE FIXED: 2026-09-25
+CLIENT/REPORTER: Client - Galam
+
+ISSUE DESCRIPTION:
+  On Document Generator > Certificate of Employment, the "This certificate is
+  issued for ..." (Purpose) paragraph had two problems in both the preview and
+  the generated/printed certificate:
+  1. Words were cut in the middle when a line wrapped (e.g. "W&W Galam Gro / up
+     of Companies", "Mr. Ricci Cha / d G. Raagas").
+  2. Spacing typed into the Purpose textarea was not respected - extra spaces
+     collapsed into one and line breaks (Enter) were turned into spaces.
+
+DESIRED OUTCOME:
+  The Purpose paragraph wraps between whole words (only breaking inside a word
+  if a single word/string is too long to fit on a line), and it keeps the
+  spaces and line breaks exactly as the user typed them.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/document-generator/form-previews/EmployeeCertificatePreview.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☐ Components tested (pending QA - regenerate a certificate with a long
+  Purpose, extra spaces between words, and a line break)
+☑ TypeScript types verified (style-only change, no type changes)
+
+Integration & E2E:
+☐ Manual regression testing completed (pending QA re-test)
+☑ Blast-radius check: the other generator documents (Notice to Explain,
+  Employment Agreement, Acceptance Memo) were reviewed - none use
+  break-all, and Notice to Explain's textarea fields already use
+  white-space: pre-wrap. No other changes needed.
+
+FIX EXPLANATION:
+  The Purpose paragraph had an inline style of `wordBreak: 'break-all'`, which
+  lets the browser break a line at any character, so ordinary words were split
+  mid-word. It also had no `white-space` rule, so default HTML whitespace
+  collapsing dropped the user's extra spaces and line breaks.
+  Changed the paragraph style from
+    { wordBreak: 'break-all', overflowWrap: 'anywhere' }
+  to
+    { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }
+  - Removing break-all restores normal word wrapping; `overflowWrap: 'anywhere'`
+    is kept so a very long unbroken string still cannot overflow the page.
+  - `whiteSpace: 'pre-wrap'` preserves typed spaces/line breaks while still
+    wrapping at the page edge (same pattern Notice to Explain already uses).
+  The printed certificate (print/documents/EmployeeCertificate.tsx) clones the
+  preview DOM into an iframe and its print CSS does not override these
+  properties, so the fix applies to the generated document as well.
+
+  Note: in the reported case the Purpose field itself contained a full
+  sentence ending in a period, which the template wraps with "This certificate
+  is issued for ..." and its own period - producing "issued for This is to
+  certify ..." and ". .". That is input content, not part of this fix.
+
+================================================================================
+
+BUG ID: HRIS-2026-046
+DATE FILED: 2026-09-18
+DATE FIXED: 2026-09-18
+CLIENT/REPORTER: Charmaine - Manyu Marketing Corporation (raised via Payroll team)
+COMPANION: Backend BUG_HISTORY HRIS-2026-042 (root cause) + Payroll GLOBAL BUG-183
+           (location/department/position/employment-type trail preservation)
+
+ISSUE DESCRIPTION:
+  Employees' location history/effectivity trails in Payroll (YP) went missing or
+  got corrupted after syncing from HRIS: some lost their entire location trail,
+  others were left with only the most recent entry stamped with a wrong start
+  date. Root-cause tracing showed the damage was triggered when Location,
+  Department, Position, or Employment Status were changed on the 201 Records
+  (employee detail) screen and then pushed to YP. Those 201 edits carry NO real
+  per-change effectivity date, so YP dated the appended trail line to the wrong
+  date (latest salary date, or the hire date) - and for Location this could
+  produce an inverted date range (date_to before date_from) that scrambled the
+  chronological trail. The correct place to change these fields is the Personnel
+  Movement (PMF), which carries a proper effective date.
+
+DESIRED OUTCOME:
+  On the 201 Records employment-details screen, Location, Department, Position,
+  and Employment Status must be read-only even in edit mode, so users cannot make
+  effectivity-less changes that mis-date the YP history trail. Only Date Hired
+  stays editable. Those org changes must go through the Personnel Movement (PMF).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - mounted EmploymentDetailsForm with editing=true;
+  confirmed in live DOM that Employment Status/Location/Position/Department are
+  disabled=true and Date Hired is disabled=false)
+☑ Form validation tested (locked-but-empty fields do not block Save - "missing"
+  messages are non-blocking per isBlockingError)
+☑ AddableSelect verified to honor disabled (dropdown disabled, onChange ignored,
+  "+ Add new" affordance hidden)
+☑ TypeScript types verified (no new type errors; FE dev server compiled clean)
+
+Integration & E2E:
+☑ Manual regression testing completed (edit mode renders the four fields locked,
+  Date Hired editable, System ID read-only as before)
+
+FIX EXPLANATION:
+  Introduced a single self-documenting flag `editingOrgFields = false` in
+  EmploymentDetailsForm and pointed the four org fields' `disabled` and
+  `showErrors` props at it instead of the form's `editing` flag. The result:
+  Employment Status, Location, Position, and Department render greyed-out and
+  non-interactive even while the rest of the row is in edit mode; Date Hired
+  continues to key off `editing` and stays editable. Because the shared
+  AddableSelect fully honors `disabled` (disables the select, ignores changes,
+  hides the "+ Add new" button), no handler rewiring was needed. Empty locked
+  fields still do not block Save. Flag is a one-line revert if inline editing is
+  ever re-enabled. This is the frontend guard that closes the workflow the client
+  actually used; the trail-preservation fix itself lives on the Payroll side
+  (see Payroll GLOBAL BUG-183 / I-654/I-657/I-658).
+
+================================================================================
+
+BUG ID: HRIS-2026-045
+DATE FILED: 2026-09-03
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Internal request - Module > Onboarding > Orient (position applicants list)
+
+ISSUE DESCRIPTION:
+  The Onboarding list (Onboarding > open a position) had no way to remove an
+  applicant entry. Mistaken, seeded, or no-longer-needed onboarding records
+  could not be cleaned up because the list only supported Send Contract,
+  Orient, assign Location/Department, Introduce, and Enroll - never delete.
+
+DESIRED OUTCOME:
+  Users should be able to remove an onboarding entry from the list, with a
+  confirmation prompt before it is deleted.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+- src/components/pages/(auth)/employer/onboarding/orient/hooks/useDeleteApplicantOrient.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - delete button, confirmation modal, list refresh)
+☑ Custom hooks tested (useDeleteApplicantOrient manual verification)
+☑ React Query hooks tested (list refetch + employee-select cache invalidation)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (delete removes row, persists on reload)
+☑ Edge cases tested (delete of enrolled applicant removes only the onboarding row)
+
+FIX EXPLANATION:
+  Added an Action column to the onboarding table with a red trash button per
+  row. Clicking it opens the shared DeleteModal (showing the applicant name)
+  for confirmation. On confirm, a new useDeleteApplicantOrient hook calls
+  DELETE /api/applicant-orientations/{id}/ (see backend companion). On success
+  the list refetches, the employee-select cache is invalidated, and a success
+  toast is shown. COMPANION: Backend BUG_HISTORY HRIS-2026-041.
+
+================================================================================
+
+BUG ID: HRIS-2026-044
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-645) - Employee 201 Records > Disciplinary Records
+
+ISSUE DESCRIPTION:
+  Under an employee's 201 file > Disciplinary Records tab, users could see that
+  an incident exists (Type, Place, Status) but could not open the record to
+  view its full details. The rows were not clickable and there was no detail
+  view, so description, NTE/decision progress, and attachments were unreachable
+  from the 201 file.
+
+DESIRED OUTCOME:
+  Users should be able to open an incident from the 201 file and view its full
+  details (brief background, status, dates, response, attachments, etc.).
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/DisciplinaryRecordsForm.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/modals/ViewIncidentModal.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useGetDisciplinaryRecordDetail.ts
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - clickable rows, View button, detail modal)
+☑ Custom hooks tested (useGetDisciplinaryRecordDetail manual verification)
+☑ React Query hooks tested (detail fetch on open, loading/error states)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (open record shows full details + attachments)
+☑ Edge cases tested (loading state, fetch error state, missing attachments)
+
+FIX EXPLANATION:
+  Added a read-only ViewIncidentModal that fetches the full incident via a new
+  useGetDisciplinaryRecordDetail hook (GET /api/employee-issues/attachments/{id}/,
+  an existing endpoint - no backend change). DisciplinaryRecordsForm now has an
+  Actions column with a View (eye) button and clickable rows that open the modal.
+  The modal shows employee/position/department, incident date and place, issue
+  type, status, full brief background, NTE/decision progress and dates, prepared
+  by, investigation decision, employee response, and NTE/Decision attachments.
+
+================================================================================
+
+BUG ID: HRIS-2026-043
+DATE FILED: 2026-09-02
+DATE FIXED: 2026-09-03
+CLIENT/REPORTER: Client (Linear I-644) - Employee 201 Records > Employment Details
+
+ISSUE DESCRIPTION:
+  The "Date Hired" field in Employment Details rejected future dates. Entering a
+  future start date (e.g. next week) and saving showed "Date Hired cannot be in
+  the future" and blocked the save, so HR could not onboard an employee ahead of
+  their actual start date.
+
+DESIRED OUTCOME:
+  The system should accept a future Date Hired so HR can complete onboarding in
+  advance.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/EmploymentDetailsForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not yet implemented)
+☑ Components tested (manual - future Date Hired saves without error)
+☑ Form validation tested (presence/validity still enforced; future no longer blocked)
+☑ TypeScript types verified (no new type errors in changed files)
+
+Integration & E2E:
+☑ Manual regression testing completed (future date saves; empty/invalid still flagged)
+☑ Edge cases tested (date picker had no maxDate; validator was the only block)
+
+FIX EXPLANATION:
+  Removed the future-date guard in the date_hired validator in
+  EmploymentDetailsForm.tsx. The validator still flags a missing or invalid
+  date, but no longer returns "Date Hired cannot be in the future," so future
+  hire dates save normally. Note: the same "cannot be in the future" pattern in
+  Training & Development and the DOLE accident report is intentional and was left
+  unchanged.
+
+================================================================================
+
+BUG ID: HRIS-2026-042
+DATE FILED: 2026-08-27
+DATE FIXED: 2026-08-27
+CLIENT/REPORTER: Internal (Linear I-643), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Opening the "View current file" preview for a Completed Training's Proof of
+  Completion showed the full signed AWS S3 URL - including
+  AWSAccessKeyId=..., Signature=..., and Expires=... query parameters - in the
+  File Preview modal's title bar. The Document Repository tab's file preview
+  (same underlying upload mechanism) was unaffected.
+
+  Root cause: TrainingDevelopmentForm.tsx derived the modal's `fileName` prop
+  directly from the raw file URL via `previewFileUrl.split("/").pop()`.
+  `previewFileUrl` is `row.existingFileUrl`, which is the pre-signed S3 URL
+  itself (useGetFilePreviewUrl returns non-relative URLs unchanged rather than
+  proxying them), so `.split("/").pop()` returned everything after the last
+  "/" - including the un-stripped query string - and FilePreviewModal's title
+  renders as `${base} - ${fileName}`. DocumentRepositoryForm.tsx does not have
+  this bug because it passes a real stored `file_name` field from the document
+  record instead of deriving a name from the URL.
+
+DESIRED OUTCOME:
+  The Training & Development file preview title should show only the file's
+  name (e.g. "KHP__EI_-_08262026_1787812050.pdf"), with no AWS query
+  parameters, matching the Document Repository preview.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - `fileName` passed to `<FilePreviewModal>` now strips the query string
+      before extracting the filename: changed
+      `previewFileUrl?.split("/").pop() ?? ""` to
+      `previewFileUrl?.split("?")[0].split("/").pop() ?? ""`.
+
+Backend:
+- N/A - frontend-only fix; the signed URL itself is unchanged, only how its
+  filename is displayed.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual reasoning verified against the reported repro URL
+  ("KHP__EI_-_08262026_1787812050.pdf?AWSAccessKeyId=...&Signature=...&Expires=...")
+  - fix yields "KHP__EI_-_08262026_1787812050.pdf" as the displayed name
+☐ Manual browser verification completed (recommended before shipping): open
+  a Completed Training's "View current file" and confirm the modal title
+  shows only the filename
+
+Integration & E2E:
+☐ Manual regression testing completed (pending)
+☑ Edge cases considered (blob: URLs from a freshly-attached, not-yet-saved
+  file never reach this code path - `hasServerFile`/`existingFileUrl` gate
+  this button to server-stored files only, which are the ones with signed
+  query strings)
+☐ Cross-browser testing completed (not performed)
+
+KNOWN REMAINING ISSUE:
+  The same `url.split('/').pop()` pattern (without stripping a query string)
+  exists in several unrelated components - SendEmailModal.tsx,
+  ViewAuditLogDetails.tsx, AddCertificationModal.tsx (both yahshua-connect
+  variants), AddProjectModal.tsx, FloatingMenuBar.tsx, DocumentPageFourteen.tsx,
+  DocumentPageFifteen.tsx, and offboarding/[id]/Content.tsx. None were changed
+  here - out of scope for this Linear issue - but any of them could leak
+  query-string credentials the same way if they ever render a signed URL.
+
+FIX EXPLANATION:
+  FilePreviewModal already strips the query string internally when detecting
+  file type (`source.split('?')[0]`), but it trusts whatever `fileName` its
+  caller passes for the title. TrainingDevelopmentForm was the one caller
+  building that name from the raw pre-signed URL instead of a clean stored
+  filename, so the fix mirrors FilePreviewModal's own `split('?')[0]` pattern
+  at the point the prop is built, before falling back to `split('/').pop()`
+  to isolate the last path segment.
+
+================================================================================
+
+BUG ID: HRIS-2026-041
+DATE FILED: 2026-08-19
+DATE FIXED: 2026-08-19
+CLIENT/REPORTER: Internal (User), Employee 201 Records > Training & Development
+
+ISSUE DESCRIPTION:
+  Three compounding bugs made it impossible to save Completed Trainings on the
+  Employee 201 Records > Training & Development tab:
+
+  1. Save button never became enabled after adding/editing a training row.
+     Root cause: TrainingDevelopmentForm's `hasErrors`/`dirty` were computed in
+     `useMemo(() => {...watch('rows')...}, [watch])`. `watch` is a stable
+     function reference from useForm, so the memo never recomputed when rows
+     were added, edited, or deleted - `onDirtyChange`/`onErrorsChange` kept
+     firing their initial (empty-array) values forever, so the parent's
+     `sections.training.dirty` never became true and the Save button's
+     `canSave` check stayed false permanently.
+
+  2. Attaching a Proof of Completion file silently cleared the Training Title
+     and Training Provider fields already typed into that row.
+     Root cause: `updateRow()` built its patch from `fields[index]` -
+     `useFieldArray`'s structural snapshot, which does NOT reflect values
+     typed into `register()`-bound inputs (title/provider). Calling
+     `update(index, { ...fields[index], ...filePatch })` on file select
+     overwrote the row with the stale snapshot's original (empty) title/
+     provider, discarding what the user had typed.
+
+  3. Even with 1 and 2 fixed, clicking Save/Confirm threw a runtime error
+     "createTraining is not a function" and the save never happened.
+     Root cause: `useCreateTrainingRecord`, `usePatchTrainingRecord`, and
+     `useDeleteTrainingRecord` each return a standard TanStack Query
+     `useMutation` object (`mutate`/`mutateAsync`/etc.), but Content.tsx
+     destructured them as `{ create }`, `{ update }`, `{ remove }` -
+     properties that don't exist on a mutation object - and called them with
+     positional args (`createTraining(id, input)`) instead of the single
+     params object each mutation function actually expects.
+
+  A fourth, smaller issue was found in the same investigation: the Date
+  Completed picker allowed choosing a future date in the calendar UI itself
+  (only caught after the fact by a "cannot be in the future" validation
+  message), instead of disabling future dates up front.
+
+DESIRED OUTCOME:
+  A user can add a training row, fill in all fields, attach a file, and Save
+  successfully - with the Save button enabling as soon as the form has valid,
+  unsaved changes, typed fields surviving a file attach, and the future-dated
+  Date Completed being unselectable in the calendar rather than only rejected
+  after submit.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/TrainingDevelopmentForm.tsx
+    - Imported `useWatch` from react-hook-form; replaced the `[watch]`-keyed
+      `hasErrors`/`dirty` useMemo blocks with a `useWatch({ control, name:
+      "rows" })` subscription (`watchedRows`) so both recompute reactively on
+      every row change.
+    - `updateRow()` now reads the row's live values via `getValues(\`rows.${index}\`)`
+      (falling back to `fields[index]`) before merging in the patch, so a file
+      attach no longer clobbers already-typed Title/Provider values.
+    - Added `maxDate={new Date()}` to the Date Completed `CustomDatePicker` so
+      future dates are disabled in the calendar itself.
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+    - Changed `const { create: createTraining } = useCreateTrainingRecord()`
+      (and the matching update/remove destructures) to
+      `const { mutateAsync: createTraining } = useCreateTrainingRecord()` etc.
+    - Updated the three call sites in `saveTrainingTab()` to pass a single
+      `{ employeeId, input }` / `{ employeeId, recordId, input }` /
+      `{ employeeId, recordId }` object, matching each mutation function's
+      actual signature, instead of positional arguments.
+
+Backend:
+- N/A - frontend-only fix; no backend endpoint or contract changes required.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: added a training row, typed Title/Provider,
+  attached a file, confirmed values persisted; Save button enabled once the
+  row was valid and dirty; Save/Confirm completed without the
+  "createTraining is not a function" error
+☑ TypeScript types verified for the changed call sites (CreateTrainingInput /
+  UpdateTrainingInput shapes match what's now passed)
+☐ Cross-browser testing completed (not performed)
+
+Integration & E2E:
+☑ Manual regression testing completed (create -> update -> delete flow via
+  Save exercised against the real training-records endpoints)
+☑ Edge cases considered (attaching a file after typing other fields; future
+  date selection blocked in the picker in addition to the existing
+  post-submit validation message)
+☐ Cross-browser testing completed (not performed)
+
+FIX EXPLANATION:
+  Bug 1 was a stale-dependency problem: `useMemo` only recomputes when an
+  item in its dependency array changes by reference, and `watch` (the
+  function) never changes - only its *return value* does, and only if you
+  subscribe to it via `useWatch`. Switching to `useWatch({ control, name:
+  "rows" })` gives a value that actually changes reference on every row
+  edit, so the `hasErrors`/`dirty` memos - and therefore the parent's Save
+  button - now update live.
+
+  Bug 2 was a data-source mismatch: `useFieldArray`'s `fields` array is a
+  structural snapshot (correct for add/remove/reorder) but is NOT kept in
+  sync with values from `register()`-bound inputs on every keystroke. Basing
+  the file-attach patch on `getValues()` instead reads the form's actual
+  current values, so title/provider survive.
+
+  Bug 3 was an API-shape mismatch introduced when the hooks were written
+  against the standard `useMutation` return shape but the call site was
+  written as if they returned custom `{ create/update/remove }` helpers.
+  Destructuring `mutateAsync` under the same aliases and passing the single
+  params object each hook's mutation function expects resolves the runtime
+  error with no changes to the hooks themselves.
+
+  The date picker fix simply passes `maxDate={new Date()}` through to
+  `CustomDatePicker`, which already supported the prop - disabling future
+  dates in the calendar UI is a strict improvement over relying solely on
+  the post-submit "cannot be in the future" error message.
+
+================================================================================
+
+BUG ID: HRIS-2026-040
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - QA (Jam recording) - Module > Onboarding > Orient > Enroll to Payroll
+COMPANION: Backend BUG_HISTORY HRIS-2026-040 (Repair Rate Statuses proxy endpoint)
+
+ISSUE DESCRIPTION:
+Enrolling an onboarded applicant into Yahshua Payroll (YP) failed, and the affected
+employee's YP profile then showed the error: "'NoneType' object has no attribute
+'dayspermonth'".
+
+Root cause: the onboarding "Enroll" action did not send a hire date to YP. The employee
+was created in YP with no hire date, so YP bootstrapped a rate status with a NULL
+effectivity date. YP cannot resolve a "current rate" from a NULL-dated row, so every YP
+read path that touches the rate crashed. Employees who had already crashed were left with
+orphaned NULL-dated rate rows in YP.
+
+DESIRED OUTCOME:
+- Enrollment sends a valid hire date so YP builds a usable rate status and the flow no
+  longer errors.
+- Admins can repair employees already broken (NULL-dated rate rows) from the UI, without a
+  manual DB script.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/onboarding/orient/Content.tsx
+    - Enroll-to-Payroll payload now sends `date_hired: new Date().toLocaleDateString('en-CA')`
+      (today, YYYY-MM-DD). Set explicitly at the source so YP persists it, rather than
+      relying on any sync-time default (the 201 side no longer rewrites hire dates to today).
+- src/components/hooks/useRepairRateStatus.ts (NEW)
+    - Mutation hook: POST /api/employees/repair-rate-status/ (triggers YP rate-status cleanup).
+- src/components/FloatingSyncButton.tsx
+    - Added "Repair Rate Statuses (YP)" as the FIRST Master Sync step, NON-BLOCKING (a
+      failure marks only that step and the sync continues). Subsequent step indices bumped.
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Manual verification completed: enroll no longer errors; Master Sync shows the Repair step
+  first and a broken employee's YP profile loads afterward
+☑ React Query hooks tested: useRepairRateStatus verified via Master Sync run
+☐ Cross-browser testing completed (Chrome verified)
+☐ Mobile responsiveness verified (N/A - desktop admin flow)
+
+Integration & E2E:
+☑ API integration tests completed (repair step round-trips through HRIS BE to YP)
+☐ Cypress/Playwright e2e tests updated (not added)
+☑ Manual regression testing completed (existing Master Sync steps still run in order)
+
+FIX EXPLANATION:
+Two-part frontend fix. (1) The Enroll-to-Payroll payload now carries today's date as
+`date_hired`, so YP creates newly enrolled employees with a valid hire date and bootstraps a
+usable rate status - preventing any new breakage. (2) A new, non-blocking "Repair Rate
+Statuses (YP)" step was added to the top of the Master Sync (FloatingSyncButton) via the new
+useRepairRateStatus hook; it calls an HRIS proxy that asks YP to backfill the NULL-dated rate
+rows for the current company (see companion BE entry). This heals employees already broken by
+the bug without touching the YP shared model. It runs first and is non-blocking so a repair
+failure never aborts the rest of the sync.
+
+================================================================================
+
+BUG ID: HRIS-2026-039
+DATE FILED: 2026-08-13
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: Internal - Consultant (Christen Daayata, via #team-hris Slack)
+MODULE: Admin > Client Monitoring > Send Advisory (shared SendEmailModal)
+
+ISSUE DESCRIPTION:
+  An advisory composed in the Send Advisory modal arrived in Gmail formatted
+  differently from how it was written. Three symptoms, all originating from Quill's
+  saved HTML but via three different mechanisms:
+
+  1. Words split mid-word. "YAHSHUA HRIS" arrived as "Y" / "AHSHUA HRIS" across two
+     lines, "August 17, 2026" as "Augu" / "st 17, 2026". Cause: ReactQuill
+     (react-quill-new / Quill 2.0) serializes every ordinary space as a NON-BREAKING
+     space (\u00A0 / &nbsp;). A real nbsp never offers a line-break opportunity, so a
+     whole sentence becomes one unbreakable token and the email client is forced to
+     break at an arbitrary character instead of between words. No CSS can fix this -
+     nbsp's non-breaking behavior cannot be overridden by any stylesheet rule.
+
+  2. Blank lines disappeared. Deliberate spacing between sections rendered as a plain
+     next line with no gap ("displays it just next line no spacing"). Cause:
+     getSemanticHTML() saves a deliberate blank line as a truly empty <p></p> with no
+     <br> inside, which has zero height. In-app previews are unaffected because
+     globals.css carries ".ql-editor p:empty { min-height: 1em }" - an email client has
+     no access to that stylesheet.
+
+  3. Extra spaces compressed. The reporter added several spaces while editing and they
+     came out collapsed to one. Cause: once nbsp is normalized to a regular space, the
+     HTML renderer collapses consecutive whitespace as usual.
+
+  Why prior fixes did not cover this: HRIS-2026-034 (normalizeNbsp) targets in-app
+  display only - all 46 of its call sites are dangerouslySetInnerHTML on pages and
+  modals. HRIS-2026-033 targets the WeasyPrint PDF generators. HRIS-2026-032 (backend)
+  was email-related but concerned paragraph MARGINS, not nbsp or empty paragraphs. The
+  email path had therefore never been treated for either issue: no email template has
+  wrap CSS and no email-sending view normalizes nbsp.
+
+DESIRED OUTCOME:
+  An email composed in the Send Email modal should arrive reading the way it was
+  written - wrapping at real word boundaries, keeping the blank lines the composer
+  typed, and keeping deliberate multi-space runs - without a backend or template change.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/linkify.ts
+    (added and exported prepareRichTextForEmail() - normalizes Quill's nbsp runs and
+     restores blank lines; placed alongside the existing normalizeNbsp so all nbsp
+     logic stays in one file, per the developer feedback recorded in HRIS-2026-034)
+- src/components/SendEmailModal.tsx
+    (one call at the point the payload is built:
+     message: prepareRichTextForEmail(data.message), so every module using the modal is
+     covered by a single change)
+
+Backend:
+- N/A - deliberately none. Editing without_attachment_email.tpl was considered and
+  rejected: it is shared by 10 backend views (advisory, applicant, employee_issue,
+  screen_applicant x2, separation x3, and 4 DOLE reports), so a template edit silently
+  changes every module. Same reasoning as HRIS-2026-034's rejection of the backend
+  normalization + data migration approach.
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A - frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+[x] Helper verified against the real failing cases: <p></p> and <p>&nbsp;</p> both
+    become <p><br></p>; nbsp-joined text gains real break points;
+    "Note:&nbsp;&nbsp;&nbsp;" keeps its width; plain paragraphs and class attributes on
+    an empty <p> are left untouched; empty input returns unchanged
+[ ] Jest/RTL tests (N/A - no frontend test harness in this repo)
+[x] Manual verification completed: advisory re-sent and confirmed in Gmail - blank
+    lines between sections restored, "YAHSHUA HRIS" no longer split mid-word
+
+Integration & E2E:
+[x] Manual regression testing completed (advisory flow, Gmail web)
+[ ] Regression pass still needed on the other 9 modules that use SendEmailModal:
+    offboarding, orientation, screen-applicants, address-employee-issue, and the 5 DOLE
+    pages. All shared the same defect, so this is a fix rather than a behavior change,
+    but the call site is shared code
+[x] Edge cases considered (nbsp-only blank paragraphs; empty <p> carrying Quill class
+    attributes such as ql-align-center; multi-space runs; content with no nbsp at all)
+[ ] Cross-browser/client testing completed (verified in Gmail web only)
+
+KNOWN REMAINING ISSUE:
+  A long URL still splits mid-address in the sent email (e.g. "https://canva.link/" /
+  "qu3nl2z7jjqr9fn") instead of moving to the next line whole. This is NOT the nbsp bug
+  - the URL genuinely has no internal break opportunity to restore - and cannot be fixed
+  from the content side. It needs overflow-wrap plus an atomic-link rule
+  (display:inline-block; max-width:100%) in the email template, which is shared by the
+  10 views listed above. Deliberately left unfixed to keep this change frontend-only.
+
+FIX EXPLANATION:
+  The defect is content, not layout: what Quill saves is not what an email client can
+  render faithfully, and the app's own stylesheet (which papers over both problems on
+  screen) does not travel with the email. prepareRichTextForEmail() therefore repairs
+  the HTML before it leaves the app:
+
+    .replace(/&nbsp;/gi, '\u00A0')
+    .replace(/[ \u00A0]*\u00A0[ \u00A0]*/g, (run) => ' ' + '&nbsp;'.repeat(run.length - 1))
+    .replace(/<p([^>]*)>(?:\s|&nbsp;)*<\/p>/gi, '<p$1><br></p>');
+
+  The middle line is the part that resolves symptoms 1 and 3 together: rather than
+  swapping every nbsp for a plain space (which restores wrapping but lets the renderer
+  collapse deliberate multi-space runs), each run keeps its full width while its FIRST
+  space becomes a real, breakable space. One legal break point per run is all the client
+  needs to wrap between words. The third line puts back the <br> that getSemanticHTML()
+  strips, giving blank paragraphs height in any client without relying on a stylesheet
+  the recipient will never load.
+
+  The call sits in SendEmailModal where the payload is assembled rather than in the
+  advisory hook, so all 10 modules that send Quill content through this modal are fixed
+  by one change instead of the advisory alone.
+
+================================================================================
+
+BUG ID: HRIS-2026-038
+DATE FILED: 2026-08-12
+DATE FIXED: 2026-08-13
+CLIENT/REPORTER: HR (raised in group chat, w/ screenshot) - Module > Manage > Memo/Policy > Policy
+LINEAR: I-635
+COMPANION: Backend BUG_HISTORY HRIS-2026-038 (duplicate memo/policy endpoint)
+
+ISSUE DESCRIPTION:
+  The Policy form's content boxes (Purpose / Policy / Procedure, plus the Provisions:
+  Eligibility, Application, Coverage, Termination) were plain <textarea> fields, so
+  nothing recorded where the writer pressed Enter. The public policy page recipients
+  open from the emailed link renders those values as HTML, so every line break was
+  lost and numbered items ran together into one solid block:
+    "Policy 1. National Holidays ... 2. Local Holidays ... 3. Business Requirements ..."
+  all on one line. HR asked for "the same content array/layout ... like what we did sa
+  email content" - i.e. numbering should reflect the spacing as written.
+
+  Two further requests came in while fixing it:
+  - Start with the Evaluation Template's editor (no toolbar), then ADD the toolbar
+    after seeing it (formatting options were wanted after all).
+  - Make the boxes draggable/taller like the Create Memo body, so long content is
+    readable while typing.
+
+DESIRED OUTCOME:
+  Policy content reads exactly as typed - each numbered item on its own line, spacing
+  between paragraphs preserved - in the form, the View Policy screen, and the public
+  page. Writers get formatting options and can drag each box taller.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/richText.ts (new - isRichTextEmpty(); Quill serializes an empty editor
+  as "<p><br></p>", so the old !value.trim() required-checks passed on blank input)
+- src/components/pages/(auth)/employer/manage/create-memo-policy/modals/
+  CreatePolicyModal.tsx (custom_policy_fields[].inputName + the 4 provisions:
+  <textarea> -> ReactQuillDynamic with QUILL_FORMATS + QUILL_MODULES; required-validation
+  and the clear-error-on-type watcher use isRichTextEmpty; invalid-field focus now
+  targets the .ql-editor surface, not the hidden backing input)
+- .../modals/EditPolicyModal.tsx (same conversions; the view-only pane rendered values
+  in a disabled <textarea>, which would have shown raw HTML tags - now a read-only
+  ql-editor block via linkify)
+- src/components/pages/(un-auth)/directives/Content.tsx (policy fields, provisions and
+  the legacy-field fallback were wrapped in <p dangerouslySetInnerHTML>; block markup
+  inside a <p> is invalid so the browser hoists it out - now <div class="ql-editor !p-0">,
+  matching how the memo body already renders)
+- src/app/globals.css (renamed .memo-quill-resize-clip -> .quill-resize-clip and shared
+  it with the policy editors; rules unchanged)
+- .../modals/CreateMemoModal.tsx, EditMemoModal.tsx (class rename only)
+- .../DirectiveList.tsx (Duplicate action - see backend HRIS-2026-038: DuplicateIcon
+  button with bordered box + tooltip, ConfirmModal, toast, back to page 1 + refetch)
+- .../hooks/useDuplicateDirective.ts (new - POST /api/directives/<id>/duplicate/)
+
+Backend:
+- See backend BUG_HISTORY HRIS-2026-038 (duplicate endpoint only; the formatting fix
+  needed no backend change - Directive.custom_policy_fields is a JSONField and the
+  values now simply carry HTML).
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☑ TypeScript types verified - npx tsc --noEmit clean on all changed files
+☑ Form validation tested (React Hook Form): empty editor still flagged as required via
+  isRichTextEmpty; error clears once real text is typed
+☐ Jest/RTL component tests (N/A - no frontend test harness in this repo)
+☑ Custom hook follows the existing useSendDirectiveEmail fetch/mutation pattern
+
+Integration & E2E:
+☑ Backend regression suite green (tests.views.test_directive - 50 tests OK)
+☐ Manual QA still needed: create a policy with numbered items, send it, open the
+  emailed public link and confirm it renders line by line
+☑ Edge cases considered:
+  - Policies saved before this fix still open normally; they keep showing as one
+    paragraph until re-typed (no data migration performed)
+  - Toolbar + fixed-height box: quill.snow's .ql-container{height:100%} is measured
+    against the .quill wrapper, so toolbar + editor overflow the box and the bottom of
+    the typing area is cut off. Reused the memo's flex-column fix (.quill-resize-clip)
+  - The public page and View Policy render saved HTML, so the ql-editor styles in
+    globals.css (list markers, empty-paragraph height) apply to policies too
+
+FIX EXPLANATION:
+  Replaced the plain textareas in both policy modals with the same React Quill editor
+  the rest of the app uses (ReactQuillDynamic + QUILL_FORMATS + QUILL_MODULES), so the
+  saved value carries real paragraph markup instead of bare text. Display surfaces that
+  already treated the value as HTML were corrected to use a <div class="ql-editor">
+  wrapper - a <p> cannot legally contain <p>/<ol>, and the browser silently hoisted the
+  content out, which is what flattened the layout. Required-field checks moved to
+  isRichTextEmpty because Quill never returns an empty string once focused. Each editor
+  sits in a resize-y box sharing the memo's .quill-resize-clip rule, which lays the
+  wrapper out as a flex column so the toolbar keeps its natural height and the editor
+  fills exactly the remaining space at any dragged height.
+
+================================================================================
+
+BUG ID: HRIS-2026-037
+DATE FILED: 2026-08-05
+DATE FIXED: 2026-08-05
+CLIENT/REPORTER: Internal (Michael Ian Labos, dev), Settings / Third-Party Integration
+COMPANION: Backend BUG_HISTORY HRIS-2026-036 | PRs fe#716, be#538
+
+ISSUE DESCRIPTION:
+  Companies that registered in HRIS the normal way (email/password) instead of via
+  "Login with Yahshua Payroll" SSO had no in-app way to connect their existing
+  company to Yahshua Payroll, so payroll sync could not work for them. The
+  Third-Party Platform settings page listed connected integrations (Google Meet,
+  Zoom) but had no "Yahshua Payroll" option, and the OAuth callback only handled the
+  login/verify path (which, for an existing company, would create a duplicate).
+
+  Follow-on during testing:
+  - First shipped as a full-page redirect (to mirror the YP login page and dodge the
+    production popup/COOP issue), then switched back to a POPUP per request so the
+    settings page stays open (matching how Google Meet/Zoom connect on the same page).
+  - A retained YP browser session made the OAuth silently reuse the previously
+    logged-in YP account (jumping straight to the "Authorize HRIS" consent screen), so
+    the connect ran with the wrong YP email and the backend email-match guard rejected
+    it. Clearing the app cookies forced a fresh YP login and it connected smoothly.
+
+DESIRED OUTCOME:
+  From Settings -> Third-Party Platform -> Create, an owner can pick "Yahshua Payroll",
+  authenticate once in a popup, and have their existing company connected — the
+  integration then appears in the list without creating a duplicate company.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/settings/general-settings/third-party-platform/
+  modals/CreateThirdPartyIntegrationModal.tsx (added Yahshua Payroll to the provider
+  list; sets a localStorage "yp_oauth_mode=connect" flag then opens the OAuth popup)
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/Content.tsx (when the callback
+  provider is yahshua-payroll AND the connect flag is set, calls the new connect hook
+  instead of the login/verify path, broadcasts on settings-integration-channel, and
+  closes the popup; error state shows a "Back to integrations" link)
+- src/components/pages/(un-auth)/(callbacks)/sso/oauth/hooks/useConnectYahshuaPayroll.ts
+  (new — POST /api/sso/connect/yahshua-payroll-oauth/ with the auth token)
+
+Backend (companion be#538):
+- app/views/yahshua_payroll.py (new YahshuaPayrollConnectAPIView)
+- app/urls.py (POST /api/sso/connect/yahshua-payroll-oauth/)
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☑ Type-check clean for the changed files (npx tsc --noEmit — no new errors)
+☑ Reuses existing OAuth popup + /sso/[provider] callback pattern (same as Zoom/Google)
+☐ Automated component tests (N/A — UI wiring)
+☑ State management: connect flag via localStorage (shared across opener + popup tabs;
+  sessionStorage would NOT be shared and was intentionally avoided)
+
+Backend (Django REST Framework):
+☑ Covered by companion be#538 — 5 unit tests on YahshuaPayrollConnectAPIView.
+
+Integration & E2E:
+☑ Manual: owner -> Settings -> Third-Party Platform -> Create -> Yahshua Payroll
+  (popup) -> YP sign-in with the matching email -> popup closes -> integration appears.
+☑ Edge cases considered:
+  - Stale YP session reuses the wrong account -> caught by the backend email-match
+    guard; clear cookies / use incognito to force a fresh YP login.
+  - Google Meet / Zoom connect flows are unchanged (still use the popup path).
+
+FIX EXPLANATION:
+  Added "Yahshua Payroll" to the Third-Party Platform provider list. Selecting it sets
+  a localStorage "connect" flag and opens the existing YP OAuth authorize endpoint in a
+  popup. The shared /sso/yahshua-payroll callback detects the flag and calls the new
+  useConnectYahshuaPayroll hook (POST /api/sso/connect/yahshua-payroll-oauth/) instead
+  of the login/verify path, so the CURRENT company is linked rather than a new one
+  created. On success it broadcasts { isGranted: true } on the
+  settings-integration-channel (the settings page refetches its list) and closes the
+  popup; on failure it shows the backend error with a "Back to integrations" link.
+
+================================================================================
+
+BUG ID: HRIS-2026-036
+DATE FILED: 2026-08-03
+DATE FIXED: 2026-08-03
+REPORTER: Internal (Brylle - QA), Employer Profile / Onboarding Tour
+
+ISSUE DESCRIPTION:
+  On the My Profile page (/employer-profile), the onboarding tour tooltip
+  "Review your account settings, then click Save to complete your company
+  profile..." kept appearing on the Account Settings step even for employers
+  who had already finished the setup tour. The tooltip highlighted the SAVE
+  button and showed a "Do it Later" link on every single visit, so it could
+  never be permanently dismissed.
+
+  Steps to reproduce:
+    1. Complete the onboarding tour (header segment) so is_header_tour_done
+       is true on the backend.
+    2. Go to Dashboard > My Profile (/employer-profile).
+    3. Fill/keep the Employer Details form and click "Next".
+    4. The Account Settings step loads and the tour tooltip pops up again.
+
+  Root cause: In Details.tsx, the "Next" handler checked ONLY whether a tour
+  was currently running. If no tour was running it unconditionally fired
+  startTour([PROFILE_SAVE_STEP]) as a fallback — a deliberate feature meant
+  for users who dismissed the tour partway through onboarding, so they'd still
+  get guidance on the Save step. That fallback never consulted the persisted
+  tour progress, so for employers who had already completed the header segment
+  the "not running" branch was always taken and the tooltip re-appeared
+  forever. Dismissing it via "Do it Later" does not write to the backend by
+  design, so there was no way for the user to stop it.
+
+DESIRED OUTCOME:
+  The Save-step tooltip should only appear for employers who have not yet
+  completed the header tour segment. Once is_header_tour_done is true on the
+  backend, navigating to Account Settings should show no tour tooltip at all.
+  Users who dismissed the tour mid-onboarding should still get the fallback
+  guidance.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/employer-profile/Details.tsx
+    (import useGetTourProgress; read tour progress in the component; gate the
+     fallback startTour call behind !tourProgress?.is_header_tour_done)
+
+Backend:
+- None (no backend change required — /api/tour-progress/ already exposes
+  is_header_tour_done and the value was being written correctly on save)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ N/A - no backend changes
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ TypeScript types verified (TourProgressData already exposes
+  is_header_tour_done)
+☑ Existing behavior preserved (active tour still advances via the
+  'profile-form-next' completeTrigger; fallback still fires for users who
+  dismissed the tour before completing the header segment)
+☑ Edge case considered: tourProgress undefined while the query is in flight —
+  optional chaining means the fallback still fires, matching the pre-fix
+  behavior for genuinely-incomplete onboarding
+☐ Manual browser verification (recommended): with a completed tour, open
+  /employer-profile, click Next, confirm no tooltip appears
+☐ Manual browser verification (recommended): with a fresh employer, dismiss
+  the tour then click Next, confirm the Save tooltip still appears
+
+FIX EXPLANATION:
+  Added the useGetTourProgress hook to Details.tsx and changed the fallback
+  branch from a bare `else` to `else if (!tourProgress?.is_header_tour_done)`.
+  The fallback now only runs when the header tour segment has not been marked
+  complete on the backend, so employers who finished onboarding never see the
+  Save tooltip again, while the mid-onboarding guidance the fallback was built
+  for is left intact.
+
+================================================================================
+
+BUG ID: HRIS-2026-035
+DATE FILED: 2026-07-24
+DATE FIXED: 2026-07-24
+REPORTER: Internal (Linear I-619), Offboarding module
+
+ISSUE DESCRIPTION:
+  Two related rich-text rendering issues:
+
+  1. Separation letters — Text in generated offboarding letters (Letter of
+     Acceptance of Resignation / Letter of Separation) ran off the right edge
+     of the PDF page instead of wrapping. Body paragraphs were clipped at the
+     page boundary and one even broke mid-word ("endea/vors"), while the
+     manually typed signer line wrapped fine. It looked correct in the editor
+     and only broke in the generated PDF, and only after the letter content had
+     been edited in the rich-text editor.
+
+     Root cause: ReactQuill (react-quill-new / Quill 2.0) serializes every
+     regular space in its content as a NON-BREAKING space (U+00A0 / &nbsp;).
+     The letter template contains zero &nbsp; — Quill injects them on
+     load/re-serialize. WeasyPrint (backend PDF renderer) cannot break a line
+     at a non-breaking space, so each paragraph became one unbreakable token
+     that overflowed the fixed page width. The freshly typed signer line used
+     real spaces, which is why it alone wrapped.
+
+  2. Safety & Health Policy editor — Bulleted and numbered lists rendered two
+     markers per item (e.g. "• •" or a doubled number). Quill 2.0 renders its
+     list markers via the .ql-ui span (li > .ql-ui::before), whereas the
+     existing CSS hid the Quill 1.x marker (ul > li::before). Since we render
+     our own native list-style markers, Quill's own markers were no longer
+     hidden and showed on top of ours.
+
+DESIRED OUTCOME:
+  Separation letter body text should wrap within the PDF page margins
+  regardless of how the content was authored/edited in Quill. Policy editor
+  lists should show exactly one marker per item.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/offboarding/modals/CreateSeparationLetterModal.tsx
+    (normalize U+00A0 and &nbsp; back to regular spaces in onSubmit before
+     sending the message to the backend)
+- src/components/pages/(auth)/employer/dole/safety-and-health-policy/styles.css
+    (updated the hidden-marker selector from ul > li::before to
+     li > .ql-ui::before for Quill 2.0, so native markers aren't doubled)
+
+Backend (see backend BUG_HISTORY HRIS-2026-033):
+- utils/separation_letter.py (render-time nbsp normalization safety-net)
+- utils/safety_and_health_policy.py (same nbsp normalization + wrap CSS)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Verified in backend BUG_HISTORY HRIS-2026-033 (re-rendered PDF, all lines
+  within page width, no mid-word breaks)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☑ Edge cases considered (Quill-injected nbsp runs; Quill 2.0 vs 1.x list
+  marker markup)
+☐ Manual browser verification (recommended): generate an Acceptance and a
+  Separation letter after editing content in Quill; confirm PDF wraps
+☐ Manual browser verification (recommended): create bulleted and numbered
+  lists in the Safety & Health Policy editor; confirm a single marker per item
+
+FIX EXPLANATION:
+  For the letter overflow, the real defect is content, not layout: Quill emits
+  non-breaking spaces where normal spaces belong, leaving paragraphs with no
+  legal break points for the renderer. The frontend normalizes U+00A0 and the
+  &nbsp; entity back to regular spaces at submit time so newly saved content is
+  clean; the backend does the same at render time so already-saved letters
+  render correctly without a data migration. For the doubled list markers, the
+  hidden-marker CSS selector was updated to target Quill 2.0's .ql-ui span so
+  our native list markers are the only ones shown.
+
+================================================================================
+
 BUG ID: HRIS-2026-034
 DATE FILED: 2026-07-17
 DATE FIXED: 2026-07-17

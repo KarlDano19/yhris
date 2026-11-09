@@ -575,7 +575,7 @@ export default function UpdateJobModal({
                       <LoadingSpinner size='xl' showText text='Loading job details...' />
                     </div>
                   ) : (
-                    <div className='min-h-[560px]'>
+                    <div>
                   {/* Tab Navigation */}
                   <div className='pt-4 pb-2 px-4'>
                     <div className='flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide'>

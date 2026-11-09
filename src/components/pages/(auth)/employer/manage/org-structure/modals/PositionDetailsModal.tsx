@@ -1,46 +1,132 @@
 import React, { Fragment, useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import { XCircleIcon, StarIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, StarIcon, MagnifyingGlassIcon, UserPlusIcon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import useSetPrimaryEmployee from '../hooks/useSetPrimaryEmployee';
 import useGetPositionEmployees from '../hooks/useGetPositionEmployees';
 import useGetPositionEmployeesAutocomplete from '../hooks/useGetPositionEmployeesAutocomplete';
 import { normalizeNbsp } from '@/helpers/linkify';
+import useAssignEmployeeToNode from '../hooks/useAssignEmployeeToNode';
+import useUnassignEmployeeFromNode from '../hooks/useUnassignEmployeeFromNode';
 
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
 
 import { Employee, PositionDetailsModalProps } from '../types';
 
-const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({ 
-  data, 
-  primaryEmployee, 
+const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
+  data,
+  primaryEmployee,
   isVisible,
   onClose,
+  onBack,
   departmentFilter
 }) => {
   const setPrimaryEmployeeMutation = useSetPrimaryEmployee();
+  const assignEmployeeMutation = useAssignEmployeeToNode();
+  const unassignEmployeeMutation = useUnassignEmployeeFromNode();
+
+  const isManualAssignment = !!data.is_manual_assignment;
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  
+
   // Search state
   const [pendingSearch, setPendingSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [isDebouncing, setIsDebouncing] = useState(false);
-  
+
   // Autocomplete state
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [shouldShowAutocomplete, setShouldShowAutocomplete] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [autocompleteLimit, setAutocompleteLimit] = useState(50);
   const autocompleteRef = useRef<HTMLUListElement>(null);
+
+  // Assign-employee search state (manual mode only). Scoped to the nearest
+  // Department ancestor's employees when this node sits under one; otherwise
+  // searches company-wide.
+  const [assignSearch, setAssignSearch] = useState('');
+  const [showAssignResults, setShowAssignResults] = useState(false);
+  const assignInputRef = useRef<HTMLInputElement>(null);
+  const [assignDropdownPosition, setAssignDropdownPosition] = useState({ top: -9999, left: -9999, width: 0 });
+  const { data: assignSearchData, isLoading: isAssignSearchLoading } = useGetEmployeePaginatedSelect(
+    showAssignResults
+      ? { search: assignSearch, page_size: 50, department_id: data.nearest_department_id || undefined }
+      : null
+  );
+  const assignSearchResults = assignSearchData?.records || [];
+
+  // Confirmation gate for assigning an employee who already holds a manual
+  // assignment on a different occurrence of this same shared position.
+  const [pendingAssignment, setPendingAssignment] = useState<{ id: number; name: string; fromLabel?: string } | null>(null);
+  // Keeps showing the last assignment's details while the confirm modal is
+  // animating closed, instead of going blank the instant pendingAssignment is cleared.
+  const [displayedAssignment, setDisplayedAssignment] = useState<{ id: number; name: string; fromLabel?: string } | null>(null);
+  useEffect(() => {
+    if (pendingAssignment) setDisplayedAssignment(pendingAssignment);
+  }, [pendingAssignment]);
+  const queryClient = useQueryClient();
+
+  // Looks for another org structure node (anywhere in the tree) that shares
+  // this node's Position and already has the given employee manually
+  // assigned to it - so we can warn before silently moving them here.
+  const findExistingAssignmentNode = (employeeId: number): any => {
+    const tree = queryClient.getQueryData<any[]>(['orgStructureManageCache']);
+    if (!tree) return null;
+
+    const search = (nodes: any[]): any => {
+      for (const node of nodes) {
+        if (
+          node.id !== data.id &&
+          node.is_manual_assignment &&
+          node.position === data.position &&
+          (node.primary_employee?.id === employeeId || node.employees?.some((emp: any) => emp.id === employeeId))
+        ) {
+          return node;
+        }
+        if (node.children?.length) {
+          const found = search(node.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    return search(tree);
+  };
+
+  // Keep the assign-employee dropdown positioned against the input's viewport
+  // rect (rendered via portal) so it isn't clipped by the modal's overflow.
+  const updateAssignDropdownPosition = () => {
+    if (assignInputRef.current) {
+      const rect = assignInputRef.current.getBoundingClientRect();
+      setAssignDropdownPosition({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  };
+
+  useEffect(() => {
+    if (!showAssignResults) return;
+    updateAssignDropdownPosition();
+
+    window.addEventListener('scroll', updateAssignDropdownPosition, true);
+    window.addEventListener('resize', updateAssignDropdownPosition);
+    return () => {
+      window.removeEventListener('scroll', updateAssignDropdownPosition, true);
+      window.removeEventListener('resize', updateAssignDropdownPosition);
+    };
+  }, [showAssignResults]);
 
   // Debounce search input for autocomplete (2 seconds like employee list)
   useEffect(() => {
@@ -72,6 +158,9 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
       setShouldShowAutocomplete(false);
       setSelectedIndex(-1);
       setAutocompleteLimit(50);
+      setAssignSearch('');
+      setShowAssignResults(false);
+      setPendingAssignment(null);
     }
   }, [isVisible]);
 
@@ -108,9 +197,9 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
   }, [debouncedSearch, shouldShowAutocomplete]);
 
   // Fetch main paginated employees when modal is open
-  const { 
-    data: employeesData, 
-    isLoading: isLoadingEmployees 
+  const {
+    data: employeesData,
+    isLoading: isLoadingEmployees
   } = useGetPositionEmployees({
     orgStructureId: data.id,
     page: currentPage,
@@ -132,13 +221,13 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
   let employeesToDisplay = employeesData?.employees || data.employees || [];
   const pagination = employeesData?.pagination;
   let autocompleteResults = autocompleteData?.records || [];
-  
+
   // Apply department filter to employees if specified
   if (departmentFilter && departmentFilter !== 'ALL') {
-    employeesToDisplay = employeesToDisplay.filter((emp: Employee) => 
+    employeesToDisplay = employeesToDisplay.filter((emp: Employee) =>
       emp.department?.toLowerCase() === departmentFilter.toLowerCase()
     );
-    autocompleteResults = autocompleteResults.filter((emp: Employee) => 
+    autocompleteResults = autocompleteResults.filter((emp: Employee) =>
       emp.department?.toLowerCase() === departmentFilter.toLowerCase()
     );
   }
@@ -156,19 +245,49 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
 
   const handleSetPrimary = async (employeeId: number) => {
     const orgStructureId = typeof data.id === 'string' ? parseInt(data.id, 10) : data.id;
-    
+
     try {
       await setPrimaryEmployeeMutation.mutateAsync({
         orgStructureId: orgStructureId,
         employeeId: employeeId
       });
-      
+
       toast.custom(() => <CustomToast message='Employee will now be displayed in the org chart.' type='success' />, {
         duration: 3000,
       });
     } catch (error: any) {
       console.error('Error setting primary employee:', error);
       toast.custom(() => <CustomToast message={error.message || 'Failed to update chart display'} type='error' />, {
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleAssignEmployee = async (employeeId: number) => {
+    try {
+      await assignEmployeeMutation.mutateAsync({ orgStructureId: data.id, employeeId });
+
+      toast.custom(() => <CustomToast message='Employee assigned to this position.' type='success' />, {
+        duration: 3000,
+      });
+      setAssignSearch('');
+      setShowAssignResults(false);
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error.message || 'Failed to assign employee'} type='error' />, {
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleUnassignEmployee = async (employeeId: number) => {
+    try {
+      await unassignEmployeeMutation.mutateAsync({ orgStructureId: data.id, employeeId });
+
+      toast.custom(() => <CustomToast message='Employee removed from this position.' type='success' />, {
+        duration: 3000,
+      });
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error.message || 'Failed to unassign employee'} type='error' />, {
         duration: 5000,
       });
     }
@@ -198,6 +317,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
   };
 
   return (
+    <>
     <Transition show={isVisible} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <TransitionChild
@@ -223,9 +343,21 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-4xl">
+              <DialogPanel className={`relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full ${isManualAssignment ? 'max-w-lg' : 'max-w-4xl'}`}>
                 {/* Header */}
                 <div className="flex bg-savoy-blue p-4 items-center rounded-t-lg">
+                  {onBack && (
+                    <button
+                      type="button"
+                      onClick={onBack}
+                      className="mr-1 p-1 rounded-full hover:bg-white/10 transition-colors"
+                      data-tooltip-id="back-to-actions-tooltip"
+                      data-tooltip-content="Back"
+                      data-tooltip-place="bottom"
+                    >
+                      <ArrowLeftIcon className="w-6 h-6 text-white" />
+                    </button>
+                  )}
                   <h3 className="flex-1 text-white ml-2 font-semibold text-lg">
                     {data.position_name}
                   </h3>
@@ -237,54 +369,12 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
 
                 {/* Content */}
                 <div className="p-6 space-y-6">
-                  {/* Primary Employee Info - Only show if matches department filter */}
-                  {primaryEmployee && (!departmentFilter || departmentFilter === 'ALL' || primaryEmployee.department?.toLowerCase() === departmentFilter.toLowerCase()) && (
-                    <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600">
-                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden flex-shrink-0">
-                        {primaryEmployee.photo ? (
-                          <img
-                            src={primaryEmployee.photo}
-                            alt={`${primaryEmployee.firstname} ${primaryEmployee.lastname}`}
-                            className="w-full h-full object-cover rounded-full"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const placeholder = target.nextElementSibling as HTMLElement;
-                              if (placeholder) placeholder.style.display = 'block';
-                            }}
-                          />
-                        ) : null}
-                        <div 
-                          className={`w-full h-full flex items-center justify-center ${primaryEmployee.photo ? 'hidden' : 'block'}`}
-                        >
-                          <PlaceholderPicture 
-                            gender={getAvatarType(primaryEmployee)} 
-                            fillColor="#3B82F6" 
-                            width={32} 
-                            height={32}
-                            style={{ opacity: 0.5 }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-lg font-bold text-gray-800">
-                          {primaryEmployee.firstname} {primaryEmployee.lastname}
-                        </h4>
-                        {primaryEmployee.department && (
-                          <p className="text-sm text-gray-700 font-medium">{primaryEmployee.department}</p>
-                        )}
-                        <p className="text-sm text-blue-700 font-medium">Displayed in Org Chart</p>
-                        <p className="text-sm text-gray-500">{primaryEmployee.email}</p>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Description */}
                   {data.description && (
                     <div>
                       <h4 className="text-lg font-semibold text-gray-800 mb-3">Position Description</h4>
                       <div className="bg-gray-50 rounded-lg overflow-hidden">
-                        <div 
+                        <div
                           className="ql-editor"
                           dangerouslySetInnerHTML={{ __html: normalizeNbsp(data.description || '') }}
                         />
@@ -292,16 +382,286 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                     </div>
                   )}
 
-                  {/* All Employees */}
+                  {isManualAssignment ? (
+                    /* Manually-assigned (reused) position: a single labeled assign field
+                       followed by a clearly separated "Currently assigned" section, instead
+                       of duplicating the assigned employee in an "All Employees" list. */
+                    <div>
+                      <p className="text-xs text-gray-500 mb-4">
+                        This position appears more than once in the org chart. Assign an employee to this box without changing their official position.
+                        {data.nearest_department_name && (
+                          <> Showing employees from <span className="font-medium">{data.nearest_department_name}</span>.</>
+                        )}
+                      </p>
+
+                      <label htmlFor="assign-employee-input" className="block text-sm font-semibold text-gray-800 mb-2">
+                        Assign an employee to this position
+                      </label>
+                      <div className="relative max-w-md">
+                        <UserPlusIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-600" />
+                        <input
+                          id="assign-employee-input"
+                          ref={assignInputRef}
+                          type="text"
+                          placeholder="Search by name, position, or department..."
+                          autoComplete="off"
+                          value={assignSearch}
+                          onChange={(e) => {
+                            setAssignSearch(e.target.value);
+                            setShowAssignResults(true);
+                          }}
+                          onFocus={() => setShowAssignResults(true)}
+                          onBlur={() => setTimeout(() => setShowAssignResults(false), 150)}
+                          className="block w-full rounded-md border border-blue-200 bg-blue-50/60 py-2 pl-10 pr-3 text-gray-900 shadow-sm placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 focus:border-blue-600 sm:text-sm sm:leading-6"
+                        />
+                        {showAssignResults && typeof document !== 'undefined' && createPortal(
+                          <ul
+                            className="fixed z-[9999] bg-white border border-gray-300 rounded-md max-h-60 overflow-y-auto shadow-lg"
+                            style={{
+                              top: assignDropdownPosition.top,
+                              left: assignDropdownPosition.left,
+                              width: assignDropdownPosition.width,
+                            }}
+                          >
+                            {isAssignSearchLoading ? (
+                              <li className="px-3 py-4 text-center">
+                                <LoadingSpinner size="sm" color="yellow" text="Searching employees..." showText className="py-2" />
+                              </li>
+                            ) : assignSearchResults.length > 0 ? (
+                              assignSearchResults.map((item: any) => {
+                                const existingNode = findExistingAssignmentNode(item.id);
+                                // Where that other occurrence sits (nearest Department ancestor,
+                                // falling back to its parent node's position) - the shared Position
+                                // name itself (e.g. "CISO") is always the same as this node's, so it
+                                // adds nothing on its own and would read as if it were a different position.
+                                const existingLocation = existingNode
+                                  ? existingNode.nearest_department_name || existingNode.parent_position_name
+                                  : null;
+
+                                return (
+                                <li
+                                  key={item.id}
+                                  className="px-3 py-2 cursor-pointer hover:bg-blue-100 flex items-center justify-between"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => {
+                                    if (existingNode) {
+                                      setPendingAssignment({
+                                        id: item.id,
+                                        name: `${item.firstname || item.label} ${item.lastname || ''}`.trim(),
+                                        fromLabel: existingLocation || undefined,
+                                      });
+                                      setAssignSearch('');
+                                      setShowAssignResults(false);
+                                    } else {
+                                      handleAssignEmployee(item.id);
+                                    }
+                                  }}
+                                >
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{item.firstname || item.label} {item.lastname || ''}</span>
+                                    {(item.position || item.department) && (
+                                      <span className="text-xs text-gray-600">
+                                        • {[item.position, item.department].filter(Boolean).join(' | ')}
+                                      </span>
+                                    )}
+                                    {existingNode && (
+                                      <span className="text-xs text-amber-600 font-medium">
+                                        Currently assigned to {data.position_name}
+                                        {existingLocation ? ` under ${existingLocation}` : ''}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <UserPlusIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                </li>
+                                );
+                              })
+                            ) : (
+                              <li className="px-3 py-4 text-center text-sm text-gray-500">No employees found</li>
+                            )}
+                          </ul>,
+                          document.body
+                        )}
+                      </div>
+
+                      <div className="my-6 border-t border-gray-200" />
+
+                      <h4 className="text-sm font-semibold text-gray-800 mb-3">Currently assigned</h4>
+                      {primaryEmployee ? (
+                        <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600">
+                          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden flex-shrink-0">
+                            {primaryEmployee.photo ? (
+                              <img
+                                src={primaryEmployee.photo}
+                                alt={`${primaryEmployee.firstname} ${primaryEmployee.lastname}`}
+                                className="w-full h-full object-cover rounded-full"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const placeholder = target.nextElementSibling as HTMLElement;
+                                  if (placeholder) placeholder.style.display = 'block';
+                                }}
+                              />
+                            ) : null}
+                            <div
+                              className={`w-full h-full flex items-center justify-center ${primaryEmployee.photo ? 'hidden' : 'block'}`}
+                            >
+                              <PlaceholderPicture
+                                gender={getAvatarType(primaryEmployee)}
+                                fillColor="#3B82F6"
+                                width={32}
+                                height={32}
+                                style={{ opacity: 0.5 }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-bold text-gray-800">
+                              {primaryEmployee.firstname} {primaryEmployee.lastname}
+                            </h4>
+                            {primaryEmployee.department && (
+                              <p className="text-sm text-gray-700 font-medium">{primaryEmployee.department}</p>
+                            )}
+                            <p className="text-sm text-blue-700 font-medium">Displayed in Org Chart</p>
+                            <p className="text-sm text-gray-500">{primaryEmployee.email}</p>
+                          </div>
+                          <button
+                            onClick={() => handleUnassignEmployee(primaryEmployee.id)}
+                            disabled={unassignEmployeeMutation.isLoading}
+                            className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex-shrink-0"
+                            data-tooltip-id="unassign-employee-tooltip"
+                            data-tooltip-content="Unassign this employee from this position"
+                            data-tooltip-place="top"
+                          >
+                            <XMarkIcon className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center p-6 bg-gray-50 rounded-lg">
+                          <p className="text-gray-500 text-sm">No employee is currently assigned to this position</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                    {/* Primary Employee Info - Only show if matches department filter */}
+                    {primaryEmployee && (!departmentFilter || departmentFilter === 'ALL' || primaryEmployee.department?.toLowerCase() === departmentFilter.toLowerCase()) && (
+                      <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600">
+                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden flex-shrink-0">
+                          {primaryEmployee.photo ? (
+                            <img
+                              src={primaryEmployee.photo}
+                              alt={`${primaryEmployee.firstname} ${primaryEmployee.lastname}`}
+                              className="w-full h-full object-cover rounded-full"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const placeholder = target.nextElementSibling as HTMLElement;
+                                if (placeholder) placeholder.style.display = 'block';
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={`w-full h-full flex items-center justify-center ${primaryEmployee.photo ? 'hidden' : 'block'}`}
+                          >
+                            <PlaceholderPicture
+                              gender={getAvatarType(primaryEmployee)}
+                              fillColor="#3B82F6"
+                              width={32}
+                              height={32}
+                              style={{ opacity: 0.5 }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-bold text-gray-800">
+                            {primaryEmployee.firstname} {primaryEmployee.lastname}
+                          </h4>
+                          {primaryEmployee.department && (
+                            <p className="text-sm text-gray-700 font-medium">{primaryEmployee.department}</p>
+                          )}
+                          <p className="text-sm text-blue-700 font-medium">Displayed in Org Chart</p>
+                          <p className="text-sm text-gray-500">{primaryEmployee.email}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Assign Employee search - available for ANY position with nobody currently
+                        assigned (assigning replaces the current one if there is one) */}
+                    {!primaryEmployee && (
+                      <div>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Assign a specific employee to this position without changing their official position.
+                          {data.nearest_department_name && (
+                            <> Showing employees from <span className="font-medium">{data.nearest_department_name}</span>.</>
+                          )}
+                        </p>
+                        <div className="relative max-w-md">
+                          <input
+                            ref={assignInputRef}
+                            type="text"
+                            placeholder="Search employees to assign..."
+                            autoComplete="off"
+                            value={assignSearch}
+                            onChange={(e) => {
+                              setAssignSearch(e.target.value);
+                              setShowAssignResults(true);
+                            }}
+                            onFocus={() => setShowAssignResults(true)}
+                            onBlur={() => setTimeout(() => setShowAssignResults(false), 150)}
+                            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                          />
+                          {showAssignResults && typeof document !== 'undefined' && createPortal(
+                            <ul
+                              className="fixed z-[9999] bg-white border border-gray-300 rounded-md max-h-60 overflow-y-auto shadow-lg"
+                              style={{
+                                top: assignDropdownPosition.top,
+                                left: assignDropdownPosition.left,
+                                width: assignDropdownPosition.width,
+                              }}
+                            >
+                              {isAssignSearchLoading ? (
+                                <li className="px-3 py-4 text-center">
+                                  <LoadingSpinner size="sm" color="yellow" text="Searching employees..." showText className="py-2" />
+                                </li>
+                              ) : assignSearchResults.length > 0 ? (
+                                assignSearchResults.map((item: any) => (
+                                  <li
+                                    key={item.id}
+                                    className="px-3 py-2 cursor-pointer hover:bg-blue-100 flex items-center justify-between"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => handleAssignEmployee(item.id)}
+                                  >
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{item.firstname || item.label} {item.lastname || ''}</span>
+                                      {(item.position || item.department) && (
+                                        <span className="text-xs text-gray-600">
+                                          • {[item.position, item.department].filter(Boolean).join(' | ')}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <UserPlusIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                  </li>
+                                ))
+                              ) : (
+                                <li className="px-3 py-4 text-center text-sm text-gray-500">No employees found</li>
+                              )}
+                            </ul>,
+                            document.body
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* All Employees */}
                     <div>
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-semibold text-gray-800">
-                        {departmentFilter && departmentFilter !== 'ALL' 
+                        {departmentFilter && departmentFilter !== 'ALL'
                           ? `${departmentFilter} Employees (${employeesToDisplay.length})`
                           : pagination ? `All Employees (${pagination.totalRecords})` : 'Employees'
                         }
                       </h4>
-                      
+
                       {/* Search Bar */}
                       <div className="flex items-center gap-2 flex-1 max-w-xs ml-4">
                         <div className="relative flex-1">
@@ -339,7 +699,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                                   const displayItems = autocompleteResults.slice(0, autocompleteLimit);
                                   const totalAutocompleteRecords = autocompleteData?.total_records || autocompleteResults.length;
                                   const hasMoreResults = totalAutocompleteRecords > autocompleteLimit;
-                                  
+
                                   if (selectedIndex === displayItems.length && hasMoreResults) {
                                     e.preventDefault();
                                     setAutocompleteLimit(prev => prev + 50);
@@ -386,22 +746,22 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                             }}
                             className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
-                          
+
                           {/* Autocomplete Dropdown */}
                           {showAutocomplete && shouldShowAutocomplete && (() => {
                             // Show loading state while debouncing or API loading
                             if (pendingSearch && pendingSearch.length >= 2 && (isDebouncing || isAutocompleteLoading)) {
                               return (
-                                <ul 
+                                <ul
                                   ref={autocompleteRef}
                                   className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto shadow-lg"
                                   onMouseDown={(e) => e.preventDefault()}
                                 >
                                   <li className="px-3 py-4 text-center">
-                                    <LoadingSpinner 
-                                      size="sm" 
-                                      color="yellow" 
-                                      text="Searching employees..." 
+                                    <LoadingSpinner
+                                      size="sm"
+                                      color="yellow"
+                                      text="Searching employees..."
                                       showText={true}
                                       className="py-2"
                                     />
@@ -415,9 +775,9 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                               const totalAutocompleteRecords = autocompleteData?.total_records || autocompleteResults.length;
                               const hasMoreResults = totalAutocompleteRecords > autocompleteLimit;
                               const displayItems = autocompleteResults.slice(0, autocompleteLimit);
-                              
+
                               return (
-                                <ul 
+                                <ul
                                   ref={autocompleteRef}
                                   className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto shadow-lg"
                                   onMouseDown={(e) => e.preventDefault()}
@@ -426,8 +786,8 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                                     <li
                                       key={item.id}
                                       className={`px-3 py-2 cursor-pointer ${
-                                        index === selectedIndex 
-                                          ? 'bg-blue-100' 
+                                        index === selectedIndex
+                                          ? 'bg-blue-100'
                                           : 'hover:bg-blue-100'
                                       }`}
                                       onMouseDown={(e) => {
@@ -454,8 +814,8 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                                   {hasMoreResults && (
                                     <li
                                       className={`px-3 py-2 cursor-pointer border-t border-gray-200 ${
-                                        selectedIndex === displayItems.length 
-                                          ? 'bg-blue-100' 
+                                        selectedIndex === displayItems.length
+                                          ? 'bg-blue-100'
                                           : 'bg-gray-50 hover:bg-gray-100'
                                       }`}
                                       onClick={(e) => {
@@ -486,7 +846,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                             // Show no results state only when searching with 2+ characters
                             if (pendingSearch && pendingSearch.length >= 2 && autocompleteResults?.length === 0) {
                               return (
-                                <ul 
+                                <ul
                                   ref={autocompleteRef}
                                   className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto shadow-lg"
                                   onMouseDown={(e) => e.preventDefault()}
@@ -525,10 +885,10 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
 
                     {isLoadingEmployees ? (
                       <div className="text-center p-8">
-                        <LoadingSpinner 
-                          size="lg" 
-                          color="yellow" 
-                          text={appliedSearch ? 'Searching employees...' : 'Loading employees...'} 
+                        <LoadingSpinner
+                          size="lg"
+                          color="yellow"
+                          text={appliedSearch ? 'Searching employees...' : 'Loading employees...'}
                           showText={true}
                         />
                       </div>
@@ -555,19 +915,19 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                                     }}
                                   />
                                 ) : null}
-                                <div 
+                                <div
                                   className={`w-full h-full flex items-center justify-center ${employee.photo ? 'hidden' : 'block'}`}
                                 >
-                                  <PlaceholderPicture 
-                                    gender={avatarType} 
-                                    fillColor="#3B82F6" 
-                                    width={24} 
+                                  <PlaceholderPicture
+                                    gender={avatarType}
+                                    fillColor="#3B82F6"
+                                    width={24}
                                     height={24}
                                     style={{ opacity: 0.5 }}
                                   />
                                 </div>
                               </div>
-                              
+
                               {/* Employee Info */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
@@ -596,7 +956,9 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                                   onClick={() => handleSetPrimary(employee.id)}
                                   disabled={setPrimaryEmployeeMutation.isLoading}
                                   className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                                  title="Display this employee in the organizational chart"
+                                  data-tooltip-id="display-in-chart-tooltip"
+                                  data-tooltip-content="Display this employee in the organizational chart"
+                                  data-tooltip-place="top"
                                 >
                                   <StarIcon className="w-3.5 h-3.5" />
                                   Display in Chart
@@ -607,7 +969,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                         })}
                       </div>
 
-                        {/* Pagination - Always visible */}
+                        {/* Pagination */}
                         {pagination && (
                           <Pagination
                             pagination={pagination}
@@ -621,7 +983,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                     ) : (
                       <div className="text-center p-8 bg-gray-50 rounded-lg">
                         <p className="text-gray-500">
-                          {appliedSearch 
+                          {appliedSearch
                             ? `No employees found matching "${appliedSearch}"`
                             : 'No employees assigned to this position'
                           }
@@ -629,13 +991,43 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                     </div>
                   )}
                   </div>
+                  </>
+                  )}
                 </div>
               </DialogPanel>
             </TransitionChild>
           </div>
         </div>
       </Dialog>
+      <Tooltip id="unassign-employee-tooltip" />
+      <Tooltip id="display-in-chart-tooltip" />
+      <Tooltip id="back-to-actions-tooltip" />
     </Transition>
+
+    <ConfirmModal
+      isOpen={!!pendingAssignment}
+      setIsOpen={(open) => { if (!open) setPendingAssignment(null); }}
+      isLoading={assignEmployeeMutation.isLoading}
+      message={
+        displayedAssignment ? (
+          <>
+            <span className="font-semibold text-savoy-blue">{displayedAssignment.name}</span> is already
+            assigned to <span className="font-semibold text-savoy-blue">{data.position_name}</span>
+            {displayedAssignment.fromLabel ? <> under {displayedAssignment.fromLabel}</> : null}.
+            <br />
+            Move them here instead?
+          </>
+        ) : ''
+      }
+      confirmAction={async () => {
+        if (pendingAssignment) {
+          await handleAssignEmployee(pendingAssignment.id);
+        }
+        setPendingAssignment(null);
+      }}
+      cancelAction={() => setPendingAssignment(null)}
+    />
+    </>
   );
 };
 

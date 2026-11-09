@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await res.json();
-    const hasOnboarded = data.has_onboarded ?? false;
+    // Onboarding gate switched off globally → everyone counts as onboarded (matches login).
+    const hasOnboarded = data.is_onboarding_enabled === false || (data.has_onboarded ?? false);
 
     session.hasCompletedOnboarding = hasOnboarded;
     session.hasOnboarded = hasOnboarded;

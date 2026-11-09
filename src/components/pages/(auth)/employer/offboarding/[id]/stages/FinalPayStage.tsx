@@ -12,9 +12,10 @@ type Props = {
   separation: any;
   onOpenLastPayModal: (modal: T_LastPayModal) => void;
   onTasksChange?: (hasAny: boolean, allComplete: boolean) => void;
+  pendingAttachmentNames?: string[];
 };
 
-const FinalPayStage = ({ separation, onOpenLastPayModal, onTasksChange }: Props) => {
+const FinalPayStage = ({ separation, onOpenLastPayModal, onTasksChange, pendingAttachmentNames }: Props) => {
   const lastPayReleased = !!separation.is_last_pay_released;
 
   return (
@@ -49,7 +50,7 @@ const FinalPayStage = ({ separation, onOpenLastPayModal, onTasksChange }: Props)
           </p>
         )}
 
-        <AttachmentCard attachments={separation.last_pay_attachments || []} label="Final Pay Documents" />
+        <AttachmentCard attachments={separation.last_pay_attachments || []} label="Final Pay Documents" pendingNames={pendingAttachmentNames} />
         <Tooltip id='finalpay-tooltip' />
       </div>
 

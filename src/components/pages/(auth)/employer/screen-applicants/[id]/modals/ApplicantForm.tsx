@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import EAFModal from './EAFModal';
+import TransferHistoryModal from './TransferHistoryModal';
 import classNames from '@/helpers/classNames';
 import { normalizeNbsp } from '@/helpers/linkify';
 import { formatDateToLocal, formatDateTimeSeparate, formatWorkExperienceDateRange } from '@/helpers/date';
@@ -13,10 +14,11 @@ import useGenerateApplicantSummary from '../../hooks/applicant/useGenerateApplic
 import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScreeningAnswersPDF';
 import useUpdateApplicantContactInfo from '../../hooks/applicant/useUpdateApplicantContactInfo';
 import useGetEAF from '../../hooks/eaf/useGetEAF';
+import useGetTransferHistory from '../../hooks/applicant/useGetTransferHistory';
 import StateContext from '../../contexts/StateContext';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon, PencilIcon, UserIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon, PencilIcon, UserIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -39,6 +41,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const [viewCV, setViewCV] = useState<boolean>(false);
   const [showDocxDownloadModal, setShowDocxDownloadModal] = useState<boolean>(false);
   const [showEAFModal, setShowEAFModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -60,6 +63,8 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const { data, isLoading, error, isError } = useGetApplicantDetails(applicant?.applicationId);
   const isHired = applicant?.status === 'hired';
   const { data: eafData, isError: eafNotFound } = useGetEAF(applicant?.applicationId as number, isHired);
+  const { data: transferHistory } = useGetTransferHistory(applicant?.applicationId);
+  const hasTransferHistory = Array.isArray(transferHistory) && transferHistory.length > 0;
 
   useEffect(() => {
     if (data && !isLoading) {
@@ -512,7 +517,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
       <>
         {applicantProfile.work_experience.map((exp: any) => {
           return (
-            <div key={exp.id} className='flex mt-8 overflow-y-auto'>
+            <div key={exp.id} className='flex mt-8'>
               <div className='mr-3'>
                 <StarIcon className='h-6 w-6 text-blue-700' />
               </div>
@@ -1011,6 +1016,16 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 </div>
                 {!viewCV && (
                   <div className='flex items-center gap-4 text-[15px] font-bold justify-end flex-wrap p-4 border-t-[1px] border-[#355FD0]'>
+                    {hasTransferHistory && (
+                      <button
+                        type='button'
+                        onClick={() => setShowTransferModal(true)}
+                        className='flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg py-2 px-4 text-sm font-medium'
+                      >
+                        <ArrowsRightLeftIcon className='w-4 h-4' />
+                        Transfer History
+                      </button>
+                    )}
                     {isHired && !eafNotFound && eafData?.pdf_url && (
                       <button
                         type='button'
@@ -1054,6 +1069,15 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
             applicantName={applicant.name}
             applicantEmail={applicant.email || undefined}
             positionTitle={JobTitle}
+          />
+        )}
+
+        {showTransferModal && applicant && (
+          <TransferHistoryModal
+            isOpen={showTransferModal}
+            onClose={() => setShowTransferModal(false)}
+            appliedJobId={applicant.applicationId}
+            applicantName={applicant.name}
           />
         )}
       </Dialog>

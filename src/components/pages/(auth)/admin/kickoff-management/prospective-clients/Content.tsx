@@ -3,17 +3,23 @@
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
+
+import { Tooltip } from 'react-tooltip';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
-import { ArrowLeftIcon, MagnifyingGlassIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowDownTrayIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import useGetProspectiveClients from './hooks/useGetProspectiveClients';
 import useGetPartners from '../partners/hooks/useGetPartners';
 import useResendKickoff from './hooks/useResendKickoff';
+import useDownloadSignedKickoffForm from './hooks/useDownloadSignedKickoffForm';
+import useResendAcknowledgement from './hooks/useResendAcknowledgement';
 import CreateProspectiveClientModal from './modal/CreateProspectiveClientModal';
 import DeleteProspectiveClientModal from './modal/DeleteProspectiveClientModal';
 
@@ -30,6 +36,9 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   converted_to_client: { label: 'Converted', color: 'bg-green-100 text-green-700' },
 };
 
+// Statuses for which a signed acknowledgement exists (form can be downloaded / re-sent)
+const COMPLETED_STATUSES = ['kickoff_completed', 'account_created', 'converted_to_client'];
+
 const Content = () => {
   const [itemsFilter, setItemsFilter] = useState({ search: '' });
   const [items, setItems] = useState<any[]>([]);
@@ -38,10 +47,14 @@ const Content = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_DeleteModalData | null>(null);
   const [resendingId, setResendingId] = useState<number | null>(null);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [resendingAckId, setResendingAckId] = useState<number | null>(null);
 
   const { data, isLoading, refetch } = useGetProspectiveClients(itemsFilter);
   const { data: partnersData, refetch: refetchPartners } = useGetPartners({ view_type: 'select' });
   const { mutate: resendKickoff } = useResendKickoff();
+  const { mutate: downloadSignedForm } = useDownloadSignedKickoffForm();
+  const { mutate: resendAcknowledgement } = useResendAcknowledgement();
 
   useEffect(() => {
     refetch();
@@ -73,6 +86,32 @@ const Content = () => {
     });
   };
 
+  const handleDownloadForm = (id: number) => {
+    setDownloadingId(id);
+    downloadSignedForm(id, {
+      onSuccess: () => {
+        toast.custom(() => <CustomToast message="Signed form downloaded." type="success" />, { duration: 4000 });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err.message || 'Failed to download the signed form.'} type="error" />, { duration: 4000 });
+      },
+      onSettled: () => setDownloadingId(null),
+    });
+  };
+
+  const handleResendAck = (id: number) => {
+    setResendingAckId(id);
+    resendAcknowledgement(id, {
+      onSuccess: (res: any) => {
+        toast.custom(() => <CustomToast message={res.message || 'Acknowledgement email resent.'} type="success" />, { duration: 4000 });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err.message || 'Failed to resend acknowledgement email.'} type="error" />, { duration: 4000 });
+      },
+      onSettled: () => setResendingAckId(null),
+    });
+  };
+
   const renderRows = () => {
     if (isLoading) {
       return (
@@ -89,6 +128,7 @@ const Content = () => {
     if (paginatedItems && paginatedItems.length > 0) {
       return paginatedItems.map((item: any) => {
         const statusMeta = STATUS_LABELS[item.status] || { label: item.status, color: 'bg-gray-100 text-gray-500' };
+        const isCompleted = COMPLETED_STATUSES.includes(item.status);
         return (
           <tr key={item.id}>
             <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-800">{item.company_name}</td>
@@ -108,13 +148,42 @@ const Content = () => {
             <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
               <div className="flex justify-center items-center space-x-2">
                 <button
-                  title="Resend kick-off invitation"
+                  data-tooltip-id="kickoff-action-tooltip"
+                  data-tooltip-content="Resend kick-off invitation"
                   disabled={resendingId === item.id}
                   onClick={() => handleResend(item.id)}
-                  className="text-blue-500 hover:opacity-70 disabled:opacity-40"
+                  className="flex h-[39px] w-[40px] items-center justify-center rounded border border-[#3d6cee9f] hover:bg-blue-50 disabled:opacity-40"
                 >
-                  <PaperAirplaneIcon className="h-4 w-4" />
+                  <Image
+                    src="/assets/send-icon.png"
+                    width={20}
+                    height={20}
+                    alt="send-icon"
+                    className="max-w-[20px] max-h-[20px]"
+                  />
                 </button>
+                {isCompleted && (
+                  <>
+                    <button
+                      data-tooltip-id="kickoff-action-tooltip"
+                      data-tooltip-content="Download signed form"
+                      disabled={downloadingId === item.id}
+                      onClick={() => handleDownloadForm(item.id)}
+                      className="flex h-[39px] w-[40px] items-center justify-center rounded border border-[#22c55e9f] text-green-600 hover:bg-green-50 disabled:opacity-40"
+                    >
+                      <ArrowDownTrayIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      data-tooltip-id="kickoff-action-tooltip"
+                      data-tooltip-content="Resend acknowledgement email"
+                      disabled={resendingAckId === item.id}
+                      onClick={() => handleResendAck(item.id)}
+                      className="flex h-[39px] w-[40px] items-center justify-center rounded border border-[#6366f19f] text-indigo-500 hover:bg-indigo-50 disabled:opacity-40"
+                    >
+                      <EnvelopeIcon className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
                 <button onClick={() => setIsDeleteModalOpen({ id: item.id, open: true, company_name: item.company_name })}>
                   <DeleteIcon />
                 </button>
@@ -145,7 +214,7 @@ const Content = () => {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mt-6">
         <div className="flex p-4">
           <Link href="/admin/kickoff-management" className="flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded">
             <ArrowLeftIcon className="h-5 w-5" />
@@ -221,6 +290,8 @@ const Content = () => {
       {isDeleteModalOpen && (
         <DeleteProspectiveClientModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
       )}
+
+      <Tooltip id="kickoff-action-tooltip" />
     </>
   );
 };

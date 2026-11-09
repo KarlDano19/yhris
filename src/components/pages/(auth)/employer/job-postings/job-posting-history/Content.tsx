@@ -16,6 +16,7 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import BackButton from '@/components/BackButton';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
+import copyToClipboard from '@/helpers/copyToClipboard';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -93,6 +94,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
   const resumeDraftIdParam = searchParams.get('resumeDraftId');
   const initAutoLoadDraftId = resumeDraftIdParam !== null ? parseInt(resumeDraftIdParam, 10) : undefined;
 
+  // jobId query param — deep-link (e.g. from the AI/MCP) to review one posting;
+  // opens that posting's edit modal on load. See the effect below.
+  const jobIdParam = searchParams.get('jobId');
+
   // CreateJobModal — for resuming drafts in-place
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(
     searchParams.get('create') === 'true' || resumeDraftIdParam !== null
@@ -169,6 +174,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
   const [contextMenuOptions, setContextMenuOptions] = useState<any>([]);
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<T_JobPostingTable[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
+
+  // Deep-link: if arriving with ?jobId=<id>, open that posting's edit modal once.
+  const deepLinkJobOpenedRef = useRef(false);
+  useEffect(() => {
+    if (jobIdParam && !deepLinkJobOpenedRef.current) {
+      const deepLinkJobId = parseInt(jobIdParam, 10);
+      if (!Number.isNaN(deepLinkJobId)) {
+        deepLinkJobOpenedRef.current = true;
+        setIsEditModalOpen({ id: deepLinkJobId, open: true });
+      }
+    }
+  }, [jobIdParam]);
+
+  // After the deep-linked edit modal is closed, strip ?jobId from the URL.
+  useEffect(() => {
+    if (deepLinkJobOpenedRef.current && !isEditModalOpen?.open && jobIdParam) {
+      router.replace('/post-job');
+    }
+  }, [isEditModalOpen, jobIdParam, router]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
@@ -568,6 +592,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
     window.open(LinkedInSharer);
   };
 
+  const handleCopyLink = async (jobPostId: number) => {
+    // Build from the current origin instead of the stored og_url, which bakes in whatever host the job was created from
+    const og_url = `${window.location.origin}/jobs/${jobPostId}`;
+    try {
+      await copyToClipboard(og_url);
+      toast.custom(() => <CustomToast message='Link copied to clipboard.' type='success' />, { duration: 3000 });
+    } catch {
+      toast.custom(() => <CustomToast message='Failed to copy link.' type='error' />, { duration: 4000 });
+    }
+  };
+
   const handleSearch = () => {
     const dateFrom = Date.parse(pendingFilter.from);
     const dateTo = Date.parse(pendingFilter.to);
@@ -895,6 +930,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean })
                                   })}
                                 </div>
                               )}
+                              <MenuItem>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyLink(jobPost.id)}
+                                  className='data-[focus]:bg-gray-100 block w-full px-4 py-2 text-left text-sm border-b'
+                                >
+                                  Copy Link
+                                </button>
+                              </MenuItem>
                               <MenuItem>
                                 <button
                                   type="button"

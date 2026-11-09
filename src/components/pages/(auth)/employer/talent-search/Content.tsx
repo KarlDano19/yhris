@@ -326,6 +326,8 @@ const Content = () => {
   const handleSearch = () => {
     // Mark that search has been performed
     setHasSearched(true);
+    // A new search means a different result set, so drop stale selections
+    clearSelection();
 
     // Add current input as a tag if it's not empty
     let updatedTags = tagsSearch;
@@ -414,9 +416,23 @@ const Content = () => {
     setSelectedApplicants(new Set());
   };
 
+  const allLoadedSelected =
+    applicants && applicants.length > 0 && applicants.every((applicant: any) => selectedApplicants.has(applicant.id));
+
+  const handleSelectAll = () => {
+    if (!applicants || applicants.length === 0) return;
+    if (allLoadedSelected) {
+      clearSelection();
+    } else {
+      setSelectedApplicants(new Set(applicants.map((applicant: any) => applicant.id)));
+    }
+  };
+
   const handleFilterUpdate = (filterData: { location: string[]; gender: string; salary: string }) => {
     // Mark that search has been performed (when filters are applied)
     setHasSearched(true);
+    // Filters change the result set, so drop stale selections
+    clearSelection();
 
     // Build search query from current tags if any exist
     const searchQuery = buildSearchQuery(tagsSearch, starredTags);
@@ -890,33 +906,44 @@ const Content = () => {
                             : 'No profiles yet'}
                         </p>
                       </div>
-                      {selectedApplicants.size > 0 && (
-                        <div className='flex items-center gap-2'>
-                          <span className='text-sm text-gray-600'>{selectedApplicants.size} selected</span>
-                          {selectedApplicants.size >= 2 && (
-                            <button
-                              onClick={handleCompareSelected}
-                              className='bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md text-sm font-semibold transition-colors'
-                            >
-                              Compare Selected ({selectedApplicants.size})
-                            </button>
-                          )}
-                          <button
-                            onClick={clearSelection}
-                            className='text-gray-500 hover:text-gray-700 text-sm underline'
-                          >
-                            Clear Selection
-                          </button>
-                        </div>
+                      {applicants && applicants.length > 0 && (
+                        <button
+                          onClick={handleSelectAll}
+                          className='self-start text-sm text-blue-600 underline hover:text-blue-800 md:self-center'
+                        >
+                          {allLoadedSelected
+                            ? 'Unselect All'
+                            : `Select All (${applicants.length} of ${totalRecords} loaded)`}
+                        </button>
                       )}
                     </div>
+
+                    {/* Sticky selection bar - stays visible while scrolling/loading more pages */}
+                    {selectedApplicants.size > 0 && (
+                      <div className='sticky top-0 z-20 -mx-6 mb-4 flex flex-wrap items-center gap-2 border-b border-gray-200 bg-white/95 px-6 py-3 backdrop-blur'>
+                        <span className='text-sm font-medium text-gray-700'>
+                          {selectedApplicants.size} applicant{selectedApplicants.size === 1 ? '' : 's'} selected
+                        </span>
+                        {selectedApplicants.size >= 2 && (
+                          <button
+                            onClick={handleCompareSelected}
+                            className='bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md text-sm font-semibold transition-colors'
+                          >
+                            Compare Selected ({selectedApplicants.size})
+                          </button>
+                        )}
+                        <button onClick={clearSelection} className='text-gray-500 hover:text-gray-700 text-sm underline'>
+                          Clear Selection
+                        </button>
+                      </div>
+                    )}
 
                     {/* Instructions */}
                     {selectedApplicants.size === 0 && (
                       <div className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
                         <p className='text-sm text-blue-800'>
-                          💡 <strong>Tip:</strong> Click the &ldquo;Compare&rdquo; button next to &ldquo;View
-                          Profile&rdquo; to select up to 5 profiles for comparison.
+                          💡 <strong>Tip:</strong> Use the Compare button on a profile card, or Select All, to
+                          choose applicants — your selection is kept as you load more profiles.
                         </p>
                       </div>
                     )}
@@ -1078,7 +1105,12 @@ const Content = () => {
           />
         )}
         {isCompareModalOpen && (
-          <CompareApplicantsModal isOpen={isCompareModalOpen} setIsOpen={setIsCompareModalOpen} refetch={refetch} />
+          <CompareApplicantsModal
+            isOpen={isCompareModalOpen}
+            setIsOpen={setIsCompareModalOpen}
+            refetch={refetch}
+            onViewProfile={(applicantId: number) => setIsApplicantProfileModalOpen({ id: applicantId, open: true })}
+          />
         )}
         {isFilterModalOpen && (
           <FilterModal

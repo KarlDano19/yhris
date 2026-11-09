@@ -18,6 +18,7 @@ import DocumentGeneratorLogo from '@/svg/DocumentGeneratorLogo';
 import Employee201RecordsLogo from '@/svg/Employee201RecordsLogo';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
 import FormsLogo from '@/svg/FormsLogo';
+import PolicyHandbookLogo from '@/svg/PolicyHandbookLogo';
 
 import TileBadge from "@/components/TileBadge"; // adjust path if your folder differs
 
@@ -66,6 +67,11 @@ const menus = [
     icon: <FormsLogo />,
     text: 'Forms',
     link: '/manage/forms',
+  },
+  {
+    icon: <PolicyHandbookLogo />,
+    text: 'Policy Handbook',
+    link: '/manage/policy-handbook',
   },
 ];
 
