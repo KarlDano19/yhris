@@ -34,7 +34,7 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": `All-in-one HR management system for Philippine businesses. Includes DOLE compliance automation, 201 document management, multi-platform job posting, attendance and leave tracking, performance evaluation, and real-time payroll sync. Flat pricing starting at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees.`,
+      "description": `All-in-one HR management system for Philippine businesses. Includes DOLE compliance automation, 201 document management, multi-platform job posting, performance evaluation, and single sign-on with YAHSHUA One Payroll, which is included. Flat pricing starting at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees.`,
       "offers": {
         "@type": "Offer",
         "price": String(YAHSHUA_PRICING.basePrice),
@@ -45,7 +45,7 @@ const jsonLd = {
           "priceCurrency": YAHSHUA_PRICING.currency,
           "unitText": "month"
         },
-        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month and a one-time ${PRICING_LABELS.setup} setup fee. VAT excluded. YAHSHUA Payroll included. No long-term contracts.`,
+        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month and a one-time ${PRICING_LABELS.setup} setup fee. VAT excluded. YAHSHUA One Payroll included. No long-term contracts.`,
         "url": "https://yahshuahris.com/pricing"
       },
       "publisher": {
@@ -55,10 +55,8 @@ const jsonLd = {
         "DOLE compliance automation (no add-on required)",
         "Employee onboarding and 201 document management",
         "Multi-platform job posting and applicant tracking",
-        "Attendance and leave management",
-        "Overtime, undertime, and rest day tracking",
         "Performance evaluation with custom forms",
-        "Real-time two-way sync with YAHSHUA Payroll",
+        "Single sign-on with YAHSHUA One Payroll, with employee data synced into HRIS",
         "Employee self-service portal",
         "Memos and Notice-to-Explain distribution"
       ]
