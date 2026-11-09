@@ -13,10 +13,10 @@ const LpPayrollIntegration = () => {
         <ScrollFadeIn className="text-center mb-16">
           <span className="lp-section-label justify-center mb-5">PAYROLL INTEGRATION</span>
           <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-gray-900 tracking-tight">
-            YAHSHUA HRIS is synced<br className="hidden md:inline" /> with YAHSHUA Payroll.
+            YAHSHUA HRIS is synced<br className="hidden md:inline" /> with YAHSHUA One Payroll.
           </h2>
           <p className="text-gray-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
-            Your HR data flows directly into payroll. No manual exports, no duplicate entry, no mismatches between what HR records and what payroll processes.
+            Sign in through YAHSHUA One Payroll and your employee records sync into YAHSHUA HRIS. No manual exports, no re-typing.
           </p>
         </ScrollFadeIn>
 
