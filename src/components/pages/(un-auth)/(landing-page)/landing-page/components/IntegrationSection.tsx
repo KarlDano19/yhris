@@ -11,12 +11,12 @@ import ypoLogo from "@/assets/landing-page-images/ypo-logo.png";
 
 const IntegrationSection = () => {
   const integrationFeatures = [
-    "Employee data synced from YAHSHUA One Payroll",
+    "Real-time employee data synchronization",
     "Distribute memos and policies directly",
     "Unified employee records management",
     "Document distribution via email",
     "Reduced manual data entry and errors",
-    "One sign-in through YAHSHUA One Payroll"
+    "Seamless workflow integration"
   ];
 
   return (
@@ -34,12 +34,13 @@ const IntegrationSection = () => {
             ✅ NOW AVAILABLE
           </div>
           <h2 className="text-3xl md:text-5xl font-bold text-indigo-dye mb-6">
-            Single Sign-On
+            Seamless Integration
             <br />
-            <span className="text-[#FFC107]">YAHSHUA HRIS</span> + <span className="text-blue-700">YAHSHUA One Payroll</span>
+            <span className="text-[#FFC107]">YAHSHUA HRIS</span> + <span className="text-blue-700">YAHSHUA Payroll</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-            Bring employee data from YAHSHUA One Payroll into HRIS, then send Personnel Movement Forms, memos, policies, and other documents directly to employees.
+            Sync employee data with YAHSHUA Payroll and send Personnel Movement Forms, memos, policies, and other documents 
+            directly to employees. Streamlined document distribution and data management in one unified system.
           </p>
           
           {/* Logo Integration Visual */}
@@ -61,7 +62,7 @@ const IntegrationSection = () => {
                 <div className="w-2 h-2 bg-[#FFC107] rounded-full animate-pulse delay-150"></div>
                 <div className="w-2 h-2 bg-blue-700 rounded-full animate-pulse delay-300"></div>
               </div>
-              <p className="text-xs font-medium text-gray-500 mt-2">Employee Sync</p>
+              <p className="text-xs font-medium text-gray-500 mt-2">Real-time Sync</p>
             </div>
             
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow min-w-[280px]">
@@ -95,7 +96,8 @@ const IntegrationSection = () => {
               </div>
               
               <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                Employee data from YAHSHUA One Payroll syncs into HRIS. Distribute Personnel Movement Forms, memos, and policies directly to employees via email.
+                Sync employee data with YAHSHUA Payroll and distribute important documents like Personnel Movement Forms, 
+                memos, and policies directly to employees via email.
               </p>
 
               <div className="space-y-4">
@@ -119,8 +121,8 @@ const IntegrationSection = () => {
                     1
                   </div>
                   <div>
-                    <h5 className="font-semibold text-indigo-dye mb-1">Employee Setup</h5>
-                    <p className="text-gray-600 text-sm">Add your employees in YAHSHUA One Payroll as you do today</p>
+                    <h5 className="font-semibold text-indigo-dye mb-1">Employee Onboarding</h5>
+                    <p className="text-gray-600 text-sm">Create employee profile in YAHSHUA HRIS with all necessary information</p>
                   </div>
                 </div>
                 
@@ -129,8 +131,8 @@ const IntegrationSection = () => {
                     2
                   </div>
                   <div>
-                    <h5 className="font-semibold text-indigo-dye mb-1">Sign In Through Payroll</h5>
-                    <p className="text-gray-600 text-sm">Log in to YAHSHUA HRIS through YAHSHUA One Payroll's single sign-on</p>
+                    <h5 className="font-semibold text-indigo-dye mb-1">Automatic Sync</h5>
+                    <p className="text-gray-600 text-sm">Employee data automatically syncs to YAHSHUA Payroll in real-time</p>
                   </div>
                 </div>
                 
@@ -139,8 +141,8 @@ const IntegrationSection = () => {
                     3
                   </div>
                   <div>
-                    <h5 className="font-semibold text-indigo-dye mb-1">Records Ready in HRIS</h5>
-                    <p className="text-gray-600 text-sm">Employee data syncs into HRIS, with no manual transfers</p>
+                    <h5 className="font-semibold text-indigo-dye mb-1">Payroll Ready</h5>
+                    <p className="text-gray-600 text-sm">Employee is immediately ready for payroll processing with accurate data</p>
                   </div>
                 </div>
               </div>
