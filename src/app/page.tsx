@@ -41,7 +41,7 @@ const jsonLd = {
         "@type": "ImageObject",
         "url": "https://yahshuahris.com/logo.png"
       },
-      "description": "Philippine all-in-one HR and payroll platform for small and mid-sized businesses. Covers DOLE compliance automation, employee onboarding, 201 files, attendance, leave, performance evaluation, and real-time payroll integration.",
+      "description": "Philippine all-in-one HR and payroll platform for small and mid-sized businesses. Covers DOLE compliance automation, employee onboarding, 201 files, performance evaluation, and single sign-on with YAHSHUA One Payroll.",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Cagayan de Oro City",
@@ -78,7 +78,7 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": `All-in-one HR management system for Philippine businesses, with YAHSHUA Payroll included. Flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync. SOC2 Type 2 and ISO 27001 certified.`,
+      "description": `All-in-one HR management system for Philippine businesses, with YAHSHUA One Payroll included. Flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, performance evaluation, and single sign-on with YAHSHUA One Payroll. SOC2 Type 2 and ISO 27001 certified.`,
       "offers": {
         "@type": "Offer",
         "price": String(YAHSHUA_PRICING.basePrice),
@@ -90,7 +90,7 @@ const jsonLd = {
           "unitText": "month",
           "valueAddedTaxIncluded": false
         },
-        "description": `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month. One-time ${PRICING_LABELS.setup} setup fee covering implementation, data migration, and training. VAT excluded. YAHSHUA Payroll included. No long-term contracts.`,
+        "description": `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month. No setup fee. VAT excluded. YAHSHUA One Payroll included. No long-term contracts.`,
         "url": "https://yahshuahris.com/pricing"
       },
       "publisher": {
@@ -100,10 +100,10 @@ const jsonLd = {
         "DOLE compliance automation (no add-on required)",
         "Employee onboarding and 201 document management",
         "Multi-platform job posting and applicant tracking",
-        "Attendance and leave management",
+        "Attendance and overtime tracking in YAHSHUA One Payroll",
         "Overtime, undertime, and rest day tracking",
         "Performance evaluation with custom forms",
-        "Real-time two-way sync with YAHSHUA Payroll",
+        "Single sign-on and employee data sync with YAHSHUA One Payroll",
         "Employee self-service portal",
         "Memos and Notice-to-Explain distribution"
       ]

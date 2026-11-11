@@ -233,7 +233,7 @@ const EmployeeVsContractorArticle = () => {
                   Once a worker is an employee, the records and the pay follow.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, from hire date to present. YAHSHUA Payroll, included with HRIS, computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips.
+                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, from hire date to present. YAHSHUA One Payroll, included with HRIS, computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips.
                 </p>
                 <Link href="/blog/payroll-registration-checklist-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See the payroll setup checklist for new employers <ArrowRight className="w-4 h-4" />

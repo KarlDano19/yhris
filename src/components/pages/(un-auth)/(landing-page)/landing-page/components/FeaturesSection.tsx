@@ -41,8 +41,8 @@ const FeaturesSection = () => {
     {
       icon: UserIcon,
       title: "Employee Management",
-      description: "Securely store all employee information from hire date. Automatic syncing capability for existing YAHSHUA Payroll users.",
-      highlights: ["Secure data storage", "YAHSHUA Payroll sync", "Employee profiles"]
+      description: "Securely store all employee information from hire date. Automatic syncing capability for existing YAHSHUA One Payroll users.",
+      highlights: ["Secure data storage", "YAHSHUA One Payroll sync", "Employee profiles"]
     },
     {
       icon: ChartBarIcon,
@@ -82,8 +82,8 @@ const FeaturesSection = () => {
     },
     {
       icon: ArrowPathIcon,
-      title: "YAHSHUA Payroll Integration",
-      description: "Seamlessly sync employee data with YAHSHUA Payroll. Send memos, NTEs, policies, Personnel Movement Form and other documents directly to employees.",
+      title: "YAHSHUA One Payroll Integration",
+      description: "Seamlessly sync employee data with YAHSHUA One Payroll. Send memos, NTEs, policies, Personnel Movement Form and other documents directly to employees.",
       highlights: ["Employee data sync", "Document distribution"]
     }
   ];
@@ -103,7 +103,7 @@ const FeaturesSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => {
-            const isPayrollIntegration = feature.title === "YAHSHUA Payroll Integration";
+            const isPayrollIntegration = feature.title === "YAHSHUA One Payroll Integration";
             return (
               <div 
                 key={index}
@@ -155,7 +155,7 @@ const FeaturesSection = () => {
                     href="/yahshua-payroll" 
                     className="inline-flex items-center px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
                   >
-                    Learn More About YAHSHUA Payroll
+                    Learn More About YAHSHUA One Payroll
                     <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
