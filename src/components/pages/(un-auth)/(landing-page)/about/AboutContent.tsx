@@ -22,7 +22,7 @@ const AboutContent = () => {
                 <span className="text-primary"> done this for 17 years.</span>
               </h1>
               <p className="text-base md:text-lg text-gray-500 leading-relaxed">
-                YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses: employee management, DOLE compliance, recruitment, performance, and real-time payroll integration, built specifically for how Philippine businesses actually operate.
+                YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses: employee management, DOLE compliance, recruitment, performance, and payroll integration through single sign-on, built specifically for how Philippine businesses actually operate.
               </p>
             </ScrollFadeIn>
           </div>
@@ -40,7 +40,7 @@ const AboutContent = () => {
                 From the moment a candidate applies to the day an employee exits, YAHSHUA HRIS keeps every record, request, and document in one place: recruitment and applicant tracking, employee 201 files, attendance and leave, performance evaluation, and guided DOLE compliance reporting.
               </p>
               <p className="text-gray-500 text-base leading-relaxed">
-                It syncs in real time with YAHSHUA Payroll, so HR data and payroll processing never fall out of step with each other.
+                It connects to YAHSHUA One Payroll through single sign-on, and employee data syncs into HRIS, with no re-typing.
               </p>
             </ScrollFadeIn>
           </div>

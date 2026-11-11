@@ -31,7 +31,7 @@ const UseCasesSection = () => {
       benefits: [
         "Complete applicant screening and onboarding workflows",
         "Advanced employee performance evaluation system",
-        "Seamless employee data sync with existing payroll systems",
+        "Employee data sync with your existing YAHSHUA One Payroll account",
         "Comprehensive benefits design and management"
       ]
     },

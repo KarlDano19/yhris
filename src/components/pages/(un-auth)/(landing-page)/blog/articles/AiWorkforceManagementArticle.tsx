@@ -173,7 +173,7 @@ const AiWorkforceManagementArticle = () => {
                   YAHSHUA HRIS gives multi-branch operations one system, not one per location.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Attendance, leave, and employee records sync across every branch in real time, with DOLE compliance and payroll integration built in, so operations leaders see the full picture instead of piecing it together from separate spreadsheets.
+                  Employee records live in one system across every branch, with DOLE compliance built in and payroll integration through single sign-on, so operations leaders see the full picture instead of piecing it together from separate spreadsheets.
                 </p>
                 <Link href="/use-cases" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how YAHSHUA HRIS supports multi-branch teams <ArrowRight className="w-4 h-4" />
@@ -226,7 +226,7 @@ const AiWorkforceManagementArticle = () => {
                   Does YAHSHUA HRIS support multi-branch retail, manufacturing, or logistics operations?
                 </h3>
                 <p>
-                  Yes. YAHSHUA HRIS centralizes attendance, leave, employee records, and DOLE compliance across every branch or site in one system, with real-time payroll integration, so operations leaders managing multiple locations are not reconciling separate spreadsheets per branch.
+                  Yes. YAHSHUA HRIS centralizes attendance, leave, employee records, and DOLE compliance across every branch or site in one system, with single sign-on to YAHSHUA One Payroll for employee data, so operations leaders managing multiple locations are not reconciling separate spreadsheets per branch.
                 </p>
               </div>
 

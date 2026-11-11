@@ -258,7 +258,7 @@ const YearEndAnnualizationArticle = () => {
                   YAHSHUA One Payroll is included in every YAHSHUA HRIS plan.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Automated BIR, SSS, PhilHealth, and Pag-IBIG computations, payslips, and bank disbursement, with HR and payroll synced in real time so year-end figures come from one record.
+                  Automated BIR, SSS, PhilHealth, and Pag-IBIG computations, payslips, and bank disbursement, with employee data synced into HRIS through single sign-on.
                 </p>
                 <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See what is included <ArrowRight className="w-4 h-4" />
