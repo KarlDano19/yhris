@@ -8,7 +8,7 @@ const DATES = {
   homepage:    '2026-07-21', // Updated when homepage content or schema changes
   redesign:    '2026-06-02', // Light theme redesign shipped
   doleArticle: '2026-10-15', // Last reviewed October 2026
-  pricing:     '2026-06-02', // Prices verified June 2026
+  pricing:     '2026-11-11', // Prices verified November 2026
   legal:       '2026-03-01', // Terms and privacy last updated
   stable:      '2026-01-01', // Stable pages with infrequent content changes
   blog:        '2026-07-21', // Updated when new posts are published — keep current

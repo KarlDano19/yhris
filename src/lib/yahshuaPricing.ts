@@ -12,7 +12,7 @@ export const YAHSHUA_PRICING = {
   excessRatePerEmployee: 60,
   vatRate: 0.12,
   currency: "PHP",
-  lastVerified: "2026-08-14",
+  lastVerified: "2026-11-11",
 } as const;
 
 const fmtPHP = (n: number) => `PHP ${n.toLocaleString("en-US")}`;

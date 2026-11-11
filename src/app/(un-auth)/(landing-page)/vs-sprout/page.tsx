@@ -30,7 +30,7 @@ const jsonLd = {
       "@type": "WebPage",
       "@id": "https://yahshuahris.com/vs-sprout#webpage",
       "name": "Sprout Solutions vs YAHSHUA HRIS: 2026 Philippine Comparison",
-      "description": `Feature and pricing comparison between YAHSHUA HRIS and Sprout HR for Philippine businesses. YAHSHUA includes DOLE compliance automation, multi-platform job posting, and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA Payroll included.`,
+      "description": `Feature and pricing comparison between YAHSHUA HRIS and Sprout HR for Philippine businesses. YAHSHUA includes DOLE compliance automation, multi-platform job posting, and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA One Payroll included.`,
       "url": "https://yahshuahris.com/vs-sprout",
       "dateModified": "2026-09-24T00:00:00.000Z",
       "publisher": {
@@ -57,7 +57,7 @@ const jsonLd = {
           "name": "What is the main difference between YAHSHUA HRIS and Sprout HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `Both platforms cover Philippine HR, payroll, and compliance. The main differences are packaging and pricing transparency. YAHSHUA HRIS includes a guided DOLE module, multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), and YAHSHUA Payroll in one published plan price of ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Sprout offers compliance (Sprout Comply) and recruitment (Recruit+) as separately named products, and its pricing is quote-based.`
+            "text": `Both platforms cover Philippine HR, payroll, and compliance. The main differences are packaging and pricing transparency. YAHSHUA HRIS includes a guided DOLE module, multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs), and YAHSHUA One Payroll in one published plan price of ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Sprout offers compliance (Sprout Comply) and recruitment (Recruit+) as separately named products, and its pricing is quote-based.`
           }
         },
         {
@@ -73,7 +73,7 @@ const jsonLd = {
           "name": "How does YAHSHUA HRIS pricing compare to Sprout HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS costs a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month, with no setup fee. YAHSHUA Payroll is included and there are no long-term contracts. Sprout HR does not publish standard pricing; companies request a quote based on headcount and modules.`
+            "text": `YAHSHUA HRIS costs a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month, with no setup fee. YAHSHUA One Payroll is included and there are no long-term contracts. Sprout HR does not publish standard pricing; companies request a quote based on headcount and modules.`
           }
         },
         {
