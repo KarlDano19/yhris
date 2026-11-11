@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-24
 
-YAHSHUA HRIS and YAHSHUA Payroll are sold as one bundle. Every plan includes both.
+YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes both.
 
 ## Freemium Plan
 
@@ -29,7 +29,7 @@ YAHSHUA HRIS and YAHSHUA Payroll are sold as one bundle. Every plan includes bot
   - Employee self-service portal
   - Memos and NTE distribution
   - Personnel movement forms (promotions, transfers, regularization)
-  - YAHSHUA Payroll: automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, bank disbursement
+  - YAHSHUA One Payroll: automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, bank disbursement
   - Real-time two-way sync between HRIS and Payroll (no CSV exports, no manual re-entry)
 
 ## Example Monthly Costs (VAT excluded)
@@ -49,7 +49,7 @@ YAHSHUA HRIS and YAHSHUA Payroll are sold as one bundle. Every plan includes bot
 ## What's Always Included (All Paid Plans)
 
 - DOLE compliance module (no add-on required)
-- YAHSHUA Payroll (no separate subscription)
+- YAHSHUA One Payroll (no separate subscription)
 - SOC2 Type 2 certified infrastructure
 - ISO 27001 certified infrastructure
 - GDPR compliant data handling
