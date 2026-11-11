@@ -34,7 +34,7 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": "All-in-one HR management system for Philippine businesses with real-time, two-way sync to YAHSHUA Payroll. Eliminates double entry, automates payroll computation, and keeps DOLE compliance current.",
+      "description": "All-in-one HR management system for Philippine businesses with single sign-on and employee data sync with YAHSHUA One Payroll. Eliminates re-typing of employee records, automates payroll computation, and keeps DOLE compliance current.",
       "offers": {
         "@type": "Offer",
         "price": String(YAHSHUA_PRICING.basePrice),
