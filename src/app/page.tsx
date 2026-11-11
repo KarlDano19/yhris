@@ -41,7 +41,7 @@ const jsonLd = {
         "@type": "ImageObject",
         "url": "https://yahshuahris.com/logo.png"
       },
-      "description": "Philippine all-in-one HR and payroll platform for small and mid-sized businesses. Covers DOLE compliance automation, employee onboarding, 201 files, attendance, leave, performance evaluation, and single sign-on with YAHSHUA One Payroll.",
+      "description": "Philippine all-in-one HR and payroll platform for small and mid-sized businesses. Covers DOLE compliance automation, employee onboarding, 201 files, performance evaluation, and single sign-on with YAHSHUA One Payroll.",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Cagayan de Oro City",
@@ -78,7 +78,7 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": `All-in-one HR management system for Philippine businesses, with YAHSHUA One Payroll included. Flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and single sign-on with YAHSHUA One Payroll. SOC2 Type 2 and ISO 27001 certified.`,
+      "description": `All-in-one HR management system for Philippine businesses, with YAHSHUA One Payroll included. Flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, performance evaluation, and single sign-on with YAHSHUA One Payroll. SOC2 Type 2 and ISO 27001 certified.`,
       "offers": {
         "@type": "Offer",
         "price": String(YAHSHUA_PRICING.basePrice),
@@ -100,7 +100,7 @@ const jsonLd = {
         "DOLE compliance automation (no add-on required)",
         "Employee onboarding and 201 document management",
         "Multi-platform job posting and applicant tracking",
-        "Attendance and leave management",
+        "Attendance and overtime tracking in YAHSHUA One Payroll",
         "Overtime, undertime, and rest day tracking",
         "Performance evaluation with custom forms",
         "Single sign-on and employee data sync with YAHSHUA One Payroll",

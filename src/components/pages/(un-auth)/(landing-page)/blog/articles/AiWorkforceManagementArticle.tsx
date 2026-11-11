@@ -226,7 +226,7 @@ const AiWorkforceManagementArticle = () => {
                   Does YAHSHUA HRIS support multi-branch retail, manufacturing, or logistics operations?
                 </h3>
                 <p>
-                  Yes. YAHSHUA HRIS centralizes attendance, leave, employee records, and DOLE compliance across every branch or site in one system, with single sign-on to YAHSHUA One Payroll for employee data, so operations leaders managing multiple locations are not reconciling separate spreadsheets per branch.
+                  Yes. YAHSHUA HRIS centralizes employee records and DOLE compliance across every branch or site in one system, with single sign-on to YAHSHUA One Payroll for employee data, so operations leaders managing multiple locations are not reconciling separate spreadsheets per branch.
                 </p>
               </div>
 
@@ -273,7 +273,7 @@ const AiWorkforceManagementArticle = () => {
               One system for every branch, plant, or hub.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS centralizes attendance, leave, and compliance across all your locations, so operations leaders see the full workforce picture in one place.
+              YAHSHUA HRIS centralizes employee records and compliance across all your locations, so operations leaders see the full workforce picture in one place.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=ai_workforce_management"
