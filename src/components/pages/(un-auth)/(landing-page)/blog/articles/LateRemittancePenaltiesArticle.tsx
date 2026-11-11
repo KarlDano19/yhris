@@ -257,7 +257,7 @@ const LateRemittancePenaltiesArticle = () => {
               {/* CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA Payroll is included in every YAHSHUA HRIS plan.
+                  YAHSHUA One Payroll is included in every YAHSHUA HRIS plan.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
                   Automated BIR, SSS, PhilHealth, and Pag-IBIG computations, payslips, and bank disbursement, with HR and payroll synced in real time so every deduction is computed on current rates.
@@ -334,7 +334,7 @@ const LateRemittancePenaltiesArticle = () => {
               Ask how payroll prepares your remittances.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions every payroll. Book a free demo and ask how remittance files are prepared before the deadline.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions every payroll. Book a free demo and ask how remittance files are prepared before the deadline.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=late_remittance_penalties_2026"

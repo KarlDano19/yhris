@@ -232,7 +232,7 @@ const PayrollMessageArticle = () => {
                   Is YAHSHUA HRIS built specifically for Philippine payroll compliance?
                 </h3>
                 <p>
-                  Yes. YAHSHUA HRIS is built for Philippine businesses and includes a dedicated DOLE module. It comes with YAHSHUA Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions automatically on every payroll run, based on gross or basic salary depending on how each client sets up payroll. To see how rate changes are handled when an agency updates its tables, ask in a demo.
+                  Yes. YAHSHUA HRIS is built for Philippine businesses and includes a dedicated DOLE module. It comes with YAHSHUA One Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions automatically on every payroll run, based on gross or basic salary depending on how each client sets up payroll. To see how rate changes are handled when an agency updates its tables, ask in a demo.
                 </p>
               </div>
 

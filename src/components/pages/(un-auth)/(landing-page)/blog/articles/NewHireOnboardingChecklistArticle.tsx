@@ -165,7 +165,7 @@ const NewHireOnboardingChecklistArticle = () => {
                   Start every new hire&apos;s file on day one.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, from hire date to present, so the contract and signed documents are together from the start. YAHSHUA Payroll is included and computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips.
+                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, from hire date to present, so the contract and signed documents are together from the start. YAHSHUA One Payroll is included and computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips.
                 </p>
                 <Link href="/use-cases/employee-onboarding" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See onboarding in YAHSHUA HRIS <ArrowRight className="w-4 h-4" />

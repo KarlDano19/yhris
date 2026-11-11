@@ -343,7 +343,7 @@ const OvertimePayComputationArticle = () => {
               Ask how payroll computes overtime.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it applies overtime rates for each type of day.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll. Book a free demo and ask how it applies overtime rates for each type of day.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=overtime_pay_2026"
