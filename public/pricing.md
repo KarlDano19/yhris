@@ -14,7 +14,7 @@ YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes
 
 - Price: PHP 7,000/month flat for up to 100 employees
 - Additional employees: PHP 60 per employee per month beyond 100
-- One-time setup fee: PHP 35,000 (full implementation, data migration, dedicated onboarding training)
+- Setup fee: none
 - VAT: excluded from all prices shown; applicable VAT appears on your invoice
 - Billing: Monthly, no long-term contract required, cancel anytime
 - Trial: full-platform trial available on request during a demo call
