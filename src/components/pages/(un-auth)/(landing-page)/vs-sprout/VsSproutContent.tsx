@@ -33,7 +33,7 @@ const valueProps = [
   },
   {
     title: "Pricing Built for Philippine SMEs",
-    body: `Flat ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. YAHSHUA Payroll included. Published pricing, no long-term contracts.`,
+    body: `Flat ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. YAHSHUA One Payroll included. Published pricing, no long-term contracts.`,
     metric: "One flat rate. Payroll included.",
   },
   {

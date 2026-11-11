@@ -57,7 +57,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
             <div className="lp-section-container text-center relative z-10">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-3">PRICING</span>
-                <p className="text-[11px] text-gray-400 text-center mb-5">Prices verified: June 2026</p>
+                <p className="text-[11px] text-gray-400 text-center mb-5">Prices verified: November 2026</p>
                 <h1 className="text-3xl md:text-4xl lg:text-[3rem] font-bold text-gray-900 mb-5">
                   <span className="block mb-3">Straightforward pricing.</span>
                   <span className="text-primary">No surprises.</span>

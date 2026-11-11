@@ -46,7 +46,7 @@ const jsonLd = {
           "name": "What makes YAHSHUA HRIS different from other HR software in the Philippines?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS includes a guided DOLE compliance module in every plan, covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings, with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA Payroll included. Many Philippine HR platforms sell compliance and recruitment as separate modules or products and do not publish pricing.`
+            "text": `YAHSHUA HRIS includes a guided DOLE compliance module in every plan, covering company registration, OSH reports, annual medical reports, and mandatory DOLE filings, with no add-on required. It also includes multi-platform job posting to LinkedIn, Facebook, and YAHSHUA Jobs; a pre-screened talent pool; and flat pricing at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees with YAHSHUA One Payroll included. Many Philippine HR platforms sell compliance and recruitment as separate modules or products and do not publish pricing.`
           }
         },
         {
@@ -54,7 +54,7 @@ const jsonLd = {
           "name": "Does YAHSHUA HRIS charge per employee?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `Not for the first ${YAHSHUA_PRICING.employeeCap} employees. YAHSHUA HRIS charges a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, with YAHSHUA Payroll included. Beyond ${YAHSHUA_PRICING.employeeCap}, each additional employee adds ${PRICING_LABELS.excess} per month. There is no setup fee. Most competing HR platforms in the Philippines charge per employee from the first seat, which makes costs difficult to predict as headcount grows.`
+            "text": `Not for the first ${YAHSHUA_PRICING.employeeCap} employees. YAHSHUA HRIS charges a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, with YAHSHUA One Payroll included. Beyond ${YAHSHUA_PRICING.employeeCap}, each additional employee adds ${PRICING_LABELS.excess} per month. There is no setup fee. Most competing HR platforms in the Philippines charge per employee from the first seat, which makes costs difficult to predict as headcount grows.`
           }
         },
         {
