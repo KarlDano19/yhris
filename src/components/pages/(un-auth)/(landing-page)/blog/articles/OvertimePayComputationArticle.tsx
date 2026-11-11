@@ -159,8 +159,8 @@ const OvertimePayComputationArticle = () => {
 
               {/* H2: Peso table */}
               <InlineDemoCta
-                heading="Tired of computing overtime by hand?"
-                body="Book a free demo and ask how YAHSHUA HRIS and Payroll tracks overtime, rest days and holidays and carries them into payroll."
+                heading="Stop computing overtime by hand."
+                body="YAHSHUA One Payroll computes overtime, night differential, holiday and rest-day pay from attendance and approved overtime requests. See it in a free demo."
                 campaign="overtime_pay"
               />
 
@@ -266,10 +266,10 @@ const OvertimePayComputationArticle = () => {
               {/* CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA Payroll is included in every YAHSHUA HRIS plan.
+                  YAHSHUA One Payroll is included with YAHSHUA HRIS.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  HR and payroll are synced in real time. Ask in a demo how overtime, holiday, and night differential are computed from attendance and each employee&apos;s daily rate.
+                  Ask in a demo how overtime, night differential, holiday and rest-day pay are computed from attendance and each employee&apos;s daily rate.
                 </p>
                 <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See what is included <ArrowRight className="w-4 h-4" />
