@@ -10,7 +10,6 @@ export const YAHSHUA_PRICING = {
   basePrice: 7000,
   employeeCap: 100,
   excessRatePerEmployee: 60,
-  setupFee: 35000,
   vatRate: 0.12,
   currency: "PHP",
   lastVerified: "2026-08-14",
@@ -21,7 +20,6 @@ const fmtPHP = (n: number) => `PHP ${n.toLocaleString("en-US")}`;
 export const PRICING_LABELS = {
   base: fmtPHP(YAHSHUA_PRICING.basePrice),
   excess: fmtPHP(YAHSHUA_PRICING.excessRatePerEmployee),
-  setup: fmtPHP(YAHSHUA_PRICING.setupFee),
 } as const;
 
 export const calculateMonthly = (employees: number) => {

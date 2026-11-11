@@ -22,15 +22,15 @@ export const hrisPricingFaqs = [
   },
   {
     q: "What costs are not included in the monthly price?",
-    a: "Common extras are one-time setup or implementation fees, add-on modules, minimum license counts, VAT (12%), and exchange-rate movement for dollar-priced plans. Examples from published pages: YAHSHUA HRIS has a one-time ₱35,000 setup fee, WORKSPHR lists ₱15,000 to ₱45,000 implementation fees (waived on contract lock-in), GreatDay's starter requires 50 licenses, and PayrollHero lists payroll at $3.00 and leave management at $2.00 per employee as add-ons.",
+    a: "Common extras are one-time setup or implementation fees, add-on modules, minimum license counts, VAT (12%), and exchange-rate movement for dollar-priced plans. Examples from published pages: YAHSHUA HRIS has no setup fee, WORKSPHR lists ₱15,000 to ₱45,000 implementation fees (waived on contract lock-in), GreatDay's starter requires 50 licenses, and PayrollHero lists payroll at $3.00 and leave management at $2.00 per employee as add-ons.",
   },
   {
     q: "Does YAHSHUA HRIS charge per employee?",
-    a: "Not up to 100 employees. The plan is ₱7,000 a month flat for up to 100 employees, then ₱60 per additional employee per month, plus a one-time ₱35,000 setup fee that covers implementation, data migration, and onboarding training. Prices exclude 12% VAT. YAHSHUA One Payroll is included, and a free plan for job posting and applicant screening is available.",
+    a: "Not up to 100 employees. The plan is ₱7,000 a month flat for up to 100 employees, then ₱60 per additional employee per month, with no setup fee. Prices exclude 12% VAT. YAHSHUA One Payroll is included, and a free plan for job posting and applicant screening is available.",
   },
   {
     q: "Is YAHSHUA HRIS the cheapest HRIS in the Philippines?",
-    a: "No. At 100 employees, lean attendance and payroll tools such as Timekeep cost less per month, and in year one the ₱35,000 setup fee makes YAHSHUA HRIS costlier than GreatDay's starter. YAHSHUA's flat price is cheaper per month than GreatDay's starter above about 91 employees, and it includes hiring, onboarding, performance, DOLE compliance, and payroll in one plan. Choose on scope and total cost, not on the subscription line alone.",
+    a: "No. At 100 employees, lean attendance and payroll tools such as Timekeep cost less per month. YAHSHUA's flat price is cheaper per month than GreatDay's starter above about 91 employees, and it includes hiring, onboarding, performance, DOLE compliance, and payroll in one plan. Choose on scope and total cost, not on the subscription line alone.",
   },
   {
     q: "How should I estimate an HRIS budget for my company?",
@@ -60,7 +60,7 @@ const monthlyRows: string[][] = [
 const yearOneRows: string[][] = [
   ["Timekeep", peso(timekeep(100) * 12), "None listed", peso(timekeep(100) * 12)],
   ["GreatDay HR (Basic Starter)", peso(greatday(100) * 12), "None listed", peso(greatday(100) * 12)],
-  ["YAHSHUA HRIS and Payroll", peso(calculateMonthly(100) * 12), peso(YAHSHUA_PRICING.setupFee), peso(calculateMonthly(100) * 12 + YAHSHUA_PRICING.setupFee)],
+  ["YAHSHUA HRIS and Payroll", peso(calculateMonthly(100) * 12), "None", peso(calculateMonthly(100) * 12)],
   ["WORKSPHR (Growth plan)", peso(worksphrGrowth(100) * 12), "Not published for Growth", peso(worksphrGrowth(100) * 12) + " plus setup"],
   ["PayrollHero (HRIS + payroll)", "about " + peso(payrollhero(100) * 12), "None listed", "about " + peso(payrollhero(100) * 12)],
 ];
@@ -68,7 +68,7 @@ const yearOneRows: string[][] = [
 const publishedRows: string[][] = [
   ["Timekeep", "₱999 a month for 10 employees, then ₱49 per additional employee; all features included", "Payroll, attendance, schedules, leave, compliance", "Published"],
   ["GreatDay HR", "₱77 per employee a month (Basic Starter); 50-license minimum", "HRIS and payroll; GreatDay says prices are changing", "Published for the starter; higher tiers by quote"],
-  ["YAHSHUA HRIS and Payroll", "₱7,000 a month flat for up to 100 employees, then ₱60 per employee; ₱35,000 one-time setup; VAT excluded", "HRIS, hiring, performance, DOLE module, payroll included", "Published"],
+  ["YAHSHUA HRIS and Payroll", "₱7,000 a month flat for up to 100 employees, then ₱60 per employee; no setup fee; VAT excluded", "HRIS, hiring, performance, DOLE module, payroll included", "Published"],
   ["WORKSPHR", "₱79 (Starter, up to 25 employees), ₱149 (Growth), ₱219 (Pro) per employee a month; implementation ₱15,000 (Starter) or ₱45,000 (Pro), waived on contract lock-in; VAT excluded", "HR and payroll", "Published"],
   ["PayrollHero", "$3.50 per employee a month for HRIS, timekeeping, attendance, and scheduling; payroll add-on $3.00; leave add-on $2.00", "Billed in US dollars on its global pricing page", "Published"],
   ["Sprout Solutions", "Custom quote; only outsourced Payroll Starter bundles list prices", "Software pricing varies by modules and size", "Not published"],
@@ -203,11 +203,11 @@ const HrisPricingPhilippinesArticle = () => {
               {/* Year one */}
               <h2 style={h2}>Year-One Cost at 100 Employees</h2>
               <p style={{ marginBottom: "1.25rem" }}>
-                Setup fees change the ranking in the first year.
+                One-time setup and implementation fees can change the ranking in the first year.
               </p>
               <Table head={["Vendor", "12 months of subscription", "One-time fees", "Year-one total"]} rightCols={[1, 2, 3]} rows={yearOneRows} />
               <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "2.5rem" }}>
-                In year one, YAHSHUA&apos;s ₱35,000 setup fee puts it above GreatDay&apos;s starter at 100 employees. From year two, with no setup fee, ₱7,000 a month is cheaper than ₱7,700. The setup fee covers implementation, data migration, and onboarding training. WORKSPHR&apos;s implementation fee for the Growth plan is not published; its Starter and Pro fees are ₱15,000 and ₱45,000, and are waived on an eligible contract commitment.
+                YAHSHUA has no setup fee, so its year-one total at 100 employees equals its subscription, ₱84,000, below GreatDay&apos;s starter at ₱92,400 (₱7,000 a month against ₱7,700). WORKSPHR&apos;s implementation fee for the Growth plan is not published; its Starter and Pro fees are ₱15,000 and ₱45,000, and are waived on an eligible contract commitment.
               </p>
 
               {/* Hidden costs */}
@@ -234,7 +234,7 @@ const HrisPricingPhilippinesArticle = () => {
                   Want your exact number?
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Tell us your headcount and we will price it with VAT and setup so you can compare it against any quote you already have.
+                  Tell us your headcount and we will price it with VAT so you can compare it against any quote you already have.
                 </p>
                 <a
                   href={DEMO_URL}
@@ -275,7 +275,7 @@ const HrisPricingPhilippinesArticle = () => {
               {/* YAHSHUA section */}
               <h2 style={h2}>Where YAHSHUA HRIS Fits</h2>
               <p style={{ marginBottom: "1rem" }}>
-                YAHSHUA HRIS is ₱{YAHSHUA_PRICING.basePrice.toLocaleString("en-US")} a month flat for up to {YAHSHUA_PRICING.employeeCap} employees, ₱{YAHSHUA_PRICING.excessRatePerEmployee} per additional employee, plus a one-time ₱{YAHSHUA_PRICING.setupFee.toLocaleString("en-US")} setup fee covering implementation, data migration, and onboarding training. YAHSHUA One Payroll is included, with BIR, SSS, PhilHealth, and Pag-IBIG computations, payslips, and bank disbursement. A guided DOLE module, job posting and applicant screening, onboarding and 201 files, attendance and leave, and performance evaluations are part of the same plan. A free plan for job posting and applicant screening is available. Prices exclude 12% VAT, and there is no long-term contract.
+                YAHSHUA HRIS is ₱{YAHSHUA_PRICING.basePrice.toLocaleString("en-US")} a month flat for up to {YAHSHUA_PRICING.employeeCap} employees, ₱{YAHSHUA_PRICING.excessRatePerEmployee} per additional employee, with no setup fee. YAHSHUA One Payroll is included, with BIR, SSS, PhilHealth, and Pag-IBIG computations, payslips, and bank disbursement. A guided DOLE module, job posting and applicant screening, onboarding and 201 files, attendance and leave, and performance evaluations are part of the same plan. A free plan for job posting and applicant screening is available. Prices exclude 12% VAT, and there is no long-term contract.
               </p>
               <p style={{ marginBottom: "2.5rem", fontSize: "0.9rem" }}>
                 See the <Link href="/pricing" style={link}>pricing page</Link>, or the side-by-side pages for <Link href="/vs-sprout" style={link}>Sprout</Link> and <Link href="/vs-greatday" style={link}>GreatDay</Link>. Our <Link href="/how-we-compare" style={link}>comparison hub</Link> lists the claims we have verified and the date we checked them.
@@ -338,7 +338,7 @@ const HrisPricingPhilippinesArticle = () => {
               See the price for your headcount, not ours.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              Book a 30-minute demo and we will quote your exact headcount with VAT and setup, then show you HR, payroll, and DOLE compliance in one system.
+              Book a 30-minute demo and we will quote your exact headcount with VAT, then show you HR, payroll, and DOLE compliance in one system.
             </p>
             <a
               href={DEMO_URL}
