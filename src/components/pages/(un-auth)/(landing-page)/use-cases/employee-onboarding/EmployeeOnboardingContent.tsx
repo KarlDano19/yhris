@@ -10,7 +10,7 @@ const features = [
   { icon: FileCheck, title: "Digital Document Management", body: "Streamline document collection with digital forms, e-signatures, and automated reminders for missing paperwork." },
   { icon: Clock, title: "Automated Workflows", body: "Set up custom onboarding workflows that automatically trigger tasks, notifications, and approvals at the right time." },
   { icon: Check, title: "Compliance Tracking", body: "Ensure all regulatory requirements are met with built-in compliance templates and audit trails." },
-  { icon: BarChart3, title: "Progress Monitoring", body: "Track onboarding progress in real-time with dashboards and reports for HR teams and managers." },
+  { icon: BarChart3, title: "Progress Monitoring", body: "Our customer success team tracks onboarding progress with you and keeps HR teams and managers updated." },
 ];
 
 const processSteps = [

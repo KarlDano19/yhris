@@ -37,7 +37,7 @@ const AboutContent = () => {
                 Everything HR, in one system.
               </h2>
               <p className="text-gray-500 text-base leading-relaxed mb-4">
-                From the moment a candidate applies to the day an employee exits, YAHSHUA HRIS keeps every record, request, and document in one place: recruitment and applicant tracking, employee 201 files, attendance and leave, performance evaluation, and guided DOLE compliance reporting.
+                From the moment a candidate applies to the day an employee exits, YAHSHUA HRIS keeps every record, request, and document in one place: recruitment and applicant tracking, employee 201 files, performance evaluation, and guided DOLE compliance reporting.
               </p>
               <p className="text-gray-500 text-base leading-relaxed">
                 It connects to YAHSHUA One Payroll through single sign-on, and employee data syncs into HRIS, with no re-typing.

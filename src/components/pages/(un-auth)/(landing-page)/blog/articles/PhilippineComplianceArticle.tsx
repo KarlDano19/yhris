@@ -170,7 +170,7 @@ const PhilippineComplianceArticle = () => {
                   How does an HRIS help with multiple simultaneous compliance deadlines?
                 </h3>
                 <p>
-                  An HRIS built for Philippine compliance maintains up-to-date contribution tables, regulatory references, and reporting formats inside a single system. Rather than compiling data from separate payroll, attendance, and contribution tools every time a deadline arrives, compliance-ready data is available in real time. YAHSHUA HRIS includes a dedicated DOLE module and comes with YAHSHUA One Payroll, which computes BIR withholding and SSS, PhilHealth, and Pag-IBIG contributions.
+                  An HRIS built for Philippine compliance keeps employee records, regulatory references, and reporting formats inside a single system. Rather than compiling data from separate payroll, attendance, and contribution tools every time a deadline arrives, your compliance data is in one place. YAHSHUA HRIS includes a dedicated DOLE module that generates reports ready for submission in a few clicks, and comes with YAHSHUA One Payroll, which computes BIR withholding and SSS, PhilHealth, and Pag-IBIG contributions.
                 </p>
               </div>
 
