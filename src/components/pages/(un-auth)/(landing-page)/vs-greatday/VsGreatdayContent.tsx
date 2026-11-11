@@ -236,7 +236,7 @@ const VsGreatdayContent = () => {
             </ScrollFadeIn>
             <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {[
-                { step: "01", title: "Attendance and payroll history transfer", body: `Employee records and attendance history migrate during setup, covered by the one-time ${PRICING_LABELS.setup} fee.` },
+                { step: "01", title: "Attendance and payroll history transfer", body: `Employee records and attendance history migrate during onboarding, and there is no setup fee.` },
                 { step: "02", title: "Hands-on onboarding", body: "Your team gets dedicated training during setup, not a self-serve help center." },
                 { step: "03", title: "Flat rate, no lock-in", body: "One monthly rate regardless of add-ons used, cancel anytime, no long-term contract." },
               ].map((m, i) => (

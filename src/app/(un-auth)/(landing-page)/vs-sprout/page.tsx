@@ -73,7 +73,7 @@ const jsonLd = {
           "name": "How does YAHSHUA HRIS pricing compare to Sprout HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS costs a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month, with a one-time ${PRICING_LABELS.setup} setup fee. YAHSHUA Payroll is included and there are no long-term contracts. Sprout HR does not publish standard pricing; companies request a quote based on headcount and modules.`
+            "text": `YAHSHUA HRIS costs a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month, with no setup fee. YAHSHUA Payroll is included and there are no long-term contracts. Sprout HR does not publish standard pricing; companies request a quote based on headcount and modules.`
           }
         },
         {

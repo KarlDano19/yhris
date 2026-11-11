@@ -54,7 +54,7 @@ const jsonLd = {
           "name": "How do I switch from Sprout HR to YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS charges a one-time ${PRICING_LABELS.setup} setup fee that covers full data migration, implementation, and dedicated onboarding training. Employee records, 201 files, and payroll history are migrated as part of onboarding, and there is no long-term contract after setup.`
+            "text": `YAHSHUA HRIS has no setup fee. Employee records, 201 files, and payroll history are migrated as part of onboarding, and there is no long-term contract after setup.`
           }
         },
         {

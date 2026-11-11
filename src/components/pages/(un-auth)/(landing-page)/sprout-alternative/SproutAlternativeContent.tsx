@@ -170,7 +170,7 @@ const SproutAlternativeContent = () => {
                 Moving off Sprout doesn't mean starting from zero.
               </h2>
               <p className="text-base text-gray-500 leading-relaxed">
-                The one-time {PRICING_LABELS.setup} setup fee covers full data migration, implementation, and dedicated onboarding training, so your employee records, 201 files, and payroll history come with you. No long-term contract locks you in after that.
+                There is no setup fee, and full data migration, implementation, and dedicated onboarding training mean your employee records, 201 files, and payroll history come with you. No long-term contract locks you in after that.
               </p>
             </ScrollFadeIn>
           </div>

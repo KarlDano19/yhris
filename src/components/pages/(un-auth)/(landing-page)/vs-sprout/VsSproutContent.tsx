@@ -233,7 +233,7 @@ const VsSproutContent = () => {
               </ScrollFadeIn>
               <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 {[
-                  { step: "01", title: "Data comes with you", body: `Employee records, 201 files, and payroll history are migrated during setup, covered by the one-time ${PRICING_LABELS.setup} fee.` },
+                  { step: "01", title: "Data comes with you", body: `Employee records, 201 files, and payroll history are migrated during onboarding, and there is no setup fee.` },
                   { step: "02", title: "Guided onboarding", body: "Your team is trained hands-on as part of setup, not left to a help center article." },
                   { step: "03", title: "No lock-in after that", body: "Flat monthly billing, cancel anytime, no long-term contract." },
                 ].map((m, i) => (

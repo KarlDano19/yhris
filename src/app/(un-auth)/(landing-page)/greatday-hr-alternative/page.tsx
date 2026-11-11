@@ -54,7 +54,7 @@ const jsonLd = {
           "name": "How do I switch from GreatDay HR to YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `YAHSHUA HRIS charges a one-time ${PRICING_LABELS.setup} setup fee that covers data migration, implementation, and dedicated onboarding training, bringing employee records and attendance history over during setup. There is no long-term contract after that.`
+            "text": `YAHSHUA HRIS has no setup fee. Data migration, implementation, and dedicated onboarding training bring employee records and attendance history over during setup, and there is no long-term contract after that.`
           }
         },
         {

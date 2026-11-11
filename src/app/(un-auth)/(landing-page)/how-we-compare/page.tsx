@@ -54,7 +54,7 @@ const jsonLd = {
           "name": "Does YAHSHUA HRIS charge per employee?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": `Not for the first ${YAHSHUA_PRICING.employeeCap} employees. YAHSHUA HRIS charges a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, with YAHSHUA Payroll included. Beyond ${YAHSHUA_PRICING.employeeCap}, each additional employee adds ${PRICING_LABELS.excess} per month. There is a one-time ${PRICING_LABELS.setup} setup fee covering implementation, data migration, and training. Most competing HR platforms in the Philippines charge per employee from the first seat, which makes costs difficult to predict as headcount grows.`
+            "text": `Not for the first ${YAHSHUA_PRICING.employeeCap} employees. YAHSHUA HRIS charges a flat ${PRICING_LABELS.base}/month (VAT excluded) for up to ${YAHSHUA_PRICING.employeeCap} employees, with YAHSHUA Payroll included. Beyond ${YAHSHUA_PRICING.employeeCap}, each additional employee adds ${PRICING_LABELS.excess} per month. There is no setup fee. Most competing HR platforms in the Philippines charge per employee from the first seat, which makes costs difficult to predict as headcount grows.`
           }
         },
         {

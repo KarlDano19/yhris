@@ -170,7 +170,7 @@ const GreatdayAlternativeContent = () => {
                 Switching off a per-license plan is a one-time step, not a project.
               </h2>
               <p className="text-base text-gray-500 leading-relaxed">
-                A one-time {PRICING_LABELS.setup} setup fee covers data migration, implementation, and dedicated onboarding training, bringing your employee records and attendance history over in one pass. After that, it's a flat monthly rate with no long-term contract.
+                There is no setup fee. Data migration, implementation, and dedicated onboarding training bring your employee records and attendance history over in one pass. After that, it's a flat monthly rate with no long-term contract.
               </p>
             </ScrollFadeIn>
           </div>
