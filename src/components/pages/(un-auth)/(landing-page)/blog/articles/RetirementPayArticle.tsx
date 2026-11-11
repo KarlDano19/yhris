@@ -225,7 +225,7 @@ const RetirementPayArticle = () => {
                   YAHSHUA HRIS keeps offboarding in one workflow.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Manage clearance forms, quitclaims, and final pay documentation through one structured workflow, with every step tracked. YAHSHUA Payroll is included.
+                  Manage clearance forms, quitclaims, and final pay documentation through one structured workflow, with every step tracked. YAHSHUA One Payroll is included.
                 </p>
                 <Link href="/blog/final-pay-computation-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See what goes into final pay <ArrowRight className="w-4 h-4" />

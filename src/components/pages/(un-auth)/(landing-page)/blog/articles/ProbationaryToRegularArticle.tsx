@@ -218,7 +218,7 @@ const ProbationaryToRegularArticle = () => {
                   Keep the dates and the signed standards in one place.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, from hire date to present, so the start date and the signed standards are on record when you need them. YAHSHUA Payroll is included.
+                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, from hire date to present, so the start date and the signed standards are on record when you need them. YAHSHUA One Payroll is included.
                 </p>
                 <Link href="/blog/payroll-registration-checklist-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See the payroll setup checklist for new employers <ArrowRight className="w-4 h-4" />

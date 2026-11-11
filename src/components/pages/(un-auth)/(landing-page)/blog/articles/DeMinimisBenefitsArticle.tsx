@@ -150,7 +150,7 @@ const DeMinimisBenefitsArticle = () => {
                   Keep payroll and BIR withholding in one system.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  YAHSHUA HRIS comes with YAHSHUA Payroll, which computes BIR withholding tax. Ask in a demo how allowances and benefits like these are set up.
+                  YAHSHUA HRIS comes with YAHSHUA One Payroll, which computes BIR withholding tax. Ask in a demo how allowances and benefits like these are set up.
                 </p>
                 <Link href="/blog/dole-compliance-requirements-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See the full DOLE and BIR compliance checklist <ArrowRight className="w-4 h-4" />
@@ -255,7 +255,7 @@ const DeMinimisBenefitsArticle = () => {
               Run payroll and BIR withholding in one system.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll, which computes BIR withholding tax. Book a free demo and ask how de minimis benefits are set up.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll, which computes BIR withholding tax. Book a free demo and ask how de minimis benefits are set up.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=de_minimis_benefits"

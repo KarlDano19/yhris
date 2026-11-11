@@ -103,7 +103,7 @@ const jsonLd = {
           "name": "Does YAHSHUA compute SSS, PhilHealth, and Pag-IBIG contributions automatically?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, and Pag-IBIG contributions automatically on every payroll run, based on gross or basic salary depending on how each client sets up payroll. To see how rate changes are handled when an agency updates its tables, ask in a demo."
+            "text": "Yes. YAHSHUA One Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, and Pag-IBIG contributions automatically on every payroll run, based on gross or basic salary depending on how each client sets up payroll. To see how rate changes are handled when an agency updates its tables, ask in a demo."
           }
         }
       ]

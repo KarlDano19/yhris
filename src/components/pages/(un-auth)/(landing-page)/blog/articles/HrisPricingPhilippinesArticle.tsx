@@ -26,7 +26,7 @@ export const hrisPricingFaqs = [
   },
   {
     q: "Does YAHSHUA HRIS charge per employee?",
-    a: "Not up to 100 employees. The plan is ₱7,000 a month flat for up to 100 employees, then ₱60 per additional employee per month, plus a one-time ₱35,000 setup fee that covers implementation, data migration, and onboarding training. Prices exclude 12% VAT. YAHSHUA Payroll is included, and a free plan for job posting and applicant screening is available.",
+    a: "Not up to 100 employees. The plan is ₱7,000 a month flat for up to 100 employees, then ₱60 per additional employee per month, plus a one-time ₱35,000 setup fee that covers implementation, data migration, and onboarding training. Prices exclude 12% VAT. YAHSHUA One Payroll is included, and a free plan for job posting and applicant screening is available.",
   },
   {
     q: "Is YAHSHUA HRIS the cheapest HRIS in the Philippines?",
@@ -275,7 +275,7 @@ const HrisPricingPhilippinesArticle = () => {
               {/* YAHSHUA section */}
               <h2 style={h2}>Where YAHSHUA HRIS Fits</h2>
               <p style={{ marginBottom: "1rem" }}>
-                YAHSHUA HRIS is ₱{YAHSHUA_PRICING.basePrice.toLocaleString("en-US")} a month flat for up to {YAHSHUA_PRICING.employeeCap} employees, ₱{YAHSHUA_PRICING.excessRatePerEmployee} per additional employee, plus a one-time ₱{YAHSHUA_PRICING.setupFee.toLocaleString("en-US")} setup fee covering implementation, data migration, and onboarding training. YAHSHUA Payroll is included, with BIR, SSS, PhilHealth, and Pag-IBIG computations, payslips, and bank disbursement. A guided DOLE module, job posting and applicant screening, onboarding and 201 files, attendance and leave, and performance evaluations are part of the same plan. A free plan for job posting and applicant screening is available. Prices exclude 12% VAT, and there is no long-term contract.
+                YAHSHUA HRIS is ₱{YAHSHUA_PRICING.basePrice.toLocaleString("en-US")} a month flat for up to {YAHSHUA_PRICING.employeeCap} employees, ₱{YAHSHUA_PRICING.excessRatePerEmployee} per additional employee, plus a one-time ₱{YAHSHUA_PRICING.setupFee.toLocaleString("en-US")} setup fee covering implementation, data migration, and onboarding training. YAHSHUA One Payroll is included, with BIR, SSS, PhilHealth, and Pag-IBIG computations, payslips, and bank disbursement. A guided DOLE module, job posting and applicant screening, onboarding and 201 files, attendance and leave, and performance evaluations are part of the same plan. A free plan for job posting and applicant screening is available. Prices exclude 12% VAT, and there is no long-term contract.
               </p>
               <p style={{ marginBottom: "2.5rem", fontSize: "0.9rem" }}>
                 See the <Link href="/pricing" style={link}>pricing page</Link>, or the side-by-side pages for <Link href="/vs-sprout" style={link}>Sprout</Link> and <Link href="/vs-greatday" style={link}>GreatDay</Link>. Our <Link href="/how-we-compare" style={link}>comparison hub</Link> lists the claims we have verified and the date we checked them.

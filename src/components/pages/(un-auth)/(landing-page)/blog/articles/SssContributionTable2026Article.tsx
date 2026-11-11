@@ -348,7 +348,7 @@ const SssContributionTable2026Article = () => {
               {/* YAHSHUA HRIS CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, and Pag-IBIG contributions on every payroll run.
+                  YAHSHUA One Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth, and Pag-IBIG contributions on every payroll run.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
                   Contributions are computed automatically, based on gross or basic salary depending on how your company sets up payroll. Ask in a demo how rate changes and remittance files are handled.
@@ -488,7 +488,7 @@ const SssContributionTable2026Article = () => {
               Ask how payroll handles SSS, PhilHealth, and Pag-IBIG changes.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions on every payroll run. Book a free demo and ask how rate and ceiling changes are handled.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll, which computes SSS, PhilHealth, and Pag-IBIG contributions on every payroll run. Book a free demo and ask how rate and ceiling changes are handled.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=sss_contribution_2026"

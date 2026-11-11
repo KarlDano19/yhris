@@ -213,10 +213,10 @@ const HolidayPayComputationArticle = () => {
               {/* YAHSHUA CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  Ask how YAHSHUA Payroll handles holiday pay.
+                  Ask how YAHSHUA One Payroll handles holiday pay.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it applies regular holiday, special holiday, and rest day multipliers based on each employee&apos;s attendance and schedule.
+                  YAHSHUA HRIS comes with YAHSHUA One Payroll. Book a free demo and ask how it applies regular holiday, special holiday, and rest day multipliers based on each employee&apos;s attendance and schedule.
                 </p>
                 <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   Book a free demo <ArrowRight className="w-4 h-4" />
@@ -325,7 +325,7 @@ const HolidayPayComputationArticle = () => {
               Ask how payroll applies the right holiday multiplier.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles holiday pay rates (130%, 150%, 200%, 260%) based on each employee&apos;s attendance and work schedule.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll. Book a free demo and ask how it handles holiday pay rates (130%, 150%, 200%, 260%) based on each employee&apos;s attendance and work schedule.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=holiday_pay"

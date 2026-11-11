@@ -163,7 +163,7 @@ const EmployeeOffboardingChecklistArticle = () => {
                   Keep the exit paperwork with the rest of the file.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, so the contract, leave records, and clearance papers are together when someone leaves. YAHSHUA Payroll is included and computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips.
+                  YAHSHUA HRIS keeps each employee&apos;s 201 file in one place, so the contract, leave records, and clearance papers are together when someone leaves. YAHSHUA One Payroll is included and computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips.
                 </p>
                 <Link href="/blog/final-pay-computation-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how final pay is computed <ArrowRight className="w-4 h-4" />

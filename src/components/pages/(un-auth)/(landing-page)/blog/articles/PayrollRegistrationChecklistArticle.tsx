@@ -312,10 +312,10 @@ const PayrollRegistrationChecklistArticle = () => {
               {/* YAHSHUA CTA */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA Payroll, included with YAHSHUA HRIS, computes government contributions.
+                  YAHSHUA One Payroll, included with YAHSHUA HRIS, computes government contributions.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Once your agency registrations are complete, YAHSHUA Payroll computes SSS, PhilHealth, Pag-IBIG, and BIR withholding on every payroll run and generates payslips. Ask in a demo how remittance files and rate changes are handled.
+                  Once your agency registrations are complete, YAHSHUA One Payroll computes SSS, PhilHealth, Pag-IBIG, and BIR withholding on every payroll run and generates payslips. Ask in a demo how remittance files and rate changes are handled.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how payroll compliance works in YAHSHUA HRIS <ArrowRight className="w-4 h-4" />
@@ -424,7 +424,7 @@ const PayrollRegistrationChecklistArticle = () => {
               Registration done. Now set up payroll.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips on every payroll run. Book a free demo and ask how remittance files are produced.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll, which computes SSS, PhilHealth, Pag-IBIG, and BIR withholding and generates payslips on every payroll run. Book a free demo and ask how remittance files are produced.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=payroll_registration_checklist"

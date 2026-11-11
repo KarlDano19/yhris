@@ -256,7 +256,7 @@ const MinimumWageByRegionArticle = () => {
                   Ask how payroll handles a new wage order.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles a new wage order, including employees whose basic pay falls below the new floor and pay items that depend on the daily rate.
+                  YAHSHUA HRIS comes with YAHSHUA One Payroll. Book a free demo and ask how it handles a new wage order, including employees whose basic pay falls below the new floor and pay items that depend on the daily rate.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how YAHSHUA handles wage order updates <ArrowRight className="w-4 h-4" />
@@ -329,7 +329,7 @@ const MinimumWageByRegionArticle = () => {
               Running payroll in more than one region?
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it handles minimum wage changes for your region.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll. Book a free demo and ask how it handles minimum wage changes for your region.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=minimum_wage_by_region_2026"
