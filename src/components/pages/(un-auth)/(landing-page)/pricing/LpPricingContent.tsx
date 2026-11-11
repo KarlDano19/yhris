@@ -15,7 +15,6 @@ interface LpPricingContentProps {
 
 const BASE_PRICE = YAHSHUA_PRICING.basePrice;
 const EXCESS_RATE = YAHSHUA_PRICING.excessRatePerEmployee;
-const SETUP_FEE = YAHSHUA_PRICING.setupFee;
 const EMPLOYEE_CAP = YAHSHUA_PRICING.employeeCap;
 
 const formatPHP = (price: number) =>
@@ -24,10 +23,10 @@ const formatPHP = (price: number) =>
 const faqs = [
   { q: "Is there really no credit card required for the free plan?", a: "Correct. The Freemium plan is free forever with no payment information needed. You can post jobs and screen applicants without spending anything." },
   { q: `What happens when I go over ${EMPLOYEE_CAP} employees?`, a: `An additional ${PRICING_LABELS.excess} per employee per month is added on top of the ${PRICING_LABELS.base} base rate. The calculator above shows your exact monthly cost as you type.` },
-  { q: "Is there a setup fee?", a: `Yes. There is a one-time setup fee of ${PRICING_LABELS.setup} which covers full implementation, data migration, and dedicated onboarding training. There are no other upfront costs after that.` },
+  { q: "Is there a setup fee?", a: "No. There is no setup fee. You pay the monthly subscription only, and VAT is added on your invoice. Ask in a demo how onboarding and data migration are handled." },
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
   { q: "Is VAT included in the pricing shown?", a: "No. All prices shown are VAT excluded. The applicable VAT will be reflected in your invoice." },
-  { q: "Does YAHSHUA HRIS come with YAHSHUA Payroll?", a: "Yes. Every YAHSHUA HRIS plan comes with YAHSHUA Payroll at no extra charge. Automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, and bank disbursement are all included in your subscription." },
+  { q: "Does YAHSHUA HRIS come with YAHSHUA One Payroll?", a: "Yes. Every YAHSHUA HRIS plan comes with YAHSHUA One Payroll at no extra charge. It computes BIR withholding tax, SSS, PhilHealth, and Pag-IBIG contributions and generates payslips, all included in your subscription." },
   { q: "Can I see the full platform before subscribing?", a: "Yes. Book a free demo and we will walk you through YAHSHUA HRIS and the built-in payroll tools in full. You can also request a trial period during your demo call." },
 ];
 
@@ -64,7 +63,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                   <span className="text-primary">No surprises.</span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
-                  One plan. Complete HR management. YAHSHUA Payroll included. No long-term contracts. Cancel anytime.
+                  One plan. Complete HR management. YAHSHUA One Payroll included. No long-term contracts. Cancel anytime.
                 </p>
               </ScrollFadeIn>
             </div>
@@ -113,7 +112,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                       <div className="rounded-lg p-4 mb-6 text-sm" style={{ border: "1.5px dashed rgba(0,0,0,0.15)" }}>
                         <p className="font-semibold text-gray-700 mb-1">Ready to grow?</p>
-                        <p className="text-gray-400">Upgrade anytime to unlock YAHSHUA HRIS and YAHSHUA Payroll</p>
+                        <p className="text-gray-400">Upgrade anytime to unlock YAHSHUA HRIS and YAHSHUA One Payroll</p>
                       </div>
 
                       <div className="mt-auto">
@@ -135,7 +134,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                     <div className="bg-primary px-8 py-6">
                       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-navy/70 mb-2">Recommended</p>
                       <h2 className="text-xl font-bold text-navy mb-1">YAHSHUA HRIS</h2>
-                      <p className="text-sm text-navy/70">Comes with YAHSHUA Payroll.</p>
+                      <p className="text-sm text-navy/70">Comes with YAHSHUA One Payroll.</p>
                     </div>
                     <div className="px-8 py-6 flex flex-col flex-1 bg-white">
 
@@ -195,10 +194,10 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                       {/* Setup fee */}
                       <div className="rounded-lg p-4 mb-6 text-sm" style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}>
                         <div className="flex items-center justify-between mb-1">
-                          <p className="font-semibold text-gray-700">One-time setup</p>
-                          <p className="font-bold text-gray-900">{formatPHP(SETUP_FEE)}</p>
+                          <p className="font-semibold text-gray-700">Setup fee</p>
+                          <p className="font-bold text-gray-900">None</p>
                         </div>
-                        <p className="text-xs text-gray-400">Includes full implementation, data migration, and dedicated onboarding training</p>
+                        <p className="text-xs text-gray-400">You pay the monthly subscription only</p>
                       </div>
 
                       <div className="mb-6 space-y-4">
@@ -208,7 +207,6 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                             {[
                               "Employee management and 201 files",
                               "Job posting and recruitment",
-                              "Leave, attendance, and time tracking",
                               "DOLE compliance reports",
                               "Performance management",
                             ].map((f) => (
@@ -220,12 +218,12 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                           </ul>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">YAHSHUA Payroll — included</p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">YAHSHUA One Payroll, included</p>
                           <ul className="space-y-3">
                             {[
                               "Automated payroll processing",
-                              "BIR, SSS, PhilHealth, Pag-IBIG filing",
-                              "One-click bank disbursement",
+                              "BIR withholding tax, SSS, PhilHealth, Pag-IBIG computation",
+                              "Attendance and overtime tracking",
                               "Payslip generation",
                             ].map((f) => (
                               <li key={f} className="flex items-start gap-3 text-sm">
@@ -268,7 +266,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                   {[
                     { range: "Up to 100 employees", rate: "₱7,000", sub: "flat monthly rate" },
                     { range: "101+ employees", rate: "₱60", sub: "per employee/month added" },
-                    { range: "One-time setup", rate: "₱35,000", sub: "implementation and training" },
+                    { range: "Setup fee", rate: "₱0", sub: "no one-time charge" },
                   ].map((tier, i) => (
                     <div key={i} className="lp-light-card p-6 text-center">
                       <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">{tier.range}</p>
