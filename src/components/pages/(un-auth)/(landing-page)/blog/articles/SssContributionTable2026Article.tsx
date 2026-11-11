@@ -108,8 +108,8 @@ const SssContributionTable2026Article = () => {
 
               {/* ===================== SSS ===================== */}
               <InlineDemoCta
-                heading="Want contributions computed for you?"
-                body="YAHSHUA Payroll, included with YAHSHUA HRIS, computes SSS, PhilHealth and Pag-IBIG contributions on every payroll run. See it in a free demo."
+                heading="Still looking up the SSS bracket for every employee?"
+                body="YAHSHUA One Payroll computes each employee's SSS, PhilHealth and Pag-IBIG contribution on every payroll run, on the basis your company uses, basic or gross. See it in a free demo."
                 campaign="sss_table"
               />
 
@@ -497,7 +497,7 @@ const SssContributionTable2026Article = () => {
               className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-xl text-white transition-all hover:gap-3"
               style={{ background: "hsl(38, 92%, 45%)" }}
             >
-              See how YAHSHUA handles payroll compliance <ArrowRight className="w-4 h-4" />
+              Book a free demo <ArrowRight className="w-4 h-4" />
             </a>
           </div>
         </section>
