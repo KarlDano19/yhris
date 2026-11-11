@@ -44,7 +44,7 @@ Del Monte Philippines Inc., DTI Region X, University of St. La Salle - Bacolod, 
 
 - PHP 7,000/month flat for up to 100 employees (VAT excluded)
 - PHP 60 per additional employee per month beyond 100
-- No setup fee
+- No setup fee; implementation, data migration, and onboarding training are included at no extra charge
 - YAHSHUA One Payroll included at no extra charge
 - No long-term contracts, cancel anytime
 - Free-forever Freemium plan (job posting and applicant screening), no credit card required

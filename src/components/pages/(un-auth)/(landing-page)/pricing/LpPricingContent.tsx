@@ -23,7 +23,7 @@ const formatPHP = (price: number) =>
 const faqs = [
   { q: "Is there really no credit card required for the free plan?", a: "Correct. The Freemium plan is free forever with no payment information needed. You can post jobs and screen applicants without spending anything." },
   { q: `What happens when I go over ${EMPLOYEE_CAP} employees?`, a: `An additional ${PRICING_LABELS.excess} per employee per month is added on top of the ${PRICING_LABELS.base} base rate. The calculator above shows your exact monthly cost as you type.` },
-  { q: "Is there a setup fee?", a: "No. There is no setup fee. You pay the monthly subscription only, and VAT is added on your invoice. Ask in a demo how onboarding and data migration are handled." },
+  { q: "Is there a setup fee?", a: "No. There is no setup fee. Implementation, data migration, and onboarding training are included at no extra charge. You pay the monthly subscription only, and VAT is added on your invoice." },
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
   { q: "Is VAT included in the pricing shown?", a: "No. All prices shown are VAT excluded. The applicable VAT will be reflected in your invoice." },
   { q: "Does YAHSHUA HRIS come with YAHSHUA One Payroll?", a: "Yes. Every YAHSHUA HRIS plan comes with YAHSHUA One Payroll at no extra charge. It computes BIR withholding tax, SSS, PhilHealth, and Pag-IBIG contributions and generates payslips, all included in your subscription." },
@@ -197,7 +197,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                           <p className="font-semibold text-gray-700">Setup fee</p>
                           <p className="font-bold text-gray-900">None</p>
                         </div>
-                        <p className="text-xs text-gray-400">You pay the monthly subscription only</p>
+                        <p className="text-xs text-gray-400">Implementation, data migration, and onboarding training are included</p>
                       </div>
 
                       <div className="mb-6 space-y-4">
