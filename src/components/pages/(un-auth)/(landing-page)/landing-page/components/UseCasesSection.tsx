@@ -19,7 +19,7 @@ const UseCasesSection = () => {
       description: "Perfect for growing businesses that need comprehensive employee data management without the complexity. YAHSHUA HRIS provides all essential HR functions including payroll integration, job posting automation, and DOLE compliance reporting.",
       benefits: [
         "Streamlined employee data synchronization",
-        "Automated payroll processing with YAHSHUA Payroll features",
+        "Automated payroll processing with YAHSHUA One Payroll features",
         "Multi-platform job posting (Facebook, LinkedIn, YAHSHUA Jobs)",
         "Built-in DOLE compliance and reporting"
       ]
@@ -58,9 +58,9 @@ const UseCasesSection = () => {
     {
       icon: CurrencyDollarIcon,
       title: "Payroll Integration Use Cases",
-      description: "Discover powerful YAHSHUA Payroll features through real-world use cases. Seamlessly sync employee data between HR and payroll systems for accurate, efficient payroll processing.",
+      description: "Discover powerful YAHSHUA One Payroll features through real-world use cases. Employee data from YAHSHUA One Payroll syncs into HRIS, with no manual transfers.",
       benefits: [
-        "Real-time employee data synchronization",
+        "Employee data synced from YAHSHUA One Payroll",
         "Automated payroll calculations and processing",
         "Integration with existing accounting systems",
         "Detailed payroll reporting and analytics"
