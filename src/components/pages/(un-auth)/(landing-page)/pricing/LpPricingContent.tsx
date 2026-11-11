@@ -27,7 +27,7 @@ const faqs = [
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
   { q: "Is VAT included in the pricing shown?", a: "No. All prices shown are VAT excluded. The applicable VAT will be reflected in your invoice." },
   { q: "Does YAHSHUA HRIS come with YAHSHUA One Payroll?", a: "Yes. Every YAHSHUA HRIS plan comes with YAHSHUA One Payroll at no extra charge. It computes BIR withholding tax, SSS, PhilHealth, and Pag-IBIG contributions and generates payslips, all included in your subscription." },
-  { q: "Can I see the full platform before subscribing?", a: "Yes. Book a free demo and we will walk you through YAHSHUA HRIS and the built-in payroll tools in full. You can also request a trial period during your demo call." },
+  { q: "Can I see the full platform before subscribing?", a: "Yes. Sign up for the 30-day free trial of YAHSHUA HRIS, or book a free demo and we will walk you through YAHSHUA HRIS and the built-in payroll tools in full. After the 30 days, your account reverts to the Freemium plan unless you upgrade." },
 ];
 
 const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
