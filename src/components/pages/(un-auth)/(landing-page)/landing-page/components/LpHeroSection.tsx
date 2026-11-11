@@ -78,9 +78,9 @@ const LpHeroSection = () => {
                 style={{ color: 'hsl(213 32% 18%)' }}
               >
                 <span className="block mb-3">
-                  Hiring to Payroll,
+                  The Only HRIS Your<br className="hidden md:block" /> HR Team Will
                 </span>
-                <span style={{ color: 'hsl(var(--lp-primary))' }}>Without the Spreadsheets.</span>
+                <span style={{ color: 'hsl(var(--lp-primary))' }}>Ever Need.</span>
               </h1>
             </ScrollFadeIn>
 
@@ -89,7 +89,7 @@ const LpHeroSection = () => {
                 className="text-base md:text-lg leading-relaxed max-w-[460px] mb-10"
                 style={{ color: 'hsl(213 25% 42%)' }}
               >
-                Hiring, employee records, performance, DOLE reports, and payroll through YAHSHUA One Payroll. All in one place, no more chasing files across spreadsheets and five different tools.
+                Hiring, attendance, payroll sync, DOLE compliance, and performance. All in one place, no more chasing records across five different tools.
               </p>
             </ScrollFadeIn>
 
