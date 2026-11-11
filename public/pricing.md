@@ -1,6 +1,6 @@
 # YAHSHUA HRIS and Payroll Pricing
 
-Last updated: 2026-09-24
+Last updated: 2026-11-11
 
 YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes both.
 
@@ -22,15 +22,14 @@ YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes
   - Hiring and applicant tracking (multi-platform job posting)
   - Pre-screened talent pool access
   - Employee onboarding and 201 document management
-  - Attendance and leave management
-  - Overtime, undertime, and rest day tracking
   - Performance evaluation (templates + custom forms)
   - DOLE compliance module (all mandatory filings)
   - Employee self-service portal
   - Memos and NTE distribution
   - Personnel movement forms (promotions, transfers, regularization)
-  - YAHSHUA One Payroll: automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, bank disbursement
-  - Real-time two-way sync between HRIS and Payroll (no CSV exports, no manual re-entry)
+  - YAHSHUA One Payroll: automated BIR withholding tax, SSS, PhilHealth, and Pag-IBIG computation, payslip generation
+  - Attendance and overtime tracking in YAHSHUA One Payroll
+  - Single sign-on between YAHSHUA HRIS and YAHSHUA One Payroll, with employee data syncing from Payroll into HRIS
 
 ## Example Monthly Costs (VAT excluded)
 
