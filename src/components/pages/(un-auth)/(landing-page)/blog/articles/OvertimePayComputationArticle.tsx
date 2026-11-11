@@ -121,13 +121,17 @@ const OvertimePayComputationArticle = () => {
                 Overtime pay in the Philippines is the hourly rate (daily rate ÷ 8) multiplied by the overtime rate for the day: 125% on an ordinary working day, 169% on a rest day or special non-working day, and 260% on a regular holiday. At the Metro Manila minimum of ₱755 a day, that is ₱117.97, ₱159.49, and ₱245.38 per overtime hour.
               </p>
 
-              {/* Formula callout */}
+              {/* H2: How to compute (matches the "how to compute overtime pay" searches) */}
+              <h2 style={{ ...h2, marginTop: 0 }}>How to Compute Overtime Pay</h2>
               <div style={{ ...box, marginBottom: "2.5rem" }}>
                 <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#374151" }}>
                   <strong style={{ color: "hsl(38, 92%, 38%)" }}>The formula</strong>
                 </p>
-                <p style={{ margin: 0, fontSize: "0.95rem", color: "#111827", fontWeight: 600 }}>
+                <p style={{ margin: "0 0 0.75rem 0", fontSize: "0.95rem", color: "#111827", fontWeight: 600 }}>
                   Overtime pay = (daily rate ÷ 8) × overtime rate × overtime hours
+                </p>
+                <p style={{ margin: 0, fontSize: "0.9rem", color: "#374151" }}>
+                  Step 1: divide the daily rate by 8 to get the hourly rate. Step 2: multiply by the overtime rate for the day (see the table below). Step 3: multiply by the overtime hours. At ₱755 a day, 2 hours of ordinary-day overtime is ₱94.375 × 125% × 2 = ₱235.94.
                 </p>
               </div>
 
