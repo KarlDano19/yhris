@@ -17,7 +17,7 @@ YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes
 - Setup fee: none
 - VAT: excluded from all prices shown; applicable VAT appears on your invoice
 - Billing: Monthly, no long-term contract required, cancel anytime
-- Trial: full-platform trial available on request during a demo call
+- Trial: 30-day free trial of the YAHSHUA HRIS modules, self-serve sign-up at https://yahshuahris.com/register (no demo needed). After 30 days the account reverts to the free plan unless you upgrade.
 - Includes:
   - Hiring and applicant tracking (multi-platform job posting)
   - Pre-screened talent pool access
