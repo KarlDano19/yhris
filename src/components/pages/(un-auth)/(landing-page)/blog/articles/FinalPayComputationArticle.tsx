@@ -155,7 +155,7 @@ const FinalPayComputationArticle = () => {
                   YAHSHUA HRIS keeps offboarding in one workflow.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Manage clearance forms, quitclaims, and final pay documentation through one structured workflow, with every step tracked. YAHSHUA Payroll is included.
+                  Manage clearance forms, quitclaims, and final pay documentation through one structured workflow, with every step tracked. YAHSHUA One Payroll is included.
                 </p>
                 <Link href="/blog/dole-compliance-requirements-philippines" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See the full DOLE compliance checklist for employers <ArrowRight className="w-4 h-4" />
@@ -265,7 +265,7 @@ const FinalPayComputationArticle = () => {
               Keep offboarding and final pay in one place.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS runs clearance, quitclaims, and final pay documentation through one structured workflow, with YAHSHUA Payroll included. Book a free demo to see it.
+              YAHSHUA HRIS runs clearance, quitclaims, and final pay documentation through one structured workflow, with YAHSHUA One Payroll included. Book a free demo to see it.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=final_pay_computation"

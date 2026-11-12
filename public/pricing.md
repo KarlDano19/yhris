@@ -1,8 +1,8 @@
 # YAHSHUA HRIS and Payroll Pricing
 
-Last updated: 2026-09-24
+Last updated: 2026-11-11
 
-YAHSHUA HRIS and YAHSHUA Payroll are sold as one bundle. Every plan includes both.
+YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes both.
 
 ## Freemium Plan
 
@@ -14,23 +14,22 @@ YAHSHUA HRIS and YAHSHUA Payroll are sold as one bundle. Every plan includes bot
 
 - Price: PHP 7,000/month flat for up to 100 employees
 - Additional employees: PHP 60 per employee per month beyond 100
-- One-time setup fee: PHP 35,000 (full implementation, data migration, dedicated onboarding training)
+- Setup fee: none. Implementation, data migration, and onboarding training are included at no extra charge.
 - VAT: excluded from all prices shown; applicable VAT appears on your invoice
 - Billing: Monthly, no long-term contract required, cancel anytime
-- Trial: full-platform trial available on request during a demo call
+- Trial: 30-day free trial of the YAHSHUA HRIS modules, self-serve sign-up at https://yahshuahris.com/register (no demo needed). After 30 days the account reverts to the free plan unless you upgrade.
 - Includes:
   - Hiring and applicant tracking (multi-platform job posting)
   - Pre-screened talent pool access
   - Employee onboarding and 201 document management
-  - Attendance and leave management
-  - Overtime, undertime, and rest day tracking
   - Performance evaluation (templates + custom forms)
   - DOLE compliance module (all mandatory filings)
   - Employee self-service portal
   - Memos and NTE distribution
   - Personnel movement forms (promotions, transfers, regularization)
-  - YAHSHUA Payroll: automated calculations, BIR, SSS, PhilHealth, and Pag-IBIG filing, payslip generation, bank disbursement
-  - Real-time two-way sync between HRIS and Payroll (no CSV exports, no manual re-entry)
+  - YAHSHUA One Payroll: automated BIR withholding tax, SSS, PhilHealth, and Pag-IBIG computation, payslip generation
+  - Attendance and overtime tracking in YAHSHUA One Payroll
+  - Single sign-on between YAHSHUA HRIS and YAHSHUA One Payroll, with employee data syncing from Payroll into HRIS
 
 ## Example Monthly Costs (VAT excluded)
 
@@ -49,7 +48,7 @@ YAHSHUA HRIS and YAHSHUA Payroll are sold as one bundle. Every plan includes bot
 ## What's Always Included (All Paid Plans)
 
 - DOLE compliance module (no add-on required)
-- YAHSHUA Payroll (no separate subscription)
+- YAHSHUA One Payroll (no separate subscription)
 - SOC2 Type 2 certified infrastructure
 - ISO 27001 certified infrastructure
 - GDPR compliant data handling

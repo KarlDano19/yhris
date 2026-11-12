@@ -38,7 +38,7 @@ const jsonLd = {
       "applicationSubCategory": "Human Resource Management",
       "operatingSystem": "Web",
       "url": "https://yahshuahris.com",
-      "description": `All-in-one HR management system for Philippine businesses. Flat pricing starting at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, attendance, leave, performance evaluation, and real-time payroll sync.`,
+      "description": `All-in-one HR management system for Philippine businesses. Flat pricing starting at ${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees. Includes DOLE compliance automation, 201 document management, performance evaluation, and single sign-on with YAHSHUA One Payroll.`,
       "offers": {
         "@type": "Offer",
         "price": String(YAHSHUA_PRICING.basePrice),
@@ -49,7 +49,7 @@ const jsonLd = {
           "priceCurrency": YAHSHUA_PRICING.currency,
           "unitText": "month"
         },
-        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month and a one-time ${PRICING_LABELS.setup} setup fee. VAT excluded. YAHSHUA Payroll included. No long-term contracts.`,
+        "description": `${PRICING_LABELS.base}/month for up to ${YAHSHUA_PRICING.employeeCap} employees, plus ${PRICING_LABELS.excess} per additional employee per month. No setup fee. VAT excluded. YAHSHUA One Payroll included. No long-term contracts.`,
         "url": "https://yahshuahris.com/pricing"
       },
       "publisher": {

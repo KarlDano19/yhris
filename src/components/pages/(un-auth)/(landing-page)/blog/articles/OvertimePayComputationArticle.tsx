@@ -121,13 +121,17 @@ const OvertimePayComputationArticle = () => {
                 Overtime pay in the Philippines is the hourly rate (daily rate ÷ 8) multiplied by the overtime rate for the day: 125% on an ordinary working day, 169% on a rest day or special non-working day, and 260% on a regular holiday. At the Metro Manila minimum of ₱755 a day, that is ₱117.97, ₱159.49, and ₱245.38 per overtime hour.
               </p>
 
-              {/* Formula callout */}
+              {/* H2: How to compute (matches the "how to compute overtime pay" searches) */}
+              <h2 style={{ ...h2, marginTop: 0 }}>How to Compute Overtime Pay</h2>
               <div style={{ ...box, marginBottom: "2.5rem" }}>
                 <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#374151" }}>
                   <strong style={{ color: "hsl(38, 92%, 38%)" }}>The formula</strong>
                 </p>
-                <p style={{ margin: 0, fontSize: "0.95rem", color: "#111827", fontWeight: 600 }}>
+                <p style={{ margin: "0 0 0.75rem 0", fontSize: "0.95rem", color: "#111827", fontWeight: 600 }}>
                   Overtime pay = (daily rate ÷ 8) × overtime rate × overtime hours
+                </p>
+                <p style={{ margin: 0, fontSize: "0.9rem", color: "#374151" }}>
+                  Step 1: divide the daily rate by 8 to get the hourly rate. Step 2: multiply by the overtime rate for the day (see the table below). Step 3: multiply by the overtime hours. At ₱755 a day, 2 hours of ordinary-day overtime is ₱94.375 × 125% × 2 = ₱235.94.
                 </p>
               </div>
 
@@ -155,8 +159,8 @@ const OvertimePayComputationArticle = () => {
 
               {/* H2: Peso table */}
               <InlineDemoCta
-                heading="Tired of computing overtime by hand?"
-                body="Book a free demo and ask how YAHSHUA HRIS and Payroll tracks overtime, rest days and holidays and carries them into payroll."
+                heading="Stop computing overtime by hand."
+                body="YAHSHUA One Payroll computes overtime, night differential, holiday and rest-day pay from attendance and approved overtime requests. See it in a free demo."
                 campaign="overtime_pay"
               />
 
@@ -262,10 +266,10 @@ const OvertimePayComputationArticle = () => {
               {/* CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA Payroll is included in every YAHSHUA HRIS plan.
+                  YAHSHUA One Payroll is included with YAHSHUA HRIS.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  HR and payroll are synced in real time. Ask in a demo how overtime, holiday, and night differential are computed from attendance and each employee&apos;s daily rate.
+                  Ask in a demo how overtime, night differential, holiday and rest-day pay are computed from attendance and each employee&apos;s daily rate.
                 </p>
                 <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See what is included <ArrowRight className="w-4 h-4" />
@@ -339,7 +343,7 @@ const OvertimePayComputationArticle = () => {
               Ask how payroll computes overtime.
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-              YAHSHUA HRIS comes with YAHSHUA Payroll. Book a free demo and ask how it applies overtime rates for each type of day.
+              YAHSHUA HRIS comes with YAHSHUA One Payroll. Book a free demo and ask how it applies overtime rates for each type of day.
             </p>
             <a
               href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=overtime_pay_2026"
