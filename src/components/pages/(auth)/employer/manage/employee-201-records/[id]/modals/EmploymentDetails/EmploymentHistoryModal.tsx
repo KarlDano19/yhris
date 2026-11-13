@@ -17,6 +17,8 @@ import { useDeleteEmploymentHistory } from "../../hooks/useDeleteEmploymentHisto
 
 import { notify } from "../../utils/notify";
 
+import { decodeNbsp } from "@/helpers/richText";
+
 export type EmploymentHistoryItem = {
   id?: number;
   position: string;
@@ -61,7 +63,7 @@ export default function EmploymentHistoryModal({
       company: e.company,
       dateFrom: e.start_date,
       dateTo: e.end_date ?? null,
-      description: e.description ?? "",
+      description: decodeNbsp(e.description),
     }));
     return sortEmploymentDesc(mapped);
   }, [entries]);
@@ -235,7 +237,7 @@ export default function EmploymentHistoryModal({
                         <div  className="text-sm font-medium text-gray-700">
                           Job Description
                         </div>
-                        <p data-testid="job-description" className="mt-1 text-xs text-gray-600 whitespace-pre-line">
+                        <p data-testid="job-description" className="mt-1 text-xs text-gray-600 whitespace-pre-line break-words">
                           {it.description || "—"}
                         </p>
                       </div>
