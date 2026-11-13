@@ -109,6 +109,56 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-056 (Linear Y1HRIS-195)
+DATE FILED: 2026-11-12
+DATE FIXED: 2026-11-12
+CLIENT/REPORTER: Internal QA (Ian Brylle Callo, via Jam recording) - Employee 201 Records >
+                 View Employment History
+RELATED: Backend BUG_HISTORY HRIS-2026-056 (root cause fix at enrollment)
+
+ISSUE DESCRIPTION:
+  Employment history entries that came from a job application showed the literal
+  code "&nbsp;" between every word in the 201 record modal, did not wrap, and ran
+  past the card edge with a horizontal scrollbar. The backend now saves clean text
+  for new enrollments, but rows saved before that fix still contain "&nbsp;" in the
+  database and kept showing it.
+
+DESIRED OUTCOME:
+  Old and new employment history rows both show normal spaces and wrap inside the
+  card, without changing any stored data.
+
+FILES CHANGED:
+Frontend:
+- src/helpers/richText.ts (new decodeNbsp helper next to isRichTextEmpty)
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/modals/EmploymentDetails/EmploymentHistoryModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (not added)
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified: npx tsc --noEmit reported no errors in the touched files
+☑ Components tested: manual check on the new (Test 2) employee after the backend fix;
+  the display fix for the old row (employee 2590) still needs a browser check
+
+Integration & E2E:
+☐ Cypress/Playwright e2e tests updated (not added)
+☐ Existing data: the database is NOT changed. Old rows still hold &nbsp; and other
+  screens that read the description directly (exports, documents) were not checked.
+
+FIX EXPLANATION:
+  Added decodeNbsp() in src/helpers/richText.ts: replaces "&nbsp;", "&#160;" and
+  non-breaking spaces with normal spaces. EmploymentHistoryModal applies it where
+  API entries are mapped (description: decodeNbsp(e.description)). That single
+  mapping feeds the card text and the edit form prefill, so editing an old entry
+  shows clean text and saving it writes the cleaned text back. The description
+  paragraph also got "break-words" so any long unbroken string wraps instead of
+  causing a horizontal scrollbar. A frontend-only fix was chosen over a data
+  migration or management command because it changes no data, needs no run on
+  each environment and is trivially reverted.
+
+================================================================================
+
 BUG ID: HRIS-2026-055
 DATE FILED: 2026-11-04
 DATE FIXED: 2026-11-04

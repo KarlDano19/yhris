@@ -5,7 +5,15 @@
  * therefore reads those as filled content and lets required fields pass.
  * Strip the markup and the non-breaking spaces before deciding.
  */
-export const isRichTextEmpty = (html?: string): boolean =>
+/**
+ * Some saved text (e.g. employment history copied from job applications before
+ * the backend fix) still contains literal `&nbsp;`, which shows up as raw code
+ * and stops the text from wrapping. Turn it back into a normal space.
+ */
+export const decodeNbsp = (text?: string | null): string =>
+  (text ?? '').replace(/&nbsp;|&#160;/g, ' ').replace(/ /g, ' ');
+
+export const isRichTextEmpty =(html?: string): boolean =>
   !html ||
   html
     .replace(/<(.|\n)*?>/g, '')
