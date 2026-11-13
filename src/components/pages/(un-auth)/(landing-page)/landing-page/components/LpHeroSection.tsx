@@ -51,7 +51,7 @@ const LpHeroSection = () => {
   };
 
   return (
-    <section className="relative pt-32 pb-0 md:pt-44 md:pb-0 overflow-hidden lp-hero-glow" style={{ background: '#ffffff', zIndex: 15 }}>
+    <section className="relative pt-32 pb-0 md:pt-44 md:pb-0 overflow-hidden lp-hero-glow bg-white dark:bg-[#0F1419]" style={{ zIndex: 15 }}>
 
       <div className="lp-section-container relative z-10">
         <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-16 items-center">
@@ -74,8 +74,7 @@ const LpHeroSection = () => {
 
             <ScrollFadeIn delay={80}>
               <h1
-                className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold mb-6 tracking-tight"
-                style={{ color: 'hsl(213 32% 18%)' }}
+                className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold mb-6 tracking-tight text-[hsl(213_32%_18%)] dark:text-[#E8EAED]"
               >
                 <span className="block mb-3">
                   Hiring to Payroll,
@@ -86,8 +85,7 @@ const LpHeroSection = () => {
 
             <ScrollFadeIn delay={160}>
               <p
-                className="text-base md:text-lg leading-relaxed max-w-[460px] mb-10"
-                style={{ color: 'hsl(213 25% 42%)' }}
+                className="text-base md:text-lg leading-relaxed max-w-[460px] mb-10 text-[hsl(213_25%_42%)] dark:text-[#9CA3AF]"
               >
                 Hiring, employee records, performance, DOLE reports, and payroll through YAHSHUA One Payroll. All in one place, no more chasing files across spreadsheets and five different tools.
               </p>
@@ -95,15 +93,14 @@ const LpHeroSection = () => {
 
             {submitted ? (
               <div
-                className="flex items-center gap-3 px-5 py-4 rounded-[10px] max-w-[500px]"
-                style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}
+                className="flex items-center gap-3 px-5 py-4 rounded-[10px] max-w-[500px] bg-[rgba(34,197,94,0.08)] dark:bg-[rgba(95,224,125,0.08)] border border-[rgba(34,197,94,0.25)] dark:border-[rgba(95,224,125,0.2)]"
               >
-                <CheckCircle className="w-5 h-5 shrink-0" style={{ color: '#16a34a' }} />
+                <CheckCircle className="w-5 h-5 shrink-0 text-[#16a34a] dark:text-[#5FE07D]" />
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: '#15803d' }}>Booking calendar opened!</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#4ade80', opacity: 0.8 }}>
-                    <span style={{ color: '#166534' }}>Pick a time slot that works for you.</span>{" "}
-                    <button onClick={() => setSubmitted(false)} className="underline" style={{ color: '#15803d' }}>
+                  <p className="text-sm font-semibold text-[#15803d] dark:text-[#5FE07D]">Booking calendar opened!</p>
+                  <p className="text-xs mt-0.5 opacity-80 text-[#166534] dark:text-[#9CA3AF]">
+                    <span>Pick a time slot that works for you.</span>{" "}
+                    <button onClick={() => setSubmitted(false)} className="underline text-[#15803d] dark:text-[#5FE07D]">
                       Try a different email
                     </button>
                   </p>

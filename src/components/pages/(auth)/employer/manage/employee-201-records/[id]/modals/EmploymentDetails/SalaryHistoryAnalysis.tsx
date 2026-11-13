@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react";
 
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import html2canvas from '@/helpers/captureLight';
 
 import { ArrowPathIcon, TrashIcon } from "@heroicons/react/24/outline";
 
@@ -254,10 +254,10 @@ export default function SalaryHistoryAnalysis({
           type="button"
           onClick={handleExportPdf}
           disabled={showLoading}
-          className={`rounded-md border border-[#355fd0] px-2 py-1 text-xs ${
+          className={`rounded-md border border-savoy-blue px-2 py-1 text-xs ${
             showLoading
-              ? "cursor-not-allowed opacity-60 text-[#355fd0]"
-              : "text-[#355fd0] hover:bg-[#355fd0]/5"
+              ? "cursor-not-allowed opacity-60 text-savoy-blue"
+              : "text-savoy-blue hover:bg-savoy-blue/5"
           }`}
           title={showLoading ? "Please wait…" : "Export to PDF"}
         >
@@ -364,7 +364,7 @@ export default function SalaryHistoryAnalysis({
                 className={`rounded-md border px-3 py-2 text-sm ${
                   notesLoading || notesError
                     ? "cursor-not-allowed border-gray-300 text-gray-400"
-                    : "border-[#355fd0] text-[#355fd0] hover:bg-[#355fd0]/5"
+                    : "border-savoy-blue text-savoy-blue hover:bg-savoy-blue/5"
                 }`}
                 title={notesError ? "Fix the error before adding." : undefined}
               >
@@ -379,7 +379,7 @@ export default function SalaryHistoryAnalysis({
                     onChange={(e) => setDraft(e.target.value)}
                     rows={3}
                     placeholder="Write an HR note..."
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#355fd0]"
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-savoy-blue"
                   />
                   <div className="flex items-center gap-2">
                     <button
@@ -387,7 +387,7 @@ export default function SalaryHistoryAnalysis({
                       type="button"
                       onClick={saveNote}
                       disabled={!draft.trim() || isSaving}
-                      className="rounded-md bg-[#355fd0] px-4 py-2 text-sm text-white disabled:opacity-50"
+                      className="rounded-md bg-savoy-blue px-4 py-2 text-sm text-white disabled:opacity-50"
                     >
                       {isSaving ? "Saving…" : "Save"}
                     </button>

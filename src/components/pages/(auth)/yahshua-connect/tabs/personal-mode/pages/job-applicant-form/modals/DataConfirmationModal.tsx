@@ -77,11 +77,11 @@ const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) =>
               <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md'>
                 <div className='mb-4'>
                   <div className='flex p-2'>
-                    <h3 className='flex-1 text-[#2C3F58] text-xl px-4 mb-4 font-semibold text-center'>
+                    <h3 className='flex-1 text-indigo-dye text-xl px-4 mb-4 font-semibold text-center'>
                       YAHSHUA-ABBA Privacy Statement for Web App
                     </h3>
                     <XCircleIcon
-                      className='w-[19px] h-[19px] text-[#ACB9CB] cursor-pointer mt-1'
+                      className='w-[19px] h-[19px] text-hris-line cursor-pointer mt-1'
                       onClick={handleCancel}
                     />
                   </div>

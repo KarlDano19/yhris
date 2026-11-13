@@ -1,0 +1,270 @@
+/* =============================================================================
+   DARK THEME — what Tailwind classes can't reach
+   Applied when <html> has the .dark class (see src/helpers/theme.ts).
+
+   Most of the app needs nothing here: every Tailwind color (gray-*, red-*,
+   savoy-blue, hris-*, white, …) is a CSS variable that switches on its own
+   (see tailwind.theme.js). This file only covers:
+     1. the page base and legacy tokens,
+     2. third-party widgets that ship their own CSS or inline styles,
+     3. raw hex colors baked into SVG icon attributes.
+   Before adding a rule, prefer a palette class in the component instead.
+   ============================================================================= */
+
+/* -------------------------------------------------------------------------- */
+/* 1. Base                                                                     */
+/* -------------------------------------------------------------------------- */
+html.dark {
+  /* Legacy tokens, still read by a few `dark:` classes (e.g. dark:bg-[var(--subtle-bg)]) */
+  --primary: #5B8AFF;
+  --primary-yellow: #FFB800;
+  --success: #5FE07D;
+  --error: #FF8B6B;
+  --warning: #FFD666;
+  --bg: #0F1419;
+  --body-text: #E8EAED;
+  --card-bg: #1A1F26;
+  --subtle-bg: #1A1F26;
+  --muted: #9CA3AF;
+}
+
+html.dark body {
+  background-color: #0F1419;
+  color: rgb(var(--t-gray-900));
+}
+
+/* Toggle-switch knobs (after:bg-white) stay light so they stand out on the dark track */
+html.dark .after\:bg-white::after {
+  background-color: #E5E7EB;
+}
+
+/* Brand-yellow buttons keep dark text: their background stays yellow in both themes.
+   An explicit text-white on the element is respected. */
+html.dark :is(.bg-hris-yellow, .bg-yellow-400, .bg-amber-400):not(.text-white),
+html.dark :is(.bg-hris-yellow, .bg-yellow-400, .bg-amber-400) :is(.text-black, .text-indigo-dye) {
+  color: #111827;
+}
+
+/* Scrollbars (light versions live in globals.css) */
+html.dark ::-webkit-scrollbar-track {
+  background: #161B22;
+}
+
+html.dark ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4B5563;
+}
+
+html.dark * {
+  scrollbar-color: #4B5563 #161B22;
+}
+
+html.dark .hide-scrollbar {
+  scrollbar-color: transparent transparent;
+}
+
+html.dark .hide-scrollbar:hover {
+  scrollbar-color: #4B5563 #161B22;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. SVG icons with hard-coded brand colors                                   */
+/* -------------------------------------------------------------------------- */
+html.dark svg [fill="#2C3F58"],
+html.dark svg[fill="#2C3F58"] {
+  fill: rgb(var(--t-indigo-dye));
+}
+
+html.dark svg [stroke="#2C3F58"],
+html.dark svg[stroke="#2C3F58"] {
+  stroke: rgb(var(--t-indigo-dye));
+}
+
+html.dark svg [stroke="#ACB9CB"] {
+  stroke: rgb(var(--t-hris-line));
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3a. react-select                                                            */
+/* Matches both prefixed instances (classNamePrefix="select") and unprefixed    */
+/* ones through react-select's emotion labels (css-xxxx-control, -menu, …).     */
+/* Only background and text are set, so custom error borders still show.        */
+/* -------------------------------------------------------------------------- */
+html.dark :is([class*="select__control"], [class*="css-"][class*="-control"]) {
+  background-color: rgb(var(--c-white));
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark :is([class*="select__menu"], [class*="css-"][class*="-menu"], [class*="css-"][class*="-MenuList"]) {
+  background-color: rgb(var(--c-white));
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark :is([class*="select__option"], [class*="css-"][class*="-option"]) {
+  background-color: transparent;
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark :is([class*="select__option"], [class*="css-"][class*="-option"]):hover,
+html.dark [class*="select__option--is-focused"] {
+  background-color: rgb(var(--c-gray-100));
+}
+
+html.dark :is([class*="select__option"], [class*="css-"][class*="-option"])[aria-selected="true"],
+html.dark [class*="select__option--is-selected"] {
+  background-color: rgb(var(--c-blue-100));
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark :is(
+  [class*="select__single-value"], [class*="css-"][class*="-singleValue"],
+  [class*="select__input"], [class*="css-"][class*="-Input"],
+  [class*="select__multi-value__label"], [class*="css-"][class*="-MultiValueLabel"]
+) {
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark :is([class*="select__placeholder"], [class*="css-"][class*="-placeholder"]) {
+  color: rgb(var(--t-gray-500));
+}
+
+html.dark :is([class*="select__multi-value"], [class*="css-"][class*="-multiValue"]) {
+  background-color: rgb(var(--c-gray-100));
+}
+
+html.dark :is([class*="select__indicator"], [class*="css-"][class*="-indicatorContainer"]) {
+  color: rgb(var(--t-gray-500));
+}
+
+html.dark :is([class*="select__indicator-separator"], [class*="css-"][class*="-indicatorSeparator"]) {
+  background-color: rgb(var(--c-gray-300));
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3b. react-datepicker                                                        */
+/* -------------------------------------------------------------------------- */
+html.dark .react-datepicker,
+html.dark .react-datepicker__header,
+html.dark .react-datepicker__month-container,
+html.dark .react-datepicker__time-container,
+html.dark .react-datepicker__time,
+html.dark .react-datepicker__time-box,
+html.dark .react-datepicker__year-dropdown,
+html.dark .react-datepicker__month-dropdown,
+html.dark .react-datepicker__month-year-dropdown {
+  background-color: rgb(var(--c-white));
+  border-color: rgb(var(--c-gray-200));
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark .react-datepicker__current-month,
+html.dark .react-datepicker-time__header,
+html.dark .react-datepicker-year-header,
+html.dark .react-datepicker__day-name,
+html.dark .react-datepicker__day,
+html.dark .react-datepicker__time-name,
+html.dark .react-datepicker__time-list-item {
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark .react-datepicker__day:hover,
+html.dark .react-datepicker__time-list-item:hover,
+html.dark .react-datepicker__year-option:hover,
+html.dark .react-datepicker__month-option:hover {
+  background-color: rgb(var(--c-gray-100));
+}
+
+html.dark .react-datepicker__day--disabled,
+html.dark .react-datepicker__day--outside-month {
+  color: rgb(var(--t-gray-500));
+}
+
+html.dark .react-datepicker__day--selected,
+html.dark .react-datepicker__day--keyboard-selected,
+html.dark .react-datepicker__day--in-range,
+html.dark .react-datepicker__day--in-selecting-range {
+  background-color: rgb(var(--c-savoy-blue));
+  color: #FFFFFF;
+}
+
+html.dark .react-datepicker__year-select,
+html.dark .react-datepicker__month-select {
+  background-color: rgb(var(--c-white));
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark .react-datepicker__triangle::before,
+html.dark .react-datepicker__triangle::after {
+  border-bottom-color: rgb(var(--c-white)) !important;
+  fill: rgb(var(--c-white));
+  color: rgb(var(--c-white));
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3c. ReactQuill editor                                                       */
+/* -------------------------------------------------------------------------- */
+html.dark .ql-toolbar.ql-snow,
+html.dark .ql-container.ql-snow {
+  background-color: rgb(var(--c-white));
+  border-color: rgb(var(--c-gray-200));
+  color: rgb(var(--t-gray-900));
+}
+
+html.dark .ql-editor {
+  caret-color: rgb(var(--t-gray-900));
+}
+
+html.dark .ql-editor.ql-blank::before {
+  color: rgb(var(--t-gray-500));
+}
+
+html.dark .ql-snow .ql-stroke {
+  stroke: rgb(var(--t-gray-700));
+}
+
+html.dark .ql-snow .ql-fill,
+html.dark .ql-snow .ql-stroke.ql-fill {
+  fill: rgb(var(--t-gray-700));
+}
+
+html.dark .ql-snow .ql-picker,
+html.dark .ql-snow .ql-picker-label {
+  color: rgb(var(--t-gray-700));
+}
+
+html.dark .ql-snow .ql-picker-options {
+  background-color: rgb(var(--c-white));
+  border-color: rgb(var(--c-gray-200));
+}
+
+html.dark .ql-snow.ql-toolbar button:hover .ql-stroke,
+html.dark .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+html.dark .ql-snow .ql-picker-label:hover .ql-stroke {
+  stroke: rgb(var(--t-savoy-blue));
+}
+
+html.dark .ql-snow.ql-toolbar button:hover .ql-fill,
+html.dark .ql-snow.ql-toolbar button.ql-active .ql-fill {
+  fill: rgb(var(--t-savoy-blue));
+}
+
+html.dark .ql-snow.ql-toolbar button:hover,
+html.dark .ql-snow.ql-toolbar button.ql-active,
+html.dark .ql-snow .ql-picker-label:hover,
+html.dark .ql-snow .ql-picker-item:hover,
+html.dark .ql-snow .ql-picker-item.ql-selected {
+  color: rgb(var(--t-savoy-blue));
+}
+
+html.dark .ql-snow .ql-tooltip {
+  background-color: rgb(var(--c-white));
+  border-color: rgb(var(--c-gray-200));
+  color: rgb(var(--t-gray-900));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+html.dark .ql-snow .ql-tooltip input[type="text"] {
+  background-color: rgb(var(--c-gray-50));
+  border-color: rgb(var(--c-gray-300));
+  color: rgb(var(--t-gray-900));
+}

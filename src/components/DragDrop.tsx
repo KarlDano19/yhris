@@ -85,7 +85,7 @@ const DragDrop = ({ setValue }: { setValue?: Function }) => {
         {...getRootProps({
           className: `${
             files.length > 0 && 'p-4'
-          } min-h-fit border-[1px] border-[#ACB9CB] rounded-lg`,
+          } min-h-fit border-[1px] border-hris-line rounded-lg`,
         })}
       >
         <input {...getInputProps()} />

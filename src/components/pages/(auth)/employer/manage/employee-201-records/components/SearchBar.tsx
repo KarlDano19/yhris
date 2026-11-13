@@ -27,7 +27,7 @@ function SearchBar({ value = "", onChange }: Props) {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Search…"
-        className="flex-1 border border-gray-200 bg-white px-3 py-2.5 text-sm rounded-md outline-none ring-0 placeholder:text-gray-400 focus:border-[#355fd0]"
+        className="flex-1 border border-gray-200 bg-white px-3 py-2.5 text-sm rounded-md outline-none ring-0 placeholder:text-gray-400 focus:border-savoy-blue"
       />
       <button
         type="button"

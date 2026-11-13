@@ -235,14 +235,14 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
         <div className='flex justify-end gap-3 px-6 py-4 border-t border-gray-100'>
           <button
             onClick={handleCloseModal}
-            className='px-4 py-2 text-sm font-semibold text-[#355FD0] border border-[#355FD0] rounded-lg hover:bg-blue-50 transition-colors'
+            className='px-4 py-2 text-sm font-semibold text-savoy-blue border border-savoy-blue rounded-lg hover:bg-blue-50 transition-colors'
           >
             Cancel
           </button>
           <button
             onClick={handleAddTask}
             disabled={!input.trim() || isCreating}
-            className='px-4 py-2 text-sm font-semibold text-white bg-[#355FD0] rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+            className='px-4 py-2 text-sm font-semibold text-white bg-savoy-blue rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {isCreating ? 'Adding...' : 'Add Task'}
           </button>

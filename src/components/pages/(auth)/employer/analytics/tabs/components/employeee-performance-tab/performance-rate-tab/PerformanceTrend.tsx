@@ -211,10 +211,10 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({
 
   return (
     <>
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex justify-between items-start mb-4">
           <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 mt-1"
+            className="p-2 hover:bg-gray-100 rounded border-2 border-hris-line flex-shrink-0 mt-1"
             onClick={() => setIsFilterModalOpen(true)}
           >
             <FilterLogo className="w-5 h-5" />

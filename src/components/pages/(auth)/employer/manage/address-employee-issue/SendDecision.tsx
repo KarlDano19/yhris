@@ -2,7 +2,7 @@ import React, { Dispatch } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
-import { T_SendDecisionModal, T_DecisionAttachmentViewModal } from '@/types/globals';
+import { T_SendDecisionModal, T_DecisionAttachmentViewModal, T_ReceiveOptionModal } from '@/types/globals';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import { formatDateToLocal } from '@/helpers/date';
 
@@ -17,7 +17,7 @@ const SendDecision = ({
   setIsSendDecisionModalOpen,
   setIsUploadDecisionAttachmentModalOpen,
   setIsDecisionAttachmentViewModalOpen,
-  setReleased,
+  setIsReceiveOptionModalOpen,
   loadingItemId,
   hasInvestigationReport,
   isNTEReceived,
@@ -31,7 +31,7 @@ const SendDecision = ({
   setIsSendDecisionModalOpen: Dispatch<T_SendDecisionModal>;
   setIsUploadDecisionAttachmentModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
   setIsDecisionAttachmentViewModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
-  setReleased: any;
+  setIsReceiveOptionModalOpen: Dispatch<T_ReceiveOptionModal>;
   loadingItemId: string | null;
   hasInvestigationReport?: boolean;
   isNTEReceived?: boolean;
@@ -63,6 +63,13 @@ const SendDecision = ({
   if (isDecisionReceived) {
     shouldDisableSendDecision = true;
   }
+
+  // HR moved the case forward without a signed decision and the employee has not signed since
+  const isProceededWithoutSignedCopy =
+    isDecisionReceived &&
+    !!employeeIssueDetails?.decision_receipt_type &&
+    employeeIssueDetails.decision_receipt_type !== 'signed_copy' &&
+    !employeeIssueDetails?.employee_signature;
 
   // Format decision_received_date as MM/DD/YYYY
   const formattedReceivedDate = formatDateToLocal(employeeIssueDetails?.decision_received_date);
@@ -107,16 +114,26 @@ const SendDecision = ({
       <div>
         <button
           className={classNames(
-            isDecisionReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
+            isProceededWithoutSignedCopy
+              ? 'bg-amber-500 text-white'
+              : isDecisionReceived
+              ? 'bg-savoy-blue text-white'
+              : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={true}
+          disabled={!isDecisionSent || isDecisionReceived}
           data-tooltip-id='decision-received-tooltip'
-          data-tooltip-html={isDecisionReceived ?
-            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when employee responds to the decision' :
-            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when employee responds to the decision'}
+          data-tooltip-html={
+            isProceededWithoutSignedCopy
+              ? 'Proceeded without a signed decision'
+              : isDecisionReceived
+              ? 'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span>'
+              : !isDecisionSent
+              ? 'Decision must be sent before marking as received'
+              : 'Click to upload the signed decision if the employee does not respond via email'
+          }
           data-tooltip-place='bottom'
-          onClick={() => setReleased(id, 'decision')}
+          onClick={() => setIsReceiveOptionModalOpen({ isOpen: true, id, type: 'decision' })}
         >
           {isLoading && (
             <div role='status'>
@@ -139,7 +156,7 @@ const SendDecision = ({
               <span className='sr-only'>Loading...</span>
             </div>
           )}
-          {!isLoading && (isDecisionReceived ? 'Received' : 'Receive')}
+          {!isLoading && (isProceededWithoutSignedCopy ? 'Proceed' : isDecisionReceived ? 'Received' : 'Receive')}
         </button>
       </div>
       {isDecisionReceived && (

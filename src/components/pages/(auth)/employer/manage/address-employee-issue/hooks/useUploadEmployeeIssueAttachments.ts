@@ -15,6 +15,7 @@ type UploadParams = {
   prepared_by?: string;
   reviewed_by?: string;
   hr_signature?: File;
+  use_standard_nte?: boolean;
 };
 
 async function uploadEmployeeIssueAttachments(params: UploadParams) {
@@ -32,6 +33,7 @@ async function uploadEmployeeIssueAttachments(params: UploadParams) {
       prepared_by,
       reviewed_by,
       hr_signature,
+      use_standard_nte,
     } = params;
 
     const formData = new FormData();
@@ -47,6 +49,7 @@ async function uploadEmployeeIssueAttachments(params: UploadParams) {
     if (prepared_by) formData.append('prepared_by', prepared_by);
     if (reviewed_by) formData.append('reviewed_by', reviewed_by);
     if (hr_signature) formData.append('hr_signature', hr_signature);
+    if (use_standard_nte !== undefined) formData.append('use_standard_nte', String(use_standard_nte));
 
     const config = {
       method: 'PATCH',

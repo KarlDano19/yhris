@@ -16,6 +16,7 @@ import Pagination from '@/components/Pagination';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
 import useRegenerateNTEPDF from './hooks/useRegenerateNTEPDF';
+import useManualReceiveEmployeeIssue from './hooks/useManualReceiveEmployeeIssue';
 import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
 import NTEAttachmentViewModal from './modals/NTEAttachmentViewModal';
 import UploadDecisionAttachmentModal from './modals/UploadDecisionAttachment';
@@ -35,6 +36,8 @@ import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
+import ReceiveOptionModal from './modals/ReceiveOptionModal';
+import ManualReceiveUploadModal from './modals/ManualReceiveUploadModal';
 import SendDecision from './SendDecision';
 
 import {
@@ -45,6 +48,8 @@ import {
   T_UploadEmployeeIssueAttachmentModal,
   T_NTEAttachmentViewModal,
   T_DecisionAttachmentViewModal,
+  T_ReceiveOptionModal,
+  T_ManualReceivePayload,
 } from '@/types/globals';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -100,6 +105,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState<any>(null);
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const [isReceiveOptionModalOpen, setIsReceiveOptionModalOpen] = useState<T_ReceiveOptionModal | null>(null);
+  const [isManualReceiveUploadModalOpen, setIsManualReceiveUploadModalOpen] =
+    useState<T_ReceiveOptionModal | null>(null);
   const [isNTEConfirmOpen, setIsNTEConfirmOpen] = useState(false);
   const [pendingNTEData, setPendingNTEData] = useState<any>(null);
   const [isDecisionConfirmOpen, setIsDecisionConfirmOpen] = useState(false);
@@ -115,6 +123,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
+  const { mutate: manualReceive, isLoading: isManualReceiving } = useManualReceiveEmployeeIssue();
   const { data: employeeIssueDetails, isLoading: isLoadingNTEDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
   const { data: decisionEmployeeIssueDetails, isLoading: isLoadingDecisionDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
   const {
@@ -160,49 +169,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [employeeIssueDetails, isSendNTEModalOpen]);
 
-  const setReleased = (id: string, emailType: string) => {
-    const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
-    const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
-    const currentDate = new Date();
-
-    // Update local state for immediate UI feedback
-    if (emailType === 'nte') {
-      employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
-      employeeIssueItemsCopy[itemIndex].incidentReceivedDate = formatDateToLocal(currentDate.toISOString());
-    }
-    // if (emailType === 'decision') {
-    //   employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
-    //   employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
-    // }
+  // HR records the NTE / decision as received, with the signed copy or with a reason for proceeding without it
+  const handleManualReceive = (payload: T_ManualReceivePayload) => {
+    if (!isManualReceiveUploadModalOpen) return;
+    const { id, type } = isManualReceiveUploadModalOpen;
 
     // Track which item is loading
-    setLoadingItemId(`${id}-${emailType}`);
+    setLoadingItemId(`${id}-${type}`);
 
-    // Create a clean payload with ONLY the fields we need to send
-    const payload = {
-      id: id,
-      actionType: 'received',
-      emailType: emailType,
-      dateReceived: currentDate,
-    };
-
-    const callbackReq = {
-      onSuccess: (data: any) => {
-        setLoadingItemId(null);
-        setEmployeeIssueItems([...employeeIssueItemsCopy]);
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-        if (refetch) {
-          refetch();
-        }
-      },
-      onError: (err: any) => {
-        setLoadingItemId(null);
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
-      },
-    };
-    mutate(payload, callbackReq);
+    manualReceive(
+      { id, emailType: type, ...payload, dateReceived: new Date() },
+      {
+        onSuccess: (data: any) => {
+          setLoadingItemId(null);
+          setIsManualReceiveUploadModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: Error) => {
+          setLoadingItemId(null);
+          toast.custom(() => <CustomToast message={err.message} type='error' />, {
+            duration: 7000,
+          });
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -719,7 +712,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setIsSendNTEModalOpen={setIsSendNTEModalOpen}
                 setIsUploadEmployeeIssueAttachmentModalOpen={setIsUploadEmployeeIssueAttachmentModalOpen}
                 setNTEAttachmentViewModalOpen={setNTEAttachmentViewModalOpen}
-                setReleased={setReleased}
+                setIsReceiveOptionModalOpen={setIsReceiveOptionModalOpen}
                 loadingItemId={loadingItemId}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
                 isInvestigated={item.isInvestigated}
@@ -746,7 +739,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
                 setIsUploadDecisionAttachmentModalOpen={setIsUploadDecisionAttachmentModalOpen}
                 setIsDecisionAttachmentViewModalOpen={setIsDecisionAttachmentViewModalOpen}
-                setReleased={setReleased}
+                setIsReceiveOptionModalOpen={setIsReceiveOptionModalOpen}
                 loadingItemId={loadingItemId}
                 hasInvestigationReport={hasInvestigationReport}
                 isNTEReceived={item.isNTEReceived === true}
@@ -1162,6 +1155,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <DecisionAttachmentViewModal
           isOpen={isDecisionAttachmentViewModalOpen}
           setIsOpen={setIsDecisionAttachmentViewModalOpen}
+        />
+      )}
+      <ReceiveOptionModal
+        isOpen={isReceiveOptionModalOpen}
+        setIsOpen={setIsReceiveOptionModalOpen}
+        onSelectManualUpload={(data) => {
+          setIsReceiveOptionModalOpen(null);
+          setIsManualReceiveUploadModalOpen(data);
+        }}
+      />
+      {isManualReceiveUploadModalOpen && (
+        <ManualReceiveUploadModal
+          isOpen={isManualReceiveUploadModalOpen}
+          setIsOpen={setIsManualReceiveUploadModalOpen}
+          onConfirm={handleManualReceive}
+          isLoading={isManualReceiving}
         />
       )}
 

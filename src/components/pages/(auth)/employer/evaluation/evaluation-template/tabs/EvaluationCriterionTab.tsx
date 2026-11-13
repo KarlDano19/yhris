@@ -310,7 +310,7 @@ function EvaluationCriterionTab({
                                   <div {...provided.dragHandleProps} className='pt-6'>
                                     <MoveIcon />
                                   </div>
-                                  <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
+                                  <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-hris-line py-6 px-4'>
                                     <input
                                       type='text'
                                       placeholder='Enter Section Title...'
@@ -335,7 +335,7 @@ function EvaluationCriterionTab({
                                       className={`flex items-center h-fit border rounded-xl p-2 space-y-2 mb-2 ${
                                         currentScoreSum >= totalScore 
                                           ? 'border-gray-300 bg-gray-100 cursor-not-allowed' 
-                                          : 'border-[#ACB9CB] cursor-pointer'
+                                          : 'border-hris-line cursor-pointer'
                                       }`}
                                       data-tooltip-id='add-section-tooltip'
                                       data-tooltip-content={
@@ -352,7 +352,7 @@ function EvaluationCriterionTab({
                                     </div>
                                     <Tooltip id='add-section-tooltip' style={{ fontSize: '10px' }} />
                                     <div
-                                      className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
+                                      className='flex items-center h-fit border rounded-xl border-hris-line p-2 space-y-2 mb-2 cursor-pointer'
                                       data-tooltip-id='delete-section-tooltip'
                                       data-tooltip-content='Delete section'
                                       data-tooltip-place='left'

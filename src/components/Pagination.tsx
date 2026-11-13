@@ -64,7 +64,7 @@ const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSi
   const pageSizes = pageSizesToUse();
 
   return (
-    <div className='my-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+    <div className='pagination-wrapper my-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
       {/* Row 1: Total Records (left on all screens), Records per page (right on mobile, grouped with pagination on desktop) */}
       <div className="flex flex-row justify-between items-center w-full sm:w-auto">
         <p className='text-sm text-gray-500'>{'Total Record/s: '}{pagination.totalRecords}</p>
@@ -106,7 +106,7 @@ const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSi
           pageLinkClassName='px-2 py-1'
           previousLinkClassName='h-full w-full'
           nextLinkClassName=''
-          activeClassName='bg-gray-300'
+          activeClassName='bg-gray-300 dark:bg-gray-600'
         />
       </div>
     </div>

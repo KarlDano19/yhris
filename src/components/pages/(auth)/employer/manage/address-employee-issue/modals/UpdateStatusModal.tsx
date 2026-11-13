@@ -6,6 +6,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import { RichTextView } from '@/components/common/RichTextEditor';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
@@ -237,11 +238,9 @@ export default function UpdateStatusModal({
                       Brief Background
                     </label>
                     <div className='mt-2'>
-                      <textarea
-                        rows={6}
-                        value={selectedIssue?.brief_background || ''}
-                        readOnly
-                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 bg-gray-100 resize-none sm:text-sm sm:leading-6'
+                      <RichTextView
+                        value={selectedIssue?.brief_background}
+                        className='max-h-48 overflow-y-auto rounded-md bg-gray-100 py-1.5 px-3 ring-1 ring-inset ring-gray-300'
                       />
                     </div>
                   </div>

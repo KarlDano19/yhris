@@ -42,7 +42,7 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
         <div className="flex items-center justify-center py-8">
           <LoadingSpinner size="lg" color="yellow" />
@@ -54,7 +54,7 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
   // Error state
   if (error) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
         <div className="flex items-center justify-center py-8">
           <div className="text-red-500">Error loading applicant data</div>
@@ -66,7 +66,7 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
   // No data state
   if (!filteredApplicantData || filteredApplicantData.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
@@ -78,13 +78,13 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+    <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
       
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b-2 border-[#ACB9CB]">
+            <tr className="border-b-2 border-hris-line">
               <th className="text-center py-3 px-2 font-semibold text-gray-700">Status</th>
               <th className="text-center py-3 px-2 font-semibold text-gray-700">Count</th>
               <th className="text-center py-3 px-2 font-semibold text-gray-700">Percentage</th>

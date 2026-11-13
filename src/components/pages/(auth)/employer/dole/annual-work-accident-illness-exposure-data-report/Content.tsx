@@ -5,7 +5,7 @@ import React, { useEffect, useState, Fragment, useRef, forwardRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query';
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
+import html2canvas from '@/helpers/captureLight';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
 import { MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';

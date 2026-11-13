@@ -38,15 +38,15 @@ const LpFinalCTA = () => {
   };
 
   return (
-    <section id="demo" className="py-28 md:py-36" style={{ background: '#ffffff' }}>
+    <section id="demo" className="py-28 md:py-36 bg-white dark:bg-[#0F1419]">
       <div className="lp-section-container">
         <ScrollFadeIn className="text-center">
           <span className="lp-section-label justify-center mb-6">GET STARTED</span>
-          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-gray-900 mb-5 leading-tight tracking-tight">
+          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-gray-900 dark:text-[#E8EAED] mb-5 leading-tight tracking-tight">
             Your HR team is doing too much manually. Let&apos;s fix that.
           </AnimatedHeadline>
           <ScrollFadeIn delay={100}>
-            <p className="text-gray-500 text-base md:text-lg mb-12 max-w-md mx-auto leading-relaxed">
+            <p className="text-gray-500 dark:text-[#9CA3AF] text-base md:text-lg mb-12 max-w-md mx-auto leading-relaxed">
               See how YAHSHUA HRIS works for your team. Free demo, no commitment, no credit card required.
             </p>
           </ScrollFadeIn>

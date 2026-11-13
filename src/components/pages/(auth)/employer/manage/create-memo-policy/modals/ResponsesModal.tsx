@@ -97,7 +97,7 @@ export default function EmployeeResponsesModal({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
-                <div className='flex bg-[#355FD0] p-4 items-center'>
+                <div className='flex bg-savoy-blue p-4 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold text-lg'>Employee Response/s</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
@@ -158,7 +158,7 @@ export default function EmployeeResponsesModal({
                               pageClassName='mx-1'
                               previousClassName='mx-1'
                               nextClassName='mx-1'
-                              activeClassName='text-[#355FD0] font-semibold'
+                              activeClassName='text-savoy-blue font-semibold'
                             />
                           </div>
                         </div>
@@ -213,7 +213,7 @@ export default function EmployeeResponsesModal({
                               pageClassName='mx-1'
                               previousClassName='mx-1'
                               nextClassName='mx-1'
-                              activeClassName='text-[#355FD0] font-semibold'
+                              activeClassName='text-savoy-blue font-semibold'
                             />
                           </div>
                         </div>

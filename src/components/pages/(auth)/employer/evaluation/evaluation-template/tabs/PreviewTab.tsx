@@ -51,7 +51,7 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
     <>
       <div className='w-full text-right px-4 pt-4'>
         <button
-          className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
+          className='bg-gray-100 border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
           onClick={() => setIsPreview(false)}
         >
           Back to editing

@@ -63,7 +63,7 @@ const SavingProgress = ({ open, onClose }: SavingProgressProps) => {
               </h1>
               <div className="w-[70%] bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                 <div
-                  className="bg-[#FFC107] h-2.5 rounded-full"
+                  className="bg-hris-yellow h-2.5 rounded-full"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>

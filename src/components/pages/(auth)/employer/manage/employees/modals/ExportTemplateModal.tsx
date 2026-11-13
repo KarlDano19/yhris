@@ -84,7 +84,7 @@ export default function ExportTemplateModal({
                   </div>
                   <div className='w-full h-6 bg-gray-200 rounded-full dark:bg-gray-700'>
                     <div
-                      className='h-6 bg-[#FFC107] font-medium text-blue-100 text-center p-0.5 leading-none rounded-full transition-all ease-in'
+                      className='h-6 bg-hris-yellow font-medium text-blue-100 text-center p-0.5 leading-none rounded-full transition-all ease-in'
                       style={{ width: `${progress}%` }}
                     >
                       {progress}%

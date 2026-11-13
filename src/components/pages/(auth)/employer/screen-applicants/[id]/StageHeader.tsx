@@ -154,7 +154,7 @@ export default function StageHeader({
   };
 
   return (
-    <div className={`flex items-center justify-between gap-2 rounded-md border border-[#ACB9CB] relative ${
+    <div className={`flex items-center justify-between gap-2 rounded-md border border-hris-line relative ${
       isDisabled ? 'opacity-60' : ''
     }`}>
       <button 
@@ -193,7 +193,7 @@ export default function StageHeader({
       <button
         onClick={handleDropdownToggle}
         type='button'
-        className='border border-[#ACB9CB] px-3 py-6 rounded-md hover:bg-gray-50'
+        className='border border-hris-line px-3 py-6 rounded-md hover:bg-gray-50'
         title={'Stage options'}
       >
         <SelectChevronDown />
@@ -201,7 +201,7 @@ export default function StageHeader({
 
       {/* Dropdown - only show if user has permissions */}
       {stageDropdownId === stage.id && (
-        <div className='grid absolute left-0 right-0 bg-white text-indigo-dye border border-[#ACB9CB] top-full z-20 p-4 gap-3 shadow-md' ref={dropdownRef}>
+        <div className='grid absolute left-0 right-0 bg-white text-indigo-dye border border-hris-line top-full z-20 p-4 gap-3 shadow-md' ref={dropdownRef}>
           <button
             onClick={() => {
               setStageDropdownId(null);

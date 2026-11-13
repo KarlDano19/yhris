@@ -35,7 +35,7 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Exit Reasons</h3>
         <div className="flex items-center justify-center h-32">
           <LoadingSpinner size="lg" color="yellow" />
@@ -46,7 +46,7 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Exit Reasons</h3>
         <div className="flex items-center justify-center h-32">
           <div className="text-red-500">Error loading exit reasons data</div>
@@ -57,13 +57,13 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
 
   return (
     <>
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
             {titleText ? `Exit Reasons for ${titleText}` : 'Exit Reasons'}
           </h3>
           <button
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
+            className="p-2 hover:bg-gray-100 rounded border-2 border-hris-line flex-shrink-0"
             onClick={() => setIsFilterModalOpen(true)}
           >
             <FilterLogo className="w-5 h-5" />
@@ -75,7 +75,7 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
             <div className="overflow-x-auto mb-6">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-[#ACB9CB]">
+                  <tr className="border-b-2 border-hris-line">
                     <th className="text-center py-3 px-2 font-semibold text-gray-700">Exit Reason</th>
                     <th className="text-center py-3 px-2 font-semibold text-gray-700">Count</th>
                   </tr>

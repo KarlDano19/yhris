@@ -180,7 +180,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({
   // Show fallback if no data
   if (departmentPerformanceData.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <h3 className="text-lg font-semibold text-gray-900 mb-8">
           Performance Rate by Department
         </h3>
@@ -196,7 +196,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({
 
   return (
     <>
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="bg-white p-6 rounded-lg border border-hris-line-alt">
         <div className="flex justify-between items-center mb-8">
           <h3 className="text-lg font-semibold text-gray-900">
             Performance Rate by Department

@@ -38,7 +38,7 @@ const InformationForm = ({ register, errors, setError, handleSubmit, SetCheckout
           id='email'
           type='email'
           className={classNames(
-            'w-full mt-2 border border-[#acb9cb] rounded-md text-[15px] p-[0.7rem]',
+            'w-full mt-2 border border-hris-line rounded-md text-[15px] p-[0.7rem]',
             errors.email ? 'is-invalid' : ''
           )}
           placeholder='Enter Email Address...'
@@ -55,7 +55,7 @@ const InformationForm = ({ register, errors, setError, handleSubmit, SetCheckout
           id='company_name'
           type='text'
           className={classNames(
-            'w-full mt-2 border border-[#acb9cb] rounded-md text-[15px] p-[0.7rem]',
+            'w-full mt-2 border border-hris-line rounded-md text-[15px] p-[0.7rem]',
             errors.company_name ? 'is-invalid' : ''
           )}
           placeholder='Enter Company Name...'
@@ -72,7 +72,7 @@ const InformationForm = ({ register, errors, setError, handleSubmit, SetCheckout
           id='company_address'
           type='text'
           className={classNames(
-            'w-full mt-2 border border-[#acb9cb] rounded-md text-[15px] p-[0.7rem]',
+            'w-full mt-2 border border-hris-line rounded-md text-[15px] p-[0.7rem]',
             errors.company_address ? 'is-invalid' : ''
           )}
           placeholder='Enter Company Address...'
@@ -89,7 +89,7 @@ const InformationForm = ({ register, errors, setError, handleSubmit, SetCheckout
           id='contact_number'
           type='text'
           className={classNames(
-            'w-full mt-2 mb-4 border border-[#acb9cb] rounded-md text-[15px] p-[0.7rem]',
+            'w-full mt-2 mb-4 border border-hris-line rounded-md text-[15px] p-[0.7rem]',
             errors.contact_number ? 'is-invalid' : ''
           )}
           placeholder='Enter Contact Number...'

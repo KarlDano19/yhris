@@ -494,7 +494,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
         <div className='mt-4'>
           <button
             type='button'
-            className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
+            className='px-4 py-2 rounded-md text-savoy-blue border-[1px] border-savoy-blue disabled:opacity-50'
             onClick={() => {
               if (isCvDocx()) {
                 setShowDocxDownloadModal(true);
@@ -577,14 +577,14 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
         <div className='mt-4'>
           <button
             type='button'
-            className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50 disabled:cursor-not-allowed mr-3'
+            className='px-4 py-2 rounded-md text-savoy-blue border-[1px] border-savoy-blue disabled:opacity-50 disabled:cursor-not-allowed mr-3'
             onClick={handleDownloadPDF}
             disabled={applicantProfile.screening_answers.length === 0 || isDownloadingPDF}
             title={applicantProfile.screening_answers.length === 0 ? 'No Screening Answers' : ''}
           >
             {isDownloadingPDF ? (
               <div className='flex items-center'>
-                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-[#355FD0] mr-2'></div>
+                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-savoy-blue mr-2'></div>
                 Downloading PDF...
               </div>
             ) : applicantProfile.screening_answers.length === 0 ? (
@@ -880,16 +880,16 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                     </p>
                     <button
                       type='button'
-                      className='inline-block px-6 py-2 rounded-md text-white bg-[#355FD0] hover:bg-blue-700'
+                      className='inline-block px-6 py-2 rounded-md text-white bg-savoy-blue hover:bg-blue-700'
                       onClick={handleDocxDownload}
                     >
                       Download CV/Resume
                     </button>
                   </div>
-                  <div className='flex justify-end p-4 border-t border-[#355FD0]'>
+                  <div className='flex justify-end p-4 border-t border-savoy-blue'>
                     <button
                       type='button'
-                      className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+                      className='border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]'
                       onClick={() => setShowDocxDownloadModal(false)}
                     >
                       Close
@@ -951,7 +951,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                           <button
                             className={classNames(
                               'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
-                              currentTab == 1 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                              currentTab == 1 ? 'bg-savoy-blue hover:bg-blue-700 text-white' : 'text-gray-400'
                             )}
                             onClick={() => setCurrentTab(1)}
                           >
@@ -962,7 +962,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                           <button
                             className={classNames(
                               'px-4 py-2 font-bold rounded-md whitespace-nowrap md:text-base w-full',
-                              currentTab == 2 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                              currentTab == 2 ? 'bg-savoy-blue hover:bg-blue-700 text-white' : 'text-gray-400'
                             )}
                             onClick={() => setCurrentTab(2)}
                           >
@@ -973,7 +973,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                           <button
                             className={classNames(
                               'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
-                              currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                              currentTab == 3 ? 'bg-savoy-blue hover:bg-blue-700 text-white' : 'text-gray-400'
                             )}
                             onClick={() => setCurrentTab(3)}
                           >
@@ -984,7 +984,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                           <button
                             className={classNames(
                               'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
-                              currentTab == 4 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                              currentTab == 4 ? 'bg-savoy-blue hover:bg-blue-700 text-white' : 'text-gray-400'
                             )}
                             onClick={() => setCurrentTab(4)}
                           >
@@ -996,7 +996,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                             <button
                               className={classNames(
                                 'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
-                                currentTab == 5 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                                currentTab == 5 ? 'bg-savoy-blue hover:bg-blue-700 text-white' : 'text-gray-400'
                               )}
                               onClick={() => setCurrentTab(5)}
                             >
@@ -1015,7 +1015,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                   {viewCV && renderResumeView()}
                 </div>
                 {!viewCV && (
-                  <div className='flex items-center gap-4 text-[15px] font-bold justify-end flex-wrap p-4 border-t-[1px] border-[#355FD0]'>
+                  <div className='flex items-center gap-4 text-[15px] font-bold justify-end flex-wrap p-4 border-t-[1px] border-savoy-blue'>
                     {hasTransferHistory && (
                       <button
                         type='button'
@@ -1039,18 +1039,18 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                     <button
                       onClick={handleClose}
                       type='button'
-                      className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+                      className='border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]'
                     >
                       Close
                     </button>
                   </div>
                 )}
                 {viewCV && (
-                  <div className='flex items-center gap-4 text-[15px] font-bold justify-start flex-wrap p-4 border-t-[1px] border-[#355FD0]'>
+                  <div className='flex items-center gap-4 text-[15px] font-bold justify-start flex-wrap p-4 border-t-[1px] border-savoy-blue'>
                     <button
                       onClick={() => setViewCV(false)}
                       type='button'
-                      className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+                      className='border border-savoy-blue rounded-lg py-2 px-6 text-savoy-blue hover:bg-savoy-blue/[.15]'
                     >
                       Go Back to Applicant Information
                     </button>

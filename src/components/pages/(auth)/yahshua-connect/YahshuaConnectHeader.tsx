@@ -11,6 +11,7 @@ import { Tooltip } from 'react-tooltip';
 
 import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 import CustomToast from '@/components/CustomToast';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
 import useLogout from '@/components/hooks/useLogout';
 import useRefreshToken from '@/components/hooks/useRefreshToken';
 import SessionExpirationModal from '@/components/SessionExpirationModal';
@@ -435,6 +436,8 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                       </p>
                     </div>
                     
+                    <ThemeSwitcher className='px-4 border-b border-gray-100' />
+                    
                     {/* Logout Button */}
                     <button
                       onClick={() => {
@@ -555,6 +558,8 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                           {profileData?.email}
                         </p>
                       </div>
+                      
+                      <ThemeSwitcher className='px-4 border-b border-gray-100' />
                       
                       {/* Logout Button */}
                       <button

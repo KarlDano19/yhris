@@ -27,7 +27,7 @@ const ProcessFlowButton = ({ label }: { label?: string }) => {
         data-tooltip-place='bottom'
       >
         <span className='sr-only'>View process flow documentation</span>
-        <RectangleGroupIcon className='h-6 w-6 text-blue-800' aria-hidden='true' />
+        {!label && <RectangleGroupIcon className='h-6 w-6 text-blue-800' aria-hidden='true' />}
         {label && <span>{label}</span>}
       </button>
       <Tooltip id='process-flow-button-tooltip' />

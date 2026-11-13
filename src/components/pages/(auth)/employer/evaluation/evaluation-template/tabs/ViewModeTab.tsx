@@ -43,18 +43,18 @@ function ViewModeTab({
                   <div className='flex justify-end pr-4'>
                     <button
                       onClick={() => setIsPreview(true)}
-                      className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
+                      className='bg-gray-100 border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
                     >
                       Preview
                     </button>
                   </div>
                 </div>
-                <div className='flex mt-2 w-full border rounded-xl border-[#ACB9CB] py-10 px-4 justify-center space-x-20'>
+                <div className='flex mt-2 w-full border rounded-xl border-hris-line py-10 px-4 justify-center space-x-20'>
                   <div
                     onClick={() => handleClickViewStyle('default')}
                     className={classNames(
                       'flex flex-col items-center border rounded-xl space-y-2 py-6 px-7 shadow-md hover:cursor-pointer',
-                      viewStyle === 'default' ? 'border-blue-600' : 'border-[#ACB9CB]'
+                      viewStyle === 'default' ? 'border-blue-600' : 'border-hris-line'
                     )}
                   >
                     <GearIcon fill={viewStyle === 'default' ? '#355FD0' : '#ACB9CB'} />
@@ -64,7 +64,7 @@ function ViewModeTab({
                     onClick={() => handleClickViewStyle('dropdown')}
                     className={classNames(
                       'flex flex-col items-center border rounded-xl space-y-2 py-6 px-4 shadow-md hover:cursor-pointer',
-                      viewStyle === 'dropdown' ? 'border-blue-600' : 'border-[#ACB9CB]'
+                      viewStyle === 'dropdown' ? 'border-blue-600' : 'border-hris-line'
                     )}
                   >
                     <DropdownIcon fill={viewStyle === 'dropdown' ? '#355FD0' : '#ACB9CB'} />
@@ -74,7 +74,7 @@ function ViewModeTab({
                     onClick={() => handleClickViewStyle('slider')}
                     className={classNames(
                       'flex flex-col items-center border rounded-xl space-y-2 py-6 px-8 shadow-md hover:cursor-pointer',
-                      viewStyle === 'slider' ? 'border-blue-600' : 'border-[#ACB9CB]'
+                      viewStyle === 'slider' ? 'border-blue-600' : 'border-hris-line'
                     )}
                   >
                     <SliderIcon fill={viewStyle === 'slider' ? '#355FD0' : '#ACB9CB'} />
