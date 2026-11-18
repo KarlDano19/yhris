@@ -4,7 +4,7 @@ import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
-  title: 'SSS, PhilHealth, Pag-IBIG Contribution Table 2026 by Salary',
+  title: 'SSS Contribution Table 2026: PhilHealth & Pag-IBIG Rates',
   description: 'Find your exact deduction: 2026 SSS, PhilHealth and Pag-IBIG tables by salary level, with employer vs employee share, EC and MPF, and worked payroll examples.',
   keywords: 'SSS contribution table 2026, PhilHealth contribution rate 2026, Pag-IBIG contribution 2026, SSS mandatory provident fund, Philippine statutory contributions 2026',
   openGraph: {
