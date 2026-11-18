@@ -37,7 +37,7 @@ const jsonLd = {
       "description": "13th month pay in the Philippines is one-twelfth of the total basic salary earned from January 1 to December 31, due by December 24 under PD 851. The formula, what counts as basic salary, worked examples including mid-year wage increases, the ₱90,000 tax-exempt cap, 2026 deadlines, and a calculator.",
       "image": "https://yahshuahris.com/blog/start-tracking-13th-month.png",
       "datePublished": "2026-09-25T00:00:00.000Z",
-      "dateModified": "2026-10-09T00:00:00.000Z",
+      "dateModified": "2026-10-29T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

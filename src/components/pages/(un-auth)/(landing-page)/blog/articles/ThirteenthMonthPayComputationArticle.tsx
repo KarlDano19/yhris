@@ -222,10 +222,10 @@ const ThirteenthMonthPayComputationArticle = () => {
               {/* CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS tracks 13th month pay automatically, every payroll run, all year.
+                  YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth and Pag-IBIG contributions.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Every cutoff, the system accrues what is owed. See your total 13th month liability anytime and walk into November with a number you already know.
+                  Book a free demo and ask how it handles 13th month pay across your cutoffs.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how YAHSHUA handles 13th month pay <ArrowRight className="w-4 h-4" />
