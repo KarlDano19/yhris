@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef } from "react";
 
 import { calculateMonthly } from "@/lib/yahshuaPricing";
+import { trackEvent } from "@/lib/analytics";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -259,6 +260,7 @@ export default function HrCostCalculatorContent() {
       // 409 means this email is already in Loops, which is fine. Anything else means the lead was not saved.
       if (!contactRes.ok && contactRes.status !== 409) {
         console.error("[hr-cost-calculator] Lead save failed with status", contactRes.status);
+        trackEvent("calculator_lead_failed", { status: contactRes.status, page_path: "/hr-cost-calculator" });
         setSubmitError("We could not save your details just now. Please try again in a moment.");
         return;
       }
@@ -296,12 +298,15 @@ export default function HrCostCalculatorContent() {
         .then((res) => {
           if (!res.ok) {
             console.error("[hr-cost-calculator] Report email failed with status", res.status);
+            trackEvent("calculator_email_failed", { status: res.status, page_path: "/hr-cost-calculator" });
           }
         })
         .catch((err) => {
           console.error("[hr-cost-calculator] Report email request failed", err);
+          trackEvent("calculator_email_failed", { status: 0, page_path: "/hr-cost-calculator" });
         });
 
+      trackEvent("calculator_complete", { employees: form.employees, months_to_roi: results.monthsToROI, page_path: "/hr-cost-calculator" });
       setStep(3);
     } catch {
       setSubmitError("Something went wrong. Please try again.");
@@ -436,7 +441,10 @@ export default function HrCostCalculatorContent() {
               </div>
 
               <button
-                onClick={() => setStep(2)}
+                onClick={() => {
+                  trackEvent("calculator_unlock_click", { employees: form.employees, page_path: "/hr-cost-calculator" });
+                  setStep(2);
+                }}
                 className="lp-btn-primary lp-btn-glow w-full sm:w-auto text-base px-10 py-4"
               >
                 Calculate My Report
@@ -480,7 +488,10 @@ export default function HrCostCalculatorContent() {
                 </div>
 
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => {
+                  trackEvent("calculator_unlock_click", { employees: form.employees, page_path: "/hr-cost-calculator" });
+                  setStep(2);
+                }}
                   className="mt-5 w-full bg-primary text-navy font-bold py-3 rounded-xl text-sm transition-all hover:brightness-110 active:scale-[0.97]"
                 >
                   Unlock Full Report

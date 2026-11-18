@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+
+import { trackEvent } from "@/lib/analytics";
 
 type Mode = "monthly" | "daily" | "varied";
 
@@ -36,6 +38,13 @@ const ThirteenthMonthCalculator = () => {
   const [endMonth, setEndMonth] = useState(11);
   const [unpaidDeductions, setUnpaidDeductions] = useState("0");
   const [perMonth, setPerMonth] = useState<string[]>(Array(12).fill(""));
+  const usedRef = useRef(false);
+  // One event per page view, on the first change or click inside the calculator.
+  const markUsed = () => {
+    if (usedRef.current) return;
+    usedRef.current = true;
+    trackEvent("calculator_use", { calculator: "13th_month", page_path: window.location.pathname });
+  };
 
   const monthsWorked = endMonth >= startMonth ? endMonth - startMonth + 1 : 0;
 
@@ -54,7 +63,7 @@ const ThirteenthMonthCalculator = () => {
   ];
 
   return (
-    <div style={{ border: "1px solid rgba(255,193,7,0.35)", borderRadius: "16px", padding: "1.5rem", background: "#FFFBF0", marginBottom: "2.5rem" }}>
+    <div onChangeCapture={markUsed} onClickCapture={markUsed} style={{ border: "1px solid rgba(255,193,7,0.35)", borderRadius: "16px", padding: "1.5rem", background: "#FFFBF0", marginBottom: "2.5rem" }}>
       <p style={{ fontWeight: 700, color: "#111827", fontSize: "1.05rem", margin: "0 0 0.25rem 0" }}>13th Month Pay Calculator (2026)</p>
       <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: "0 0 1.25rem 0" }}>
         Enter basic salary only. Leave out overtime, allowances, night differential, holiday pay, and COLA unless your company treats them as part of basic salary.

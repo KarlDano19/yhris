@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 import { YAHSHUA_PRICING, PRICING_LABELS, calculateMonthly, calculateVAT, calculateWithVAT } from "@/lib/yahshuaPricing";
+import { trackEvent } from "@/lib/analytics";
 
 interface LpPricingContentProps {
   isLoggedIn: boolean;
@@ -39,6 +40,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
   const isOverBase = employeeCount > EMPLOYEE_CAP;
 
   const handlePaidCTA = () => {
+    trackEvent("checkout_start_click", { cta_location: "pricing_paid_plan", logged_in: Boolean(isLoggedIn), page_path: "/pricing" });
     if (isLoggedIn) {
       router.push(`/checkout/hris/`);
     } else {
@@ -117,7 +119,10 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                       <div className="mt-auto">
                         <button
-                          onClick={() => router.push("/register")}
+                          onClick={() => {
+                            trackEvent("start_free_click", { cta_location: "pricing_free_plan", cta_text: "Start Free Plan", page_path: "/pricing" });
+                            router.push("/register");
+                          }}
                           className="w-full py-3 text-sm font-semibold text-gray-700 rounded-lg transition-opacity hover:opacity-80"
                           style={{ background: "#f3f4f6", border: "1px solid rgba(0,0,0,0.12)" }}
                         >
