@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import PayrollErrorsArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollErrorsArticle";
+import PayrollErrorsArticle, { payrollErrorsFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollErrorsArticle";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'What Payroll Errors Actually Cost Philippine MSMEs',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'SSS is now at 15%, PhilHealth at 5%, and BIR penalties run 25% surcharge plus 12% annual interest. If your payroll system was not updated, errors have been accumulating since January.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-06-22T00:00:00.000Z',
-    modifiedTime: '2026-06-22T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['philippine-payroll-errors-msme'].published),
+    modifiedTime: blogIso(BLOG_DATES['philippine-payroll-errors-msme'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "headline": "What Philippine Payroll Errors Actually Cost MSMEs",
       "description": "Philippine MSMEs running payroll on outdated SSS, PhilHealth, and BIR rates face surcharges of 25%, 12% annual interest, and up to 50,000 pesos in compromise penalties. Here is what the cost actually looks like.",
       "image": "https://yahshuahris.com/blog/payroll-errors-msme.png",
-      "datePublished": "2026-06-22T00:00:00.000Z",
-      "dateModified": "2026-06-22T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['philippine-payroll-errors-msme'].published),
+      "dateModified": blogIso(BLOG_DATES['philippine-payroll-errors-msme'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
@@ -53,6 +54,18 @@ const jsonLd = {
         "@id": "https://yahshuahris.com/blog/philippine-payroll-errors-msme"
       },
       "keywords": "payroll errors Philippines 2026, SSS contribution rate 2026, PhilHealth premium 2026, BIR withholding tax penalties Philippines, MSME payroll compliance Philippines"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://yahshuahris.com/blog/philippine-payroll-errors-msme#faq",
+      "mainEntity": payrollErrorsFaqs.map((f) => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.a
+        }
+      }))
     },
     {
       "@type": "BreadcrumbList",

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import FinalPayComputationArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/FinalPayComputationArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Final Pay Computation for Resigned Employees (DOLE)',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Final pay is due within 30 days of separation under DOLE Labor Advisory No. 06-20, a different clock than the employee\'s 30-day resignation notice. What must be included, a worked example, and the clearance rules.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-09-16T00:00:00.000Z',
-    modifiedTime: '2026-09-16T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['final-pay-computation-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['final-pay-computation-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/final-pay-computation-philippines#article",
       "headline": "Final Pay Computation for Resigned Employees: What DOLE's Labor Advisory Actually Requires",
       "description": "DOLE Labor Advisory No. 06, Series of 2020 requires final pay within 30 days of separation. What counts as final pay for a resigned employee, what does not (separation pay), a worked computation example, and the clearance and Certificate of Employment rules.",
-      "datePublished": "2026-09-16T00:00:00.000Z",
-      "dateModified": "2026-09-16T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['final-pay-computation-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['final-pay-computation-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

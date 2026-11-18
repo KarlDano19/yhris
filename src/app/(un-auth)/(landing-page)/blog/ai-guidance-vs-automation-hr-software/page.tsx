@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import AiGuidanceVsAutomationArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/AiGuidanceVsAutomationArticle";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'AI Guidance vs AI Automation in HR Software | YAHSHUA HRIS',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'An AI assistant that quotes you the SSS rate is not the same as a payroll system that applies it correctly. One informs. The other acts. The difference determines your compliance exposure.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-07-16T00:00:00.000Z',
-    modifiedTime: '2026-07-16T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['ai-guidance-vs-automation-hr-software'].published),
+    modifiedTime: blogIso(BLOG_DATES['ai-guidance-vs-automation-hr-software'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "headline": "Why \"Telling You the Rule\" Is Not Compliance: The Real Difference Between AI Guidance and AI Automation in HR Software",
       "description": "An AI assistant that quotes the SSS rate is not the same as a payroll system that applies it correctly. This article defines both categories, explains where guidance-only approaches create compliance gaps specific to Philippine payroll, and gives employers five concrete questions to determine which type of system they are running.",
       "image": "https://yahshuahris.com/blog/ai-guidance-vs-automation.png",
-      "datePublished": "2026-07-16T00:00:00.000Z",
-      "dateModified": "2026-07-16T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['ai-guidance-vs-automation-hr-software'].published),
+      "dateModified": blogIso(BLOG_DATES['ai-guidance-vs-automation-hr-software'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

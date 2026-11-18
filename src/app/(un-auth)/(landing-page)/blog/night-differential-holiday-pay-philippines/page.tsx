@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import NightDifferentialHolidayStackingArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/NightDifferentialHolidayStackingArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Night Differential and Holiday Pay Stacking | YAHSHUA HRIS',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'The exact stacking math for night differential, holiday pay, rest day premiums, and overtime under the Philippine Labor Code, including double holiday scenarios.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-08-20T00:00:00.000Z',
-    modifiedTime: '2026-08-20T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['night-differential-holiday-pay-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['night-differential-holiday-pay-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -34,8 +35,8 @@ const jsonLd = {
       "headline": "Night Differential and Holiday Pay: How the Rates Actually Stack",
       "description": "How night differential stacks with regular holiday, special non-working day, rest day, and overtime pay in the Philippines. Full rate tables and a worked example.",
       "image": "https://yahshuahris.com/blog/night-differential-holiday-stacking.png",
-      "datePublished": "2026-08-20T00:00:00.000Z",
-      "dateModified": "2026-08-20T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['night-differential-holiday-pay-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['night-differential-holiday-pay-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

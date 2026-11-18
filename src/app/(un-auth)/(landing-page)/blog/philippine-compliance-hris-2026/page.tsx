@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import PhilippineComplianceArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PhilippineComplianceArticle";
+import PhilippineComplianceArticle, { philippineComplianceFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PhilippineComplianceArticle";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Philippine HR Compliance 2026 | YAHSHUA HRIS',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'PhilHealth E-Claims 3.0, BIR income sourcing rules, and DOLE AERW: multiple compliance obligations are live right now. Here is what each one means and how to face all of them without drowning.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-06-22T00:00:00.000Z',
-    modifiedTime: '2026-06-22T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['philippine-compliance-hris-2026'].published),
+    modifiedTime: blogIso(BLOG_DATES['philippine-compliance-hris-2026'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "headline": "Philippine Compliance 2026: Why You Need One System, Not Five Checklists",
       "description": "PhilHealth E-Claims 3.0, BIR income sourcing rules, and DOLE AERW filing are all active in 2026. Here is what each compliance obligation means and why disconnected systems make it harder to manage.",
       "image": "https://yahshuahris.com/blog/why-one-system.png",
-      "datePublished": "2026-06-22T00:00:00.000Z",
-      "dateModified": "2026-06-22T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['philippine-compliance-hris-2026'].published),
+      "dateModified": blogIso(BLOG_DATES['philippine-compliance-hris-2026'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
@@ -53,6 +54,18 @@ const jsonLd = {
         "@id": "https://yahshuahris.com/blog/philippine-compliance-hris-2026"
       },
       "keywords": "PhilHealth E-Claims compliance Philippines, HRIS payroll Philippines 2026, DOLE AERW filing 2026, BIR RMC 38-2024 payroll, Philippine compliance deadlines"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://yahshuahris.com/blog/philippine-compliance-hris-2026#faq",
+      "mainEntity": philippineComplianceFaqs.map((f) => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.a
+        }
+      }))
     },
     {
       "@type": "BreadcrumbList",

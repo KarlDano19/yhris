@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import YearEndAnnualizationArticle, { annualizationFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/YearEndAnnualizationArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 const URL = 'https://yahshuahris.com/blog/year-end-tax-annualization-philippines-2026';
 
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
     description: 'A step-by-step guide to recomputing employees\' 2026 income tax in the December payroll, with worked examples and the January and February 2027 BIR filings.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-01T00:00:00.000Z',
-    modifiedTime: '2026-10-01T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['year-end-tax-annualization-philippines-2026'].published),
+    modifiedTime: blogIso(BLOG_DATES['year-end-tax-annualization-philippines-2026'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -36,8 +37,8 @@ const jsonLd = {
       "headline": "Year-End Tax Annualization 2026: How to Compute It, Plus BIR Form 2316 and 1604-C Deadlines",
       "description": "Year-end tax annualization is the employer's recomputation of each employee's income tax for the full year in the last December payroll. Steps, the 2026 tax table, what is not taxable, worked examples, special cases (previous employers, resignations, minimum wage earners), and the 2316, 1604-C, and substituted filing deadlines.",
       "image": "https://yahshuahris.com/blog/year-end-tax-annualization-2026.png",
-      "datePublished": "2026-10-01T00:00:00.000Z",
-      "dateModified": "2026-10-01T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['year-end-tax-annualization-philippines-2026'].published),
+      "dateModified": blogIso(BLOG_DATES['year-end-tax-annualization-philippines-2026'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import RetirementPayArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/RetirementPayArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Retirement Pay Law RA 7641: 22.5 Days Per Year, Formula',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Retirement pay is 22.5 days per year of service, not 15. Who qualifies, the formula with peso examples, who is exempt, and how to plan for it.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-23T00:00:00.000Z',
-    modifiedTime: '2026-10-23T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['retirement-pay-law-ra-7641-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['retirement-pay-law-ra-7641-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -57,8 +58,8 @@ const jsonLd = {
       "headline": "Retirement Pay Law (RA 7641): What Every Philippine Employer Must Set Aside",
       "description": "Under RA 7641, retirement pay is at least 22.5 days of pay per year of service for private-sector employees who retire at 60 or older with five years of service. Who qualifies, the formula with peso examples, who is exempt, tax treatment, and how employers should plan for it.",
       "image": "https://yahshuahris.com/blog/retirement-pay-law-ra-7641-philippines.png",
-      "datePublished": "2026-10-23T00:00:00.000Z",
-      "dateModified": "2026-10-23T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['retirement-pay-law-ra-7641-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['retirement-pay-law-ra-7641-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

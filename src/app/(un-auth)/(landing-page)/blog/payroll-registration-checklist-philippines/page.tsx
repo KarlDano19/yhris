@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import PayrollRegistrationChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollRegistrationChecklistArticle";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Philippine Payroll Registration Checklist | YAHSHUA HRIS',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'Step-by-step checklist for registering with all four government agencies before your first payroll. Correct order, required forms, fees, and remittance deadlines.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-07-15T00:00:00.000Z',
-    modifiedTime: '2026-07-15T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['payroll-registration-checklist-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['payroll-registration-checklist-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "headline": "The Philippine Business Payroll Setup Checklist: Registering with BIR, SSS, PhilHealth, and Pag-IBIG",
       "description": "Step-by-step checklist for registering a Philippine business with BIR, SSS, PhilHealth, and Pag-IBIG before processing payroll. Covers required forms, fees, correct registration sequence, and monthly remittance deadlines.",
       "image": "https://yahshuahris.com/blog/payroll-registration-checklist.png",
-      "datePublished": "2026-07-15T00:00:00.000Z",
-      "dateModified": "2026-07-15T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['payroll-registration-checklist-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['payroll-registration-checklist-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

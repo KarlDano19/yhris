@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Q4ComplianceCountdownArticle, { q4CountdownFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/Q4ComplianceCountdownArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 const URL = 'https://yahshuahris.com/blog/q4-payroll-compliance-deadlines-philippines-2026';
 
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
     description: 'Holidays, wage increases, monthly remittances, year-end tax, and 13th month pay from October to December 2026, plus what is due in January.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-01T00:00:00.000Z',
-    modifiedTime: '2026-10-01T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['q4-payroll-compliance-deadlines-philippines-2026'].published),
+    modifiedTime: blogIso(BLOG_DATES['q4-payroll-compliance-deadlines-philippines-2026'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -36,8 +37,8 @@ const jsonLd = {
       "headline": "Your Q4 Compliance Countdown: Every Payroll Deadline Between Now and December 24",
       "description": "Philippine payroll deadlines from October to December 2026: eight national holidays and special days, NCR's November 16 to 18 special days, minimum wage increases in Central Visayas, Bicol, and BARMM, monthly SSS, PhilHealth, Pag-IBIG, and BIR payments, year-end annualization, the December 24 13th month pay deadline, and January 2027 filings.",
       "image": "https://yahshuahris.com/blog/q4-payroll-compliance-countdown-2026.png",
-      "datePublished": "2026-10-01T00:00:00.000Z",
-      "dateModified": "2026-11-18T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['q4-payroll-compliance-deadlines-philippines-2026'].published),
+      "dateModified": blogIso(BLOG_DATES['q4-payroll-compliance-deadlines-philippines-2026'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

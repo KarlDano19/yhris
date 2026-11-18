@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import EmployeeVsContractorArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/EmployeeVsContractorArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Employee vs Independent Contractor Philippines: DOLE Rules',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Courts look at control, not the contract label. How the four-fold test and DOLE Department Order 174-17 decide classification, and what it costs on payroll.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-27T00:00:00.000Z',
-    modifiedTime: '2026-10-27T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['employee-vs-independent-contractor-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['employee-vs-independent-contractor-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -58,8 +59,8 @@ const jsonLd = {
       "headline": "Employee vs. Independent Contractor: How DOLE Classification Rules Affect Your Payroll Risk",
       "description": "In the Philippines, a worker is an employee or an independent contractor based on how the work is actually done, not the contract label. The four-fold test, economic dependence, DOLE Department Order 174-17 on labor-only contracting, and what misclassification costs on payroll.",
       "image": "https://yahshuahris.com/blog/employee-vs-independent-contractor-philippines.png",
-      "datePublished": "2026-10-27T00:00:00.000Z",
-      "dateModified": "2026-10-27T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['employee-vs-independent-contractor-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['employee-vs-independent-contractor-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

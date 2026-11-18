@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import DeMinimisBenefitsArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DeMinimisBenefitsArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'De Minimis Benefits 2026: New BIR Ceilings (RR 29-2025)',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Effective January 6, 2026, the BIR raised tax-exempt ceilings on 10 categories of de minimis benefits. What changed, what did not, and how the excess-over-ceiling rule works with the ₱90,000 cap.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-09-16T00:00:00.000Z',
-    modifiedTime: '2026-09-16T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['de-minimis-benefits-2026-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['de-minimis-benefits-2026-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/de-minimis-benefits-2026-philippines#article",
       "headline": "BIR's New Tax-Free Benefit Limits (RR No. 29-2025): What Changed in De Minimis Benefits",
       "description": "BIR Revenue Regulations No. 29-2025, effective January 6, 2026, raised the tax-exempt ceilings on 10 categories of de minimis benefits. What changed, what stayed the same, and how the excess-over-ceiling rule interacts with the ₱90,000 annual cap on 13th month pay and other benefits.",
-      "datePublished": "2026-09-16T00:00:00.000Z",
-      "dateModified": "2026-09-16T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['de-minimis-benefits-2026-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['de-minimis-benefits-2026-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

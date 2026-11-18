@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import LateRemittancePenaltiesArticle, { lateRemittanceFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/LateRemittancePenaltiesArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 const URL = 'https://yahshuahris.com/blog/sss-philhealth-pagibig-late-remittance-penalties';
 
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
     description: 'The penalty rate for each agency, a worked example of paying 1 to 12 months late, criminal and benefit liabilities, and the relief programs open in 2026.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-08T00:00:00.000Z',
-    modifiedTime: '2026-10-08T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['sss-philhealth-pagibig-late-remittance-penalties'].published),
+    modifiedTime: blogIso(BLOG_DATES['sss-philhealth-pagibig-late-remittance-penalties'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -36,8 +37,8 @@ const jsonLd = {
       "headline": "SSS, PhilHealth, and Pag-IBIG Late Remittance Penalties: What They Actually Cost You",
       "description": "Late SSS contributions cost 2% per month (RA 11199), late PhilHealth premiums at least 3% per month compounded (RA 11223), and late Pag-IBIG remittances one-tenth of 1% per day (HDMF Circular 275). A worked example of paying 1 to 12 months late, criminal and benefit liabilities, remittance deadlines, and the PhilHealth and SSS relief programs open in 2026.",
       "image": "https://yahshuahris.com/blog/late-remittance-penalties-2026.png",
-      "datePublished": "2026-10-08T00:00:00.000Z",
-      "dateModified": "2026-10-08T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['sss-philhealth-pagibig-late-remittance-penalties'].published),
+      "dateModified": blogIso(BLOG_DATES['sss-philhealth-pagibig-late-remittance-penalties'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import EmployeeOffboardingChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/EmployeeOffboardingChecklistArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Employee Offboarding Checklist Philippines: 30-Day Plan',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Final pay within 30 days, COE within 3 days, 30 days written notice, and Form 2316 on the last payment. The checklist with each legal clock marked.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-11-04T00:00:00.000Z',
-    modifiedTime: '2026-11-04T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['employee-offboarding-checklist-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['employee-offboarding-checklist-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -58,8 +59,8 @@ const jsonLd = {
       "headline": "Employee Offboarding Checklist for Philippine Employers: From Resignation to Final Pay",
       "description": "An offboarding checklist runs on three legal clocks: 30 days' written notice from a resigning employee, a Certificate of Employment within 3 days of request, and final pay within 30 days of separation. BIR Form 2316 is due on the day of the last payment of compensation.",
       "image": "https://yahshuahris.com/blog/employee-offboarding-checklist-philippines.png",
-      "datePublished": "2026-11-04T00:00:00.000Z",
-      "dateModified": "2026-11-04T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['employee-offboarding-checklist-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['employee-offboarding-checklist-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import NewHireOnboardingChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/NewHireOnboardingChecklistArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'New Hire Onboarding Checklist Philippines: Documents and IDs',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'SSS and PhilHealth within 30 days, a TIN within 10 days, Pag-IBIG enrollment, and what to collect. The checklist with required steps marked.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-11-04T00:00:00.000Z',
-    modifiedTime: '2026-11-04T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['new-hire-onboarding-checklist-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['new-hire-onboarding-checklist-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -58,8 +59,8 @@ const jsonLd = {
       "headline": "New Hire Onboarding Checklist for Philippine Employers: Government IDs and Documents",
       "description": "Onboarding a new hire means four government registrations: SSS and PhilHealth, each reported within 30 days of hiring, Pag-IBIG membership, and a BIR TIN within 10 days of employment if the employee has none. The checklist, the documents to collect, and the Data Privacy Act limits.",
       "image": "https://yahshuahris.com/blog/new-hire-onboarding-checklist-philippines.png",
-      "datePublished": "2026-11-04T00:00:00.000Z",
-      "dateModified": "2026-11-04T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['new-hire-onboarding-checklist-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['new-hire-onboarding-checklist-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

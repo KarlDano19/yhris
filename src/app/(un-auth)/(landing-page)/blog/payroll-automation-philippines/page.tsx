@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import PayrollMessageArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollMessageArticle";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Your Payroll Is a Message to Your Team | YAHSHUA HRIS',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'Every payday, your employees are reading something. A payroll that is late says you were not a priority. One that is correct, on time, every cycle says something else entirely.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-06-22T00:00:00.000Z',
-    modifiedTime: '2026-06-22T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['payroll-automation-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['payroll-automation-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "headline": "Your Payroll Is a Message to Your Team",
       "description": "Accurate, on-time payroll is one of the most consistent acts of leadership a Philippine business owner performs. Here is what payroll automation actually gives you, and what it costs when it goes wrong.",
       "image": "https://yahshuahris.com/blog/payroll-message.png",
-      "datePublished": "2026-06-22T00:00:00.000Z",
-      "dateModified": "2026-06-22T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['payroll-automation-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['payroll-automation-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

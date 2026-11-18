@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import ProbationaryToRegularArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/ProbationaryToRegularArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Probationary Employee Regularization Philippines: 180 Days',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Keep a probationary employee past day 180 and they are regular by law. How to count the days, what to tell new hires, and what they are owed from day one.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-23T00:00:00.000Z',
-    modifiedTime: '2026-10-23T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['probationary-to-regular-employee-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['probationary-to-regular-employee-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -57,8 +58,8 @@ const jsonLd = {
       "headline": "Probationary to Regular: Getting the 6-Month Regularization Timeline Right in Payroll",
       "description": "Probationary employment in the Philippines cannot exceed six months from the day the employee started working, safest counted as 180 calendar days. How to count the days, what employers must tell new hires, what probationary employees are owed, and when they become regular.",
       "image": "https://yahshuahris.com/blog/probationary-to-regular-employee-philippines.png",
-      "datePublished": "2026-10-23T00:00:00.000Z",
-      "dateModified": "2026-10-23T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['probationary-to-regular-employee-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['probationary-to-regular-employee-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

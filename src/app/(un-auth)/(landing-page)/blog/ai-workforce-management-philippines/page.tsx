@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import AiWorkforceManagementArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/AiWorkforceManagementArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Beyond BPO: AI Workforce Management in the Philippines',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Most future-of-work coverage in the Philippines defaults to BPO. Here is what AI-powered workforce management looks like in retail, manufacturing, and logistics.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-09-10T00:00:00.000Z',
-    modifiedTime: '2026-09-10T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['ai-workforce-management-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['ai-workforce-management-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -34,8 +35,8 @@ const jsonLd = {
       "headline": "Beyond BPO: How AI Is Changing Workforce Management in Philippine Retail, Manufacturing, and Logistics",
       "description": "AI adoption is highest in Philippine transportation and logistics (86.4%) and retail (85.5%), lowest in manufacturing (72.4%). What this means for multi-branch operations.",
       "image": "https://yahshuahris.com/blog/ai-workforce-management.png",
-      "datePublished": "2026-09-10T00:00:00.000Z",
-      "dateModified": "2026-09-10T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['ai-workforce-management-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['ai-workforce-management-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
