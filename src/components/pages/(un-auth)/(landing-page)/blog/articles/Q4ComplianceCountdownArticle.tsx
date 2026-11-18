@@ -150,7 +150,7 @@ const Q4ComplianceCountdownArticle = () => {
                 ]}
               />
               <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "2.5rem" }}>
-                eFPS filers of BIR Form 1601-C file on a staggered schedule (the 11th to 15th, by industry group) and pay by the 15th; check the BIR monthly tax calendar for your group. Pag-IBIG remittances follow a schedule by the first letter of the employer&apos;s name (10th to month-end of the following month under HDMF Circular 275); confirm your window with Pag-IBIG.
+                eFPS filers of BIR Form 1601-C file on a staggered schedule (the 11th to 15th, by industry group) and pay by the 15th; check the BIR monthly tax calendar for your group. Pag-IBIG Circular No. 499-2026, effective August 21, 2026, moves employer remittance to electronic submission through eSRS in Virtual Pag-IBIG, with a six-month transition period; confirm your due-date window in your Virtual Pag-IBIG account.
               </p>
 
               {/* H2: Holiday pay */}
@@ -193,7 +193,7 @@ const Q4ComplianceCountdownArticle = () => {
                 rows={[
                   ["SSS", "Last day of the month after the contribution month", "2% per month (RA 11199)"],
                   ["PhilHealth", "11th to 15th (employer number ending 0 to 4) or 16th to 20th (ending 5 to 9) of the following month", "Interest of at least 3% per month, compounded (RA 11223)"],
-                  ["Pag-IBIG", "By first letter of the employer's name: A to D 10th to 14th, E to L 15th to 19th, M to Q 20th to 24th, R to Z 25th to month-end", "One-tenth of 1% per day (HDMF Circular 275)"],
+                  ["Pag-IBIG", "Confirm your due-date window with Pag-IBIG; remittance moves to eSRS under Circular No. 499-2026, effective August 21, 2026, with a six-month transition", "One-tenth of 1% per day of delay (Circular No. 499-2026)"],
                   ["BIR 1601-C", "10th of the following month for manual filers; December's return is due January 15", "Surcharge, interest, and compromise penalties under the Tax Code"],
                 ]}
               />
@@ -238,10 +238,10 @@ const Q4ComplianceCountdownArticle = () => {
               {/* CTA callout */}
               <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                 <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                  YAHSHUA HRIS tracks 13th month pay automatically, every payroll run, all year.
+                  YAHSHUA HRIS comes with YAHSHUA Payroll, which computes SSS, PhilHealth and Pag-IBIG contributions.
                 </p>
                 <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                  Every cutoff, the system accrues what is owed, and it flags employees whose basic pay falls below the applicable minimum wage when a wage order takes effect.
+                  Book a free demo and ask how it handles 13th month pay and minimum wage changes across your cutoffs.
                 </p>
                 <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                   See how YAHSHUA handles year-end payroll <ArrowRight className="w-4 h-4" />
@@ -263,7 +263,7 @@ const Q4ComplianceCountdownArticle = () => {
                   Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Published October 2026
                 </p>
                 <p style={{ color: "#d1d5db", fontSize: "0.8rem", marginTop: "0.5rem" }}>
-                  Sources: <a href="https://pco.gov.ph/wp-content/uploads/2025/09/20250903-PROC-1006-FRM.pdf.pdf" target="_blank" rel="noopener noreferrer">Proclamation No. 1006, s. 2025</a>; <a href="https://www.pna.gov.ph/articles/1284634" target="_blank" rel="noopener noreferrer">Proclamation No. 1447, s. 2026</a>; DOLE Labor Advisories No. 12, s. 2025 and No. 16, s. 2026; <a href="https://bworldonline.com/the-nation/2026/09/27/782222/central-visayas-workers-to-get-p42-wage-increase-in-oct" target="_blank" rel="noopener noreferrer">DOLE on the Central Visayas wage order</a>; <a href="https://www.sss.gov.ph/pay-contribution" target="_blank" rel="noopener noreferrer">SSS</a>; <a href="https://www.philhealth.gov.ph/partners/employers/pay_procedures.php" target="_blank" rel="noopener noreferrer">PhilHealth</a>; BIR RR 2-98 as amended by RR No. 11-2018; RA 11199; RA 11223; HDMF Circular 275. Verified October 1, 2026. Confirm dates with each agency before filing. This article does not constitute legal or tax advice.
+                  Sources: <a href="https://pco.gov.ph/wp-content/uploads/2025/09/20250903-PROC-1006-FRM.pdf.pdf" target="_blank" rel="noopener noreferrer">Proclamation No. 1006, s. 2025</a>; <a href="https://www.pna.gov.ph/articles/1284634" target="_blank" rel="noopener noreferrer">Proclamation No. 1447, s. 2026</a>; DOLE Labor Advisories No. 12, s. 2025 and No. 16, s. 2026; <a href="https://bworldonline.com/the-nation/2026/09/27/782222/central-visayas-workers-to-get-p42-wage-increase-in-oct" target="_blank" rel="noopener noreferrer">DOLE on the Central Visayas wage order</a>; <a href="https://www.sss.gov.ph/pay-contribution" target="_blank" rel="noopener noreferrer">SSS</a>; <a href="https://www.philhealth.gov.ph/partners/employers/pay_procedures.php" target="_blank" rel="noopener noreferrer">PhilHealth</a>; BIR RR 2-98 as amended by RR No. 11-2018; RA 11199; RA 11223; Pag-IBIG Circular No. 499-2026. Verified October 1, 2026; Pag-IBIG row updated November 18, 2026. Confirm dates with each agency before filing. This article does not constitute legal or tax advice.
                 </p>
               </div>
 
