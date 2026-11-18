@@ -14,16 +14,16 @@ export const metadata = {
   description: '₱7,000 a month for up to 100 employees, then ₱60 per extra employee. No setup fee. YAHSHUA One Payroll included. Prices exclude VAT.',
   openGraph: {
     images: OG_IMAGES,
-    title: 'YAHSHUA HRIS Pricing - Affordable HR & Payroll Plans',
-    description: 'Simple, transparent pricing for YAHSHUA HRIS. Payroll automation, employee management, and DOLE compliance. Plans for every business size.',
+    title: 'YAHSHUA HRIS Pricing: ₱7,000/Month, No Setup Fee',
+    description: '₱7,000 a month for up to 100 employees, then ₱60 per extra employee. No setup fee. YAHSHUA One Payroll included. Prices exclude VAT.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     images: TWITTER_IMAGES,
     card: 'summary_large_image',
-    title: 'YAHSHUA HRIS Pricing - Affordable HR & Payroll Plans',
-    description: 'Transparent pricing for payroll automation, employee management, and DOLE compliance in the Philippines.',
+    title: 'YAHSHUA HRIS Pricing: ₱7,000/Month, No Setup Fee',
+    description: '₱7,000 a month for up to 100 employees. No setup fee. YAHSHUA One Payroll included.',
   },
   alternates: {
     canonical: 'https://yahshuahris.com/pricing'
