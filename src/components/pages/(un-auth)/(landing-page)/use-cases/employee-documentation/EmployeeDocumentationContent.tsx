@@ -275,6 +275,12 @@ const EmployeeDocumentationContent = () => {
                   <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">Start for Free <ArrowRight className="w-4 h-4" /></Link>
                   <Link href="/use-cases" className="lp-btn-ghost-dark gap-2">View All Use Cases</Link>
                 </div>
+                <p className="text-sm text-gray-500 mt-6">
+                  Related guide:{" "}
+                  <Link href="/blog/employee-201-file-philippines" className="font-semibold underline underline-offset-2 hover:text-gray-900">
+                    What belongs in an employee 201 file
+                  </Link>
+                </p>
               </ScrollFadeIn>
             </div>
           </section>

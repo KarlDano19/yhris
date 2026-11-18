@@ -302,6 +302,11 @@ const EmployeeOffboardingChecklistArticle = () => {
                     DOLE Compliance Requirements Every Philippine Employer Must Know in 2026 →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/use-cases/employee-documentation" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Employee Documentation: Everything in one place →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

@@ -160,6 +160,12 @@ const EmployeeOnboardingContent = () => {
                 <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">Start for Free <ArrowRight className="w-4 h-4" /></Link>
                 <Link href="/use-cases" className="lp-btn-ghost-dark gap-2">View All Use Cases</Link>
               </div>
+              <p className="text-sm text-gray-500 mt-6">
+                Related guide:{" "}
+                <Link href="/blog/new-hire-onboarding-checklist-philippines" className="font-semibold underline underline-offset-2 hover:text-gray-900">
+                  New hire onboarding checklist for Philippine employers
+                </Link>
+              </p>
             </ScrollFadeIn>
           </div>
         </section>
