@@ -1,18 +1,21 @@
 import { Metadata } from 'next';
 import LpPayrollIntegrationContent from "@/components/pages/(un-auth)/(landing-page)/payroll-integration/LpPayrollIntegrationContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Payroll Integration: YAHSHUA HRIS and YAHSHUA One Payroll',
   description: 'YAHSHUA HRIS connects to YAHSHUA One Payroll through single sign-on, and employee data syncs into HRIS. No exports, no re-typing.',
   keywords: 'hris payroll integration philippines, hr payroll sync, yahshua one payroll, payroll automation',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Payroll Integration: YAHSHUA HRIS and YAHSHUA One Payroll',
     description: 'Single sign-on between YAHSHUA HRIS and YAHSHUA One Payroll, with employee data synced into HRIS.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS Payroll Integration',
     description: 'Single sign-on and employee sync between HRIS and Payroll. No exports, no re-typing.',

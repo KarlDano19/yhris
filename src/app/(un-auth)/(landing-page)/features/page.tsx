@@ -2,18 +2,21 @@ import { Metadata } from 'next';
 import Content from "@/components/pages/(un-auth)/(landing-page)/features/LpFeaturesContent";
 import PixelEvents from '@/components/PixelEvents';
 import { YAHSHUA_PRICING, PRICING_LABELS } from '@/lib/yahshuaPricing';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS Features: Payroll, 201 Files & DOLE Compliance',
   description: 'See everything YAHSHUA HRIS can do: automated payroll, 201 file management, DOLE compliance, performance evaluations, and payroll integration.',
   keywords: 'yahshua hris features, employee management, job posting, DOLE compliance, performance evaluation, payroll integration, HR automation',
   openGraph: {
+    images: OG_IMAGES,
     title: 'YAHSHUA HRIS Features: Payroll, 201 Files & DOLE Compliance',
     description: 'See everything YAHSHUA HRIS can do: automated payroll, 201 file management, DOLE compliance reports, performance evaluations, and more.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS Features: Payroll, 201 Files & DOLE Compliance',
     description: 'Automated payroll, 201 file management, DOLE compliance reports, and more. Built for Philippine businesses.',

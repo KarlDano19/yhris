@@ -2,18 +2,21 @@ import { Metadata } from 'next';
 import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import VsSproutContent from "@/components/pages/(un-auth)/(landing-page)/vs-sprout/VsSproutContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Sprout Solutions vs YAHSHUA HRIS: 2026 PH Comparison',
   description: `Sprout Solutions vs YAHSHUA HRIS on pricing, payroll, DOLE compliance, and hiring. YAHSHUA: ${PRICING_LABELS.base}/mo flat, payroll included. Sprout: quote-based.`,
   keywords: 'sprout solutions vs yahshua hris, compare sprout solutions, sprout solutions alternative philippines, hris comparison philippines, hr software philippines',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Sprout Solutions vs YAHSHUA HRIS: 2026 PH Comparison',
     description: `Pricing, payroll, DOLE compliance, and hiring compared. YAHSHUA HRIS is ${PRICING_LABELS.base}/mo flat with payroll included; Sprout is quote-based.`,
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Sprout Solutions vs YAHSHUA HRIS: 2026 PH Comparison',
     description: 'Side-by-side comparison of Sprout Solutions and YAHSHUA HRIS for Philippine businesses.',

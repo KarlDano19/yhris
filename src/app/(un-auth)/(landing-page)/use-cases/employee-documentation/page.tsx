@@ -1,17 +1,20 @@
 import { Metadata } from 'next';
 import EmployeeDocumentationContent from "@/components/pages/(un-auth)/(landing-page)/use-cases/employee-documentation/EmployeeDocumentationContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Employee Documentation Software | YAHSHUA HRIS',
   description: 'Store and organize 201 files and employee records digitally with secure access and compliance-ready documentation.',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Employee Documentation Software | YAHSHUA HRIS',
     description: 'Store and organize 201 files and employee records digitally with secure, compliance-ready access.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Employee Documentation Software | YAHSHUA HRIS',
     description: 'Digital 201 files and employee records with secure, compliance-ready access.',

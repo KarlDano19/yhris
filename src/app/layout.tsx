@@ -18,6 +18,7 @@ import './globals.css';
 import './dark-theme.css';
   
 export const metadata = {
+  metadataBase: new URL('https://yahshuahris.com'),
   title: 'Yahshua HRIS',
   description: 'YAHSHUA HRIS is an all-in-one HR and payroll platform for Philippine businesses. Manage employees, DOLE compliance, 201 files, and more.',
 };

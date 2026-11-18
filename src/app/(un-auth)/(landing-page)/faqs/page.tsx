@@ -1,18 +1,21 @@
 import { Metadata } from 'next';
 import Content from "@/components/pages/(un-auth)/(landing-page)/faqs/Content";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'FAQs: YAHSHUA HRIS Help and Support',
   description: 'Frequently asked questions about YAHSHUA HRIS. Get answers on pricing, features, DOLE compliance, payroll integration, onboarding, and technical support.',
   keywords: 'yahshua hris faq, hris support philippines, hr software questions, dole compliance faq',
   openGraph: {
+    images: OG_IMAGES,
     title: 'FAQs: YAHSHUA HRIS Help and Support',
     description: 'Answers to common questions about YAHSHUA HRIS pricing, features, DOLE compliance, and payroll integration.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS FAQs',
     description: 'Answers to common questions about YAHSHUA HRIS.',

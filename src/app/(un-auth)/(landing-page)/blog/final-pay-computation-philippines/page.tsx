@@ -2,12 +2,14 @@ import { Metadata } from 'next';
 import FinalPayComputationArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/FinalPayComputationArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Final Pay Computation for Resigned Employees (DOLE)',
   description: 'DOLE requires final pay within 30 days of resignation. What counts as final pay, what does not, a worked example, and the clearance and COE rules that apply.',
   keywords: 'final pay computation Philippines, DOLE final pay 30 days, final pay resigned employee, DOLE Labor Advisory 06-20, back pay computation Philippines, certificate of employment 3 days',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Final Pay Computation for Resigned Employees: What DOLE Actually Requires',
     description: 'Final pay is due within 30 days of separation under DOLE Labor Advisory No. 06-20, a different clock than the employee\'s 30-day resignation notice. What must be included, a worked example, and the clearance rules.',
     type: 'article',
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Final Pay Computation for Resigned Employees (DOLE)',
     description: 'What DOLE Labor Advisory No. 06-20 actually requires for final pay: the 30-day deadline, what counts, and a worked example.',

@@ -2,12 +2,14 @@ import { Metadata } from 'next';
 import NewHireOnboardingChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/NewHireOnboardingChecklistArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'New Hire Onboarding Checklist Philippines: Documents and IDs',
   description: 'New hire onboarding checklist for Philippine employers: SSS and PhilHealth in 30 days, TIN in 10 days, Pag-IBIG, documents to collect, and privacy limits.',
   keywords: 'new hire onboarding checklist Philippines, employee onboarding requirements Philippines, new employee SSS PhilHealth Pag-IBIG TIN, documents required for new hires, employer onboarding checklist',
   openGraph: {
+    images: OG_IMAGES,
     title: 'New Hire Onboarding Checklist: Government IDs and Documents',
     description: 'SSS and PhilHealth within 30 days, a TIN within 10 days, Pag-IBIG enrollment, and what to collect. The checklist with required steps marked.',
     type: 'article',
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'New Hire Onboarding Checklist Philippines: Documents and IDs',
     description: 'The onboarding checklist for Philippine employers, with each government deadline marked.',

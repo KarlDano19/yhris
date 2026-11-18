@@ -2,12 +2,14 @@ import { Metadata } from 'next';
 import EmployeeOffboardingChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/EmployeeOffboardingChecklistArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Employee Offboarding Checklist Philippines: 30-Day Plan',
   description: 'A step-by-step offboarding checklist for Philippine employers: resignation notice, clearance, final pay within 30 days, COE in 3 days, and BIR Form 2316.',
   keywords: 'employee offboarding checklist Philippines, offboarding process Philippines, clearance checklist, final pay 30 days, certificate of employment 3 days, BIR Form 2316 resigned employee',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Employee Offboarding Checklist: Resignation to Final Pay',
     description: 'Final pay within 30 days, COE within 3 days, 30 days written notice, and Form 2316 on the last payment. The checklist with each legal clock marked.',
     type: 'article',
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Employee Offboarding Checklist Philippines: 30-Day Plan',
     description: 'The offboarding checklist for Philippine employers, with the legal deadlines marked.',

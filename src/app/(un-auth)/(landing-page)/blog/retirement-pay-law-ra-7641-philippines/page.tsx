@@ -2,12 +2,14 @@ import { Metadata } from 'next';
 import RetirementPayArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/RetirementPayArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Retirement Pay Law RA 7641: 22.5 Days Per Year, Formula',
   description: 'RA 7641 retirement pay is 22.5 days of pay per year of service at 60+ with 5 years of service. Formula, peso examples, who is exempt, and what to set aside.',
   keywords: 'retirement pay Philippines, RA 7641, retirement pay computation, retirement pay formula 22.5 days, Article 302 Labor Code, optional retirement age 60, compulsory retirement 65',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Retirement Pay Law (RA 7641): What Employers Must Set Aside',
     description: 'Retirement pay is 22.5 days per year of service, not 15. Who qualifies, the formula with peso examples, who is exempt, and how to plan for it.',
     type: 'article',
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Retirement Pay Law RA 7641: 22.5 Days Per Year, Formula',
     description: 'How retirement pay is computed under RA 7641, who qualifies, and who is exempt.',

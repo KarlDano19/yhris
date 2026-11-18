@@ -1,18 +1,21 @@
 import { Metadata } from 'next';
 import AboutContent from "@/components/pages/(un-auth)/(landing-page)/about/AboutContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'About YAHSHUA HRIS: Built by The ABBA Initiative',
   description: 'YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses, part of The ABBA Initiative, the company that also builds YAHSHUA One.',
   keywords: 'about yahshua hris, the abba initiative, yahshua one, yahshua hris company',
   openGraph: {
+    images: OG_IMAGES,
     title: 'About YAHSHUA HRIS',
     description: 'Built by a team that has done this for 17 years. YAHSHUA HRIS is part of The ABBA Initiative.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'About YAHSHUA HRIS',
     description: 'YAHSHUA HRIS is an all-in-one HR platform for Philippine businesses, part of The ABBA Initiative.',

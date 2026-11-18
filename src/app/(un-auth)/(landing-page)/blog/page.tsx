@@ -1,18 +1,21 @@
 import { Metadata } from 'next';
 import LpBlogContent from "@/components/pages/(un-auth)/(landing-page)/blog/LpBlogContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'HR Insights for Philippine Business Leaders | YAHSHUA HRIS',
   description: 'Practical guides on DOLE compliance, payroll, recruitment, and HR management for Philippine businesses. Written by the YAHSHUA HRIS team.',
   keywords: 'hr blog philippines, dole compliance guide, payroll tips, recruitment philippines, hr management',
   openGraph: {
+    images: OG_IMAGES,
     title: 'HR Insights for Philippine Business Leaders | YAHSHUA HRIS',
     description: 'Practical guides on DOLE compliance, payroll, recruitment, and HR management for Philippine businesses.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS Blog: HR Insights',
     description: 'Practical HR guides for Philippine businesses.',

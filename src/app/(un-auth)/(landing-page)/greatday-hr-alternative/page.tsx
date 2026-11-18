@@ -2,18 +2,21 @@ import { Metadata } from 'next';
 import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import GreatdayAlternativeContent from "@/components/pages/(un-auth)/(landing-page)/greatday-hr-alternative/GreatdayAlternativeContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'GreatDay HR Alternative: YAHSHUA HRIS for Philippine SMEs',
   description: 'Looking for a GreatDay HR alternative? YAHSHUA HRIS bundles recruitment, performance management, and DOLE compliance at one flat rate.',
   keywords: 'greatday hr alternative, switch from greatday hr, hris alternative philippines, greatday hr competitor',
   openGraph: {
+    images: OG_IMAGES,
     title: 'GreatDay HR Alternative: YAHSHUA HRIS',
     description: 'No add-on fees for recruitment or performance, guided DOLE compliance included. See why Philippine SMEs choose YAHSHUA HRIS over GreatDay HR.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'GreatDay HR Alternative: YAHSHUA HRIS',
     description: 'A GreatDay HR alternative built for Philippine SMEs: one flat rate, nothing unbundled.',
