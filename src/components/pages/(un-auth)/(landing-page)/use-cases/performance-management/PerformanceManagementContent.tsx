@@ -161,6 +161,12 @@ const PerformanceManagementContent = () => {
                   <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">Start for Free <ArrowRight className="w-4 h-4" /></Link>
                   <Link href="/use-cases" className="lp-btn-ghost-dark gap-2">View All Use Cases</Link>
                 </div>
+                <p className="text-sm text-gray-500 mt-6">
+                  Related guide:{" "}
+                  <Link href="/blog/probationary-to-regular-employee-philippines" className="font-semibold underline underline-offset-2 hover:text-gray-900">
+                    Probationary to regular: getting the 6-month timeline right
+                  </Link>
+                </p>
               </ScrollFadeIn>
             </div>
           </section>

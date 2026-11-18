@@ -321,6 +321,11 @@ const LateRemittancePenaltiesArticle = () => {
                     Your Payroll Is a Message to Your Team →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/employee-vs-independent-contractor-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Employee vs. Independent Contractor: DOLE Classification Rules →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

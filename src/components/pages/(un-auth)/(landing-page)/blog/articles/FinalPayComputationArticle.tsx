@@ -252,6 +252,11 @@ const FinalPayComputationArticle = () => {
                     2026 SSS, PhilHealth, and Pag-IBIG Contribution Rates →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/employee-offboarding-checklist-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Employee Offboarding Checklist: From Resignation to Final Pay →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

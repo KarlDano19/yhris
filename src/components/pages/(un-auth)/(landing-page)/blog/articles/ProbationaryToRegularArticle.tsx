@@ -308,6 +308,21 @@ const ProbationaryToRegularArticle = () => {
                     Final Pay Computation for Resigned Employees →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/new-hire-onboarding-checklist-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    New Hire Onboarding Checklist: Government IDs and Documents →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/employee-vs-independent-contractor-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Employee vs. Independent Contractor: DOLE Classification Rules →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/use-cases/performance-management" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Performance Management: Elevate every review →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

@@ -275,6 +275,21 @@ const Employee201FileArticle = () => {
                     DOLE Compliance Requirements for Philippine Employers →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/employee-offboarding-checklist-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Employee Offboarding Checklist: From Resignation to Final Pay →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog/new-hire-onboarding-checklist-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    New Hire Onboarding Checklist: Government IDs and Documents →
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/use-cases/employee-documentation" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Employee Documentation: Everything in one place →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
