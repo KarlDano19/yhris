@@ -1,18 +1,21 @@
 import { Metadata } from 'next';
 import UseCasesContent from "@/components/pages/(un-auth)/(landing-page)/use-cases/UseCasesContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS Use Cases for Philippine Businesses',
   description: 'Explore how Philippine businesses use YAHSHUA HRIS for employee onboarding, performance management, DOLE compliance, document management, and more.',
   keywords: 'hris use cases philippines, employee onboarding software, performance management philippines, hr document management',
   openGraph: {
+    images: OG_IMAGES,
     title: 'YAHSHUA HRIS Use Cases',
     description: 'See how Philippine businesses use YAHSHUA HRIS for onboarding, performance, compliance, and more.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS Use Cases',
     description: 'How Philippine businesses use YAHSHUA HRIS for HR management.',

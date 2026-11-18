@@ -2,12 +2,14 @@ import { Metadata } from 'next';
 import EmployeeVsContractorArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/EmployeeVsContractorArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Employee vs Independent Contractor Philippines: DOLE Rules',
   description: 'The contract label does not decide it. How courts and DOLE tell an employee from an independent contractor, the DO 174-17 rules, and what a wrong call costs.',
   keywords: 'employee vs independent contractor Philippines, employee classification DOLE, four-fold test, labor-only contracting, DO 174-17, independent contractor misclassification, Ditiangkin v Lazada',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Employee vs. Independent Contractor: The Payroll Risk of Getting It Wrong',
     description: 'Courts look at control, not the contract label. How the four-fold test and DOLE Department Order 174-17 decide classification, and what it costs on payroll.',
     type: 'article',
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Employee vs Independent Contractor Philippines: DOLE Rules',
     description: 'How Philippine courts and DOLE classify workers, and the payroll risk of misclassification.',

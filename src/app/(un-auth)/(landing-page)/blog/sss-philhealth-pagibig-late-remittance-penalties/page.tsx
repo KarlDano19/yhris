@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import LateRemittancePenaltiesArticle, { lateRemittanceFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/LateRemittancePenaltiesArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 const URL = 'https://yahshuahris.com/blog/sss-philhealth-pagibig-late-remittance-penalties';
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description: 'Late SSS costs 2% a month, PhilHealth at least 3% compounded, Pag-IBIG 0.1% a day. What 1 to 12 months late costs, criminal liability, and 2026 relief.',
   keywords: 'late remittance penalty Philippines, SSS late payment penalty, PhilHealth late payment interest, Pag-IBIG late remittance penalty, non-remittance of contributions, SSS condonation 2026, PhilHealth interest waiver 2026, delayed remittance SSS PhilHealth Pag-IBIG',
   openGraph: {
+    images: OG_IMAGES,
     title: 'SSS, PhilHealth, Pag-IBIG Late Remittance Penalties 2026',
     description: 'The penalty rate for each agency, a worked example of paying 1 to 12 months late, criminal and benefit liabilities, and the relief programs open in 2026.',
     type: 'article',
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'SSS, PhilHealth, Pag-IBIG Late Remittance Penalties 2026',
     description: 'What late remittances really cost Philippine employers, with a worked example and 2026 relief programs.',

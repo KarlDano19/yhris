@@ -2,12 +2,14 @@ import { Metadata } from 'next';
 import DeMinimisBenefitsArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DeMinimisBenefitsArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'De Minimis Benefits 2026: New BIR Ceilings (RR 29-2025)',
   description: 'BIR Revenue Regulations No. 29-2025 raised de minimis benefit ceilings effective Jan 6, 2026. Full old-vs-new table, what did not change, and the excess-over-ceiling rule.',
   keywords: 'de minimis benefits 2026 Philippines, RR No. 29-2025, BIR de minimis ceiling, rice subsidy 2026, clothing allowance tax exempt Philippines, de minimis benefits list',
   openGraph: {
+    images: OG_IMAGES,
     title: 'BIR\'s New Tax-Free Benefit Limits (RR No. 29-2025)',
     description: 'Effective January 6, 2026, the BIR raised tax-exempt ceilings on 10 categories of de minimis benefits. What changed, what did not, and how the excess-over-ceiling rule works with the ₱90,000 cap.',
     type: 'article',
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'De Minimis Benefits 2026: New BIR Ceilings (RR 29-2025)',
     description: 'Full breakdown of the BIR\'s updated de minimis benefit ceilings effective January 6, 2026.',

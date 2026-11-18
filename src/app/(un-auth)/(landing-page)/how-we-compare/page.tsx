@@ -2,18 +2,21 @@ import { Metadata } from 'next';
 import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import CompetitorsContent from "@/components/pages/(un-auth)/(landing-page)/competitors/CompetitorsContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS vs Other HR Software in the Philippines',
   description: 'Compare YAHSHUA HRIS to Sprout, GreatDay HR, and other Philippine HR software on pricing, DOLE compliance, and features.',
   keywords: 'hris comparison philippines, hr software comparison, yahshua hris competitors, best hris philippines',
   openGraph: {
+    images: OG_IMAGES,
     title: 'How YAHSHUA HRIS Compares to Other HR Software',
     description: 'Transparent feature and pricing comparisons between YAHSHUA HRIS and other HR software options in the Philippines.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'How YAHSHUA HRIS Compares',
     description: 'HR software comparisons for Philippine businesses.',

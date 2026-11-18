@@ -1,16 +1,19 @@
 import { Metadata } from 'next';
 import DocsContent from "@/components/pages/(un-auth)/(landing-page)/docs/Content";
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS Documentation and Setup Guide',
   description: 'Step-by-step guide to setting up YAHSHUA HRIS, from signup to full implementation, for Philippine businesses.',
   openGraph: {
+    images: OG_IMAGES,
     title: 'YAHSHUA HRIS Documentation and Setup Guide',
     description: 'Step-by-step guide to setting up YAHSHUA HRIS, from signup to full implementation.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS Documentation and Setup Guide',
     description: 'Complete guide to getting started with YAHSHUA HRIS.',

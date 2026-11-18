@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Q4ComplianceCountdownArticle, { q4CountdownFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/Q4ComplianceCountdownArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 const URL = 'https://yahshuahris.com/blog/q4-payroll-compliance-deadlines-philippines-2026';
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description: 'Every Philippine payroll deadline from October to December 24, 2026: holidays, wage increases, SSS, PhilHealth, Pag-IBIG, BIR, annualization, 13th month.',
   keywords: 'Q4 payroll compliance deadlines Philippines, payroll deadlines 2026, holidays November December 2026 Philippines, holiday pay 2026, 13th month pay deadline 2026, year-end annualization, BIR 2316 deadline, SSS contribution deadline',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Q4 2026 Payroll Deadlines in the Philippines: Checklist',
     description: 'Holidays, wage increases, monthly remittances, year-end tax, and 13th month pay from October to December 2026, plus what is due in January.',
     type: 'article',
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Q4 2026 Payroll Deadlines in the Philippines: Checklist',
     description: 'Every Philippine payroll deadline from October to December 24, 2026, in one calendar.',

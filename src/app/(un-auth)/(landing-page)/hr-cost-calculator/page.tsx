@@ -1,16 +1,19 @@
 import type { Metadata } from 'next';
 import HrCostCalculatorContent from '@/components/pages/(un-auth)/(landing-page)/hr-cost-calculator/HrCostCalculatorContent';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'HR & Payroll Cost Calculator | YAHSHUA HRIS',
   description: 'Free calculator for Philippine businesses. Find out how much manual HR and payroll is costing you every year, and how much you could save.',
   openGraph: {
+    images: OG_IMAGES,
     title: 'HR & Payroll Cost Calculator: YAHSHUA HRIS',
     description: 'Calculate your annual HR and payroll waste in minutes. See your savings estimate and ROI timeline with YAHSHUA.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'HR & Payroll Cost Calculator: YAHSHUA HRIS',
     description: 'Find out how much manual HR and payroll is costing your Philippine business every year.',

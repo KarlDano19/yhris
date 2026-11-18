@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import OvertimePayComputationArticle, { overtimeFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/OvertimePayComputationArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 const URL = 'https://yahshuahris.com/blog/overtime-pay-computation-philippines';
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description: 'Overtime pay rates of 125%, 169%, 260%, and 338%, the formula for daily-paid and monthly-paid employees, and peso examples at the ₱755 NCR minimum.',
   keywords: 'overtime pay computation Philippines, how to compute overtime pay, overtime rate Philippines 2026, 755 overtime pay, rest day overtime 169%, holiday overtime 260%, Labor Code Article 87, DOLE overtime rules',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Overtime Pay Rate Philippines 2026: Formula + ₱755 Examples',
     description: 'Every overtime rate from ordinary days to double holidays, the formula for daily-paid and monthly-paid employees, and peso amounts at the new NCR minimum wage.',
     type: 'article',
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Overtime Pay Rate Philippines 2026: Formula + ₱755 Examples',
     description: 'Overtime rates, the formula, and peso amounts at the ₱755 NCR minimum wage.',

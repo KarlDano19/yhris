@@ -15,6 +15,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import './globals.css';
   
 export const metadata = {
+  metadataBase: new URL('https://yahshuahris.com'),
   title: 'Yahshua HRIS',
   description: 'YAHSHUA HRIS is an all-in-one HR and payroll platform for Philippine businesses. Manage employees, DOLE compliance, 201 files, and more.',
 };

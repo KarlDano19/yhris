@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import YearEndAnnualizationArticle, { annualizationFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/YearEndAnnualizationArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 const URL = 'https://yahshuahris.com/blog/year-end-tax-annualization-philippines-2026';
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description: 'How Philippine employers annualize withholding tax in December 2026: steps, tax table, worked examples, special cases, and BIR 2316 and 1604-C deadlines.',
   keywords: 'year-end tax annualization Philippines 2026, annualization withholding tax, how to compute annualized tax, BIR 2316 deadline 2027, 1604-C alphalist deadline, substituted filing, tax refund January 25, income tax table 2026 Philippines',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Year-End Tax Annualization 2026: How to Compute It (PH)',
     description: 'A step-by-step guide to recomputing employees\' 2026 income tax in the December payroll, with worked examples and the January and February 2027 BIR filings.',
     type: 'article',
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Year-End Tax Annualization 2026: How to Compute It (PH)',
     description: 'Steps, tax table, worked examples, and BIR 2316 and 1604-C deadlines for Philippine employers.',

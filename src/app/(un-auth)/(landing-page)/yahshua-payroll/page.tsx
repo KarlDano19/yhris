@@ -2,18 +2,21 @@ import { Metadata } from 'next';
 import YahshuaPayrollContent from "@/components/pages/(un-auth)/(landing-page)/yahshua-payroll/Content";
 import PixelEvents from '@/components/PixelEvents';
 import { YAHSHUA_PRICING, PRICING_LABELS } from '@/lib/yahshuaPricing';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA Payroll Integration: Sync Your HR Data',
   description: 'Connect YAHSHUA HRIS with YAHSHUA Payroll for seamless employee data sync. Eliminate double entry, automate payroll computation, and stay DOLE compliant.',
   keywords: 'yahshua payroll, payroll integration philippines, hris payroll sync, payroll automation philippines',
   openGraph: {
+    images: OG_IMAGES,
     title: 'YAHSHUA Payroll Integration',
     description: 'Sync YAHSHUA HRIS with YAHSHUA Payroll. Eliminate double entry and automate payroll computation for Philippine businesses.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA Payroll Integration',
     description: 'Seamless HR and payroll sync for Philippine businesses.',

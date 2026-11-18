@@ -1,17 +1,20 @@
 import { Metadata } from 'next';
 import PerformanceManagementContent from "@/components/pages/(un-auth)/(landing-page)/use-cases/performance-management/PerformanceManagementContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Performance Management Software | YAHSHUA HRIS',
   description: 'Run performance reviews with customizable templates, continuous feedback, and tracked completion for Philippine teams.',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Performance Management Software | YAHSHUA HRIS',
     description: 'Run performance reviews with customizable templates, continuous feedback, and tracked completion.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Performance Management Software | YAHSHUA HRIS',
     description: 'Customizable evaluation templates, continuous feedback, and completion tracking.',

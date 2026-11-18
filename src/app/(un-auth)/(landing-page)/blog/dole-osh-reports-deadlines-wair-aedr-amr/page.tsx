@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import DoleOshReportsArticle, { doleOshReportsFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleOshReportsArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 const URL = 'https://yahshuahris.com/blog/dole-osh-reports-deadlines-wair-aedr-amr';
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description: 'WAIR is due every 30th, AEDR on January 30, AMR on March 31 under DO 252-25. Who files, where, the 24-hour accident rule, and the fines for missing them.',
   keywords: 'deadline of submission of WAIR, WAIR deadline, AEDR deadline January 30, Annual Medical Report deadline March 31, DO 252-25, DOLE OSH reports, work accident illness report, when to report fatal accident to DOLE',
   openGraph: {
+    images: OG_IMAGES,
     title: 'WAIR, AEDR, AMR Deadlines and Penalties: DOLE OSH Reports',
     description: 'When each DOLE safety report is due under DO 252-25, where it is filed, the 24-hour accident reporting rule, and what a missed submission costs.',
     type: 'article',
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'WAIR, AEDR, AMR Deadlines and Penalties: DOLE OSH Reports',
     description: 'DOLE safety report deadlines, filing channel, the 24-hour rule, and fines under DO 252-25.',

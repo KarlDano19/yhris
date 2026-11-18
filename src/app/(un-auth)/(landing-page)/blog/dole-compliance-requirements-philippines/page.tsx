@@ -1,12 +1,14 @@
 import { Metadata } from 'next';
 import DoleComplianceArticle, { doleComplianceFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleComplianceArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'DOLE Compliance Requirements for Employers | YAHSHUA HRIS',
   description: 'A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.',
   keywords: 'DOLE compliance requirements Philippines, WAIR report, EC logbook, OSH annual report, Philippine labor compliance',
   openGraph: {
+    images: OG_IMAGES,
     title: 'DOLE Compliance Requirements Every Philippine Employer Must Know',
     description: 'A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.',
     type: 'article',
@@ -16,6 +18,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'DOLE Compliance Requirements Every Philippine Employer Must Know',
     description: 'Mandatory DOLE reports explained: WAIR, EC Logbook, OSH annual report, and more.',

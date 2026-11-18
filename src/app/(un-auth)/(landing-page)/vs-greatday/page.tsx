@@ -2,18 +2,21 @@ import { Metadata } from 'next';
 import { YAHSHUA_PRICING, PRICING_LABELS } from "@/lib/yahshuaPricing";
 import VsGreatdayContent from "@/components/pages/(un-auth)/(landing-page)/vs-greatday/VsGreatdayContent";
 import PixelEvents from '@/components/PixelEvents';
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS vs GreatDay HR: Which Is Right for You?',
   description: 'Compare YAHSHUA HRIS and GreatDay HR side by side. See how recruitment, performance management, DOLE compliance, and pricing stack up for Philippine SMEs.',
   keywords: 'yahshua hris vs greatday hr, greatday hr alternative, hris comparison philippines, hr software philippines',
   openGraph: {
+    images: OG_IMAGES,
     title: 'YAHSHUA HRIS vs GreatDay HR',
     description: 'Compare YAHSHUA HRIS and GreatDay HR on features, pricing, and DOLE compliance. Built for Philippine businesses.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS vs GreatDay HR',
     description: 'Side-by-side comparison of YAHSHUA HRIS and GreatDay HR for Philippine businesses.',

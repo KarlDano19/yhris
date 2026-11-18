@@ -2,17 +2,20 @@ import { Metadata } from 'next';
 import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
 import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import PrivacyPolicyContent from "@/components/pages/(un-auth)/privacy-policy/PrivacyPolicyContent";
+import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | YAHSHUA HRIS',
   description: 'How YAHSHUA HRIS collects, uses, and protects personal information across our web and mobile HR platform.',
   openGraph: {
+    images: OG_IMAGES,
     title: 'Privacy Policy | YAHSHUA HRIS',
     description: 'How YAHSHUA HRIS collects, uses, and protects personal information.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
+    images: TWITTER_IMAGES,
     card: 'summary_large_image',
     title: 'Privacy Policy | YAHSHUA HRIS',
     description: 'How YAHSHUA HRIS collects, uses, and protects personal information.',
