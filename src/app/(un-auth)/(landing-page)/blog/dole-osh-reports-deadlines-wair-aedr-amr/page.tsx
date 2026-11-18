@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import DoleOshReportsArticle, { doleOshReportsFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleOshReportsArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 const URL = 'https://yahshuahris.com/blog/dole-osh-reports-deadlines-wair-aedr-amr';
 
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
     description: 'When each DOLE safety report is due under DO 252-25, where it is filed, the 24-hour accident reporting rule, and what a missed submission costs.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-15T00:00:00.000Z',
-    modifiedTime: '2026-10-15T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['dole-osh-reports-deadlines-wair-aedr-amr'].published),
+    modifiedTime: blogIso(BLOG_DATES['dole-osh-reports-deadlines-wair-aedr-amr'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -36,8 +37,8 @@ const jsonLd = {
       "headline": "DOLE Safety Report Deadlines: WAIR, AEDR, and AMR Under DO 252-25",
       "description": "Under DOLE Department Order No. 252-25, employers submit the Work Accident/Illness Report (WAIR) on the 30th of every month, the Annual Work Accident/Illness Exposure Data Report (AEDR) by January 30, and the Annual Medical Report (AMR) by March 31, even when no incident occurred. Deadlines for 2026 and 2027, the 24-hour accident reporting rule, who files, and administrative fines of 1,000, 2,000, and 3,000 pesos.",
       "image": "https://yahshuahris.com/blog/dole-safety-report-deadlines-2026.png",
-      "datePublished": "2026-10-15T00:00:00.000Z",
-      "dateModified": "2026-10-15T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['dole-osh-reports-deadlines-wair-aedr-amr'].published),
+      "dateModified": blogIso(BLOG_DATES['dole-osh-reports-deadlines-wair-aedr-amr'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

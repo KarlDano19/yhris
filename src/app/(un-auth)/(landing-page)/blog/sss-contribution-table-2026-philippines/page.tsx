@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import SssContributionTable2026Article from "@/components/pages/(un-auth)/(landing-page)/blog/articles/SssContributionTable2026Article";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'SSS, PhilHealth, Pag-IBIG Contribution Table 2026 by Salary',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'SSS is 15% of the monthly salary credit up to ₱35,000, PhilHealth is 5% with a ₱100,000 ceiling, and Pag-IBIG caps at ₱400 a month. Tables with employer and employee shares and computation examples.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-07-14T00:00:00.000Z',
-    modifiedTime: '2026-10-09T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['sss-contribution-table-2026-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['sss-contribution-table-2026-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "headline": "2026 SSS, PhilHealth and Pag-IBIG Contribution Tables: Rates and Ceilings for Employers",
       "description": "SSS is 15% of the monthly salary credit up to ₱35,000, PhilHealth is 5% with a ₱100,000 ceiling, and Pag-IBIG caps at ₱400 per month. Contribution tables with employer and employee shares, computation examples, and an employer checklist.",
       "image": "https://yahshuahris.com/blog/sss-contribution-2026.png",
-      "datePublished": "2026-07-14T00:00:00.000Z",
-      "dateModified": "2026-10-09T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['sss-contribution-table-2026-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['sss-contribution-table-2026-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

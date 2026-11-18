@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import NcrMinimumWage2026Article from "@/components/pages/(un-auth)/(landing-page)/blog/articles/NcrMinimumWage2026Article";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Minimum Wage 2026: ₱755/Day in Quezon City, Manila, Makati',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'Wage Order No. NCR-28 raises the NCR minimum wage to ₱755/day (non-agriculture) and ₱718/day (lower category) from September 26, 2026, in a single tranche. NCR-27 never took effect due to court injunctions.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-07-21T00:00:00.000Z',
-    modifiedTime: '2026-10-27T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['ncr-minimum-wage-2026'].published),
+    modifiedTime: blogIso(BLOG_DATES['ncr-minimum-wage-2026'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -85,8 +86,8 @@ const jsonLd = {
       "headline": "NCR Minimum Wage 2026: ₱755/Day Under Wage Order NCR-28, Effective September 26",
       "description": "Wage Order No. NCR-28 raises the Metro Manila minimum wage to ₱755 per day for non-agriculture workers and ₱718 for the lower category from September 26, 2026, in a single tranche. The earlier ₱85 order, NCR-27, never took effect because of court injunctions. Rate table, timeline, who is covered, and the employer payroll checklist.",
       "image": "https://yahshuahris.com/blog/ncr-minimum-wage-2026.png",
-      "datePublished": "2026-07-21T00:00:00.000Z",
-      "dateModified": "2026-10-27T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['ncr-minimum-wage-2026'].published),
+      "dateModified": blogIso(BLOG_DATES['ncr-minimum-wage-2026'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

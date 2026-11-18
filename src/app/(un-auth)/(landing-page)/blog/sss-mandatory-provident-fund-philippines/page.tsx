@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import SssMandatoryProvidentFundArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/SssMandatoryProvidentFundArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'SSS Mandatory Provident Fund (WISP) Explained',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'Above a ₱20,000 Monthly Salary Credit, part of every SSS contribution goes to WISP instead of the regular program. Here is exactly how the split, investment, and payout work.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-09-10T00:00:00.000Z',
-    modifiedTime: '2026-09-10T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['sss-mandatory-provident-fund-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['sss-mandatory-provident-fund-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -34,8 +35,8 @@ const jsonLd = {
       "headline": "Inside the SSS Mandatory Provident Fund (WISP): What It Is and How It Changes Your Payroll Math",
       "description": "The SSS Mandatory Provident Fund (WISP) automatically applies once Monthly Salary Credit exceeds ₱20,000. How the contribution split, investment allocation, and payout rules work, and how WISP differs from the separate, voluntary WISP Plus program.",
       "image": "https://yahshuahris.com/blog/sss-mandatory-provident-fund.png",
-      "datePublished": "2026-09-10T00:00:00.000Z",
-      "dateModified": "2026-09-10T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['sss-mandatory-provident-fund-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['sss-mandatory-provident-fund-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

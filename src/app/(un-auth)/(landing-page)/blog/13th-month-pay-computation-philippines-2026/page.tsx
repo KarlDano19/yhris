@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import ThirteenthMonthPayComputationArticle, { thirteenthMonthFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/ThirteenthMonthPayComputationArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 const URL = 'https://yahshuahris.com/blog/13th-month-pay-computation-philippines-2026';
 
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
     description: 'The 13th month pay formula, what counts as basic salary, worked examples for new hires, resigned and daily-paid employees, the ₱90,000 tax cap, 2026 deadlines, and a free calculator.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-09-25T00:00:00.000Z',
-    modifiedTime: '2026-10-09T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['13th-month-pay-computation-philippines-2026'].published),
+    modifiedTime: blogIso(BLOG_DATES['13th-month-pay-computation-philippines-2026'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -36,8 +37,8 @@ const jsonLd = {
       "headline": "13th Month Pay Computation 2026: The Formula, the Common Mistakes, and a Free Calculator",
       "description": "13th month pay in the Philippines is one-twelfth of the total basic salary earned from January 1 to December 31, due by December 24 under PD 851. The formula, what counts as basic salary, worked examples including mid-year wage increases, the ₱90,000 tax-exempt cap, 2026 deadlines, and a calculator.",
       "image": "https://yahshuahris.com/blog/start-tracking-13th-month.png",
-      "datePublished": "2026-09-25T00:00:00.000Z",
-      "dateModified": "2026-10-29T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['13th-month-pay-computation-philippines-2026'].published),
+      "dateModified": blogIso(BLOG_DATES['13th-month-pay-computation-philippines-2026'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

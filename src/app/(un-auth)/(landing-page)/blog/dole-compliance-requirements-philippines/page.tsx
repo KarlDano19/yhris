@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import DoleComplianceArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleComplianceArticle";
+import DoleComplianceArticle, { doleComplianceFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleComplianceArticle";
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'DOLE Compliance Requirements for Employers | YAHSHUA HRIS',
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     description: 'A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-06-02T00:00:00.000Z',
-    modifiedTime: '2026-10-15T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['dole-compliance-requirements-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['dole-compliance-requirements-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -33,8 +34,8 @@ const jsonLd = {
       "headline": "DOLE Compliance Requirements Every Philippine Employer Must Know",
       "description": "A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.",
       "image": "https://yahshuahris.com/blog/dole-compliance-2026.png",
-      "datePublished": "2026-06-02T00:00:00.000Z",
-      "dateModified": "2026-10-15T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['dole-compliance-requirements-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['dole-compliance-requirements-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
@@ -53,6 +54,18 @@ const jsonLd = {
         "@id": "https://yahshuahris.com/blog/dole-compliance-requirements-philippines"
       },
       "keywords": "DOLE compliance requirements Philippines, WAIR report, EC logbook, OSH annual report, Philippine labor compliance"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://yahshuahris.com/blog/dole-compliance-requirements-philippines#faq",
+      "mainEntity": doleComplianceFaqs.map((f) => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.a
+        }
+      }))
     },
     {
       "@type": "BreadcrumbList",

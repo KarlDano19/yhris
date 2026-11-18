@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import MinimumWageByRegionArticle, { minimumWageByRegionFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/MinimumWageByRegionArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 const URL = 'https://yahshuahris.com/blog/minimum-wage-philippines-2026-by-region';
 
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
     description: 'Every region\'s current daily minimum wage, the wage order behind it, when it took effect, and the changes already scheduled. Built for multi-branch employers.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-09-25T00:00:00.000Z',
-    modifiedTime: '2026-10-27T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['minimum-wage-philippines-2026-by-region'].published),
+    modifiedTime: blogIso(BLOG_DATES['minimum-wage-philippines-2026-by-region'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -36,8 +37,8 @@ const jsonLd = {
       "headline": "Minimum Wage in the Philippines 2026 by Region: A Multi-Branch Employer's Guide",
       "description": "The current daily minimum wage in every Philippine region as of September 26, 2026, ranging from ₱401 in BARMM provinces to ₱755 in Metro Manila, with the wage order, effective date, area and size tiers, and scheduled changes for each region.",
       "image": "https://yahshuahris.com/blog/minimum-wage-by-region-2026.png",
-      "datePublished": "2026-09-25T00:00:00.000Z",
-      "dateModified": "2026-10-27T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['minimum-wage-philippines-2026-by-region'].published),
+      "dateModified": blogIso(BLOG_DATES['minimum-wage-philippines-2026-by-region'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",

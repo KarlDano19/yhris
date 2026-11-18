@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Employee201FileArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/Employee201FileArticle";
 import PixelEvents from '@/components/PixelEvents';
+import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 
 export const metadata: Metadata = {
   title: 'Employee 201 File Philippines: What to Keep and How Long',
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
     description: 'DOLE requires employment records to be kept at least three years from the last entry. What goes in a 201 file, the retention rules, and the privacy limits.',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2026-10-27T00:00:00.000Z',
-    modifiedTime: '2026-10-27T00:00:00.000Z',
+    publishedTime: blogIso(BLOG_DATES['employee-201-file-philippines'].published),
+    modifiedTime: blogIso(BLOG_DATES['employee-201-file-philippines'].modified),
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
@@ -58,8 +59,8 @@ const jsonLd = {
       "headline": "What Belongs in an Employee 201 File, and How Long You Are Required to Keep It",
       "description": "A 201 file is an employee's record folder. DOLE rules require employment records such as payrolls and time records to be kept at least three years from the last entry, and tax law requires books of accounts to be kept five years. What to put in a 201 file, the retention rules, and the Data Privacy Act limits.",
       "image": "https://yahshuahris.com/blog/employee-201-file-philippines.png",
-      "datePublished": "2026-10-27T00:00:00.000Z",
-      "dateModified": "2026-10-27T00:00:00.000Z",
+      "datePublished": blogIso(BLOG_DATES['employee-201-file-philippines'].published),
+      "dateModified": blogIso(BLOG_DATES['employee-201-file-philippines'].modified),
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
