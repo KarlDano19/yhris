@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import HolidayPayComputationArticle, { holidayPayFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/HolidayPayComputationArticle";
+import HolidayPayComputationArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/HolidayPayComputationArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
+import { holidayPayFaqs } from '@/lib/blogFaqs';
 
 export const metadata: Metadata = {
   title: 'Philippine Holiday Pay Computation Guide | YAHSHUA HRIS',

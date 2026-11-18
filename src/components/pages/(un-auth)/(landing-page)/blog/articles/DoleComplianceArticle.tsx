@@ -5,15 +5,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 import InlineDemoCta from "@/components/pages/(un-auth)/(landing-page)/blog/components/InlineDemoCta";
-
-export const doleComplianceFaqs = [
-  { q: "What is DOLE DO 252-25 and does it apply to my business?", a: "DO 252-25 is DOLE's revised implementing rules for Republic Act 11058, which took effect on May 16, 2025. It applies to all private-sector establishments in the Philippines, including those with remote or home-based workers, economic zone enterprises, and contracting setups. If you have employees, DO 252-25 applies to you." },
-  { q: "Do I need to submit a WAIR even if no accidents happened last month?", a: "Yes. Under current DOLE rules, the Employer's Work Accident and Illness Report must be submitted by the 30th of every month, regardless of whether any incidents occurred during the reporting period. A zero-incident report is still a required submission." },
-  { q: "What is the Annual Medical Report and who needs to file it?", a: "The Annual Medical Report (form DOLE-BWC-HSD-OH-47-A) summarizes all health services provided to employees during the calendar year. It is due by March 31 of the following year. All covered workplaces are required to submit it. Failure to file carries fines of P20,000 to P50,000 per day until corrected." },
-  { q: "What happens if a Philippine employer fails a DOLE inspection under the new rules?", a: "Inspectors issue a Notice of Results listing all deficiencies. Under DO 252-25, willful non-compliance carries a daily fine of P100,000 until corrected, and repeat violations face progressively higher penalties. In cases of imminent danger, DOLE can issue an immediate work stoppage order with less procedural delay than under the previous rules." },
-  { q: "Can DOLE reports be submitted online?", a: "Yes. DOLE maintains an Online Compliance Portal at reports.dole.gov.ph for submitting mandatory reports digitally. Digital records are accepted by DOLE provided they are accessible, accurately dated, and can be produced on demand during inspections." },
-  { q: "Are small businesses covered by DO 252-25?", a: "Yes. While specific OSH requirements (such as the mandatory Health and Safety Committee) only apply at 20 or more workers, all private-sector employers are covered by DOLE labor standards and OSH reporting requirements. Work accident reporting is mandatory regardless of company size." },
-];
+import { doleComplianceFaqs } from '@/lib/blogFaqs';
 
 const DoleComplianceArticle = () => {
   return (

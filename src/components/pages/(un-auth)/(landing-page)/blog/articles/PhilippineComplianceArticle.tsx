@@ -2,14 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-
-export const philippineComplianceFaqs = [
-  { q: "What is the PhilHealth E-Claims Version 3.0 deadline for Philippine employers?", a: "Under PhilHealth Advisory PA2026-0027, all accredited health facilities must complete migration to E-Claims Version 3.0 by June 30, 2026. Effective July 1, 2026, only E-Claims Version 3.0 will be operational — claims submitted through earlier versions will be Returned to Hospital and will not be processed." },
-  { q: "What do BIR RMC 5-2024 and RMC 38-2024 mean for my payroll?", a: "These circulars establish that Philippine income tax applies based on where the income-producing activity originates — not just where a service is physically performed or where payment is received. For employers with remote workers or cross-border arrangements where essential activities are performed in the Philippines, this may create Philippine tax liability even if the compensation is structured or paid offshore. A payroll tax review against these circulars is strongly recommended." },
-  { q: "What changed under BIR RMC 10-2026 for cash donations?", a: "BIR RMC No. 10-2026, issued February 4, 2026, requires that all Donor's Tax Returns (BIR Form 1800) for purely cash donations be filed electronically through eBIRForms, eFPS, or authorized ATSP solutions. Manual filing is no longer accepted. Cash donations to accredited donee institutions may still be claimed as deductions from gross income subject to documentary requirements. No Electronic Certificate Authorizing Registration (eCAR) is required for cash donations." },
-  { q: "What is the DOLE AERW and who is required to file it?", a: "The Annual Establishment Report on Wages (AERW) is a mandatory submission under DOLE Labor Advisory No. 08-26 and Article 124 of the Labor Code. All private establishments must submit an itemized listing of rank-and-file employees — including learners, apprentices, and workers with disabilities — and their corresponding salaries and wages for the reporting year. It is filed through the DOLE Online Compliance Portal at aerw.nwpc.dole.gov.ph." },
-  { q: "How does an HRIS help with multiple simultaneous compliance deadlines?", a: "An HRIS built for Philippine compliance keeps employee records, regulatory references, and reporting formats inside a single system. Rather than compiling data from separate payroll, attendance, and contribution tools every time a deadline arrives, your compliance data is in one place. YAHSHUA HRIS includes a dedicated DOLE module that generates reports ready for submission in a few clicks, and comes with YAHSHUA One Payroll, which computes BIR withholding and SSS, PhilHealth, and Pag-IBIG contributions." },
-];
+import { philippineComplianceFaqs } from '@/lib/blogFaqs';
 
 const PhilippineComplianceArticle = () => {
   return (
