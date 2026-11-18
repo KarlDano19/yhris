@@ -37,7 +37,7 @@ const jsonLd = {
       "description": "Philippine payroll deadlines from October to December 2026: eight national holidays and special days, NCR's November 16 to 18 special days, minimum wage increases in Central Visayas, Bicol, and BARMM, monthly SSS, PhilHealth, Pag-IBIG, and BIR payments, year-end annualization, the December 24 13th month pay deadline, and January 2027 filings.",
       "image": "https://yahshuahris.com/blog/q4-payroll-compliance-countdown-2026.png",
       "datePublished": "2026-10-01T00:00:00.000Z",
-      "dateModified": "2026-10-01T00:00:00.000Z",
+      "dateModified": "2026-11-18T00:00:00.000Z",
       "author": {
         "@type": "Organization",
         "name": "YAHSHUA HRIS Team",
