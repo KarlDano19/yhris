@@ -11,6 +11,7 @@ const posts: BlogPost[] = [
   {
     slug: "bir-form-1604-c-alphalist-2026-philippines",
     category: "Statutory Compliance",
+    image: "/blog/bir-form-1604-c-alphalist-2026-philippines.png",
     title: "BIR Form 1604-C and the Alphalist: Your January 2027 Filing Checklist",
     excerpt: "Due January 31, 2027, a Sunday, so plan to file by Friday, January 29. What goes in the alphalist, the three ways to submit it, the Section 250 penalty, and a year-end checklist.",
     date: "November 2026",
@@ -19,6 +20,7 @@ const posts: BlogPost[] = [
   {
     slug: "philhealth-contribution-table-2026-philippines",
     category: "Statutory Compliance",
+    image: "/blog/philhealth-contribution-table-2026-philippines.png",
     title: "PhilHealth Contribution Table 2026: Rate, Floor, Ceiling and Employer Share",
     excerpt: "5% of monthly basic salary, split 2.5% each, on a ₱10,000 floor and ₱100,000 ceiling. The table by salary, what counts as basic salary, and when employers pay.",
     date: "November 2026",

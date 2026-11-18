@@ -31,6 +31,8 @@ export const BLOG_COVERS = {
   'hris-pricing-philippines-2026': { path: '/blog/hris-pricing-philippines-2026.png', width: 1200, height: 628 },
   'q4-payroll-compliance-deadlines-philippines-2026': { path: '/blog/q4-payroll-compliance-countdown-2026.png', width: 1200, height: 628 },
   'minimum-wage-philippines-2026-by-region': { path: '/blog/minimum-wage-by-region-2026.png', width: 1200, height: 628 },
+  'philhealth-contribution-table-2026-philippines': { path: '/blog/philhealth-contribution-table-2026-philippines.png', width: 1200, height: 628 },
+  'bir-form-1604-c-alphalist-2026-philippines': { path: '/blog/bir-form-1604-c-alphalist-2026-philippines.png', width: 1200, height: 628 },
 } as const;
 
 export type BlogCoverSlug = keyof typeof BLOG_COVERS;

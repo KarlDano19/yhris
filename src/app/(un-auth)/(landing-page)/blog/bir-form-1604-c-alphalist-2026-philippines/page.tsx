@@ -3,14 +3,14 @@ import Bir1604CAlphalistArticle from "@/components/pages/(un-auth)/(landing-page
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 import { bir1604cFaqs } from '@/lib/blogFaqs';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'BIR Form 1604-C and Alphalist: January 2027 Filing Guide',
   description: 'BIR Form 1604-C and the alphalist of employees are due January 31, 2027, a Sunday. What goes in, how to submit, the ₱1,000 penalty, and a checklist.',
   keywords: 'BIR 1604-C alphalist, BIR Form 1604-C 2026, alphalist of employees, 1604-C deadline January 31 2027, BIR alphalist submission, Section 250 penalty, BIR Form 2316',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('bir-form-1604-c-alphalist-2026-philippines'),
     title: 'BIR Form 1604-C and the Alphalist: Your January 2027 Filing Checklist',
     description: 'The 1604-C and alphalist for 2026 are due January 31, 2027, a Sunday. What goes in the alphalist, how to submit it, the penalty, and a year-end checklist.',
     type: 'article',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('bir-form-1604-c-alphalist-2026-philippines'),
     card: 'summary_large_image',
     title: 'BIR Form 1604-C and Alphalist: January 2027 Filing Guide',
     description: 'BIR 1604-C and alphalist due January 31, 2027 (a Sunday). Contents, submission methods, penalty and checklist.',
@@ -38,7 +38,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/bir-form-1604-c-alphalist-2026-philippines#article",
       "headline": "BIR Form 1604-C and the Alphalist: Your January 2027 Filing Checklist",
       "description": "BIR Form 1604-C and the alphalist of employees for compensation paid in 2026 are due on or before January 31, 2027, a Sunday. What the alphalist contains, how to submit it, the Section 250 penalty, and a year-end checklist for employers.",
-      "image": "https://yahshuahris.com/preview-image.png",
+      "image": blogCoverUrl('bir-form-1604-c-alphalist-2026-philippines'),
       "datePublished": blogIso(BLOG_DATES['bir-form-1604-c-alphalist-2026-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['bir-form-1604-c-alphalist-2026-philippines'].modified),
       "author": {
