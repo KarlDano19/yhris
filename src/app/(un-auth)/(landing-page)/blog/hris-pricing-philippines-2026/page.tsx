@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import HrisPricingPhilippinesArticle, { hrisPricingFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/HrisPricingPhilippinesArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 const URL = 'https://yahshuahris.com/blog/hris-pricing-philippines-2026';
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Published HRIS and payroll prices in the Philippines for 2026, monthly and year-one cost at 50 to 300 employees, hidden fees, and how to choose.',
   keywords: 'HRIS pricing Philippines 2026, how much does HRIS cost Philippines, payroll software cost Philippines, HRIS price per employee, GreatDay HR pricing, Sprout Solutions pricing, HRIS for 100 employees, best HRIS Philippines',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('hris-pricing-philippines-2026'),
     title: 'HRIS Pricing Philippines 2026: What 100 Employees Cost',
     description: 'Published prices for the main Philippine HR and payroll tools, the cost at 50 to 300 employees, the fees outside the subscription, and how to choose.',
     type: 'article',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('hris-pricing-philippines-2026'),
     card: 'summary_large_image',
     title: 'HRIS Pricing Philippines 2026: What 100 Employees Cost',
     description: 'What HR and payroll software costs in the Philippines, with published prices and the real cost at 50 to 300 employees.',
@@ -39,7 +39,7 @@ const jsonLd = {
       "@id": `${URL}#article`,
       "headline": "HRIS Pricing in the Philippines 2026: What a 100-Employee Company Actually Pays",
       "description": "In 2026 a 100-employee Philippine company pays roughly 5,400 to 40,000 pesos a month for HR and payroll software, depending on scope. Published prices from Timekeep, YAHSHUA HRIS, GreatDay HR, WORKSPHR, and PayrollHero, the monthly and year-one cost at 50 to 300 employees, fees outside the subscription, and how to choose. Sprout Solutions publishes no price.",
-      "image": "https://yahshuahris.com/blog/hris-pricing-philippines-2026.png",
+      "image": blogCoverUrl('hris-pricing-philippines-2026'),
       "datePublished": blogIso(BLOG_DATES['hris-pricing-philippines-2026'].published),
       "dateModified": blogIso(BLOG_DATES['hris-pricing-philippines-2026'].modified),
       "author": {

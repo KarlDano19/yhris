@@ -2,14 +2,14 @@ import { Metadata } from 'next';
 import SssMandatoryProvidentFundArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/SssMandatoryProvidentFundArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'SSS Mandatory Provident Fund (WISP) Explained',
   description: 'WISP automatically applies once MSC exceeds ₱20,000. How the 15% SSS contribution splits, how it is invested, and how it differs from WISP Plus.',
   keywords: 'SSS Mandatory Provident Fund, SSS WISP, Workers Investment and Savings Program, SSS MPF, WISP vs WISP Plus, SSS provident fund Philippines',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('sss-mandatory-provident-fund-philippines'),
     title: 'Inside the SSS Mandatory Provident Fund (WISP)',
     description: 'Above a ₱20,000 Monthly Salary Credit, part of every SSS contribution goes to WISP instead of the regular program. Here is exactly how the split, investment, and payout work.',
     type: 'article',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('sss-mandatory-provident-fund-philippines'),
     card: 'summary_large_image',
     title: 'Inside the SSS Mandatory Provident Fund (WISP)',
     description: 'How the SSS WISP contribution split, investment, and payout actually work, and how it differs from WISP Plus.',
@@ -37,7 +37,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/sss-mandatory-provident-fund-philippines#article",
       "headline": "Inside the SSS Mandatory Provident Fund (WISP): What It Is and How It Changes Your Payroll Math",
       "description": "The SSS Mandatory Provident Fund (WISP) automatically applies once Monthly Salary Credit exceeds ₱20,000. How the contribution split, investment allocation, and payout rules work, and how WISP differs from the separate, voluntary WISP Plus program.",
-      "image": "https://yahshuahris.com/blog/sss-mandatory-provident-fund.png",
+      "image": blogCoverUrl('sss-mandatory-provident-fund-philippines'),
       "datePublished": blogIso(BLOG_DATES['sss-mandatory-provident-fund-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['sss-mandatory-provident-fund-philippines'].modified),
       "author": {

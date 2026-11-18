@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 import SssContributionTable2026Article from "@/components/pages/(un-auth)/(landing-page)/blog/articles/SssContributionTable2026Article";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'SSS, PhilHealth, Pag-IBIG Contribution Table 2026 by Salary',
   description: 'Find your exact deduction: 2026 SSS, PhilHealth and Pag-IBIG tables by salary level, with employer vs employee share, EC and MPF, and worked payroll examples.',
   keywords: 'SSS contribution table 2026, PhilHealth contribution rate 2026, Pag-IBIG contribution 2026, SSS mandatory provident fund, Philippine statutory contributions 2026',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('sss-contribution-table-2026-philippines'),
     title: '2026 SSS, PhilHealth and Pag-IBIG Contribution Rates: Philippine Employer Guide',
     description: 'SSS is 15% of the monthly salary credit up to ₱35,000, PhilHealth is 5% with a ₱100,000 ceiling, and Pag-IBIG caps at ₱400 a month. Tables with employer and employee shares and computation examples.',
     type: 'article',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('sss-contribution-table-2026-philippines'),
     card: 'summary_large_image',
     title: '2026 Philippine Statutory Contribution Rates: SSS, PhilHealth, Pag-IBIG',
     description: 'SSS at 15%, ₱35,000 MSC ceiling. PhilHealth at 5%, ₱100,000 ceiling. Pag-IBIG caps at ₱400/month. Updated tables for Philippine employers.',
@@ -36,7 +36,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/sss-contribution-table-2026-philippines#article",
       "headline": "2026 SSS, PhilHealth and Pag-IBIG Contribution Tables: Rates and Ceilings for Employers",
       "description": "SSS is 15% of the monthly salary credit up to ₱35,000, PhilHealth is 5% with a ₱100,000 ceiling, and Pag-IBIG caps at ₱400 per month. Contribution tables with employer and employee shares, computation examples, and an employer checklist.",
-      "image": "https://yahshuahris.com/blog/sss-contribution-2026.png",
+      "image": blogCoverUrl('sss-contribution-table-2026-philippines'),
       "datePublished": blogIso(BLOG_DATES['sss-contribution-table-2026-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['sss-contribution-table-2026-philippines'].modified),
       "author": {

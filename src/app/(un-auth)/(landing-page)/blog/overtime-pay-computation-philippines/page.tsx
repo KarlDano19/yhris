@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import OvertimePayComputationArticle, { overtimeFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/OvertimePayComputationArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 const URL = 'https://yahshuahris.com/blog/overtime-pay-computation-philippines';
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Overtime pay rates of 125%, 169%, 260%, and 338%, the formula for daily-paid and monthly-paid employees, and peso examples at the ₱755 NCR minimum.',
   keywords: 'overtime pay computation Philippines, how to compute overtime pay, overtime rate Philippines 2026, 755 overtime pay, rest day overtime 169%, holiday overtime 260%, Labor Code Article 87, DOLE overtime rules',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('overtime-pay-computation-philippines'),
     title: 'Overtime Pay Rate Philippines 2026: Formula + ₱755 Examples',
     description: 'Every overtime rate from ordinary days to double holidays, the formula for daily-paid and monthly-paid employees, and peso amounts at the new NCR minimum wage.',
     type: 'article',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('overtime-pay-computation-philippines'),
     card: 'summary_large_image',
     title: 'Overtime Pay Rate Philippines 2026: Formula + ₱755 Examples',
     description: 'Overtime rates, the formula, and peso amounts at the ₱755 NCR minimum wage.',
@@ -39,7 +39,7 @@ const jsonLd = {
       "@id": `${URL}#article`,
       "headline": "Overtime Pay Computation in the Philippines (2026): Rates, Formula, and ₱755 Examples",
       "description": "Overtime pay in the Philippines is the hourly rate (daily rate divided by 8) multiplied by the overtime rate for the day: 125% on ordinary days, 169% on rest days and special days, 260% on regular holidays, and 338% on a regular holiday falling on a rest day. Peso amounts at the ₱755 NCR minimum, worked examples, monthly-paid conversion, coverage under Labor Code Article 82, and tax treatment.",
-      "image": "https://yahshuahris.com/blog/overtime-pay-computation-2026.png",
+      "image": blogCoverUrl('overtime-pay-computation-philippines'),
       "datePublished": blogIso(BLOG_DATES['overtime-pay-computation-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['overtime-pay-computation-philippines'].modified),
       "author": {

@@ -2,14 +2,14 @@ import { Metadata } from 'next';
 import Employee201FileArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/Employee201FileArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'Employee 201 File Philippines: What to Keep and How Long',
   description: 'What belongs in an employee 201 file, how long DOLE and tax rules say to keep the records, and where the Data Privacy Act limits you. Includes an HR checklist.',
   keywords: 'employee 201 file Philippines, 201 file requirements, employee records retention Philippines, how long to keep employee records, DOLE record keeping, Data Privacy Act employee records',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('employee-201-file-philippines'),
     title: 'Employee 201 File: What to Keep, and for How Long',
     description: 'DOLE requires employment records to be kept at least three years from the last entry. What goes in a 201 file, the retention rules, and the privacy limits.',
     type: 'article',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('employee-201-file-philippines'),
     card: 'summary_large_image',
     title: 'Employee 201 File Philippines: What to Keep and How Long',
     description: 'What belongs in a 201 file and how long Philippine rules say to keep employee records.',
@@ -61,7 +61,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/employee-201-file-philippines#article",
       "headline": "What Belongs in an Employee 201 File, and How Long You Are Required to Keep It",
       "description": "A 201 file is an employee's record folder. DOLE rules require employment records such as payrolls and time records to be kept at least three years from the last entry, and tax law requires books of accounts to be kept five years. What to put in a 201 file, the retention rules, and the Data Privacy Act limits.",
-      "image": "https://yahshuahris.com/blog/employee-201-file-philippines.png",
+      "image": blogCoverUrl('employee-201-file-philippines'),
       "datePublished": blogIso(BLOG_DATES['employee-201-file-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['employee-201-file-philippines'].modified),
       "author": {

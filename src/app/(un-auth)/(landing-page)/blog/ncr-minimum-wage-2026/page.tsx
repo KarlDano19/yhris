@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 import NcrMinimumWage2026Article from "@/components/pages/(un-auth)/(landing-page)/blog/articles/NcrMinimumWage2026Article";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'Minimum Wage 2026: ₱755/Day in Quezon City, Manila, Makati',
   description: 'Since Sept 26, 2026 (NCR-28): ₱755/day non-agriculture, ₱718 lower category. Daily, hourly, monthly, overtime and holiday pay for all 17 Metro Manila cities.',
   keywords: 'Manila minimum wage 2026, Quezon City minimum wage 2026, Makati minimum wage 2026, NCR minimum wage 2026, Wage Order NCR-28, Wage Order NCR-27, Metro Manila minimum wage, minimum wage Philippines 2026',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('ncr-minimum-wage-2026'),
     title: 'Minimum Wage 2026: ₱755/Day in Quezon City, Manila, Makati',
     description: 'Wage Order No. NCR-28 raises the NCR minimum wage to ₱755/day (non-agriculture) and ₱718/day (lower category) from September 26, 2026, in a single tranche. NCR-27 never took effect due to court injunctions.',
     type: 'article',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('ncr-minimum-wage-2026'),
     card: 'summary_large_image',
     title: 'Minimum Wage 2026: ₱755/Day in Quezon City, Manila, Makati',
     description: 'NCR minimum wage is ₱755/day (non-agriculture) from September 26, 2026 under Wage Order NCR-28. What happened to NCR-27, and the employer payroll checklist.',
@@ -88,7 +88,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/ncr-minimum-wage-2026#article",
       "headline": "NCR Minimum Wage 2026: ₱755/Day Under Wage Order NCR-28, Effective September 26",
       "description": "Wage Order No. NCR-28 raises the Metro Manila minimum wage to ₱755 per day for non-agriculture workers and ₱718 for the lower category from September 26, 2026, in a single tranche. The earlier ₱85 order, NCR-27, never took effect because of court injunctions. Rate table, timeline, who is covered, and the employer payroll checklist.",
-      "image": "https://yahshuahris.com/blog/ncr-minimum-wage-2026.png",
+      "image": blogCoverUrl('ncr-minimum-wage-2026'),
       "datePublished": blogIso(BLOG_DATES['ncr-minimum-wage-2026'].published),
       "dateModified": blogIso(BLOG_DATES['ncr-minimum-wage-2026'].modified),
       "author": {

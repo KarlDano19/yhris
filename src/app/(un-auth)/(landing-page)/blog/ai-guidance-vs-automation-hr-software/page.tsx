@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 import AiGuidanceVsAutomationArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/AiGuidanceVsAutomationArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'AI Guidance vs AI Automation in HR Software | YAHSHUA HRIS',
   description: "An AI assistant that quotes the SSS rate isn't the same as a payroll system that applies it correctly. The compliance gap between guidance and automation.",
   keywords: 'AI payroll automation vs AI guidance, AI HR software Philippines, payroll automation Philippines, compliance automation HR, AI guidance HR software',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('ai-guidance-vs-automation-hr-software'),
     title: 'Why "Telling You the Rule" Is Not Compliance: AI Guidance vs AI Automation in HR Software',
     description: 'An AI assistant that quotes you the SSS rate is not the same as a payroll system that applies it correctly. One informs. The other acts. The difference determines your compliance exposure.',
     type: 'article',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('ai-guidance-vs-automation-hr-software'),
     card: 'summary_large_image',
     title: 'AI Guidance vs AI Automation in HR Software',
     description: 'Knowing the SSS rate and applying it correctly are two different things. This is why Philippine employers on AI-powered HR tools can still face compliance penalties.',
@@ -36,7 +36,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/ai-guidance-vs-automation-hr-software#article",
       "headline": "Why \"Telling You the Rule\" Is Not Compliance: The Real Difference Between AI Guidance and AI Automation in HR Software",
       "description": "An AI assistant that quotes the SSS rate is not the same as a payroll system that applies it correctly. This article defines both categories, explains where guidance-only approaches create compliance gaps specific to Philippine payroll, and gives employers five concrete questions to determine which type of system they are running.",
-      "image": "https://yahshuahris.com/blog/ai-guidance-vs-automation.png",
+      "image": blogCoverUrl('ai-guidance-vs-automation-hr-software'),
       "datePublished": blogIso(BLOG_DATES['ai-guidance-vs-automation-hr-software'].published),
       "dateModified": blogIso(BLOG_DATES['ai-guidance-vs-automation-hr-software'].modified),
       "author": {
