@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useRef } from "react";
 
+import { calculateMonthly } from "@/lib/yahshuaPricing";
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface FormValues {
@@ -56,23 +58,6 @@ const fmt = (n: number) =>
     maximumFractionDigits: 0,
   }).format(Math.round(n));
 
-const calcYahshuaMonthly = (employees: number): number => {
-  const base = 7000;
-  if (employees <= 100) return base;
-  let extra = 0;
-  let rem = employees - 100;
-  const t1 = Math.min(rem, 150);
-  extra += t1 * 39;
-  rem -= t1;
-  if (rem > 0) {
-    const t2 = Math.min(rem, 250);
-    extra += t2 * 37;
-    rem -= t2;
-  }
-  if (rem > 0) extra += rem * 35;
-  return Math.round((base + extra) * 1.12);
-};
-
 const runCalc = (f: FormValues): CalcResults => {
   // 1.18 = PH employer burden: 13th month (8.3%) + SSS (~4%) + PhilHealth (~2.5%) + Pag-IBIG (~0.3%) + misc (~3%)
   // 173 = standard PH working hours per month (8h × 5d × ~21.75 working days)
@@ -85,7 +70,8 @@ const runCalc = (f: FormValues): CalcResults => {
   const toolRedundancyCost = (f.toolCount - 1) * 36000;
   const totalWaste = payrollTimeCost + complianceTimeCost + errorCost + toolRedundancyCost;
   const yahshuaSavings = totalWaste * 0.7;
-  const yahshuaMonthly = calcYahshuaMonthly(f.employees);
+  // Same figure as the pricing page: flat base up to the employee cap, then a per-employee rate (VAT excluded).
+  const yahshuaMonthly = calculateMonthly(f.employees);
   const monthsToROI =
     yahshuaSavings > 0 ? Math.ceil(yahshuaMonthly / (yahshuaSavings / 12)) : 0;
   return {
@@ -253,7 +239,7 @@ export default function HrCostCalculatorContent() {
       new Intl.NumberFormat("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(n));
 
     try {
-      await fetch("/api/loops/calculator/contacts", {
+      const contactRes = await fetch("/api/loops/calculator/contacts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -270,7 +256,14 @@ export default function HrCostCalculatorContent() {
         }),
       });
 
-      await fetch("/api/loops/calculator/events", {
+      // 409 means this email is already in Loops, which is fine. Anything else means the lead was not saved.
+      if (!contactRes.ok && contactRes.status !== 409) {
+        console.error("[hr-cost-calculator] Lead save failed with status", contactRes.status);
+        setSubmitError("We could not save your details just now. Please try again in a moment.");
+        return;
+      }
+
+      const eventRes = await fetch("/api/loops/calculator/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -284,6 +277,9 @@ export default function HrCostCalculatorContent() {
           },
         }),
       });
+      if (!eventRes.ok) {
+        console.error("[hr-cost-calculator] Loops event failed with status", eventRes.status);
+      }
 
       fetch("/api/loops/calculator/transactional", {
         method: "POST",
@@ -296,7 +292,15 @@ export default function HrCostCalculatorContent() {
           calcYahshuaSavings: fmtNum(results.yahshuaSavings),
           calcMonthsToRoi: results.monthsToROI,
         }),
-      }).catch(() => {});
+      })
+        .then((res) => {
+          if (!res.ok) {
+            console.error("[hr-cost-calculator] Report email failed with status", res.status);
+          }
+        })
+        .catch((err) => {
+          console.error("[hr-cost-calculator] Report email request failed", err);
+        });
 
       setStep(3);
     } catch {
@@ -667,7 +671,7 @@ export default function HrCostCalculatorContent() {
                   </p>
                   <p className="text-white/50 text-sm mt-2 print:text-gray-500">
                     Based on {fmt(results.yahshuaMonthly)}/mo plan for {form.employees}{" "}
-                    employees.
+                    employees (VAT excluded).
                   </p>
                 </div>
               </div>

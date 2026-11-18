@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.LOOPS_CALCULATOR_API;
 
     if (!apiKey) {
+      console.error('[loops-calculator] LOOPS_CALCULATOR_API is not set in this environment');
       return NextResponse.json(
         { error: 'Loops calculator API key not configured' },
         { status: 500 }
