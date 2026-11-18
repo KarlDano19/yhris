@@ -2,15 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-
-export const holidayPayFaqs = [
-  { q: "Are employees paid if they do not work on a regular holiday in the Philippines?", a: "Yes. On a regular holiday, all covered employees are entitled to 100% of their regular daily rate even if they do not report to work. This is different from special non-working holidays, where the \"no work, no pay\" rule applies unless the company policy provides otherwise." },
-  { q: "What is the holiday pay rate for employees working on a regular holiday?", a: "Employees who work on a regular holiday receive 200% of their regular daily rate — their basic pay for the day plus an additional 100% premium. If the holiday falls on their rest day and they work, the rate increases to 260%." },
-  { q: "What is the difference between a regular holiday and a special non-working holiday?", a: "Regular holidays are fixed under the law (e.g., Independence Day, Christmas, Rizal Day) and employees are paid even if they do not work. Special non-working holidays (e.g., EDSA People Power Anniversary, All Saints' Day) follow \"no work, no pay\" — employees only receive pay if they report." },
-  { q: "How should holiday pay be computed for employees on flexible work schedules?", a: "For employees on flexible or compressed workweek arrangements, holiday pay computation depends on the specific DOLE-approved schedule. The applicable daily rate is based on the equivalent daily rate in the arrangement, not the standard 8-hour rate. Review the specific arrangement against current DOLE guidelines or consult your HR counsel." },
-  { q: "What is the penalty for not paying the correct holiday pay?", a: "Under Articles 128 and 129 of the Labor Code, the employer is liable for the full unpaid or underpaid amount across all affected employees, plus attorney's fees equal to 10% of total recovered wages. DOLE can issue a compliance order and, in cases where non-compliance jeopardizes worker welfare, suspend business operations — during which the employer must continue to pay wages. Employees may file money claims directly with DOLE or the NLRC without needing to hire a lawyer." },
-  { q: "Do contractual and part-time employees receive holiday pay?", a: "Yes, provided they are covered employees under the Labor Code. Contractual and project-based employees on a daily or hourly rate are entitled to holiday pay. Part-time employees receive holiday pay proportionate to their regular schedule. Employees paid purely on commission may be exempt under certain conditions — consult DOLE guidelines for commission-based arrangements." },
-];
+import { holidayPayFaqs } from '@/lib/blogFaqs';
 
 const HolidayPayComputationArticle = () => {
   return (

@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import PhilippineComplianceArticle, { philippineComplianceFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PhilippineComplianceArticle";
+import PhilippineComplianceArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PhilippineComplianceArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { philippineComplianceFaqs } from '@/lib/blogFaqs';
 
 export const metadata: Metadata = {
   title: 'Philippine HR Compliance 2026 | YAHSHUA HRIS',

@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import PayrollErrorsArticle, { payrollErrorsFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollErrorsArticle";
+import PayrollErrorsArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollErrorsArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { payrollErrorsFaqs } from '@/lib/blogFaqs';
 
 export const metadata: Metadata = {
   title: 'What Payroll Errors Actually Cost Philippine MSMEs',

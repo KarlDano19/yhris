@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import DoleComplianceArticle, { doleComplianceFaqs } from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleComplianceArticle";
+import DoleComplianceArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleComplianceArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { doleComplianceFaqs } from '@/lib/blogFaqs';
 
 export const metadata: Metadata = {
   title: 'DOLE Compliance Requirements for Employers | YAHSHUA HRIS',

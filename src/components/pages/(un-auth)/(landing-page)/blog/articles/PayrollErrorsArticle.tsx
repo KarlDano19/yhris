@@ -4,14 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-
-export const payrollErrorsFaqs = [
-  { q: "What is the PhilHealth contribution rate for Philippine employers in 2026?", a: "The PhilHealth premium contribution rate for 2026 is 5% of the employee's monthly basic salary, split equally at 2.5% each for employer and employee. The minimum monthly premium is ₱500 (for salaries at or below ₱10,000) and the maximum is ₱5,000 (for salaries at ₱100,000 and above). This rate is the final scheduled increase under Republic Act No. 11223, the Universal Health Care Act." },
-  { q: "What is the SSS contribution rate in 2026?", a: "The SSS contribution rate in 2026 is 15% of the employee's Monthly Salary Credit (MSC) — 10% paid by the employer and 5% by the employee. This rate took effect January 1, 2025 under Republic Act No. 11199 and carries unchanged into 2026. The MSC ceiling is ₱35,000, up from the previous ₱30,000 limit." },
-  { q: "What are BIR penalties for incorrect payroll withholding tax in the Philippines?", a: "Under NIRC Sections 248 and 249, BIR penalties for incorrect withholding tax include: a 25% surcharge on the unpaid amount (50% for willful neglect or fraud), 12% annual interest from the filing deadline to the date of payment, and compromise penalties from ₱1,000 to ₱50,000 based on the amount unpaid. Under RA 11976 (Ease of Paying Taxes Act), micro taxpayers with gross sales below ₱3 million and small taxpayers below ₱20 million qualify for 50% reductions on interest and compromise penalties." },
-  { q: "How do I check if my payroll system has 2026 compliance errors?", a: "Verify three settings in your payroll system: PhilHealth at 5% with a ₱100,000 salary ceiling, SSS at 15% with a ₱35,000 MSC ceiling, and BIR withholding computed on the TRAIN Law brackets with a ₱90,000 13th month pay tax exemption. If any figure differs from your current configuration, your remittances have been incorrect and the total discrepancy should be calculated before a government notice arrives." },
-  { q: "Can a Philippine employer be penalized for payroll errors they did not know about?", a: "Yes. The 25% surcharge under NIRC Section 248 applies to late or incorrect remittances regardless of intent — only the 50% rate requires proof of willful neglect or fraud. Employers are legally responsible for correct computation and timely remittance of all statutory contributions. Ignorance of rate changes is not a recognized defense." },
-];
+import { payrollErrorsFaqs } from '@/lib/blogFaqs';
 
 const PayrollErrorsArticle = () => {
   return (
