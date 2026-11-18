@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import PayrollErrorsArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollErrorsArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 import { payrollErrorsFaqs } from '@/lib/blogFaqs';
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Philippine MSMEs on outdated SSS, PhilHealth, and BIR rates face 25% surcharges, 12% annual interest, and up to ₱50,000 in penalties. Here's the real cost.",
   keywords: 'payroll errors Philippines 2026, SSS contribution rate 2026, PhilHealth premium 2026, BIR withholding tax penalties Philippines, MSME payroll compliance Philippines',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('philippine-payroll-errors-msme'),
     title: 'What Philippine Payroll Errors Actually Cost MSMEs',
     description: 'SSS is now at 15%, PhilHealth at 5%, and BIR penalties run 25% surcharge plus 12% annual interest. If your payroll system was not updated, errors have been accumulating since January.',
     type: 'article',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('philippine-payroll-errors-msme'),
     card: 'summary_large_image',
     title: 'What Philippine Payroll Errors Actually Cost MSMEs',
     description: 'SSS at 15%, PhilHealth at 5%, BIR penalties at 25% surcharge and 12% interest. Here is what running payroll on outdated rates actually costs.',
@@ -37,7 +37,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/philippine-payroll-errors-msme#article",
       "headline": "What Philippine Payroll Errors Actually Cost MSMEs",
       "description": "Philippine MSMEs running payroll on outdated SSS, PhilHealth, and BIR rates face surcharges of 25%, 12% annual interest, and up to 50,000 pesos in compromise penalties. Here is what the cost actually looks like.",
-      "image": "https://yahshuahris.com/blog/payroll-errors-msme.png",
+      "image": blogCoverUrl('philippine-payroll-errors-msme'),
       "datePublished": blogIso(BLOG_DATES['philippine-payroll-errors-msme'].published),
       "dateModified": blogIso(BLOG_DATES['philippine-payroll-errors-msme'].modified),
       "author": {

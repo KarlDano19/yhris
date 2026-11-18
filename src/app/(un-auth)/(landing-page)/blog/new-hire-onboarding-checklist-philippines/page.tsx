@@ -2,14 +2,14 @@ import { Metadata } from 'next';
 import NewHireOnboardingChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/NewHireOnboardingChecklistArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'New Hire Onboarding Checklist Philippines: Documents and IDs',
   description: 'New hire onboarding checklist for Philippine employers: SSS and PhilHealth in 30 days, TIN in 10 days, Pag-IBIG, documents to collect, and privacy limits.',
   keywords: 'new hire onboarding checklist Philippines, employee onboarding requirements Philippines, new employee SSS PhilHealth Pag-IBIG TIN, documents required for new hires, employer onboarding checklist',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('new-hire-onboarding-checklist-philippines'),
     title: 'New Hire Onboarding Checklist: Government IDs and Documents',
     description: 'SSS and PhilHealth within 30 days, a TIN within 10 days, Pag-IBIG enrollment, and what to collect. The checklist with required steps marked.',
     type: 'article',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('new-hire-onboarding-checklist-philippines'),
     card: 'summary_large_image',
     title: 'New Hire Onboarding Checklist Philippines: Documents and IDs',
     description: 'The onboarding checklist for Philippine employers, with each government deadline marked.',
@@ -61,7 +61,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/new-hire-onboarding-checklist-philippines#article",
       "headline": "New Hire Onboarding Checklist for Philippine Employers: Government IDs and Documents",
       "description": "Onboarding a new hire means four government registrations: SSS and PhilHealth, each reported within 30 days of hiring, Pag-IBIG membership, and a BIR TIN within 10 days of employment if the employee has none. The checklist, the documents to collect, and the Data Privacy Act limits.",
-      "image": "https://yahshuahris.com/blog/new-hire-onboarding-checklist-philippines.png",
+      "image": blogCoverUrl('new-hire-onboarding-checklist-philippines'),
       "datePublished": blogIso(BLOG_DATES['new-hire-onboarding-checklist-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['new-hire-onboarding-checklist-philippines'].modified),
       "author": {

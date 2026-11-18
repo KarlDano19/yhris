@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import DoleComplianceArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/DoleComplianceArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 import { doleComplianceFaqs } from '@/lib/blogFaqs';
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.',
   keywords: 'DOLE compliance requirements Philippines, WAIR report, EC logbook, OSH annual report, Philippine labor compliance',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('dole-compliance-requirements-philippines'),
     title: 'DOLE Compliance Requirements Every Philippine Employer Must Know',
     description: 'A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.',
     type: 'article',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('dole-compliance-requirements-philippines'),
     card: 'summary_large_image',
     title: 'DOLE Compliance Requirements Every Philippine Employer Must Know',
     description: 'Mandatory DOLE reports explained: WAIR, EC Logbook, OSH annual report, and more.',
@@ -37,7 +37,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/dole-compliance-requirements-philippines#article",
       "headline": "DOLE Compliance Requirements Every Philippine Employer Must Know",
       "description": "A practical breakdown of mandatory DOLE reports, from WAIR submissions to OSH annual reports, and how to stay compliant without drowning in paperwork.",
-      "image": "https://yahshuahris.com/blog/dole-compliance-2026.png",
+      "image": blogCoverUrl('dole-compliance-requirements-philippines'),
       "datePublished": blogIso(BLOG_DATES['dole-compliance-requirements-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['dole-compliance-requirements-philippines'].modified),
       "author": {

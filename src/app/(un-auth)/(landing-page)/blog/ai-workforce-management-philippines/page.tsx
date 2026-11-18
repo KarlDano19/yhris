@@ -2,14 +2,14 @@ import { Metadata } from 'next';
 import AiWorkforceManagementArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/AiWorkforceManagementArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'Beyond BPO: AI Workforce Management in the Philippines',
   description: 'AI adoption is highest in PH logistics (86.4%) and retail (85.5%), lowest in manufacturing (72.4%). What this means for multi-branch operations.',
   keywords: 'workforce management Philippines logistics, AI workforce management Philippines, multi-branch retail scheduling Philippines, deskless worker technology, future of work Philippines',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('ai-workforce-management-philippines'),
     title: 'Beyond BPO: AI Workforce Management in the Philippines',
     description: 'Most future-of-work coverage in the Philippines defaults to BPO. Here is what AI-powered workforce management looks like in retail, manufacturing, and logistics.',
     type: 'article',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('ai-workforce-management-philippines'),
     card: 'summary_large_image',
     title: 'Beyond BPO: AI Workforce Management in the Philippines',
     description: 'AI adoption by PH industry: logistics 86.4%, retail 85.5%, manufacturing 72.4%. What it means for multi-branch operations.',
@@ -37,7 +37,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/ai-workforce-management-philippines#article",
       "headline": "Beyond BPO: How AI Is Changing Workforce Management in Philippine Retail, Manufacturing, and Logistics",
       "description": "AI adoption is highest in Philippine transportation and logistics (86.4%) and retail (85.5%), lowest in manufacturing (72.4%). What this means for multi-branch operations.",
-      "image": "https://yahshuahris.com/blog/ai-workforce-management.png",
+      "image": blogCoverUrl('ai-workforce-management-philippines'),
       "datePublished": blogIso(BLOG_DATES['ai-workforce-management-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['ai-workforce-management-philippines'].modified),
       "author": {

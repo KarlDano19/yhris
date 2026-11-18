@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import HolidayPayComputationArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/HolidayPayComputationArticle";
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 import { holidayPayFaqs } from '@/lib/blogFaqs';
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Correct holiday pay rates for regular and special non-working holidays in the Philippines, with a computation table and common employer mistakes.',
   keywords: 'holiday pay computation Philippines, regular holiday pay Philippines, special non-working holiday pay, DOLE holiday pay rules, how to compute holiday pay Philippines',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('philippine-holiday-pay-computation-guide'),
     title: 'Philippine Holiday Pay Computation: A Complete Employer Guide',
     description: 'Pay rates for regular and special holidays, rest day premiums, common computation mistakes, and what DOLE expects from employers on every payroll cycle.',
     type: 'article',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('philippine-holiday-pay-computation-guide'),
     card: 'summary_large_image',
     title: 'Philippine Holiday Pay Computation: Complete Employer Guide',
     description: 'Correct pay rates for all holiday scenarios, common mistakes, and DOLE compliance requirements.',
@@ -38,7 +38,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/philippine-holiday-pay-computation-guide#article",
       "headline": "Philippine Holiday Pay Computation: A Complete Employer Guide",
       "description": "Correct holiday pay rates for regular and special non-working holidays in the Philippines. Includes computation table, common employer mistakes, and DOLE compliance requirements.",
-      "image": "https://yahshuahris.com/blog/philippine-holiday-pay.png",
+      "image": blogCoverUrl('philippine-holiday-pay-computation-guide'),
       "datePublished": blogIso(BLOG_DATES['philippine-holiday-pay-computation-guide'].published),
       "dateModified": blogIso(BLOG_DATES['philippine-holiday-pay-computation-guide'].modified),
       "author": {

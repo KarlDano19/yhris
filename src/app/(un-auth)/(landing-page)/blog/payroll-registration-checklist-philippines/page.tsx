@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 import PayrollRegistrationChecklistArticle from "@/components/pages/(un-auth)/(landing-page)/blog/articles/PayrollRegistrationChecklistArticle";
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'Philippine Payroll Registration Checklist | YAHSHUA HRIS',
   description: 'Step-by-step checklist for registering a Philippine business with BIR, SSS, PhilHealth, and Pag-IBIG, including forms, fees, and remittance deadlines.',
   keywords: 'payroll registration checklist Philippines, BIR employer registration Philippines, SSS employer registration, PhilHealth employer registration, Pag-IBIG employer registration',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('payroll-registration-checklist-philippines'),
     title: 'Philippine Business Payroll Setup Checklist: BIR, SSS, PhilHealth, Pag-IBIG',
     description: 'Step-by-step checklist for registering with all four government agencies before your first payroll. Correct order, required forms, fees, and remittance deadlines.',
     type: 'article',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('payroll-registration-checklist-philippines'),
     card: 'summary_large_image',
     title: 'Payroll Registration Checklist: BIR, SSS, PhilHealth, Pag-IBIG (Philippines)',
     description: 'Every form, fee, and deadline for setting up payroll compliance in the Philippines. Step-by-step with the correct registration sequence.',
@@ -36,7 +36,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/payroll-registration-checklist-philippines#article",
       "headline": "The Philippine Business Payroll Setup Checklist: Registering with BIR, SSS, PhilHealth, and Pag-IBIG",
       "description": "Step-by-step checklist for registering a Philippine business with BIR, SSS, PhilHealth, and Pag-IBIG before processing payroll. Covers required forms, fees, correct registration sequence, and monthly remittance deadlines.",
-      "image": "https://yahshuahris.com/blog/payroll-registration-checklist.png",
+      "image": blogCoverUrl('payroll-registration-checklist-philippines'),
       "datePublished": blogIso(BLOG_DATES['payroll-registration-checklist-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['payroll-registration-checklist-philippines'].modified),
       "author": {
