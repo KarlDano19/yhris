@@ -326,6 +326,11 @@ const LateRemittancePenaltiesArticle = () => {
                     Employee vs. Independent Contractor: DOLE Classification Rules →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/philhealth-contribution-table-2026-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    PhilHealth Contribution Table 2026: Rate, Floor and Ceiling →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

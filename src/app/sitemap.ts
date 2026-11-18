@@ -123,6 +123,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${BASE_URL}/blog/philhealth-contribution-table-2026-philippines`,
+      lastModified: new Date(BLOG_DATES['philhealth-contribution-table-2026-philippines'].modified),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/blog/bir-form-1604-c-alphalist-2026-philippines`,
+      lastModified: new Date(BLOG_DATES['bir-form-1604-c-alphalist-2026-philippines'].modified),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/blog/dole-compliance-requirements-philippines`,
       lastModified: new Date(BLOG_DATES['dole-compliance-requirements-philippines'].modified),
       changeFrequency: 'monthly',

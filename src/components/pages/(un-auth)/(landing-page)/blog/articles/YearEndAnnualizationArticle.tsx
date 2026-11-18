@@ -314,6 +314,11 @@ const YearEndAnnualizationArticle = () => {
                     What Philippine Payroll Errors Actually Cost MSMEs →
                   </Link>
                 </li>
+                <li>
+                  <Link href="/blog/bir-form-1604-c-alphalist-2026-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    BIR Form 1604-C and the Alphalist: January 2027 Filing Checklist →
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

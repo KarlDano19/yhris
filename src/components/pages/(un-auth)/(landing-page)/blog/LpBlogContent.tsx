@@ -9,6 +9,22 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "bir-form-1604-c-alphalist-2026-philippines",
+    category: "Statutory Compliance",
+    title: "BIR Form 1604-C and the Alphalist: Your January 2027 Filing Checklist",
+    excerpt: "Due January 31, 2027, a Sunday, so plan to file by Friday, January 29. What goes in the alphalist, the three ways to submit it, the Section 250 penalty, and a year-end checklist.",
+    date: "November 2026",
+    readTime: "7 min read",
+  },
+  {
+    slug: "philhealth-contribution-table-2026-philippines",
+    category: "Statutory Compliance",
+    title: "PhilHealth Contribution Table 2026: Rate, Floor, Ceiling and Employer Share",
+    excerpt: "5% of monthly basic salary, split 2.5% each, on a ₱10,000 floor and ₱100,000 ceiling. The table by salary, what counts as basic salary, and when employers pay.",
+    date: "November 2026",
+    readTime: "6 min read",
+  },
+  {
     slug: "new-hire-onboarding-checklist-philippines",
     category: "Operations Playbook",
     image: "/blog/new-hire-onboarding-checklist-philippines.png",
