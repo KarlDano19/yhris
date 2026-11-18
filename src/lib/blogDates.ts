@@ -9,7 +9,7 @@ export const BLOG_DATES = {
   'payroll-automation-philippines': { published: '2026-06-22', modified: '2026-06-22' },
   'philippine-compliance-hris-2026': { published: '2026-06-22', modified: '2026-06-22' },
   'philippine-payroll-errors-msme': { published: '2026-06-22', modified: '2026-06-22' },
-  'sss-contribution-table-2026-philippines': { published: '2026-07-14', modified: '2026-10-09' },
+  'sss-contribution-table-2026-philippines': { published: '2026-07-14', modified: '2026-11-23' },
   'payroll-registration-checklist-philippines': { published: '2026-07-15', modified: '2026-07-15' },
   'ai-guidance-vs-automation-hr-software': { published: '2026-07-16', modified: '2026-07-16' },
   'ncr-minimum-wage-2026': { published: '2026-07-21', modified: '2026-10-27' },

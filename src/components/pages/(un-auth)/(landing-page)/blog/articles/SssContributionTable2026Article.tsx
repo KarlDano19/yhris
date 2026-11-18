@@ -27,12 +27,12 @@ const SssContributionTable2026Article = () => {
                 2026 SSS, PhilHealth and Pag-IBIG Contribution Tables: Rates and Ceilings for Employers
               </h1>
               <p className="text-gray-500 text-lg leading-relaxed mb-8">
-                In 2026, SSS is 15% of the Monthly Salary Credit (up to ₱35,000), PhilHealth is 5% of basic salary (₱10,000 to ₱100,000), and Pag-IBIG is capped at ₱400 a month (₱200 each from employer and employee). If your payroll system is on older rates, you are calculating deductions incorrectly on every payroll run.
+                SSS contribution table 2026: the rate is 15% of the Monthly Salary Credit (MSC), with the employer paying 10% and the employee 5%, on an MSC from ₱5,000 to ₱35,000. It has not changed since the final RA 11199 increase took effect in January 2025. PhilHealth is 5% of basic salary (₱10,000 to ₱100,000) and Pag-IBIG is capped at ₱400 a month (₱200 each from employer and employee). If your payroll system is on older rates, you are calculating deductions incorrectly on every payroll run.
               </p>
               <div className="flex items-center gap-4 text-sm text-gray-400" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.5rem" }}>
                 <span>By YAHSHUA HRIS Team</span>
                 <span>·</span>
-                <span>Updated October 2026</span>
+                <span>Updated November 2026</span>
                 <span>·</span>
                 <span>10 min read</span>
               </div>
