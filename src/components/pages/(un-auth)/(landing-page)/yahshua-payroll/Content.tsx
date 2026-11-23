@@ -47,8 +47,8 @@ const payrollFeatures = [
 const integrationApps = [
   {
     title: "ABBA Timekeeper App",
-    description: "Mobile clock-in for employees, included with the YAHSHUA One Payroll subscription. Clock-ins appear in the admin's time logs.",
-    tags: ["Mobile Clock-In", "Time Logs", "Included with Payroll"],
+    description: "Mobile clock-in for employees that records a photo and the location. Included with the YAHSHUA One Payroll subscription, and clock-ins appear in the admin's time logs.",
+    tags: ["Mobile Clock-In", "Photo and Location", "Included with Payroll"],
   },
   {
     title: "Employee Kiosk",

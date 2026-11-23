@@ -51,7 +51,7 @@ const comparisonRows: { feature: string; yahshua: Cell; sprout: Cell; greatday: 
   { feature: "DOLE compliance tools", yahshua: "Guided DOLE module, included", sprout: "Separate product (Sprout Comply)", greatday: "No published DOLE module" },
   { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, sprout: true, greatday: true },
   { feature: "Employee self-service portal", yahshua: true, sprout: true, greatday: true },
-  { feature: "Mobile clock-in", yahshua: "No HRIS app (mobile-responsive web). Timekeeper mobile app comes with Payroll", sprout: "Mobile app", greatday: "GPS and selfie clock-in" },
+  { feature: "Mobile clock-in", yahshua: "Timekeeper mobile app with photo and location, included with Payroll. No separate HRIS app", sprout: "Mobile app", greatday: "GPS and selfie clock-in" },
 ];
 
 const renderCell = (value: Cell, highlight: boolean) => {

@@ -165,7 +165,7 @@ const VsGreatdayContent = () => {
               </div>
             </ScrollFadeIn>
             <p className="text-xs text-gray-400 text-center mt-6 max-w-lg mx-auto">
-              GreatDay HR offers strong mobile GPS attendance and biometric facial recognition, useful for field and frontline teams. Pricing and feature details sourced from GreatDay HR's public Philippines pricing page as of September 2026. GreatDay notes its prices are changing, so confirm current rates with GreatDay.
+              GreatDay HR offers biometric facial recognition attendance, useful for frontline teams. Both products offer mobile clock-in with photo and location; in YAHSHUA it is the Timekeeper mobile app, which comes with YAHSHUA One Payroll. Pricing and feature details sourced from GreatDay HR's public Philippines pricing page as of September 2026. GreatDay notes its prices are changing, so confirm current rates with GreatDay.
             </p>
           </div>
         </section>
@@ -207,7 +207,6 @@ const VsGreatdayContent = () => {
                   <h3 className="text-base font-bold text-gray-900 mb-4">GreatDay HR fits best when:</h3>
                   <ul className="space-y-3">
                     {[
-                      "Your workforce is field-based and needs GPS or selfie attendance verification",
                       "Facial recognition biometric attendance is a requirement, not a nice-to-have",
                       "You mainly need core HR, attendance, and payroll, where GreatDay's base package can cost less than our flat rate",
                     ].map((s) => (

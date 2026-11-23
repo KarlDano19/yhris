@@ -61,11 +61,10 @@ export const COMPETITORS = {
       { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, competitor: true },
       { feature: "Employee self-service portal", yahshua: true, competitor: true },
       { feature: "Philippine-localized platform", yahshua: true, competitor: true },
-      { feature: "Mobile GPS and selfie attendance", yahshua: false, competitor: true },
+      { feature: "Mobile clock-in with photo and location", yahshua: true, competitor: true },
       { feature: "Facial recognition biometric attendance", yahshua: false, competitor: true },
     ],
     strengths: [
-      "Mobile GPS and selfie-verified attendance built for field teams",
       "Facial recognition biometric attendance, available as a paid add-on",
     ],
   },

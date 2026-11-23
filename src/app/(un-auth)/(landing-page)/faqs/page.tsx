@@ -69,7 +69,7 @@ const jsonLd = {
           "name": "Does YAHSHUA HRIS have a mobile app?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "There is no separate YAHSHUA HRIS mobile app. YAHSHUA HRIS runs in the browser and is fully responsive, so your team can use it on a phone, tablet, or desktop. Mobile clock-in is part of YAHSHUA One Payroll, which comes with every paid plan, through the Timekeeper mobile app. Timekeeping is not part of the HRIS modules, and the free plan (job posting and applicant screening) does not include clock-in."
+            "text": "There is no separate YAHSHUA HRIS mobile app. YAHSHUA HRIS runs in the browser and is fully responsive, so your team can use it on a phone, tablet, or desktop. Mobile clock-in is part of YAHSHUA One Payroll, which comes with every paid plan, through the Timekeeper mobile app, which records a photo and the location when an employee clocks in. Timekeeping is not part of the HRIS modules, and the free plan (job posting and applicant screening) does not include clock-in."
           }
         },
         {

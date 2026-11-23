@@ -33,7 +33,6 @@ const switchFor = [
 ];
 
 const stayFor = [
-  "Your team is field-based and relies on GreatDay's GPS and selfie attendance",
   "You need facial recognition biometric attendance for frontline staff",
   "You mainly need core HR, attendance, and payroll, where GreatDay's base package can cost less than our flat rate",
 ];

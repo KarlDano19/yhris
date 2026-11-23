@@ -84,7 +84,7 @@ const jsonLd = {
           "name": "Which HR software is better for Philippine SMEs: YAHSHUA HRIS or GreatDay HR?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "GreatDay HR is a strong option for field-based or frontline teams that prioritize mobile GPS attendance and facial recognition biometrics. YAHSHUA HRIS is a better fit for Philippine SMEs that want recruitment, performance management, and guided DOLE compliance included in one flat monthly rate without add-on fees."
+            "text": "GreatDay HR is a strong option for frontline teams that need facial recognition biometric attendance. YAHSHUA HRIS is a better fit for Philippine SMEs that want recruitment, performance management, and guided DOLE compliance included in one flat monthly rate without add-on fees."
           }
         }
       ]
