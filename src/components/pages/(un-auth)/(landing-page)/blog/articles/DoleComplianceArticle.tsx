@@ -95,7 +95,7 @@ const DoleComplianceArticle = () => {
                   {/* H2: Core DOLE Reports */}
                   <InlineDemoCta
                     heading="Make DOLE reports less manual."
-                    body="See how YAHSHUA HRIS generates the DOLE reports employers need, such as WAIR, EC Logbook and OSH documents, in a free demo."
+                    body="See the YAHSHUA HRIS DOLE module generate reports such as the WAIR, EC Logbook and OSH program documents in a free demo."
                     campaign="dole_compliance"
                   />
 
@@ -247,10 +247,10 @@ const DoleComplianceArticle = () => {
                   {/* YAHSHUA HRIS CTA callout */}
                   <div style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.25)", borderRadius: "16px", padding: "2rem", marginBottom: "3rem" }}>
                     <p style={{ color: "#111827", fontWeight: "600", marginBottom: "0.75rem", fontSize: "1.05rem" }}>
-                      YAHSHUA HRIS generates all required DOLE reports from your existing HR data.
+                      The YAHSHUA HRIS DOLE module generates reports ready for submission in a few clicks.
                     </p>
                     <p style={{ color: "#6b7280", marginBottom: "1.25rem", fontSize: "0.95rem" }}>
-                      Work Accident Reports, EC Logbooks, OSH annual reports. Generated in minutes, formatted correctly, ready to submit. No rebuilding spreadsheets from scratch before every inspection.
+                      Work Accident Reports, EC Logbooks, and OSH program documents, ready for submission in a few clicks. No rebuilding spreadsheets from scratch before every inspection.
                     </p>
                     <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
                       See how DOLE compliance works in YAHSHUA HRIS <ArrowRight className="w-4 h-4" />
@@ -322,7 +322,7 @@ const DoleComplianceArticle = () => {
                 Stop rebuilding WAIR reports from scratch every month.
               </h2>
               <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-                YAHSHUA HRIS generates your WAIR, EC Logbook, Annual Medical Report, and OSH annual report directly from your HR data. Correct format, ready to submit, every reporting period.
+                The YAHSHUA HRIS DOLE module generates reports such as the WAIR, EC Logbook, Annual Medical Report, and OSH program documents, ready for submission in a few clicks.
               </p>
               <a
                 href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=blog&utm_campaign=dole_compliance"

@@ -28,8 +28,8 @@ const valueProps = [
   },
   {
     title: "DOLE Compliance Built In",
-    body: "Guided DOLE Module covering company registration to annual reports. Automated compliance for your specific business type, with no add-ons required.",
-    metric: "100% compliance rate. Zero penalties.",
+    body: "Guided DOLE Module covering company registration to annual reports, with no add-ons required.",
+    metric: "Included in every plan. No add-ons.",
   },
   {
     title: "Pricing Built for Philippine SMEs",
