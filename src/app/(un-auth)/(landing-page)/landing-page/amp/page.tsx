@@ -160,12 +160,12 @@ const AMPLandingPage = () => {
                 <div className="feature-card">
                   <h3 className="feature-title">Employee Data Synchronization</h3>
                   <p className="feature-description">
-                    Seamlessly sync employee data between HRIS and payroll systems. 
-                    Real-time updates ensure accuracy and eliminate data entry errors.
+                    Sign in through single sign-on with YAHSHUA One Payroll and employee data syncs from Payroll into HRIS, 
+                    so you do not re-enter employee records.
                   </p>
                   <ul className="feature-list">
-                    <li>Real-time data sync</li>
-                    <li>Automatic updates</li>
+                    <li>Single sign-on with Payroll</li>
+                    <li>Employee data syncs from Payroll into HRIS</li>
                     <li>Centralized management</li>
                     <li>Data integrity validation</li>
                   </ul>
@@ -231,7 +231,7 @@ const AMPLandingPage = () => {
                     Discover powerful YAHSHUA payroll features through real-world use cases and documentation.
                   </p>
                   <ul className="feature-list">
-                    <li>Real-time data synchronization</li>
+                    <li>Single sign-on and employee data sync</li>
                     <li>Automated payroll calculations</li>
                     <li>System integrations</li>
                     <li>Detailed reporting</li>
@@ -245,8 +245,8 @@ const AMPLandingPage = () => {
                   <div className="stat-label">Government Compliant</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-number">Real-time</div>
-                  <div className="stat-label">Employee Data Sync</div>
+                  <div className="stat-number">SSO</div>
+                  <div className="stat-label">Single Sign-On with Payroll</div>
                 </div>
                 <div className="stat">
                   <div className="stat-number">24/7</div>
