@@ -54,8 +54,8 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://showcase.yahshuapayroll.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-savoy-blue transition-colors">
-                    YAHSHUA Payroll Online
+                  <Link href="/yahshua-payroll" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                    YAHSHUA One Payroll
                   </Link>
                 </li>
                 <li>

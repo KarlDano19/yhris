@@ -56,10 +56,10 @@ export default function Content({ token }: ContentProps) {
             request a new invitation link.
           </p>
           <a
-            href="https://showcase.yahshuapayroll.com/help-center"
+            href="mailto:clientrelations@abba.works?subject=Kick-off%20link%20expired"
             className="inline-block px-5 py-2 bg-[#2c3f58] text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"
           >
-            Contact Support
+            Email Client Relations
           </a>
         </div>
       </div>
