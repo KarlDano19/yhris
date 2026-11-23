@@ -205,7 +205,7 @@ const YahshuaPayrollContent = () => {
                     </div>
                     <div className="flex flex-col items-center gap-1.5">
                       <RefreshCw className="w-6 h-6 text-primary animate-[spin_4s_linear_infinite]" />
-                      <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Live Sync</span>
+                      <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Single Sign-On</span>
                     </div>
                     <div className="rounded-xl px-6 py-4 flex flex-col items-center gap-1.5 min-w-[160px]" style={{ background: "#ffffff", border: "1px solid rgba(255,193,7,0.25)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
                       <span className="text-base font-bold text-gray-900">YAHSHUA</span>
@@ -214,9 +214,9 @@ const YahshuaPayrollContent = () => {
                   </div>
                   <div className="max-w-xs">
                     <span className="lp-section-label mb-4">HRIS INTEGRATION</span>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Perfect integration with YAHSHUA HRIS.</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Connects to YAHSHUA HRIS.</h2>
                     <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                      Employee data flows automatically from HRIS to Payroll, eliminating duplicate entry and ensuring data consistency across your organization.
+                      Sign in to YAHSHUA HRIS through single sign-on with YAHSHUA One Payroll, and employee data from Payroll syncs into HRIS, so you do not re-enter employee records.
                     </p>
                     <Link href="/payroll-integration" className="lp-btn-primary gap-2">
                       Learn About Integration <ArrowRight className="w-4 h-4" />
