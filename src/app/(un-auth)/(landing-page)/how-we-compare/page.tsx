@@ -65,7 +65,7 @@ const jsonLd = {
           "name": "What HR software in the Philippines includes DOLE compliance?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Several Philippine HR platforms offer DOLE compliance tools. YAHSHUA HRIS includes a guided DOLE module in every plan as a built-in feature, not an add-on, covering DOLE company registration, Occupational Safety and Health (OSH) reporting, annual medical reports, and AERW filing. Some other platforms offer DOLE compliance as a separate module or product."
+            "text": "Several Philippine HR platforms offer DOLE compliance tools. YAHSHUA HRIS includes a guided DOLE module in every plan as a built-in feature, not an add-on, covering DOLE log books, company registration, work accident reports, annual medical reports, the Occupational Safety and Health (OSH) program, and annual safety reports. Some other platforms offer DOLE compliance as a separate module or product."
           }
         },
         {

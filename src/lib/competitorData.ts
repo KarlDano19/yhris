@@ -56,7 +56,7 @@ export const COMPETITORS = {
     comparisonRows: [
       { feature: "Multi-platform job posting included", yahshua: true, competitor: false },
       { feature: "Performance evaluation module included", yahshua: true, competitor: false },
-      { feature: "Guided DOLE reporting (OSH, AERW, registration)", yahshua: true, competitor: false },
+      { feature: "Guided DOLE reporting (OSH program, work accident, registration)", yahshua: true, competitor: false },
       { feature: "Flat pricing with an employee-count cap", yahshua: true, competitor: false },
       { feature: "BIR, SSS, PhilHealth, Pag-IBIG payroll compliance", yahshua: true, competitor: true },
       { feature: "Employee self-service portal", yahshua: true, competitor: true },

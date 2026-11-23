@@ -68,7 +68,7 @@ const jsonLd = {
           "name": "Does YAHSHUA HRIS include DOLE compliance automation?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. YAHSHUA HRIS includes a guided DOLE Module covering company registration through annual reports: OSH reports, AERW filing, and mandatory DOLE filings, all included in every plan with no add-on required. Sprout offers DOLE compliance tools through Sprout Comply, a separately named product with quote-based pricing."
+            "text": "Yes. YAHSHUA HRIS includes a guided DOLE Module covering company registration through annual reports: log books, work accident reports, the OSH program, and annual safety reports, all included in every plan with no add-on required. Sprout offers DOLE compliance tools through Sprout Comply, a separately named product with quote-based pricing."
           }
         },
         {

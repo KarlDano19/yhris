@@ -23,7 +23,7 @@ const valueProps = [
   },
   {
     title: "Guided DOLE Compliance Module",
-    body: "GreatDay HR automates BIR 2316, Alphalist, and payroll-side compliance well, but doesn't publish a DOLE reporting module. YAHSHUA's DOLE Module goes further, guiding you through company registration, OSH reports, and AERW filing, all in every plan.",
+    body: "GreatDay HR automates BIR 2316, Alphalist, and payroll-side compliance well, but doesn't publish a DOLE reporting module. YAHSHUA's DOLE Module goes further, covering company registration, work accident reports, and the OSH program, all in every plan.",
     metric: "100% compliance rate. Zero penalties.",
   },
   {

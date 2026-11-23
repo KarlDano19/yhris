@@ -109,7 +109,7 @@ const PhilippineComplianceArticle = () => {
                 DOLE Labor Advisory No. 08-26 requires the filing of the 2025 Annual Establishment Report on Wages (AERW). Filed through the DOLE Online Compliance Portal at aerw.nwpc.dole.gov.ph, this mandatory submission documents wage compliance across your workforce — names of rank-and-file employees, including learners, apprentices, and workers with disabilities, along with their corresponding salaries and wages, as required under Article 124 of the Labor Code.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                The AERW requires accurate, organized compensation data. For HR teams whose records are spread across spreadsheets, payroll software, and paper files, compiling this data is a multi-day exercise. YAHSHUA HRIS structures compensation data in the format required for AERW export — no scramble, no weekend crunch, no reconciliation across disconnected systems.
+                The AERW requires accurate, organized compensation data. For HR teams whose records are spread across spreadsheets, payroll software, and paper files, compiling this data is a multi-day exercise. Keeping compensation records in one system makes that work far faster than reconciling disconnected files.
               </p>
 
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" }}>

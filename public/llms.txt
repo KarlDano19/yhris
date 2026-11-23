@@ -4,7 +4,7 @@
 
 ## What It Does
 
-- DOLE compliance reports (log books, establishment registration, work accident reports, OSH program, annual safety reports)
+- DOLE compliance reports (log books, establishment registration, work accident reports, annual medical reports, OSH program, annual safety reports)
 - Multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs) with centralized applicant tracking
 - Pre-screened talent pool for faster hiring
 - Employee onboarding and 201 document management

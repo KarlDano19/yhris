@@ -110,7 +110,7 @@ const SproutAlternativeContent = () => {
                   YAHSHUA HRIS: built for Philippine SMEs, not enterprise procurement.
                 </h2>
                 <p className="text-base text-gray-500 leading-relaxed">
-                  Flat pricing at {PRICING_LABELS.base}/month for up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that. Multi-platform job posting, a pre-screened talent pool, and a guided DOLE Module covering company registration through OSH reports and AERW filing all ship in the same plan, no add-ons required.
+                  Flat pricing at {PRICING_LABELS.base}/month for up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that. Multi-platform job posting, a pre-screened talent pool, and a guided DOLE Module covering company registration through the OSH program and annual safety reports all ship in the same plan, no add-ons required.
                 </p>
               </div>
             </ScrollFadeIn>

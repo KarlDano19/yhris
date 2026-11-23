@@ -68,7 +68,7 @@ const jsonLd = {
           "name": "Does GreatDay HR include DOLE compliance automation?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "GreatDay HR automates BIR, SSS, PhilHealth, and Pag-IBIG payroll compliance, including Alphalist and BIR 2316 generation. It does not publish a dedicated guided DOLE reporting module covering company registration, OSH reports, or AERW filing the way YAHSHUA HRIS does. YAHSHUA's DOLE Module includes these reports in every plan with no add-on required."
+            "text": "GreatDay HR automates BIR, SSS, PhilHealth, and Pag-IBIG payroll compliance, including Alphalist and BIR 2316 generation. It does not publish a dedicated guided DOLE reporting module covering company registration, work accident reports, or the OSH program the way YAHSHUA HRIS does. YAHSHUA's DOLE Module includes these reports in every plan with no add-on required."
           }
         },
         {

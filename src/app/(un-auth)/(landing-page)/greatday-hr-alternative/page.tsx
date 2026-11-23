@@ -65,7 +65,7 @@ const jsonLd = {
           "name": "Why do businesses look for a GreatDay HR alternative?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Common reasons include GreatDay HR selling recruitment and performance management as paid add-ons rather than including them in its base package, per-employee pricing on a Basic Starter Package sold as a 50-license bundle, and the lack of a published guided DOLE reporting module for company registration, OSH reports, and AERW filing."
+            "text": "Common reasons include GreatDay HR selling recruitment and performance management as paid add-ons rather than including them in its base package, per-employee pricing on a Basic Starter Package sold as a 50-license bundle, and the lack of a published guided DOLE reporting module for company registration, work accident reports, and the OSH program."
           }
         }
       ]

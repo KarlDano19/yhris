@@ -21,7 +21,7 @@ const painPoints = [
   {
     icon: FileWarning,
     title: "No guided DOLE reporting module",
-    body: "GreatDay HR automates BIR and payroll-side compliance, but doesn't publish a module for company registration, OSH reports, or AERW filing.",
+    body: "GreatDay HR automates BIR and payroll-side compliance, but doesn't publish a module for company registration, work accident reports, or the OSH program.",
   },
 ];
 
@@ -109,7 +109,7 @@ const GreatdayAlternativeContent = () => {
                   YAHSHUA HRIS: one flat rate, nothing unbundled.
                 </h2>
                 <p className="text-base text-gray-500 leading-relaxed">
-                  {PRICING_LABELS.base}/month covers up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that, and no separate charge for recruitment or performance management. The DOLE Module guides you through company registration, OSH reports, and AERW filing at no extra cost.
+                  {PRICING_LABELS.base}/month covers up to {YAHSHUA_PRICING.employeeCap} employees, with a simple {PRICING_LABELS.excess}/employee fee above that, and no separate charge for recruitment or performance management. The DOLE Module covers company registration, work accident reports, and the OSH program at no extra cost.
                 </p>
               </div>
             </ScrollFadeIn>

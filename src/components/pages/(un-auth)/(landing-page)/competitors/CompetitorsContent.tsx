@@ -25,7 +25,7 @@ const valueProps = [
   },
   {
     title: "DOLE Compliance Built In",
-    body: "From company registration to OSH reports and AERW filing, the DOLE Module walks you through every mandatory filing for your specific business type. No separate compliance vendor needed.",
+    body: "From company registration to work accident reports, the OSH program, and annual safety reports, the DOLE Module generates reports ready for submission in a few clicks. No separate compliance vendor needed.",
     metric: "100% compliance rate. Zero penalties.",
   },
   {
