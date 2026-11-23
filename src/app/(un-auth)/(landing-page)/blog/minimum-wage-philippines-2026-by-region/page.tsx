@@ -7,12 +7,12 @@ import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blo
 const URL = 'https://yahshuahris.com/blog/minimum-wage-philippines-2026-by-region';
 
 export const metadata: Metadata = {
-  title: 'Minimum Wage Philippines 2026: Cebu, NCR & All Regions',
+  title: 'Minimum Wage Philippines 2026 by Region: All Current Rates',
   description: 'Daily minimum wage in every Philippine region, from ₱401 (BARMM) to ₱755 (NCR), including Cebu (₱582 Class A from Oct 14). Wage orders, effective dates, and upcoming changes.',
   keywords: 'minimum wage Philippines 2026, minimum wage by region Philippines, regional minimum wage 2026, minimum wage Cebu 2026, minimum wage Davao 2026, minimum wage Cagayan de Oro 2026, minimum wage CALABARZON 2026, new rate for minimum wage 2026',
   openGraph: {
     images: blogCoverImages('minimum-wage-philippines-2026-by-region'),
-    title: 'Minimum Wage Philippines 2026: Cebu, NCR & All Regions',
+    title: 'Minimum Wage Philippines 2026 by Region: All Current Rates',
     description: 'Every region\'s current daily minimum wage, the wage order behind it, when it took effect, and the changes already scheduled. Built for multi-branch employers.',
     type: 'article',
     locale: 'en_US',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     images: blogCoverTwitterImages('minimum-wage-philippines-2026-by-region'),
     card: 'summary_large_image',
-    title: 'Minimum Wage Philippines 2026: Cebu, NCR & All Regions',
+    title: 'Minimum Wage Philippines 2026 by Region: All Current Rates',
     description: 'Daily minimum wage in every Philippine region as of September 2026, from ₱401 in BARMM to ₱755 in NCR.',
   },
   alternates: {
