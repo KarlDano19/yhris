@@ -37,7 +37,7 @@ const jsonLd = {
           "name": "How does YAHSHUA HRIS work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS simplifies human resource processes by offering a centralized platform for all essential HR functions. Through the dashboard, you can post jobs, screen applicants, manage employees, oversee training, handle payroll, and ensure compliance with labor laws."
+            "text": "YAHSHUA HRIS simplifies human resource processes by offering a centralized platform for all essential HR functions. Through the dashboard, you can post jobs, screen applicants, manage employees, run evaluations, handle payroll, and ensure compliance with labor laws."
           }
         },
         {
@@ -53,7 +53,7 @@ const jsonLd = {
           "name": "What are the features of YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "<ul><li>Post a Job: Create and publish job listings.</li><li>Screen Applicants: Review and shortlist job candidates.</li><li>Orient: Simplify the onboarding process for new employees.</li><li>Manage: Track and manage employee information and performance.</li><li>Train: Facilitate employee development through training programs.</li><li>Payroll: Automate and manage salary disbursement and deductions.</li><li>Employee Separation: Efficiently manage employee exits.</li><li>DOLE Compliance: Ensure alignment with the Department of Labor and Employment (DOLE) regulations.</li><li>Employee Kit: Provide employees with essential resources and documents.</li></ul>"
+            "text": "<ul><li>Post a Job: Create and publish job listings.</li><li>Screen Applicants: Review and shortlist job candidates.</li><li>Orient: Simplify the onboarding process for new employees.</li><li>Manage: Track and manage employee information and performance.</li><li>Train: Set up evaluation templates and schedules, company policies, and benefits.</li><li>Payroll: Compute salaries, deductions, and SSS, PhilHealth, Pag-IBIG, and BIR withholding with YAHSHUA One Payroll, and generate payslips.</li><li>Employee Separation: Efficiently manage employee exits.</li><li>DOLE Compliance: Ensure alignment with the Department of Labor and Employment (DOLE) regulations.</li><li>Employee Kit: Provide employees with essential resources and documents.</li></ul>"
           }
         },
         {

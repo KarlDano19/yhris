@@ -50,7 +50,7 @@ const FaqPage = () => {
       question: "How does YAHSHUA HRIS work?",
       answer: (
         <p>
-          YAHSHUA HRIS simplifies human resource processes by offering a centralized platform for all essential HR functions. Through the dashboard, you can post jobs, screen applicants, manage employees, oversee training, handle payroll, and ensure compliance with labor laws. Each feature is designed to make HR tasks efficient, saving you time and reducing manual work.
+          YAHSHUA HRIS simplifies human resource processes by offering a centralized platform for all essential HR functions. Through the dashboard, you can post jobs, screen applicants, manage employees, run evaluations, handle payroll, and ensure compliance with labor laws. Each feature is designed to make HR tasks efficient, saving you time and reducing manual work.
         </p>
       ),
     },
@@ -72,8 +72,8 @@ const FaqPage = () => {
           <li>Screen Applicants: Review and shortlist job candidates.</li>
           <li>Orient: Simplify the onboarding process for new employees.</li>
           <li>Manage: Track and manage employee information and performance.</li>
-          <li>Train: Facilitate employee development through training programs.</li>
-          <li>Payroll: Automate and manage salary disbursement and deductions.</li>
+          <li>Train: Set up evaluation templates and schedules, company policies, and benefits.</li>
+          <li>Payroll: Compute salaries, deductions, and SSS, PhilHealth, Pag-IBIG, and BIR withholding with YAHSHUA One Payroll, and generate payslips.</li>
           <li>Employee Separation: Efficiently manage employee exits.</li>
           <li>DOLE Compliance: Ensure alignment with the Department of Labor and Employment (DOLE) regulations.</li>
           <li>Employee Kit: Provide employees with essential resources and documents.</li>
@@ -136,7 +136,7 @@ const FaqPage = () => {
     { logo: <ScreenApplicantsLogo />, label: "Screen Applicants", desc: "Review and evaluate job applications.", onClick: () => setIsScreenApplicantsModalOpen(true), tutorialUrl: "https://youtu.be/TiQ1NNdTbSQ", hasTutorial: true },
     { logo: <OrientLogo />, label: "Orient", desc: "Onboard and orient new employees.", onClick: () => setIsOrientModalOpen(true), tutorialUrl: "https://youtu.be/zNAUFdsaA2c", hasTutorial: true },
     { logo: <ManageLogo />, label: "Manage", desc: "Manage employee information and records.", onClick: () => setIsManageModalOpen(true), hasTutorial: false },
-    { logo: <TrainLogo />, label: "Train", desc: "Access training resources and programs.", onClick: () => setIsTrainModalOpen(true), hasTutorial: false },
+    { logo: <TrainLogo />, label: "Train", desc: "Set up evaluation templates, schedules, policies, and benefits.", onClick: () => setIsTrainModalOpen(true), hasTutorial: false },
     { logo: <PayrollLogo />, label: "Payroll", desc: "Manage payroll and compensation.", onClick: () => setIsPayrollModalOpen(true), hasTutorial: false },
     { logo: <EmployeeSeparationLogo />, label: "Employee Separation", desc: "Handle employee exits and separations.", onClick: () => setIsEmployeeSeparationModalOpen(true), hasTutorial: false },
     { logo: <EmployeeKitLogo />, label: "Employee Kit", desc: "Access employee resources and tools.", onClick: () => setIsEmployeeKitModalOpen(true), hasTutorial: false },
