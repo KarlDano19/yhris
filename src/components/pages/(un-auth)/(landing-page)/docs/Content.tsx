@@ -284,7 +284,7 @@ const DocsContent = () => {
                     {noteBox("success", "Now Available", <ul className="list-disc list-inside space-y-1"><li>Full compensation details</li><li>Performance review scores and ratings</li></ul>)}
                     <h3 className="text-base font-bold text-gray-800 mb-3 mt-6">Sync Frequency</h3>
                     <ul className="list-disc list-inside space-y-2 text-sm text-gray-500 mb-6 pl-2">
-                      <li>Real-time for new employee additions</li>
+                      <li>When you sign in to YAHSHUA HRIS through single sign-on with YAHSHUA One Payroll</li>
                       <li>On-demand when you manually trigger a sync</li>
                     </ul>
                     {noteBox("info", "Future Enhancements", "We're continuously expanding data synchronization capabilities. More comprehensive integration between YAHSHUA Payroll and YAHSHUA HRIS is coming in future updates.")}

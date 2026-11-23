@@ -4,14 +4,14 @@
 
 ## What It Does
 
-- DOLE compliance automation (company registration, OSH reports, annual medical reports, mandatory DOLE filings)
+- DOLE compliance reports (log books, establishment registration, work accident reports, OSH program, annual safety reports)
 - Multi-platform job posting (LinkedIn, Facebook, YAHSHUA Jobs) with centralized applicant tracking
 - Pre-screened talent pool for faster hiring
 - Employee onboarding and 201 document management
 - Attendance and overtime tracking in YAHSHUA One Payroll, included in the bundle
 - Performance evaluation with standard templates and custom forms
 - Single sign-on with YAHSHUA One Payroll, with employee data syncing from Payroll into HRIS
-- Employee self-service portal (leave filing, payslip access, document requests)
+- Employee self-service through the employee's YAHSHUA One account, with access to timekeeping, leaves, and cash advance requests (HR or admin approves)
 - Memos and Notice-to-Explain distribution via email
 
 ## Who It's For
