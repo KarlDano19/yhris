@@ -42,6 +42,9 @@ const trackInternalCta = (anchor: HTMLAnchorElement) => {
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const hit = INTERNAL_CTA_EVENTS.find((x) => x.matches(path));
   if (!hit) return;
+  // /register serves employers and job seekers. Clicks made on the job board pages are applicants, not trial intent.
+  const onJobBoard = window.location.pathname.startsWith('/jobs') || window.location.pathname.startsWith('/job-app-form');
+  const eventName = hit.event === 'start_free_click' && onJobBoard ? 'applicant_register_click' : hit.event;
   const params = {
     link_url: path,
     cta_text: (anchor.textContent || '').trim().slice(0, 100),
@@ -49,10 +52,10 @@ const trackInternalCta = (anchor: HTMLAnchorElement) => {
     page_path: window.location.pathname,
   };
   if (typeof window.gtag === 'function') {
-    window.gtag('event', hit.event, params);
+    window.gtag('event', eventName, params);
   }
   if (posthog.__loaded) {
-    posthog.capture(hit.event, params);
+    posthog.capture(eventName, params);
   }
 };
 
