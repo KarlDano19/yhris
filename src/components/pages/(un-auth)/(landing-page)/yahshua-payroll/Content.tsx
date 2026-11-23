@@ -6,7 +6,6 @@ import {
   Cloud,
   Users,
   ShieldCheck,
-  CreditCard,
   FileText,
   Settings,
   Smartphone,
@@ -37,12 +36,6 @@ const payrollFeatures = [
     title: "100% Labor Law Compliant",
     description: "Fully compliant with DOLE and Philippine labor laws. Stay updated with regulatory changes automatically.",
     highlights: ["DOLE Compliant", "Auto Updates", "Legal Protection"],
-  },
-  {
-    icon: CreditCard,
-    title: "Direct Bank and GCash Disbursement",
-    description: "Disburse employee payroll directly to their bank accounts or via GCash for convenient and fast payments.",
-    highlights: ["Bank Integration", "GCash Support", "Instant Payments"],
   },
   {
     icon: FileText,

@@ -16,7 +16,7 @@ const features = [
 const processSteps = [
   { step: "01", title: "Pre-boarding Setup", body: "Send welcome emails, digital forms, and access credentials before the first day." },
   { step: "02", title: "First Day Experience", body: "Guide new hires through orientation, workspace setup, and initial introductions." },
-  { step: "03", title: "Training and Integration", body: "Deliver role-specific training modules and facilitate team introductions." },
+  { step: "03", title: "Team Integration", body: "Facilitate team introductions and role handovers so new hires settle in quickly." },
   { step: "04", title: "30-60-90 Day Check-ins", body: "Automated follow-ups to ensure successful integration and address any concerns." },
 ];
 
