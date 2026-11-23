@@ -5,7 +5,7 @@ import ScrollFadeIn from "./ScrollFadeIn";
 
 const items = [
   { q: "What type of system is YAHSHUA HRIS?", a: "YAHSHUA HRIS is a cloud-based system. Open it in any browser, on any device, from anywhere. No installation, no IT setup required." },
-  { q: "Is the system mobile-friendly?", a: "Yes. The system is fully responsive on desktop, tablet, and mobile browsers so your team can access it from any device. A dedicated mobile app is in the works." },
+  { q: "Is the system mobile-friendly?", a: "Yes. YAHSHUA HRIS runs in your browser and is fully responsive on desktop, tablet, and mobile, so your team can use it from any device. There is no separate HRIS mobile app. Mobile clock-in is part of YAHSHUA Payroll, through the Timekeeper mobile app." },
   { q: "What is the system uptime target?", a: "YAHSHUA HRIS targets 99.9% uptime. When maintenance is needed, updates are scheduled overnight to minimize disruption to your team." },
   { q: "How is my data kept secure?", a: "Your data is private, encrypted, and accessible only to authorized people in your organization. We hold SOC 2 Type 2 and ISO 27001 certifications, and we are GDPR compliant. Certificates are available on request." },
   { q: "How are user permissions managed?", a: "YAHSHUA HRIS uses Role-Based Access Control (RBAC). Each user sees only what their role allows, keeping sensitive data visible only to the people who need it." },
