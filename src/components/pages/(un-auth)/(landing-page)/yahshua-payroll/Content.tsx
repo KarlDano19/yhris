@@ -58,14 +58,9 @@ const integrationApps = [
     tags: ["Mobile Clock-In", "Time Logs", "Included with Payroll"],
   },
   {
-    title: "ABBA Kiosk App",
-    description: "Employee self-service portal for requests and profile management on Android, iOS, and Huawei.",
-    tags: ["Self-Service Portal", "Multi-Platform", "Request Management"],
-  },
-  {
-    title: "ABBA Approval App",
-    description: "Manage and approve employee requests anytime, anywhere with mobile convenience.",
-    tags: ["Mobile Approvals", "Request Management", "24/7 Access"],
+    title: "Employee Kiosk",
+    description: "Employees use their YAHSHUA One account as their kiosk once the employer adds them to the company, with access to timekeeping, leaves, and cash advance requests that HR or the admin approves.",
+    tags: ["Self-Service", "Timekeeping and Leaves", "Cash Advance Requests"],
   },
 ];
 
@@ -157,13 +152,13 @@ const YahshuaPayrollContent = () => {
             <div className="lp-section-container">
               <ScrollFadeIn>
                 <div className="text-center mb-14">
-                  <span className="lp-section-label justify-center mb-5">INTEGRATED APPS</span>
+                  <span className="lp-section-label justify-center mb-5">FOR YOUR EMPLOYEES</span>
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-                    Complete ecosystem of mobile apps.
+                    Clock-in and self-service for your team.
                   </h2>
                 </div>
               </ScrollFadeIn>
-              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                 {integrationApps.map((app, i) => (
                   <ScrollFadeIn key={app.title} delay={i * 80}>
                     <div className="lp-light-card p-7 h-full flex flex-col">
