@@ -6,7 +6,6 @@ import {
   Cloud,
   Users,
   ShieldCheck,
-  FileText,
   Settings,
   Smartphone,
   ArrowRight,
@@ -38,16 +37,10 @@ const payrollFeatures = [
     highlights: ["BIR Withholding Tax", "SSS, PhilHealth, Pag-IBIG", "Overtime and Night Differential"],
   },
   {
-    icon: FileText,
-    title: "Audit Trail and Logging",
-    description: "Complete audit log and trailing to track all payroll activities for transparency and compliance.",
-    highlights: ["Activity Tracking", "Full Transparency", "Compliance Ready"],
-  },
-  {
     icon: Settings,
-    title: "Fully Customizable",
-    description: "Customize the system to meet your specific business requirements with flexible configuration options.",
-    highlights: ["Custom Workflows", "Flexible Setup", "Business Specific"],
+    title: "Custom Pay Items and Loans",
+    description: "Create your own pay items, taxable or non-taxable, as earnings or deductions, and track employee loans with a running balance.",
+    highlights: ["Custom Pay Items", "Taxable and Non-Taxable", "Loan Running Balance"],
   },
 ];
 
