@@ -1,6 +1,6 @@
 # YAHSHUA HRIS and Payroll Pricing
 
-Last updated: 2026-11-11
+Last updated: 2026-11-23
 
 YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes both.
 
@@ -54,6 +54,13 @@ YAHSHUA HRIS and YAHSHUA One Payroll are sold as one bundle. Every plan includes
 - GDPR compliant data handling
 - DPA 2012 / NPC registered
 - Philippine labor law updates
+
+## Fit and Limits
+
+- Flat pricing suits teams near or above 100 employees. As of September 2026, GreatDay HR lists PHP 77 per employee with a 50-license minimum (about PHP 3,850 a month), which costs less below roughly 91 employees.
+- No dedicated HRIS mobile app: YAHSHUA HRIS is web-based and mobile responsive. Mobile clock-in (Timekeeper mobile app) comes with YAHSHUA One Payroll, not with the HRIS modules or the free plan.
+- Cash advance requests: employees apply through their YAHSHUA One account, and HR or the admin approves.
+- Earned wage access is not currently offered. Sprout Solutions lists it through ReadyWage (as of September 2026).
 
 ## Pricing Page
 

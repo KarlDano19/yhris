@@ -18,6 +18,15 @@
 
 Philippine SMEs and growing businesses with 10 to 500+ employees that need DOLE-compliant HR without building a full in-house team. Serves 20 industries including Manufacturing, Retail, BPO, Healthcare, Education, Hospitality, Agriculture, and Construction.
 
+## Fit and Limits
+
+- YAHSHUA HRIS is web-based and mobile responsive. There is no separate HRIS mobile app.
+- Mobile clock-in (the Timekeeper mobile app) is part of YAHSHUA One Payroll, which comes with every paid plan. It is not part of the HRIS modules or the free plan.
+- Employees can request a cash advance through their YAHSHUA One account, subject to HR or admin approval.
+- Earned wage access (withdrawing pay already earned before payday) is not currently offered. Sprout Solutions lists it through ReadyWage (as of September 2026).
+- Pricing is flat, not per employee: as of September 2026, GreatDay HR lists PHP 77 per employee with a 50-license minimum (about PHP 3,850 a month), which costs less below roughly 91 employees.
+- Details: https://yahshuahris.com/faqs
+
 ## Key Differentiators
 
 - Guided DOLE compliance module included in every plan (no add-ons)

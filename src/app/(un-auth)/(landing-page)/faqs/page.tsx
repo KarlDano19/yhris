@@ -63,6 +63,38 @@ const jsonLd = {
             "@type": "Answer",
             "text": "YAHSHUA HRIS automates tedious HR tasks, reduces human error in payroll and compliance, helps ensure adherence to DOLE regulations, centralizes HR management in one platform, and scales from small teams to large enterprises."
           }
+        },
+        {
+          "@type": "Question",
+          "name": "Does YAHSHUA HRIS have a mobile app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "There is no separate YAHSHUA HRIS mobile app. YAHSHUA HRIS runs in the browser and is fully responsive, so your team can use it on a phone, tablet, or desktop. Mobile clock-in is part of YAHSHUA One Payroll, which comes with every paid plan, through the Timekeeper mobile app. Timekeeping is not part of the HRIS modules, and the free plan (job posting and applicant screening) does not include clock-in."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is YAHSHUA HRIS a good fit for a company with fewer than 50 employees?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It can be, if you want hiring, DOLE reports, performance evaluation, and payroll in one plan. The price is a flat PHP 7,000 a month (VAT excluded) for up to 100 employees, with no setup fee, and implementation, data migration, and onboarding training are free. That flat rate means a very small team can pay more per employee than under per-employee pricing. As of September 2026, GreatDay HR lists PHP 77 per employee with a 50-license minimum, about PHP 3,850 a month, which costs less below roughly 91 employees. You can try YAHSHUA HRIS first: the free plan covers job posting and applicant screening, and the 30-day trial covers all HRIS modules."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can employees request a cash advance in YAHSHUA?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Employees can apply for a cash advance through their YAHSHUA One account, which serves as their kiosk once the employer has added them to the company. The request goes to HR or the admin for approval. HR can set up repayment as a payroll deduction in YAHSHUA One Payroll."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does YAHSHUA offer earned wage access?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No, not currently. YAHSHUA HRIS and YAHSHUA One Payroll do not let employees withdraw pay they have already earned before payday. Employees can estimate what they have earned from their recorded time logs, and their pay appears in their payslip once payroll is generated. If earned wage access is a requirement, Sprout Solutions lists it through its ReadyWage product (as of September 2026). For short-term needs, employees can request a cash advance, which HR or the admin approves."
+          }
         }
       ]
     }
