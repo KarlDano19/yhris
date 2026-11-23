@@ -22,20 +22,20 @@ const payrollFeatures = [
   {
     icon: Cloud,
     title: "Cloud-Based on AWS",
-    description: "Hosted on Amazon Web Services for maximum reliability and security. Access your payroll data anywhere, anytime.",
-    highlights: ["AWS Hosting", "24/7 Availability", "Automatic Backups"],
+    description: "Hosted on Amazon Web Services. Open it in a browser and access your payroll data anywhere, with nothing to install.",
+    highlights: ["AWS Hosting", "Web-Based Access", "No Installation"],
   },
   {
     icon: Users,
-    title: "Scalable for Any Business",
-    description: "Supports businesses from 5 to 10,000 employees with unlimited users regardless of your pricing plan.",
-    highlights: ["5 to 10,000 Employees", "Unlimited Users", "No User Limits"],
+    title: "Pricing That Grows With Your Team",
+    description: "A flat monthly rate covers up to 100 employees, with a per-employee fee above that. Payroll is included in the YAHSHUA HRIS and Payroll plan.",
+    highlights: ["Flat Rate to 100 Employees", "PHP 60 per Added Employee", "Payroll Included"],
   },
   {
     icon: ShieldCheck,
-    title: "100% Labor Law Compliant",
-    description: "Fully compliant with DOLE and Philippine labor laws. Stay updated with regulatory changes automatically.",
-    highlights: ["DOLE Compliant", "Auto Updates", "Legal Protection"],
+    title: "Philippine Payroll Computation",
+    description: "Computes BIR withholding tax, SSS, PhilHealth, and Pag-IBIG contributions, plus overtime, night differential, holiday, and rest-day pay. DOLE reports are part of YAHSHUA HRIS.",
+    highlights: ["BIR Withholding Tax", "SSS, PhilHealth, Pag-IBIG", "Overtime and Night Differential"],
   },
   {
     icon: FileText,
@@ -54,8 +54,8 @@ const payrollFeatures = [
 const integrationApps = [
   {
     title: "ABBA Timekeeper App",
-    description: "Facial recognition time tracking with offline capability and geo-location tracking.",
-    tags: ["Facial Recognition", "Offline Capability", "Geo-location"],
+    description: "Mobile clock-in for employees, included with the YAHSHUA One Payroll subscription. Clock-ins appear in the admin's time logs.",
+    tags: ["Mobile Clock-In", "Time Logs", "Included with Payroll"],
   },
   {
     title: "ABBA Kiosk App",
