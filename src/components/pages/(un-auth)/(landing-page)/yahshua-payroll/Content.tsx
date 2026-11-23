@@ -81,15 +81,15 @@ const YahshuaPayrollContent = () => {
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   <a
-                    href="https://showcase.yahshuapayroll.com"
+                    href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="lp-btn-primary lp-btn-glow gap-2"
                   >
-                    View Live Demo <ArrowUpRight className="w-4 h-4" />
+                    Book a Free Demo <ArrowUpRight className="w-4 h-4" />
                   </a>
                   <Link href="/register" className="lp-btn-ghost-dark gap-2">
-                    Start Free Trial <ArrowRight className="w-4 h-4" />
+                    Start the HRIS Free Trial <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </ScrollFadeIn>
@@ -222,21 +222,21 @@ const YahshuaPayrollContent = () => {
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 tracking-tight">
                   Ready to modernize your payroll?
                 </h2>
-                <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
-                  Start free or explore the live demo. No credit card required.
+                <p className="text-gray-500 text-base mb-8 max-w-md mx-auto">
+                  Book a free demo and we will walk you through YAHSHUA One Payroll with YAHSHUA HRIS. The 30-day free trial covers the HRIS modules.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
-                  <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
-                    Start Free Trial <ArrowRight className="w-4 h-4" />
-                  </Link>
                   <a
-                    href="https://showcase.yahshuapayroll.com"
+                    href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="lp-btn-ghost-dark gap-2"
+                    className="lp-btn-primary lp-btn-glow gap-2"
                   >
-                    View Live Demo <ArrowUpRight className="w-4 h-4" />
+                    Book a Free Demo <ArrowUpRight className="w-4 h-4" />
                   </a>
+                  <Link href="/register" className="lp-btn-ghost-dark gap-2">
+                    Start the HRIS Free Trial <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
               </ScrollFadeIn>
             </div>
