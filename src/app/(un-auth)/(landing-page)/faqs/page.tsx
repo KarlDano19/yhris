@@ -45,7 +45,7 @@ const jsonLd = {
           "name": "Is YAHSHUA HRIS secure?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. YAHSHUA HRIS integrates preventive cybersecurity measures and stays updated on the latest threats. The company has a Data Protection Officer (DPO) and adheres to the Data Privacy Act (Republic Act 10173)."
+            "text": "Yes, YAHSHUA HRIS prioritizes data security. We integrate proper and preventive cybersecurity measures into our systems and stay updated on the latest cyberattacks. Additionally, we have a Data Protection Officer (DPO) in our company and adhere to the Data Privacy Act (Republic Act 10173) to ensure compliance with privacy laws."
           }
         },
         {
@@ -53,7 +53,7 @@ const jsonLd = {
           "name": "What are the features of YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS includes job posting, applicant screening, employee onboarding, employee management, training, payroll automation, employee separation, DOLE compliance, and an employee kit with essential resources and documents."
+            "text": "<ul><li>Post a Job: Create and publish job listings.</li><li>Screen Applicants: Review and shortlist job candidates.</li><li>Orient: Simplify the onboarding process for new employees.</li><li>Manage: Track and manage employee information and performance.</li><li>Train: Facilitate employee development through training programs.</li><li>Payroll: Automate and manage salary disbursement and deductions.</li><li>Employee Separation: Efficiently manage employee exits.</li><li>DOLE Compliance: Ensure alignment with the Department of Labor and Employment (DOLE) regulations.</li><li>Employee Kit: Provide employees with essential resources and documents.</li></ul>"
           }
         },
         {
@@ -61,7 +61,7 @@ const jsonLd = {
           "name": "What are the benefits of using YAHSHUA HRIS?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "YAHSHUA HRIS automates tedious HR tasks, reduces human error in payroll and compliance, helps ensure adherence to DOLE regulations, centralizes HR management in one platform, and scales from small teams to large enterprises."
+            "text": "<ul><li>Efficiency: Automates tedious HR tasks, freeing up time for more strategic initiatives.</li><li>Accuracy: Reduces human error, particularly in payroll and compliance.</li><li>Compliance: Helps ensure adherence to local labor laws, including DOLE regulations.</li><li>Centralized Management: Provides a one-stop solution for all HR tasks, making it easier to oversee employee lifecycles.</li><li>Scalability: Designed to grow with your organization, handling everything from small teams to large enterprises.</li></ul>"
           }
         },
         {

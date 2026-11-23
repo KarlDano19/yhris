@@ -47,7 +47,7 @@ const FaqPage = () => {
   const faqs = [
     {
       id: 1,
-      question: "How does it work?",
+      question: "How does YAHSHUA HRIS work?",
       answer: (
         <p>
           YAHSHUA HRIS simplifies human resource processes by offering a centralized platform for all essential HR functions. Through the dashboard, you can post jobs, screen applicants, manage employees, oversee training, handle payroll, and ensure compliance with labor laws. Each feature is designed to make HR tasks efficient, saving you time and reducing manual work.
@@ -56,7 +56,7 @@ const FaqPage = () => {
     },
     {
       id: 2,
-      question: "Is it secure?",
+      question: "Is YAHSHUA HRIS secure?",
       answer: (
         <p>
           Yes, YAHSHUA HRIS prioritizes data security. We integrate proper and preventive cybersecurity measures into our systems and stay updated on the latest cyberattacks. Additionally, we have a Data Protection Officer (DPO) in our company and adhere to the Data Privacy Act (Republic Act 10173) to ensure compliance with privacy laws.
@@ -65,7 +65,7 @@ const FaqPage = () => {
     },
     {
       id: 3,
-      question: "What are the features?",
+      question: "What are the features of YAHSHUA HRIS?",
       answer: (
         <ul className="list-disc pl-5">
           <li>Post a Job: Create and publish job listings.</li>
@@ -82,7 +82,7 @@ const FaqPage = () => {
     },
     {
       id: 4,
-      question: "What are the benefits?",
+      question: "What are the benefits of using YAHSHUA HRIS?",
       answer: (
         <ul className="list-disc pl-5">
           <li>Efficiency: Automates tedious HR tasks, freeing up time for more strategic initiatives.</li>
