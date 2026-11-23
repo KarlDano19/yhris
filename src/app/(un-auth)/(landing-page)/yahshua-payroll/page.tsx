@@ -5,21 +5,21 @@ import { YAHSHUA_PRICING, PRICING_LABELS } from '@/lib/yahshuaPricing';
 import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
 
 export const metadata: Metadata = {
-  title: 'YAHSHUA Payroll Integration: Sync Your HR Data',
-  description: 'Connect YAHSHUA HRIS with YAHSHUA Payroll for seamless employee data sync. Eliminate double entry, automate payroll computation, and stay DOLE compliant.',
-  keywords: 'yahshua payroll, payroll integration philippines, hris payroll sync, payroll automation philippines',
+  title: 'YAHSHUA One Payroll: Included With YAHSHUA HRIS',
+  description: 'YAHSHUA One Payroll computes BIR, SSS, PhilHealth, and Pag-IBIG contributions and connects to YAHSHUA HRIS through single sign-on. Included in every HRIS plan.',
+  keywords: 'yahshua one payroll, yahshua payroll, payroll philippines, hris payroll single sign-on, payroll automation philippines',
   openGraph: {
     images: OG_IMAGES,
-    title: 'YAHSHUA Payroll Integration',
-    description: 'Sync YAHSHUA HRIS with YAHSHUA Payroll. Eliminate double entry and automate payroll computation for Philippine businesses.',
+    title: 'YAHSHUA One Payroll: Included With YAHSHUA HRIS',
+    description: 'YAHSHUA One Payroll computes BIR, SSS, PhilHealth, and Pag-IBIG contributions for Philippine businesses and is included in every YAHSHUA HRIS plan.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     images: TWITTER_IMAGES,
     card: 'summary_large_image',
-    title: 'YAHSHUA Payroll Integration',
-    description: 'Seamless HR and payroll sync for Philippine businesses.',
+    title: 'YAHSHUA One Payroll',
+    description: 'Philippine payroll, included with YAHSHUA HRIS.',
   },
   alternates: {
     canonical: 'https://yahshuahris.com/yahshua-payroll'

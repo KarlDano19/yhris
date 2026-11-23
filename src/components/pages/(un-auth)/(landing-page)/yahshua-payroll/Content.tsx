@@ -70,14 +70,14 @@ const YahshuaPayrollContent = () => {
             />
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
-                <span className="lp-section-label justify-center mb-3">YAHSHUA PAYROLL</span>
-                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: June 2026</p>
+                <span className="lp-section-label justify-center mb-3">YAHSHUA ONE PAYROLL</span>
+                <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: November 2026</p>
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
-                  YAHSHUA Payroll Online.<br className="hidden md:inline" />
-                  <span className="text-primary"> Cloud-based. Fully compliant.</span>
+                  YAHSHUA One Payroll.<br className="hidden md:inline" />
+                  <span className="text-primary"> Cloud-based. Built for Philippine payroll.</span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
-                  Next generation payroll business solution designed for Philippine businesses of all sizes. No installs, no maintenance, always up to date.
+                  Payroll for Philippine businesses, included with YAHSHUA HRIS. Open it in a browser, with nothing to install.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   <a
@@ -196,7 +196,7 @@ const YahshuaPayrollContent = () => {
                       <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Single Sign-On</span>
                     </div>
                     <div className="rounded-xl px-6 py-4 flex flex-col items-center gap-1.5 min-w-[160px]" style={{ background: "#ffffff", border: "1px solid rgba(255,193,7,0.25)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                      <span className="text-base font-bold text-gray-900">YAHSHUA</span>
+                      <span className="text-base font-bold text-gray-900">YAHSHUA One</span>
                       <span className="text-sm font-semibold text-primary">Payroll</span>
                     </div>
                   </div>
