@@ -16,7 +16,7 @@ const painPoints = [
   {
     icon: Users,
     title: "Per-employee pricing on top of a 50-license bundle",
-    body: "GreatDay HR's Basic Starter Package is PHP 77 per employee per month, sold as a 50-license bundle (about PHP 3,850/month as of September 2026), and add-ons like recruitment and performance cost extra.",
+    body: "GreatDay HR's Basic Starter Package is PHP 77 per employee per month, sold as a 50-license bundle (about PHP 3,850/month as of November 2026), and add-ons like recruitment and performance cost extra.",
   },
   {
     icon: FileWarning,
@@ -48,7 +48,7 @@ const GreatdayAlternativeContent = () => {
           <div className="lp-section-container relative z-10 text-center">
             <ScrollFadeIn>
               <span className="lp-section-label justify-center mb-3">GREATDAY HR ALTERNATIVE</span>
-              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
+              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: November 2026</p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                 Looking for a<br className="hidden md:inline" />
                 <span className="text-primary"> GreatDay HR alternative?</span>

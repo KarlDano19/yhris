@@ -28,7 +28,7 @@ const faqs = [
   { q: "Can I upgrade from Freemium to the full plan anytime?", a: "Yes. You can upgrade at any time from within your account. All your existing data carries over instantly." },
   { q: "Is VAT included in the pricing shown?", a: "No. All prices shown are VAT excluded. The applicable VAT will be reflected in your invoice." },
   { q: "Does YAHSHUA HRIS come with YAHSHUA One Payroll?", a: "Yes. Every YAHSHUA HRIS plan comes with YAHSHUA One Payroll at no extra charge. It computes BIR withholding tax, SSS, PhilHealth, and Pag-IBIG contributions and generates payslips, all included in your subscription." },
-  { q: "Is YAHSHUA HRIS a good fit for a company with fewer than 50 employees?", a: "It can be, if you want hiring, DOLE reports, performance evaluation, and payroll in one plan. The price is a flat PHP 7,000 a month (VAT excluded) for up to 100 employees, with no setup fee, and implementation, data migration, and onboarding training are free. That flat rate means a very small team can pay more per employee than under per-employee pricing. As of September 2026, GreatDay HR lists PHP 77 per employee with a 50-license minimum, about PHP 3,850 a month, which costs less below roughly 91 employees. You can try YAHSHUA HRIS first: the free plan covers job posting and applicant screening, and the 30-day trial covers all HRIS modules." },
+  { q: "Is YAHSHUA HRIS a good fit for a company with fewer than 50 employees?", a: "It can be, if you want hiring, DOLE reports, performance evaluation, and payroll in one plan. The price is a flat PHP 7,000 a month (VAT excluded) for up to 100 employees, with no setup fee, and implementation, data migration, and onboarding training are free. That flat rate means a very small team can pay more per employee than under per-employee pricing. As of November 2026, GreatDay HR lists PHP 77 per employee with a 50-license minimum, about PHP 3,850 a month, which costs less below roughly 91 employees. You can try YAHSHUA HRIS first: the free plan covers job posting and applicant screening, and the 30-day trial covers all HRIS modules." },
   { q: "Can I see the full platform before subscribing?", a: "Yes. Sign up for the 30-day free trial of YAHSHUA HRIS, or book a free demo and we will walk you through YAHSHUA HRIS and the built-in payroll tools in full. After the 30 days, your account reverts to the Freemium plan unless you upgrade." },
 ];
 
@@ -281,6 +281,32 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                     </div>
                   ))}
                 </div>
+                <div className="max-w-2xl mx-auto mt-8">
+                  <p className="text-center text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">What it adds up to</p>
+                  <div className="lp-light-card overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-xs text-gray-400 border-b border-gray-100">
+                          <th className="text-left font-semibold px-4 py-3">Team size</th>
+                          <th className="text-right font-semibold px-4 py-3">Monthly total</th>
+                          <th className="text-right font-semibold px-4 py-3">Per employee</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[50, 100, 150, 200].map((n) => (
+                          <tr key={n} className="border-b border-gray-50 last:border-0">
+                            <td className="text-left text-gray-600 px-4 py-3">{n} employees</td>
+                            <td className="text-right font-semibold text-gray-900 px-4 py-3">{formatPHP(calculateMonthly(n))}</td>
+                            <td className="text-right text-gray-500 px-4 py-3">{formatPHP(Math.round(calculateMonthly(n) / n))}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-center text-xs text-gray-400 mt-3">
+                    Hiring, DOLE reports, performance evaluation, and YAHSHUA One Payroll are included. No setup fee. VAT excluded. The per-employee figure is the monthly total divided by team size.
+                  </p>
+                </div>
                 <p className="text-center text-sm text-gray-400 mt-6">
                   All prices are VAT excluded.{" "}
                   <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="text-gray-600 font-semibold hover:text-primary transition-colors">Book a call</a>{" "}
@@ -308,7 +334,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                       {[
                         "Philippine businesses that want hiring, DOLE reports, performance evaluation, and payroll in one published price.",
                         "HR and finance teams moving off spreadsheets for 201 files, DOLE filings, and payroll.",
-                        "Teams near or above 100 employees, where the flat rate costs less than GreatDay HR's listed per-employee price (September 2026).",
+                        "Teams near or above 100 employees, where the flat rate costs less than GreatDay HR's listed per-employee price (November 2026).",
                       ].map((f) => (
                         <li key={f} className="flex items-start gap-3 text-sm">
                           <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
@@ -323,7 +349,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                       {[
                         "You need a dedicated HRIS mobile app. YAHSHUA HRIS runs in the browser and is mobile responsive. Mobile clock-in comes with YAHSHUA One Payroll through the Timekeeper mobile app.",
                         "You need earned wage access built in. Sprout Solutions lists it through ReadyWage (September 2026). Employees can request a cash advance in YAHSHUA, which HR approves.",
-                        "You have fewer than about 90 employees and want the lowest per-employee price. GreatDay HR lists PHP 77 per employee with a 50-license minimum (September 2026).",
+                        "You have fewer than about 90 employees and want the lowest per-employee price. GreatDay HR lists PHP 77 per employee with a 50-license minimum (November 2026).",
                       ].map((f) => (
                         <li key={f} className="flex items-start gap-3 text-sm">
                           <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0 mt-2" />

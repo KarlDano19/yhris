@@ -107,7 +107,7 @@ const FaqPage = () => {
       question: "Is YAHSHUA HRIS a good fit for a company with fewer than 50 employees?",
       answer: (
         <p>
-          It can be, if you want hiring, DOLE reports, performance evaluation, and payroll in one plan. The price is a flat PHP 7,000 a month (VAT excluded) for up to 100 employees, with no setup fee, and implementation, data migration, and onboarding training are free. That flat rate means a very small team can pay more per employee than under per-employee pricing. As of September 2026, GreatDay HR lists PHP 77 per employee with a 50-license minimum, about PHP 3,850 a month, which costs less below roughly 91 employees. You can try YAHSHUA HRIS first: the free plan covers job posting and applicant screening, and the 30-day trial covers all HRIS modules.
+          It can be, if you want hiring, DOLE reports, performance evaluation, and payroll in one plan. The price is a flat PHP 7,000 a month (VAT excluded) for up to 100 employees, with no setup fee, and implementation, data migration, and onboarding training are free. That flat rate means a very small team can pay more per employee than under per-employee pricing. As of November 2026, GreatDay HR lists PHP 77 per employee with a 50-license minimum, about PHP 3,850 a month, which costs less below roughly 91 employees. You can try YAHSHUA HRIS first: the free plan covers job posting and applicant screening, and the 30-day trial covers all HRIS modules.
         </p>
       ),
     },

@@ -51,8 +51,8 @@ export const COMPETITORS = {
   greatday: {
     slug: "greatday",
     name: "GreatDay HR",
-    lastReviewed: "September 2026",
-    pricingModel: "PHP 77/employee/month; Basic Starter Package sold as a 50-license bundle (about PHP 3,850/month) as of Sept 2026. GreatDay notes prices are changing.",
+    lastReviewed: "November 2026",
+    pricingModel: "PHP 77/employee/month; Basic Starter Package sold as a 50-license bundle (about PHP 3,850/month) as of Nov 2026. GreatDay notes prices are changing.",
     comparisonRows: [
       { feature: "Multi-platform job posting included", yahshua: true, competitor: false },
       { feature: "Performance evaluation module included", yahshua: true, competitor: false },

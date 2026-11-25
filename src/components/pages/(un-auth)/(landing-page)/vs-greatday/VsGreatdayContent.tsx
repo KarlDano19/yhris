@@ -28,7 +28,7 @@ const valueProps = [
   },
   {
     title: "Flat Pricing With a Real Cap",
-    body: `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. GreatDay HR's Basic Starter Package is PHP 77 per employee per month, sold as a 50-license bundle (about PHP 3,850/month as of September 2026), with recruitment and performance as paid add-ons.`,
+    body: `${PRICING_LABELS.base}/month flat for up to ${YAHSHUA_PRICING.employeeCap} employees, with a simple ${PRICING_LABELS.excess}/employee fee above that. GreatDay HR's Basic Starter Package is PHP 77 per employee per month, sold as a 50-license bundle (about PHP 3,850/month as of November 2026), with recruitment and performance as paid add-ons.`,
     metric: "Predictable cost as you scale past 50 or 100 staff.",
   },
   {
@@ -59,7 +59,7 @@ const VsGreatdayContent = () => {
           <div className="lp-section-container relative z-10 text-center">
             <ScrollFadeIn>
               <span className="lp-section-label justify-center mb-3">YAHSHUA HRIS VS GREATDAY HR</span>
-              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: September 2026</p>
+              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: November 2026</p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                 Why Philippine businesses<br className="hidden md:inline" />
                 <span className="text-primary"> choose YAHSHUA over GreatDay HR.</span>
@@ -165,7 +165,7 @@ const VsGreatdayContent = () => {
               </div>
             </ScrollFadeIn>
             <p className="text-xs text-gray-400 text-center mt-6 max-w-lg mx-auto">
-              GreatDay HR offers biometric facial recognition attendance, useful for frontline teams. Both products offer mobile clock-in with photo and location; in YAHSHUA it is the Timekeeper mobile app, which comes with YAHSHUA One Payroll. Pricing and feature details sourced from GreatDay HR's public Philippines pricing page as of September 2026. GreatDay notes its prices are changing, so confirm current rates with GreatDay.
+              GreatDay HR offers biometric facial recognition attendance, useful for frontline teams. Both products offer mobile clock-in with photo and location; in YAHSHUA it is the Timekeeper mobile app, which comes with YAHSHUA One Payroll. Pricing and feature details sourced from GreatDay HR's public Philippines pricing page as of November 2026. GreatDay notes its prices are changing, so confirm current rates with GreatDay.
             </p>
           </div>
         </section>
