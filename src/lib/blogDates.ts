@@ -31,8 +31,9 @@ export const BLOG_DATES = {
   'hris-pricing-philippines-2026': { published: '2026-10-15', modified: '2026-11-25' },
   'q4-payroll-compliance-deadlines-philippines-2026': { published: '2026-10-01', modified: '2026-11-18' },
   'minimum-wage-philippines-2026-by-region': { published: '2026-09-25', modified: '2026-10-27' },
-  'philhealth-contribution-table-2026-philippines': { published: '2026-11-18', modified: '2026-11-18' },
+  'philhealth-contribution-table-2026-philippines': { published: '2026-11-18', modified: '2026-11-25' },
   'bir-form-1604-c-alphalist-2026-philippines': { published: '2026-11-18', modified: '2026-11-18' },
+  'pagibig-contribution-table-2026-philippines': { published: '2026-11-25', modified: '2026-11-25' },
 } as const;
 
 export type BlogSlug = keyof typeof BLOG_DATES;

@@ -9,6 +9,14 @@ import BlogFeaturedSection, { BlogPost, splitFeatured } from "@/components/pages
 // Newest first. Set `featured: true` on one post to pin it to the Featured slot.
 const posts: BlogPost[] = [
   {
+    slug: "pagibig-contribution-table-2026-philippines",
+    category: "Statutory Compliance",
+    title: "Pag-IBIG Contribution Table 2026: Rate, ₱10,000 Cap and Employer Share",
+    excerpt: "2% from the employee and 2% from the employer on a ₱10,000 cap, so ₱200 each at most. The table by salary, how to compute it, and the employer remittance schedule that changed in August 2026.",
+    date: "November 2026",
+    readTime: "6 min read",
+  },
+  {
     slug: "bir-form-1604-c-alphalist-2026-philippines",
     category: "Statutory Compliance",
     image: "/blog/bir-form-1604-c-alphalist-2026-philippines.png",

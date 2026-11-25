@@ -135,6 +135,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${BASE_URL}/blog/pagibig-contribution-table-2026-philippines`,
+      lastModified: new Date(BLOG_DATES['pagibig-contribution-table-2026-philippines'].modified),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/blog/dole-compliance-requirements-philippines`,
       lastModified: new Date(BLOG_DATES['dole-compliance-requirements-philippines'].modified),
       changeFrequency: 'monthly',

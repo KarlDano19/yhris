@@ -281,6 +281,11 @@ const PhilhealthContributionTable2026Article = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/blog/pagibig-contribution-table-2026-philippines" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    Pag-IBIG Contribution Table 2026 →
+                  </Link>
+                </li>
+                <li>
                   <Link href="/blog/sss-philhealth-pagibig-late-remittance-penalties" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
                     SSS, PhilHealth and Pag-IBIG Late Remittance Penalties →
                   </Link>
