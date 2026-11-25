@@ -17,6 +17,7 @@ export const BLOG_DATES = {
   'ai-workforce-management-philippines': { published: '2026-09-10', modified: '2026-09-10' },
   'sss-mandatory-provident-fund-philippines': { published: '2026-09-10', modified: '2026-09-10' },
   'final-pay-computation-philippines': { published: '2026-09-16', modified: '2026-09-16' },
+  'bir-form-2316-philippines-2026': { published: '2026-11-25', modified: '2026-11-25' },
   'de-minimis-benefits-2026-philippines': { published: '2026-09-16', modified: '2026-09-16' },
   'year-end-tax-annualization-philippines-2026': { published: '2026-10-01', modified: '2026-10-01' },
   'sss-philhealth-pagibig-late-remittance-penalties': { published: '2026-10-08', modified: '2026-11-25' },

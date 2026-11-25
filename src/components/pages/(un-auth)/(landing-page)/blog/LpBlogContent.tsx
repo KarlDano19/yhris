@@ -26,6 +26,14 @@ const posts: BlogPost[] = [
     readTime: "7 min read",
   },
   {
+    slug: "bir-form-2316-philippines-2026",
+    category: "Statutory Compliance",
+    title: "BIR Form 2316 for 2026: What Employers Must Issue and File by January 31, 2027",
+    excerpt: "Employee copy by January 31, 2027, a Sunday, and the BIR copy by February 28. Who qualifies for substituted filing, how to submit with Annex F, and the Section 250 penalty.",
+    date: "November 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "philhealth-contribution-table-2026-philippines",
     category: "Statutory Compliance",
     image: "/blog/philhealth-contribution-table-2026-philippines.png",

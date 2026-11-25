@@ -244,6 +244,11 @@ const Bir1604CAlphalistArticle = () => {
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Related Reading</p>
               <ul className="space-y-2">
                 <li>
+                  <Link href="/blog/bir-form-2316-philippines-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
+                    BIR Form 2316 for 2026: What Employers Must Issue and File →
+                  </Link>
+                </li>
+                <li>
                   <Link href="/blog/year-end-tax-annualization-philippines-2026" className="text-sm font-semibold" style={{ color: "hsl(var(--lp-primary))" }}>
                     Year-End Tax Annualization for Philippine Employers →
                   </Link>

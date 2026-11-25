@@ -141,6 +141,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${BASE_URL}/blog/bir-form-2316-philippines-2026`,
+      lastModified: new Date(BLOG_DATES['bir-form-2316-philippines-2026'].modified),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${BASE_URL}/blog/dole-compliance-requirements-philippines`,
       lastModified: new Date(BLOG_DATES['dole-compliance-requirements-philippines'].modified),
       changeFrequency: 'monthly',
