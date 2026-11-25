@@ -3,14 +3,14 @@ import Bir2316Article from "@/components/pages/(un-auth)/(landing-page)/blog/art
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 import { bir2316Faqs } from '@/lib/blogFaqs';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'BIR Form 2316 2026: Deadlines, Substituted Filing, Penalties',
   description: 'Give BIR Form 2316 to employees by January 31, 2027 (a Sunday) and file the BIR copy by February 28. Substituted filing, Annex F and the ₱1,000 penalty.',
   keywords: 'BIR Form 2316, BIR 2316 deadline 2027, certificate of compensation payment tax withheld, substituted filing, Annex F BIR, BIR 2316 submission, Section 250 penalty, 2316 employer guide Philippines',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('bir-form-2316-philippines-2026'),
     title: 'BIR Form 2316 for 2026: What Employers Must Issue and File by January 31, 2027',
     description: 'BIR Form 2316 goes to employees by January 31, 2027 and to the BIR by February 28. Who qualifies for substituted filing, how to submit, and the penalty.',
     type: 'article',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('bir-form-2316-philippines-2026'),
     card: 'summary_large_image',
     title: 'BIR Form 2316 2026: Deadlines, Substituted Filing, Penalties',
     description: 'Employee copy by January 31, 2027, BIR copy by February 28. Substituted filing, submission steps and the Section 250 penalty.',
@@ -38,7 +38,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/bir-form-2316-philippines-2026#article",
       "headline": "BIR Form 2316 for 2026: What Employers Must Issue and File by January 31, 2027",
       "description": "BIR Form 2316 for compensation paid in 2026 goes to employees on or before January 31, 2027, a Sunday, and the BIR copy is due February 28, 2027. Substituted filing conditions, how to submit, the Section 250 penalty, and an employer checklist.",
-      "image": "https://yahshuahris.com/preview-image.png",
+      "image": blogCoverUrl('bir-form-2316-philippines-2026'),
       "datePublished": blogIso(BLOG_DATES['bir-form-2316-philippines-2026'].published),
       "dateModified": blogIso(BLOG_DATES['bir-form-2316-philippines-2026'].modified),
       "author": {

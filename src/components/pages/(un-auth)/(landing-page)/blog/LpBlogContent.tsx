@@ -11,6 +11,7 @@ const posts: BlogPost[] = [
   {
     slug: "pagibig-contribution-table-2026-philippines",
     category: "Statutory Compliance",
+    image: "/blog/pagibig-contribution-table-2026-philippines.png",
     title: "Pag-IBIG Contribution Table 2026: Rate, ₱10,000 Cap and Employer Share",
     excerpt: "2% from the employee and 2% from the employer on a ₱10,000 cap, so ₱200 each at most. The table by salary, how to compute it, and the employer remittance schedule that changed in August 2026.",
     date: "November 2026",
@@ -28,6 +29,7 @@ const posts: BlogPost[] = [
   {
     slug: "bir-form-2316-philippines-2026",
     category: "Statutory Compliance",
+    image: "/blog/bir-form-2316-philippines-2026.png",
     title: "BIR Form 2316 for 2026: What Employers Must Issue and File by January 31, 2027",
     excerpt: "Employee copy by January 31, 2027, a Sunday, and the BIR copy by February 28. Who qualifies for substituted filing, how to submit with Annex F, and the Section 250 penalty.",
     date: "November 2026",

@@ -3,14 +3,14 @@ import PagibigContributionTable2026Article from "@/components/pages/(un-auth)/(l
 import PixelEvents from '@/components/PixelEvents';
 import { BLOG_DATES, blogIso } from '@/lib/blogDates';
 import { pagibigFaqs } from '@/lib/blogFaqs';
-import { OG_IMAGES, TWITTER_IMAGES } from '@/lib/ogImage';
+import { blogCoverImages, blogCoverTwitterImages, blogCoverUrl } from '@/lib/blogCovers';
 
 export const metadata: Metadata = {
   title: 'Pag-IBIG Contribution Table 2026: 2% Rate, ₱200 Maximum',
   description: 'Pag-IBIG 2026: employee 2% and employer 2% on a ₱10,000 salary cap, so ₱200 each at most. Table by salary, formula and the new employer remittance schedule.',
   keywords: 'Pag-IBIG contribution table 2026, pagibig contribution table 2026, Pag-IBIG contribution 2026, Pag-IBIG employer share, Pag-IBIG maximum fund salary, Pag-IBIG remittance schedule 2026, HDMF Circular 460, HDMF Circular 499',
   openGraph: {
-    images: OG_IMAGES,
+    images: blogCoverImages('pagibig-contribution-table-2026-philippines'),
     title: 'Pag-IBIG Contribution Table 2026: Rate, ₱10,000 Cap and Employer Share',
     description: '2% from the employee and 2% from the employer on a ₱10,000 cap. Contribution table by salary, how to compute it, and the employer remittance schedule that changed in August 2026.',
     type: 'article',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     authors: ['YAHSHUA HRIS Team'],
   },
   twitter: {
-    images: TWITTER_IMAGES,
+    images: blogCoverTwitterImages('pagibig-contribution-table-2026-philippines'),
     card: 'summary_large_image',
     title: 'Pag-IBIG Contribution Table 2026: 2% Rate, ₱200 Maximum',
     description: 'Pag-IBIG 2026: 2% employee, 2% employer, capped at a ₱10,000 salary base, so ₱200 each at most. Plus the new remittance schedule.',
@@ -38,7 +38,7 @@ const jsonLd = {
       "@id": "https://yahshuahris.com/blog/pagibig-contribution-table-2026-philippines#article",
       "headline": "Pag-IBIG Contribution Table 2026: Rate, ₱10,000 Cap and Employer Share",
       "description": "Pag-IBIG contribution table 2026: the employee pays 2% and the employer pays 2% of monthly compensation, on a salary base capped at ₱10,000, so the maximum is ₱200 each. Table by salary, the computation, and the employer remittance schedule under HDMF Circular No. 499.",
-      "image": "https://yahshuahris.com/preview-image.png",
+      "image": blogCoverUrl('pagibig-contribution-table-2026-philippines'),
       "datePublished": blogIso(BLOG_DATES['pagibig-contribution-table-2026-philippines'].published),
       "dateModified": blogIso(BLOG_DATES['pagibig-contribution-table-2026-philippines'].modified),
       "author": {
