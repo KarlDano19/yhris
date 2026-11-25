@@ -28,7 +28,7 @@ export const BLOG_DATES = {
   'employee-vs-independent-contractor-philippines': { published: '2026-10-27', modified: '2026-10-27' },
   'probationary-to-regular-employee-philippines': { published: '2026-10-23', modified: '2026-10-23' },
   'retirement-pay-law-ra-7641-philippines': { published: '2026-10-23', modified: '2026-10-23' },
-  'hris-pricing-philippines-2026': { published: '2026-10-15', modified: '2026-10-15' },
+  'hris-pricing-philippines-2026': { published: '2026-10-15', modified: '2026-11-25' },
   'q4-payroll-compliance-deadlines-philippines-2026': { published: '2026-10-01', modified: '2026-11-18' },
   'minimum-wage-philippines-2026-by-region': { published: '2026-09-25', modified: '2026-10-27' },
   'philhealth-contribution-table-2026-philippines': { published: '2026-11-18', modified: '2026-11-18' },

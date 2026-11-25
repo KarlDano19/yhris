@@ -10,11 +10,11 @@ const DEMO_URL = "https://calendly.com/clientrelations-abba/presentation?utm_sou
 export const hrisPricingFaqs = [
   {
     q: "How much does an HRIS cost in the Philippines in 2026?",
-    a: "For a 100-employee company, published list prices work out to roughly ₱5,400 to ₱40,000 a month for HR and payroll software, depending on scope. Lean attendance and payroll tools start around ₱5,400 at 100 employees (Timekeep), a flat all-in-one plan such as YAHSHUA HRIS is ₱7,000, GreatDay HR's starter is about ₱7,700, and dollar-priced suites such as PayrollHero come to about ₱40,000 once payroll is added. Sprout Solutions does not publish a price.",
+    a: "For a 100-employee company, published list prices work out to roughly ₱5,400 to ₱40,000 a month for HR and payroll software, depending on scope. Lean attendance and payroll tools start around ₱5,400 at 100 employees (Timekeep), a flat all-in-one plan such as YAHSHUA HRIS is ₱7,000, GreatDay HR's starter is about ₱7,700, KAMI Lite is about ₱14,500, ElevenOS Growth is about ₱15,400, and dollar-priced suites such as PayrollHero come to about ₱40,000 once payroll is added. Sprout Solutions does not publish a price.",
   },
   {
     q: "Is HRIS priced per employee or flat?",
-    a: "Both exist. Many tools charge per employee per month (for example ₱49 to ₱77 per employee for lean tools and ₱149 to ₱219 for WORKSPHR's higher plans). Others charge a flat monthly fee up to a headcount cap and a small fee beyond it: YAHSHUA HRIS is ₱7,000 a month for up to 100 employees, then ₱60 per additional employee. A flat plan costs less per head as you grow; a per-employee plan costs less if you stay small.",
+    a: "Both exist. Many tools charge per employee per month (for example ₱49 to ₱77 per employee for lean tools and ₱149 to ₱219 for WORKSPHR's higher plans). Some add a monthly platform fee on top of a per-employee rate: ElevenOS Growth is ₱2,490 plus ₱129 per employee, and KAMI Lite is ₱2,500 plus ₱120 per employee, billed annually. Others charge a flat monthly fee up to a headcount cap and a small fee beyond it: YAHSHUA HRIS is ₱7,000 a month for up to 100 employees, then ₱60 per additional employee. A flat plan costs less per head as you grow; a per-employee plan costs less if you stay small.",
   },
   {
     q: "Does Sprout Solutions publish its pricing?",
@@ -22,7 +22,7 @@ export const hrisPricingFaqs = [
   },
   {
     q: "What costs are not included in the monthly price?",
-    a: "Common extras are one-time setup or implementation fees, add-on modules, minimum license counts, VAT (12%), and exchange-rate movement for dollar-priced plans. Examples from published pages: YAHSHUA HRIS has no setup fee, WORKSPHR lists ₱15,000 to ₱45,000 implementation fees (waived on contract lock-in), GreatDay's starter requires 50 licenses, and PayrollHero lists payroll at $3.00 and leave management at $2.00 per employee as add-ons.",
+    a: "Common extras are one-time setup or implementation fees, add-on modules, minimum license counts, VAT (12%), and exchange-rate movement for dollar-priced plans. Examples from published pages: YAHSHUA HRIS and Timekeep have no setup fee, ElevenOS lists a ₱9,990 (Growth) or ₱19,990 (Business) setup fee, KAMI lists onboarding packages from ₱25,000, WORKSPHR lists ₱15,000 to ₱45,000 implementation fees (waived on contract lock-in), GreatDay's starter requires 50 licenses, and PayrollHero lists payroll at $3.00 and leave management at $2.00 per employee as add-ons.",
   },
   {
     q: "Does YAHSHUA HRIS charge per employee?",
@@ -30,7 +30,7 @@ export const hrisPricingFaqs = [
   },
   {
     q: "Is YAHSHUA HRIS the cheapest HRIS in the Philippines?",
-    a: "No. At 100 employees, lean attendance and payroll tools such as Timekeep cost less per month. YAHSHUA's flat price is cheaper per month than GreatDay's starter above about 91 employees, and it includes hiring, onboarding, performance, DOLE compliance, and payroll in one plan. Choose on scope and total cost, not on the subscription line alone.",
+    a: "No. At 100 employees, lean attendance and payroll tools such as Timekeep cost less per month. YAHSHUA's flat price is cheaper per month than GreatDay's starter above about 91 employees, than KAMI Lite above about 38, and than ElevenOS Growth above about 35 (list prices, before VAT, with a smaller scope on those plans), and it includes hiring, onboarding, performance, DOLE compliance, and payroll in one plan. Choose on scope and total cost, not on the subscription line alone.",
   },
   {
     q: "How should I estimate an HRIS budget for my company?",
@@ -41,17 +41,24 @@ export const hrisPricingFaqs = [
 const employeeCounts = [50, 100, 200, 300];
 const peso = (n: number) => "₱" + Math.round(n).toLocaleString("en-US");
 
-// Published list prices checked on each vendor's own pricing page, October 2026
+// Published list prices checked on each vendor's own pricing page, October 15 and November 25, 2026 (see the Checked column)
 const timekeep = (n: number) => 999 + Math.max(0, n - 10) * 49;                 // ₱999 for 10, then ₱49 each
 const greatday = (n: number) => 77 * Math.max(n, 50);                          // ₱77 per employee, 50-license starter
 const worksphrGrowth = (n: number) => 149 * n;                                 // ₱149 per employee per month
 const PESO_PER_USD = 62;                                                       // indicative
 const payrollhero = (n: number) => 6.5 * PESO_PER_USD * n;                     // $3.50 + $3.00 payroll add-on
+// Checked November 25, 2026
+const elevenGrowth = (n: number) => 2490 + 129 * Math.max(n, 10);              // ₱2,490 platform + ₱129 per active employee, 10-employee minimum
+const elevenBusiness = (n: number) => 4490 + 219 * Math.max(n, 10);            // ₱4,490 platform + ₱219 per active employee
+const kamiLite = (n: number) => 2500 + 120 * n;                                // ₱2,500 base + ₱120 per person, billed annually
 
 const monthlyRows: string[][] = [
   ["Timekeep (payroll, attendance, leave)", ...employeeCounts.map((n) => peso(timekeep(n)))],
   ["YAHSHUA HRIS and Payroll", ...employeeCounts.map((n) => peso(calculateMonthly(n)))],
   ["GreatDay HR (Basic Starter)", ...employeeCounts.map((n) => peso(greatday(n)))],
+  ["KAMI Workforce (Lite, billed annually)", ...employeeCounts.map((n) => peso(kamiLite(n)))],
+  ["ElevenOS (Growth)", ...employeeCounts.map((n) => peso(elevenGrowth(n)))],
+  ["ElevenOS (Business)", ...employeeCounts.map((n) => peso(elevenBusiness(n)))],
   ["WORKSPHR (Growth plan)", ...employeeCounts.map((n) => peso(worksphrGrowth(n)))],
   ["PayrollHero (HRIS + payroll, USD list price)", ...employeeCounts.map((n) => "about " + peso(payrollhero(n)))],
   ["Sprout Solutions", "Quote", "Quote", "Quote", "Quote"],
@@ -61,17 +68,22 @@ const yearOneRows: string[][] = [
   ["Timekeep", peso(timekeep(100) * 12), "None listed", peso(timekeep(100) * 12)],
   ["GreatDay HR (Basic Starter)", peso(greatday(100) * 12), "None listed", peso(greatday(100) * 12)],
   ["YAHSHUA HRIS and Payroll", peso(calculateMonthly(100) * 12), "None", peso(calculateMonthly(100) * 12)],
+  ["KAMI Workforce (Lite, billed annually)", peso(kamiLite(100) * 12), "Onboarding package from ₱25,000", peso(kamiLite(100) * 12) + " plus onboarding"],
+  ["ElevenOS (Growth)", peso(elevenGrowth(100) * 12), "₱9,990", peso(elevenGrowth(100) * 12 + 9990)],
+  ["ElevenOS (Business)", peso(elevenBusiness(100) * 12), "₱19,990", peso(elevenBusiness(100) * 12 + 19990)],
   ["WORKSPHR (Growth plan)", peso(worksphrGrowth(100) * 12), "Not published for Growth", peso(worksphrGrowth(100) * 12) + " plus setup"],
   ["PayrollHero (HRIS + payroll)", "about " + peso(payrollhero(100) * 12), "None listed", "about " + peso(payrollhero(100) * 12)],
 ];
 
 const publishedRows: string[][] = [
-  ["Timekeep", "₱999 a month for 10 employees, then ₱49 per additional employee; all features included", "Payroll, attendance, schedules, leave, compliance", "Published"],
-  ["GreatDay HR", "₱77 per employee a month (Basic Starter); 50-license minimum", "HRIS and payroll; GreatDay says prices are changing", "Published for the starter; higher tiers by quote"],
-  ["YAHSHUA HRIS and Payroll", "₱7,000 a month flat for up to 100 employees, then ₱60 per employee; no setup fee; VAT excluded", "HRIS, hiring, performance, DOLE module, payroll included", "Published"],
-  ["WORKSPHR", "₱79 (Starter, up to 25 employees), ₱149 (Growth), ₱219 (Pro) per employee a month; implementation ₱15,000 (Starter) or ₱45,000 (Pro), waived on contract lock-in; VAT excluded", "HR and payroll", "Published"],
-  ["PayrollHero", "$3.50 per employee a month for HRIS, timekeeping, attendance, and scheduling; payroll add-on $3.00; leave add-on $2.00", "Billed in US dollars on its global pricing page", "Published"],
-  ["Sprout Solutions", "Custom quote; only outsourced Payroll Starter bundles list prices", "Software pricing varies by modules and size", "Not published"],
+  ["Timekeep", "₱999 a month for 10 employees, then ₱49 per additional employee; all features included", "Payroll, attendance, schedules, leave, compliance", "Published", "Nov 25, 2026"],
+  ["GreatDay HR", "₱77 per employee a month (Basic Starter); 50-license minimum", "HRIS and payroll; GreatDay says prices are changing", "Published for the starter; higher tiers by quote", "Nov 25, 2026"],
+  ["YAHSHUA HRIS and Payroll", "₱7,000 a month flat for up to 100 employees, then ₱60 per employee; no setup fee; VAT excluded", "HRIS, hiring, performance, DOLE module, payroll included", "Published", "Nov 25, 2026"],
+  ["KAMI Workforce", "Lite ₱2,500 a month plus ₱120 per person, Plus ₱3,500 plus ₱180, Super ₱5,500 plus ₱280, all billed annually; onboarding packages ₱25,000 to ₱60,000", "Lite covers core HR, attendance, payroll, and benefits; performance is in Super", "Published", "Nov 25, 2026"],
+  ["ElevenOS", "Growth ₱2,490 a month plus ₱129 per active employee; Business ₱4,490 plus ₱219; one-time setup ₱9,990 (Growth) or ₱19,990 (Business); 10-employee minimum; taxes excluded", "Growth is HR, attendance, and payroll; recruitment and performance reviews are in Business", "Published", "Nov 25, 2026"],
+  ["WORKSPHR", "₱79 (Starter, up to 25 employees), ₱149 (Growth), ₱219 (Pro) per employee a month; implementation ₱15,000 (Starter) or ₱45,000 (Pro), waived on contract lock-in; VAT excluded", "HR and payroll", "Published", "Oct 15, 2026 (Starter re-confirmed Nov 25)"],
+  ["PayrollHero", "$3.50 per employee a month for HRIS, timekeeping, attendance, and scheduling; payroll add-on $3.00; leave add-on $2.00", "Billed in US dollars on its global pricing page", "Published", "Oct 15, 2026"],
+  ["Sprout Solutions", "Custom quote; only outsourced Payroll Starter bundles list prices", "Software pricing varies by modules and size", "Not published", "Nov 17, 2026"],
 ];
 
 const h2 = { fontSize: "1.5rem", fontWeight: "700", color: "#111827", marginTop: "3rem", marginBottom: "1rem" } as const;
@@ -128,7 +140,7 @@ const HrisPricingPhilippinesArticle = () => {
               <div className="flex items-center gap-4 text-sm text-gray-400" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.5rem" }}>
                 <span>By YAHSHUA HRIS Team</span>
                 <span>·</span>
-                <span>October 2026</span>
+                <span>Updated November 25, 2026</span>
                 <span>·</span>
                 <span>9 min read</span>
               </div>
@@ -176,10 +188,10 @@ const HrisPricingPhilippinesArticle = () => {
               </ul>
 
               {/* Published prices */}
-              <h2 style={h2}>Published Prices, October 2026</h2>
-              <Table head={["Vendor", "Published price", "Scope and notes", "Price transparency"]} rows={publishedRows} />
+              <h2 style={h2}>Published Prices, Updated November 2026</h2>
+              <Table head={["Vendor", "Published price", "Scope and notes", "Price transparency", "Checked"]} rows={publishedRows} />
               <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "2.5rem" }}>
-                Sources: each vendor&apos;s pricing page. GreatDay&apos;s starter price was confirmed in September 2026 and GreatDay notes that prices are changing. PayrollHero&apos;s page is its global, US-dollar page; it says Philippine pricing may differ. These tools are not like for like: compare what is included, not only the price.
+                Sources: each vendor&apos;s pricing page, on the date in the Checked column. GreatDay&apos;s PHP 77 starter price was re-confirmed on November 25, 2026, and GreatDay still says prices are changing soon. WORKSPHR&apos;s Growth and Pro prices could not be re-read on November 25, so they show the October 15 figures. PayrollHero&apos;s page is its global, US-dollar page; it says Philippine pricing may differ. These tools are not like for like: compare what is included, not only the price.
               </p>
 
               {/* Monthly cost */}
@@ -189,7 +201,7 @@ const HrisPricingPhilippinesArticle = () => {
               </p>
               <Table head={["Vendor", "50 employees", "100 employees", "200 employees", "300 employees"]} rightCols={[1, 2, 3, 4]} rows={monthlyRows} />
               <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "1.5rem" }}>
-                How each row is computed: Timekeep ₱999 plus ₱49 for every employee above 10. YAHSHUA ₱7,000 up to 100 employees, then ₱60 per additional employee. GreatDay ₱77 per employee with a 50-license minimum. WORKSPHR Growth ₱149 per employee (check plan limits with the vendor). PayrollHero $3.50 plus $3.00 payroll at an indicative ₱62 to the dollar.
+                How each row is computed: Timekeep ₱999 plus ₱49 for every employee above 10. YAHSHUA ₱7,000 up to 100 employees, then ₱60 per additional employee. GreatDay ₱77 per employee with a 50-license minimum. KAMI Lite ₱2,500 plus ₱120 per employee. ElevenOS Growth ₱2,490 plus ₱129 per employee and Business ₱4,490 plus ₱219, with a 10-employee minimum. WORKSPHR Growth ₱149 per employee (check plan limits with the vendor). PayrollHero $3.50 plus $3.00 payroll at an indicative ₱62 to the dollar.
               </p>
               <div style={{ ...box, marginBottom: "2.5rem" }}>
                 <p style={{ margin: "0 0 0.5rem 0", fontWeight: 600, color: "#111827", fontSize: "0.95rem" }}>Reading the table</p>
@@ -197,6 +209,7 @@ const HrisPricingPhilippinesArticle = () => {
                   <li>Under about 90 employees, a per-employee tool such as GreatDay&apos;s starter costs less per month than YAHSHUA&apos;s flat plan.</li>
                   <li>Above about 91 employees, the flat plan is cheaper than GreatDay&apos;s starter, and the gap widens with every hire.</li>
                   <li>Lean tools like Timekeep cost less at every size shown, with a narrower published scope.</li>
+                  <li>Against ElevenOS Growth, the flat plan is cheaper from about 35 employees, and against KAMI Lite from about 38. ElevenOS Business, which adds recruitment and performance reviews, costs more than the flat plan from about 12 employees. Those plans differ in scope, so read the scope column too.</li>
                 </ul>
               </div>
 
@@ -213,7 +226,7 @@ const HrisPricingPhilippinesArticle = () => {
               {/* Hidden costs */}
               <h2 style={h2}>What the Monthly Price Usually Leaves Out</h2>
               <p style={mistake}>
-                <strong style={{ color: "#111827" }}>Setup and implementation.</strong> One-time fees range from none to ₱45,000 in the published prices above. Ask whether data migration and training are included.
+                <strong style={{ color: "#111827" }}>Setup and implementation.</strong> One-time fees range from none to ₱60,000 in the published prices above (ElevenOS ₱9,990 to ₱19,990, KAMI onboarding ₱25,000 to ₱60,000, WORKSPHR ₱15,000 to ₱45,000). Ask whether data migration and training are included.
               </p>
               <p style={mistake}>
                 <strong style={{ color: "#111827" }}>Add-on modules.</strong> PayrollHero&apos;s payroll ($3.00) and leave management ($2.00) are priced on top of its $3.50 base, nearly doubling the per-employee cost.
@@ -293,10 +306,10 @@ const HrisPricingPhilippinesArticle = () => {
               {/* Author */}
               <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "2rem", marginTop: "2rem" }}>
                 <p style={{ color: "#9ca3af", fontSize: "0.85rem" }}>
-                  Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Published October 2026
+                  Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Published October 2026 · Updated November 25, 2026
                 </p>
                 <p style={{ color: "#d1d5db", fontSize: "0.8rem", marginTop: "0.5rem" }}>
-                  Sources: vendor pricing pages checked October 15, 2026: <a href="https://www.yahshuahris.com/pricing" target="_blank" rel="noopener noreferrer">YAHSHUA HRIS</a>, <a href="https://greatdayhr.ph/pricing" target="_blank" rel="noopener noreferrer">GreatDay HR</a>, <a href="https://worksphr.com/pricing" target="_blank" rel="noopener noreferrer">WORKSPHR</a>, <a href="https://www.timekeep.ph/pricing" target="_blank" rel="noopener noreferrer">Timekeep</a>, <a href="https://payrollhero.com/pricing" target="_blank" rel="noopener noreferrer">PayrollHero</a>, and <a href="https://sprout.ph" target="_blank" rel="noopener noreferrer">Sprout Solutions</a>. Vendors change prices without notice; confirm with each vendor before you decide. VAT is 12% where not stated otherwise.
+                  Sources: vendor pricing pages checked October 15 and November 25, 2026: <a href="https://www.yahshuahris.com/pricing" target="_blank" rel="noopener noreferrer">YAHSHUA HRIS</a>, <a href="https://greatdayhr.ph/price" target="_blank" rel="noopener noreferrer">GreatDay HR</a>, <a href="https://www.elevenos.ph/pricing" target="_blank" rel="noopener noreferrer">ElevenOS</a>, <a href="https://kamiworkforce.com/ph/pricing" target="_blank" rel="noopener noreferrer">KAMI Workforce</a>, <a href="https://worksphr.com/pricing" target="_blank" rel="noopener noreferrer">WORKSPHR</a>, <a href="https://www.timekeep.ph/pricing" target="_blank" rel="noopener noreferrer">Timekeep</a>, <a href="https://payrollhero.com/pricing" target="_blank" rel="noopener noreferrer">PayrollHero</a>, and <a href="https://sprout.ph" target="_blank" rel="noopener noreferrer">Sprout Solutions</a>. Vendors change prices without notice; confirm with each vendor before you decide. VAT is 12% where not stated otherwise.
                 </p>
               </div>
 
