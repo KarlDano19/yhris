@@ -115,7 +115,7 @@ const jsonLd = {
           "name": "When are statutory contribution remittances due in 2026?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "SSS contributions are due by the last day of the month following the contribution month for regular employers. PhilHealth premiums are due from the 11th to the 20th of the following month, by the last digit of the employer number. Pag-IBIG remittances follow a schedule based on the first letter of the employer's name, from the 10th to the end of the following month (HDMF Circular No. 275). Deadlines that fall on a weekend or holiday generally move to the next working day, so verify each agency's current calendar."
+            "text": "SSS contributions are due by the last day of the month following the contribution month for regular employers. PhilHealth premiums are due from the 11th to the 20th of the following month, by the last digit of the employer number. Pag-IBIG remittances follow a schedule based on the first letter of the employer's name, on the 1st to 7th, 5th to 11th or 9th to 15th of the following month (HDMF Circular No. 499, effective August 21, 2026). Deadlines that fall on a weekend or holiday generally move to the next working day, so verify each agency's current calendar."
           }
         }
       ]

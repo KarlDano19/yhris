@@ -326,7 +326,7 @@ const SssContributionTable2026Article = () => {
                 <strong style={{ color: "#111827" }}>Common payroll error:</strong> Some payroll systems apply the 2% Pag-IBIG rate to the employee&apos;s full gross salary instead of capping the base at ₱10,000. For an employee earning ₱40,000, the correct employee deduction is ₱200, not ₱800 (2% of ₱40,000). Over-deducting Pag-IBIG is a compliance error and the excess must be refunded to the employee.
               </p>
               <p style={{ marginBottom: "2rem" }}>
-                Pag-IBIG remittances follow a schedule based on the first letter of the employer&apos;s name, from the 10th to the end of the following month (HDMF Circular No. 275); confirm your window with Pag-IBIG. Late remittance carries a penalty of 1/10 of 1% per day of delay.
+                Pag-IBIG remittances follow a schedule based on the first letter of the employer&apos;s name, in the month after the period covered: A to F on the 1st to 7th, G to N on the 5th to 11th, and O to Z, numbers and special characters on the 9th to 15th (HDMF Circular No. 499, effective August 21, 2026); confirm your window in Virtual Pag-IBIG. Late remittance carries a penalty of 1/10 of 1% per day of delay.
               </p>
 
               {/* ===================== What to update ===================== */}
@@ -342,7 +342,7 @@ const SssContributionTable2026Article = () => {
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Verify PhilHealth is at 5% with a ₱100,000 ceiling.</strong> The 5% rate has been in effect since January 2024. If your system is at 4.5%, you have had a two-year shortfall to correct.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Check the Pag-IBIG cap logic.</strong> Confirm your system applies the 2% rate only up to ₱10,000 of salary, not to the full gross. Both over-deduction and under-deduction are compliance problems.</li>
                 <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Check your payslip format.</strong> SSS payslip deductions should now show two line items for employees earning above ₱20,000: regular SS and MPF. A single combined SSS line is acceptable but some agencies prefer the split.</li>
-                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Verify remittance schedules.</strong> SSS contributions are due by the last day of the month after the contribution month, PhilHealth from the 11th to the 20th depending on the last digit of your employer number, and Pag-IBIG on a schedule based on the first letter of your company name (HDMF Circular No. 275). Confirm your exact dates with each agency, as deadlines move when they fall on weekends or holidays.</li>
+                <li style={{ marginBottom: "0.75rem" }}><strong style={{ color: "#111827" }}>Verify remittance schedules.</strong> SSS contributions are due by the last day of the month after the contribution month, PhilHealth from the 11th to the 20th depending on the last digit of your employer number, and Pag-IBIG on a schedule based on the first letter of your company name (HDMF Circular No. 499, effective August 21, 2026). Confirm your exact dates with each agency, as deadlines move when they fall on weekends or holidays.</li>
               </ul>
 
               {/* YAHSHUA HRIS CTA callout */}
@@ -422,7 +422,7 @@ const SssContributionTable2026Article = () => {
                   When are statutory contribution remittances due in 2026?
                 </h3>
                 <p>
-                  SSS contributions are due by the last day of the month following the contribution month for regular employers. PhilHealth premiums are due from the 11th to the 20th of the following month, by the last digit of the employer number. Pag-IBIG remittances follow a schedule based on the first letter of the employer&apos;s name, from the 10th to the end of the following month (HDMF Circular No. 275). Deadlines that fall on a weekend or holiday generally move to the next working day, so verify each agency&apos;s current calendar.
+                  SSS contributions are due by the last day of the month following the contribution month for regular employers. PhilHealth premiums are due from the 11th to the 20th of the following month, by the last digit of the employer number. Pag-IBIG remittances follow a schedule based on the first letter of the employer&apos;s name, on the 1st to 7th, 5th to 11th or 9th to 15th of the following month (HDMF Circular No. 499, effective August 21, 2026). Deadlines that fall on a weekend or holiday generally move to the next working day, so verify each agency&apos;s current calendar.
                 </p>
               </div>
 
