@@ -15,7 +15,7 @@ export const lateRemittanceFaqs = [
   },
   {
     q: "What is the Pag-IBIG penalty for late remittance?",
-    a: "One-tenth of 1% of the amount due for every day of delay, under HDMF Circular No. 275. That is about 3% a month, matching the 3% monthly penalty in Section 23 of the Pag-IBIG Fund Law (RA 9679).",
+    a: "One-tenth of 1% of the amount due for every day of delay, counted from the day after the due date, under HDMF Circular No. 499 (2026), which keeps the daily rate from the earlier HDMF Circular No. 275. That is about 3% a month, matching the 3% monthly penalty in Section 23 of the Pag-IBIG Fund Law (RA 9679).",
   },
   {
     q: "Can an employer go to jail for not remitting contributions?",
@@ -131,7 +131,7 @@ const LateRemittancePenaltiesArticle = () => {
                 rows={[
                   ["SSS", "2% per month from the due date until paid", "RA 11199, Section 22(a)", "24% of the amount owed"],
                   ["PhilHealth", "Interest of at least 3% per month, compounded monthly", "RA 11223 (UHC Act) IRR, Section 9.2", "About 43% of the amount owed"],
-                  ["Pag-IBIG", "One-tenth of 1% of the amount due per day of delay", "HDMF Circular No. 275; RA 9679, Section 23", "About 37% of the amount owed"],
+                  ["Pag-IBIG", "One-tenth of 1% of the amount due per day of delay", "HDMF Circular No. 499 (2026); RA 9679, Section 23", "About 37% of the amount owed"],
                 ]}
               />
               <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "2.5rem" }}>
@@ -203,7 +203,7 @@ const LateRemittancePenaltiesArticle = () => {
                 rows={[
                   ["SSS", "Last day of the month after the contribution month (regular employers, per sss.gov.ph)"],
                   ["PhilHealth", "11th to 15th (employer number ending 0 to 4) or 16th to 20th (ending 5 to 9) of the following month"],
-                  ["Pag-IBIG", "By first letter of the employer's name: A to D 10th to 14th, E to L 15th to 19th, M to Q 20th to 24th, R to Z 25th to month-end (HDMF Circular No. 275)"],
+                  ["Pag-IBIG", "By first letter of the employer's name, in the following month: A to F 1st to 7th, G to N 5th to 11th, O to Z, numbers and special characters 9th to 15th (HDMF Circular No. 499, effective August 21, 2026, which replaced the Circular No. 275 schedule). Paid through eSRS in Virtual Pag-IBIG for Employers"],
                 ]}
               />
               <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "2.5rem" }}>
@@ -282,7 +282,7 @@ const LateRemittancePenaltiesArticle = () => {
                   Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Published October 2026
                 </p>
                 <p style={{ color: "#d1d5db", fontSize: "0.8rem", marginTop: "0.5rem" }}>
-                  Sources: <a href="https://www.sss.gov.ph/wp-content/uploads/2022/04/Booklet_SS-ACT-OF-2018_05172019_2.pdf" target="_blank" rel="noopener noreferrer">Social Security Act of 2018 (RA 11199)</a>, Sections 22, 24, and 28; <a href="https://www.philhealth.gov.ph/about_us/UHC-IRR_Signed.pdf" target="_blank" rel="noopener noreferrer">UHC Act IRR</a> and <a href="https://lawphil.net/statutes/repacts/ra2019/ra_11223_2019.html" target="_blank" rel="noopener noreferrer">RA 11223</a>, Section 38; <a href="https://lawphil.net/statutes/repacts/ra2009/ra_9679_2009.html" target="_blank" rel="noopener noreferrer">Pag-IBIG Fund Law (RA 9679)</a>, Sections 23 and 25; HDMF Circular No. 275; <a href="https://www.philhealth.gov.ph/circulars/2026/PC2026-0001.pdf" target="_blank" rel="noopener noreferrer">PhilHealth Circular No. 2026-0001</a>; SSS Circular No. 2022-021 and SSS&apos;s April 2026 relief program announcement. Verified October 8, 2026. This article does not constitute legal advice; consult a lawyer or the agencies for your situation.
+                  Sources: <a href="https://www.sss.gov.ph/wp-content/uploads/2022/04/Booklet_SS-ACT-OF-2018_05172019_2.pdf" target="_blank" rel="noopener noreferrer">Social Security Act of 2018 (RA 11199)</a>, Sections 22, 24, and 28; <a href="https://www.philhealth.gov.ph/about_us/UHC-IRR_Signed.pdf" target="_blank" rel="noopener noreferrer">UHC Act IRR</a> and <a href="https://lawphil.net/statutes/repacts/ra2019/ra_11223_2019.html" target="_blank" rel="noopener noreferrer">RA 11223</a>, Section 38; <a href="https://lawphil.net/statutes/repacts/ra2009/ra_9679_2009.html" target="_blank" rel="noopener noreferrer">Pag-IBIG Fund Law (RA 9679)</a>, Sections 23 and 25; HDMF Circular No. 499, series of 2026, and HDMF Circular No. 275; <a href="https://www.philhealth.gov.ph/circulars/2026/PC2026-0001.pdf" target="_blank" rel="noopener noreferrer">PhilHealth Circular No. 2026-0001</a>; SSS Circular No. 2022-021 and SSS&apos;s April 2026 relief program announcement. Verified October 8, 2026; Pag-IBIG remittance schedule updated November 25, 2026. This article does not constitute legal advice; consult a lawyer or the agencies for your situation.
                 </p>
               </div>
 

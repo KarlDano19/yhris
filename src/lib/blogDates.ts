@@ -19,7 +19,7 @@ export const BLOG_DATES = {
   'final-pay-computation-philippines': { published: '2026-09-16', modified: '2026-09-16' },
   'de-minimis-benefits-2026-philippines': { published: '2026-09-16', modified: '2026-09-16' },
   'year-end-tax-annualization-philippines-2026': { published: '2026-10-01', modified: '2026-10-01' },
-  'sss-philhealth-pagibig-late-remittance-penalties': { published: '2026-10-08', modified: '2026-10-08' },
+  'sss-philhealth-pagibig-late-remittance-penalties': { published: '2026-10-08', modified: '2026-11-25' },
   'overtime-pay-computation-philippines': { published: '2026-10-08', modified: '2026-11-11' },
   'dole-osh-reports-deadlines-wair-aedr-amr': { published: '2026-10-15', modified: '2026-10-15' },
   'new-hire-onboarding-checklist-philippines': { published: '2026-11-04', modified: '2026-11-04' },
